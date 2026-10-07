@@ -1,0 +1,14 @@
+{
+  "dataset": "litho1",
+  "description": "Acquire original litho1 files; preserve legacy bytes without preprocessing.",
+  "files": [
+    {
+      "path": "litho1pt0-1.5.0-py3-none-any.whl",
+      "size": 14615078,
+      "sha256": "50b4b3ae4f7bd84ecb5e1f4a67fa936efde0e2ecfbf299ba4dce9c51bc77b406",
+      "urls": [
+        "https://files.pythonhosted.org/packages/1a/2f/513db6a4840e131446e05c6156a6f4a0eef6b45a8b6d978b0358af8d008b/litho1pt0-1.5.0-py3-none-any.whl"
+      ]
+    }
+  ]
+}

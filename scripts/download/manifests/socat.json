@@ -1,0 +1,22 @@
+{
+  "dataset": "socat",
+  "description": "Acquire original socat files; preserve legacy bytes without preprocessing.",
+  "files": [
+    {
+      "path": "SOCATv2026_NorthPacific.tsv",
+      "size": 327816280,
+      "sha256": "32d1cb59c3e3c57180dd1eb039a75a50915b9b8051330da2a8d7d8db9b7fd68f",
+      "urls": [
+        "https://www.ncei.noaa.gov/data/oceans/ncei/ocads/data/0315110/SOCATv2026_NorthPacific.tsv"
+      ]
+    },
+    {
+      "path": "SOCATv2026_tracks_gridded_monthly.csv",
+      "size": 49866648,
+      "sha256": "4768c5a20ba0cebdd72501964ecd80a3c67f344ed57e37bb8ccefc45bb15f407",
+      "urls": [
+        "https://www.ncei.noaa.gov/data/oceans/ncei/ocads/data/0315110/SOCATv2026_Gridded_Data/SOCATv2026_tracks_gridded_monthly.csv"
+      ]
+    }
+  ]
+}

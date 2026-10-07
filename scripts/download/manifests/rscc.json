@@ -1,0 +1,12 @@
+{
+  "dataset": "rscc",
+  "description": "Acquire original rscc files; preserve legacy bytes without preprocessing.",
+  "files": [
+    {
+      "path": "RSCC（灾难遥感时序图文数据集）.zip",
+      "urls": [],
+      "note": "Legacy wrapper ZIP not found locally. Import with --source-dir. RSCC xBD image access requires external license/download workflow. https://huggingface.co/datasets/richkoala/RSCC",
+      "sha256": "fa81c08b016e521de15def2b1b027685aa8b186915b542602c2309284cb8502b"
+    }
+  ]
+}

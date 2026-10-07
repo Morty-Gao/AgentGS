@@ -1,0 +1,41 @@
+{
+  "dataset": "geotooleval",
+  "description": "Acquire original geotooleval files; preserve legacy bytes without preprocessing.",
+  "files": [
+    {
+      "path": "GeoToolEval.xlsx",
+      "size": 128118,
+      "sha256": "05d586c4f7475193609d1865b6f921248678148700fe1fbfcb663f4dfa394640",
+      "urls": [],
+      "note": "Project-authored input snapshot; no confirmed public original URL. Import with --source-dir."
+    },
+    {
+      "path": "GeoToolEval_with_geoskills.xlsx",
+      "size": 187867,
+      "sha256": "9d859fc9d35058d76a757656e5cc4ef14d179f6ac5a23f37d942a114b8f19403",
+      "urls": [],
+      "note": "Project-authored input snapshot; no confirmed public original URL. Import with --source-dir."
+    },
+    {
+      "path": "GeoToolAgent_完整资源注册表.xlsx",
+      "size": 116321,
+      "sha256": "aa008c221a1df1e21a4cd9f39ea7e2051580faeb1b0c4fdd9743b70713ddd966",
+      "urls": [],
+      "note": "Project-authored input snapshot; no confirmed public original URL. Import with --source-dir."
+    },
+    {
+      "path": "2.机器学习和大数据分析.json",
+      "size": 53346,
+      "sha256": "a05372725a95e5f253f99d65e7e6f05784fbe505981e51a52922f85999fc2eb5",
+      "urls": [],
+      "note": "Project-authored input snapshot; no confirmed public original URL. Import with --source-dir."
+    },
+    {
+      "path": "10.自然灾害与极端地震.xlsx",
+      "size": 5024222,
+      "sha256": "42c84e094db2015030c59ba3b4253799b7ebafae6625a30de6292049c04892af",
+      "urls": [],
+      "note": "Project-authored input snapshot; no confirmed public original URL. Import with --source-dir."
+    }
+  ]
+}

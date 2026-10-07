@@ -1,0 +1,15 @@
+{
+  "dataset": "usgs",
+  "description": "Acquire original usgs files; preserve legacy bytes without preprocessing.",
+  "files": [
+    {
+      "path": "usgs_2010_2020_m7.csv",
+      "size": 29819,
+      "sha256": "cfb3c16b495c62babdce9231ad223c4ad69bfa7ad3a3a0022da221fdd4aa5698",
+      "urls": [
+        "https://earthquake.usgs.gov/fdsnws/event/1/query?format=csv&starttime=2010-01-01&endtime=2021-01-01&minmagnitude=7&orderby=time-asc&limit=20000"
+      ],
+      "note": "Frozen 169-event snapshot. Live catalog updates must fail this checksum rather than replace the snapshot."
+    }
+  ]
+}

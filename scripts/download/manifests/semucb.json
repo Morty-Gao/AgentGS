@@ -1,0 +1,14 @@
+{
+  "dataset": "semucb",
+  "description": "Acquire original semucb files; preserve legacy bytes without preprocessing.",
+  "files": [
+    {
+      "path": "semucb_repo.zip",
+      "size": 12049748,
+      "sha256": "37ee678ce87e56e73a5915c25225cde051e6c180463073bbddbdbc42e3f227cf",
+      "urls": [
+        "https://codeload.github.com/bsl-group/SEMUCB-WM1-Model/zip/870eb96ad2ae05a095deae33321f12cf5a63d884"
+      ]
+    }
+  ]
+}

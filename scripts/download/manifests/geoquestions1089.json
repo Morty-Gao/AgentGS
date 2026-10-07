@@ -1,0 +1,22 @@
+{
+  "dataset": "geoquestions1089",
+  "description": "Acquire original geoquestions1089 files; preserve legacy bytes without preprocessing.",
+  "files": [
+    {
+      "path": "GeoQuestions1089.json",
+      "urls": [
+        "https://raw.githubusercontent.com/AI-team-UoA/GeoQuestions1089/main/GeoQuestions1089.json"
+      ],
+      "note": "Full upstream source not found locally. Mutable URL with pinned content checksum.",
+      "sha256": "58645517fbb50723d02501bb24d41c663e020616a3f6cb4a9c6ea3fcfb9cb862"
+    },
+    {
+      "path": "GeoQuestions1089_answers.json",
+      "urls": [
+        "https://raw.githubusercontent.com/AI-team-UoA/GeoQuestions1089/main/GeoQuestions1089_answers.json"
+      ],
+      "note": "Full upstream source not found locally. Mutable URL with pinned content checksum.",
+      "sha256": "75b5a3abfab344139633345b03de24c4efe86244dde50c379570c4d8eb0d44e0"
+    }
+  ]
+}

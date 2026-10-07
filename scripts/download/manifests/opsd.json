@@ -1,0 +1,22 @@
+{
+  "dataset": "opsd",
+  "description": "Acquire original opsd files; preserve legacy bytes without preprocessing.",
+  "files": [
+    {
+      "path": "renewable_capacity_timeseries.csv",
+      "size": 11708095,
+      "sha256": "d5c15d15447fa02c70064d7708e2047c023d923dbc3548632b9c39c355d96486",
+      "urls": [
+        "https://data.open-power-system-data.org/renewable_power_plants/2020-08-25/renewable_capacity_timeseries.csv"
+      ]
+    },
+    {
+      "path": "renewable_power_plants_EU.csv",
+      "size": 265825487,
+      "sha256": "1a61a9fbd0435a2a9d71ae567f4e602f8bee52bffd529ec440dbca6a3bf2aee1",
+      "urls": [
+        "https://data.open-power-system-data.org/renewable_power_plants/2020-08-25/renewable_power_plants_EU.csv"
+      ]
+    }
+  ]
+}

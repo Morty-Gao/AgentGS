@@ -1,0 +1,14 @@
+{
+  "dataset": "disastervqa",
+  "description": "Acquire original disastervqa files; preserve legacy bytes without preprocessing.",
+  "files": [
+    {
+      "path": "DisasterVQA-Dataset-v3.zip",
+      "urls": [
+        "https://zenodo.org/api/records/20306919/files/DisasterVQA-Dataset-v3.zip/content"
+      ],
+      "note": "Official v3 ZIP. Legacy Chinese wrapper ZIP has different bytes; do not rename it to this filename.",
+      "md5": "4a3576c78a5d71a556ecc081bcc2cd28"
+    }
+  ]
+}

@@ -1,0 +1,21 @@
+{
+  "dataset": "biodeeptime",
+  "description": "Acquire original biodeeptime files; preserve legacy bytes without preprocessing.",
+  "files": [
+    {
+      "path": "biodeeptime.md",
+      "size": 18394,
+      "sha256": "af1b517c024af23dd0d280792e0704514e200568262b16e487f37881986b482e",
+      "urls": [
+        "https://zenodo.org/api/records/8154672/files/biodeeptime.md/content"
+      ]
+    },
+    {
+      "path": "6-7(1).zip",
+      "size": 94726761,
+      "sha256": "5e873b62d9b241ac5f23bddb9b2e0818cb73689b4023b4a521aea35a8ddd1208",
+      "urls": [],
+      "note": "Original user-provided domain 7/8 bundle containing D1/biodeeptime.csv and CCS v1.0. Local import only. Official Zenodo archive has different packaging; not substituted."
+    }
+  ]
+}

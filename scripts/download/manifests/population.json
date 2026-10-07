@@ -1,0 +1,15 @@
+{
+  "dataset": "population",
+  "description": "Acquire original population files; preserve legacy bytes without preprocessing.",
+  "files": [
+    {
+      "path": "population-with-un-projections.csv",
+      "size": 1172501,
+      "sha256": "a77c8da5a75a47c82057c12ae52a38f4f11e3333c2a39a8b0260928caee45aa2",
+      "urls": [
+        "https://ourworldindata.org/grapher/population-with-un-projections.csv"
+      ],
+      "note": "Frozen legacy OWID CSV; upstream updates can fail checksum. No transformation."
+    }
+  ]
+}
