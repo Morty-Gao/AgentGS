@@ -1,0 +1,13 @@
+{
+  "name": "bwrap",
+  "version": "0.9.0-1ubuntu0.3",
+  "license": "LGPL-2.0-or-later",
+  "host": "Ubuntu-24.04",
+  "platforms": {
+    "linux-x64": {
+      "url": "https://archive.ubuntu.com/ubuntu/pool/main/b/bubblewrap/bubblewrap_0.9.0-1ubuntu0.3_amd64.deb",
+      "sha256": "2461f1beee9cb04c8942739fe1a2b37e7b7c2a3d518f0779dc75f9245baa3094",
+      "archive": "bubblewrap_0.9.0-1ubuntu0.3_amd64.deb"
+    }
+  }
+}

@@ -54,3 +54,12 @@ Desktop.ini
 /outputs/
 /forks/
 /tmp/
+
+# Installed external tools and frontend artifacts
+/tools/
+node_modules/
+.vite/
+
+# Pipeline source directory is not a build artifact
+!scripts/build/
+!scripts/build/**

@@ -1,0 +1,17 @@
+# Configuration syntax follows the agreed provider/model separation.
+# Replace capabilities and budgets with verified metadata for your provider.
+schema_version = 1
+[providers.primary]
+base_url = "${LLM_BASE_URL}"
+api_key = "${LLM_API_KEY}"
+[models.default]
+provider = "primary"
+model = "${LLM_MODEL}"
+context_window = 128000
+max_output_tokens = 8192
+supported_efforts = []
+[models.default.capabilities]
+tool_calling = true
+[roles]
+planner = "default"
+answer = "default"

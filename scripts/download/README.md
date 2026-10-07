@@ -45,17 +45,19 @@ bash scripts/download/download_all.sh --verify-only
 | socat | SOCAT v2026 北太平洋 TSV、月度网格 CSV |
 | snapo | SNAPO 原始 113597.xlsx |
 | ccs | Zenodo 17003094 的 CCS v1.0 数据、schema 与说明 |
-| biodeeptime | Zenodo 8154672 的说明与完整 CSV ZIP |
+| biodeeptime | 原始说明与用户提供的 `6-7(1).zip`，其中有完整 D1/biodeeptime.csv 和同批 CCS 资料 |
 | yago2geo | 原始 yago2_plus_geo.zip，约 4.2 GB |
 | earthse | Earth-Iron / Earth-Silver，各四个固定 revision parquet |
 | earthbench | 旧项目使用的 49 个问题目录、1415 个原始资产，以及原版 question.json；不是全量影像仓库 |
 | geoquestions1089 | 完整原版问题 JSON 和答案 JSON |
 | disastervqa | Zenodo 20306919 的官方 Dataset-v3 ZIP |
-| rscc | 旧版 RSCC 用户原始包装 ZIP，需本地导入 |
+| rscc | RSCC 官方 xbd_subset.tgz 原始包，对应旧中文包装 ZIP 内的同名包 |
 | geotooleval | 项目自编工作簿、资源表与原始问题 JSON，需本地导入 |
 | unidentified_sources | 115871.nc、D4.xlsx，来源身份待确认，仅本地保全 |
 
-版本、URL、校验和维护在 `manifests/*.json`，数据文件本身被 Git 忽略。旧版 GEM、RSCC、自编资料及不明来源文件没有已确认的同版本公开直链，脚本要求本地导入。下载全量不代表这些本地项能在全新机器上自动恢复。
+版本、URL、校验和维护在 `manifests/*.json`，数据文件本身被 Git 忽略。旧版 GEM、自编资料及不明来源文件没有已确认的同版本公开直链，脚本要求本地导入。下载全量不代表这些本地项能在全新机器上自动恢复。
+
+大于 8 MiB 且已知大小的文件使用最多四个并发 HTTP 分段请求，核对每段 Content-Range 与实际长度，再校验完整文件哈希。服务端不支持分段时回退到普通下载。分段失败会重试，不接受截断内容；下载步骤不会解压或重新包装数据。
 
 NASA、USGS、World Bank 和 OWID 的部分上游地址会变化；manifest 锁定旧项目原始字节，若服务器内容更新则明确失败。World Bank ZIP 甚至可能因打包时间变化而哈希不同。复现实验应导入旧文件；更新版本需另行审核 URL、校验和及后续 pipeline，不自动切换到最新版本。
 
@@ -63,6 +65,14 @@ NASA、USGS、World Bank 和 OWID 的部分上游地址会变化；manifest 锁�
 
 原始文件从旧项目和同级 `GeoToolAgent数据集` 直接复制，源文件保留。逐文件来源、目标、大小、SHA-256 与缺失项记录在被 Git 忽略的 `outputs/download_migration/migration.json`。
 
-尚未找到完整 BioDeepTime CSV ZIP、原始 Earth-Agent question.json、GeoQuestions1089 两份完整 JSON、官方 DisasterVQA ZIP 和旧版 RSCC 包。脚本保留对应获取定义，离线校验应返回失败，不以旧项目生成的问答子集冒充原始数据。官方 DisasterVQA ZIP 与旧项目中文包装包并非相同文件。
+首次迁移复制了 1,460 个原始文件，共 10,250,613,992 字节，覆盖 22 个分类，当时 18 个分类完整。BioDeepTime 完整 CSV 位于用户提供的原始 `6-7(1).zip` 中，保留原包，不在下载步骤解压。这个包装包没有公开同字节下载地址，需本地导入；官方 Zenodo 8154672 发布包有不同的包装方式。
 
-不为这些脚本新增测试文件；手动验证日志记录在 `outputs/download_migration/`。已有原始数据的校验通过仅说明迁移和跳过逻辑通过；网络获取路径另用本机 HTTP 服务的小文件手动检查，不重新下载真实数据集。Linux 原生运行需要后续在 Linux 主机验证，当前 Bash 运行验证使用 Windows Git Bash。
+首次迁移缺少原始 Earth-Agent question.json、GeoQuestions1089 两份完整 JSON、官方 DisasterVQA ZIP 和旧版 RSCC 包，共 5 项，涉及 4 个分类。随后按用户要求从官方来源重新获取，最新结果见 `outputs/download_migration/fresh_downloads.json` 和 `verification_summary.json`。官方 DisasterVQA ZIP 与旧项目中文包装包并非相同文件。
+
+缺失内容现已全部补齐：重新获取 5 个文件，共 1,672,087,625 字节；当前 22 个分类的 1,465 个文件完整，共 11,922,701,617 字节。PowerShell 和 Windows Git Bash 的统一 `--verify-only` 均返回 0。原始迁移时的缺失清单保留在 migration.json 的 missing_at_initial_migration 字段，当前 missing 为空。DisasterVQA 另外完整检查了 ZIP 成员 CRC；RSCC 原始 tarball 可完整读取。
+
+RSCC 直接保存官方团队提供的 `xbd_subset.tgz`，替代不可恢复的中文外层 ZIP；大小和 CRC32 与旧包装 ZIP 中的成员记录一致，下载后锁定 SHA-256。manifest 的 legacy_wrapper 字段保留外层旧包指纹以供追溯。获取说明见 [RSCC 官方数据卡](https://huggingface.co/datasets/richkoala/RSCC)。原始包内的影像使用仍遵循上游 xBD 许可。
+
+不为这些脚本新增测试文件；手动验证日志记录在 `outputs/download_migration/`。首次验证使用本地复制的文件和本机 HTTP 服务的小文件；补齐缺失数据时实际运行下载 CLI 并校验官方文件。项目迁移到 Ubuntu-24.04 WSL 后，原生 Linux 的 Bash 统一校验也已通过：22 个分类、1,465 个文件，退出码 0。
+
+已手动检查本地 HTTP 获取、错误内容/截断响应拒绝、重试、临时文件清理、已有文件保留、从其他工作目录调用 CLI、本地导入以及两个统一入口；分段获取也手动检查了并发组装、普通响应回退与错误 Content-Range 拒绝。HEAD 已确认 NASA GISTEMP 与 World Bank 当前响应大小不同于旧文件，这两项联网重建会被版本校验拒绝；本地旧版原始数据完整并通过校验。HEAD 可达性不等于完整远程下载及校验通过。

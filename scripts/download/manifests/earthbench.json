@@ -12742,8 +12742,9 @@
       "urls": [
         "https://raw.githubusercontent.com/opendatalab/Earth-Agent/ca1dfaef750654331308a434966d307f1728fd90/benchmark/question.json"
       ],
-      "note": "Full original 248-question source not found locally. Legacy generated JSONL is not a replacement.",
-      "sha256": "c9cc3269aab7666c6cd44b8af81c580c562c695a94251868c029f8c107989bc2"
+      "note": "Full original 248-question source; downloaded from pinned upstream commit and verified against legacy SHA-256.",
+      "sha256": "c9cc3269aab7666c6cd44b8af81c580c562c695a94251868c029f8c107989bc2",
+      "size": 4097198
     }
   ]
 }

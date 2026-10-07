@@ -1,0 +1,2 @@
+{"id": "distance", "input": {"calls": [{"tool": "GeoHaversineDistance", "arguments": {"lat1": 0, "lon1": 0, "lat2": 0, "lon2": 1}}]}, "expected_tools": ["GeoHaversineDistance"]}
+{"id": "energy", "input": {"calls": [{"tool": "GeoMagnitudeToEnergy", "arguments": {"magnitude": 7}}]}, "expected_tools": ["GeoMagnitudeToEnergy"]}

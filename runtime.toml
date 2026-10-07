@@ -1,0 +1,8 @@
+[runtime]
+max_concurrent_tasks = 2
+default_timeout_seconds = 300
+default_rss_limit_mb = 1024
+max_total_rss_mb = 4096
+code_timeout_seconds = 20
+sandbox = "auto"
+allow_proot = false

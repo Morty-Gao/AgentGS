@@ -1,2 +1,3 @@
-def main() -> None:
-    print("Hello from agentgs!")
+"""AgentGS. Importing the package performs no initialization."""
+
+__version__ = "0.2.0"
