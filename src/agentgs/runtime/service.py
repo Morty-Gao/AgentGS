@@ -108,10 +108,22 @@ class TaskService:
                     "OPENBLAS_NUM_THREADS": "1",
                     "MKL_NUM_THREADS": "1",
                     "PYTHONUNBUFFERED": "1",
+                    "PYTHONPATH": str(Path(__file__).resolve().parents[2]),
                 }
+                interpreter = sys.executable
+                reproduction = self.root / "tools/envs/reproduction/bin/python"
+                if self.settings.worker_python:
+                    selected = (self.root / self.settings.worker_python).resolve()
+                    if not selected.is_file():
+                        raise FileNotFoundError(
+                            f"Configured worker interpreter missing: {selected}"
+                        )
+                    interpreter = str(selected)
+                elif reproduction.exists():
+                    interpreter = str(reproduction)
                 with (work / "stderr.log").open("wb") as error_log:
                     process = await asyncio.create_subprocess_exec(
-                        sys.executable,
+                        interpreter,
                         "-m",
                         "agentgs.runtime.worker",
                         "--request",
@@ -171,6 +183,10 @@ class TaskService:
                         await asyncio.sleep(0.05)
                     await process.wait()
                     await reader
+                if (work / "result.json").exists():
+                    record.result = AgentResult.model_validate_json(
+                        (work / "result.json").read_text()
+                    )
                 if record.error:
                     record.status = TaskStatus.FAILED
                 elif process.returncode == 0 and (work / "result.json").exists():
@@ -178,6 +194,12 @@ class TaskService:
                         (work / "result.json").read_text()
                     )
                     record.status = TaskStatus.SUCCEEDED
+                    if record.result.completion_status != "Completed":
+                        record.status = TaskStatus.FAILED
+                        record.error = ToolError(
+                            code="task_incomplete",
+                            message="Algorithm returned Not Completed; answer and trace are preserved",
+                        )
                 else:
                     path = work / "error.json"
                     record.error = (
@@ -204,6 +226,12 @@ class TaskService:
             if reader:
                 await asyncio.gather(reader, return_exceptions=True)
             self.processes.pop(spec.id, None)
+            partial_path = self.root / "outputs/tasks" / spec.id / "result.json"
+            if record.result is None and partial_path.is_file():
+                try:
+                    record.result = AgentResult.model_validate_json(partial_path.read_text())
+                except (ValueError, OSError):
+                    pass
             self.store.save(record)
             self.store.emit(
                 spec.id,
@@ -213,3 +241,4 @@ class TaskService:
                     "peak_rss_bytes": record.peak_rss_bytes,
                 },
             )
+            self.jobs.pop(spec.id, None)

@@ -1,23 +1,38 @@
+import importlib.util
+import json
+
 from pydantic import ValidationError
 
+from agentgs.agent.execution.feedback import assess_tool_execution
 from agentgs.contracts.models import ToolError, ToolResult
 from agentgs.runtime.sandbox.base import SandboxUnavailable
-from agentgs.runtime.tools.domains.earthquake import get_event, query_catalog
-from agentgs.runtime.tools.registry import builtin_tools
+from agentgs.runtime.tools.context import tool_context
+from agentgs.runtime.tools.domains.earthquake import (
+    CatalogQuery,
+    EventQuery,
+    get_event,
+    query_catalog,
+)
+from agentgs.runtime.tools.domains.geosparql import replay_query
+from agentgs.runtime.tools.registry import builtin_tools, internal_operations
 
 
 class LocalToolExecutor:
-    def __init__(self, datasets, artifacts, events, code_executor=None):
+    def __init__(
+        self, datasets, artifacts, events, code_executor=None, *, allow_internal_operations=False
+    ):
         self.datasets, self.artifacts, self.events = datasets, artifacts, events
         self.registry = builtin_tools()
+        self.internal = internal_operations() if allow_internal_operations else {}
         self.code_executor = code_executor
+        self._known_files = set(self.artifacts.root.rglob("*"))
 
     def specs(self):
         return [item.spec for item in self.registry.values()]
 
     async def execute(self, call):
         self.events.emit("tool.started", {"call_id": call.id, "tool": call.tool})
-        item = self.registry.get(call.tool)
+        item = self.registry.get(call.tool) or self.internal.get(call.tool)
         try:
             if not item:
                 raise KeyError(call.tool)
@@ -25,19 +40,46 @@ class LocalToolExecutor:
             if call.tool == "ExecutePython":
                 data = await self.code_executor.run_python(params.code)
             elif call.tool == "DeepEarthQueryUSGSCatalog":
-                data = query_catalog(params, self.datasets)
+                args = params.model_dump()
+                modern = {"start_year", "end_year", "min_magnitude", "limit"}
+                if set(args).issubset(modern):
+                    data = query_catalog(CatalogQuery.model_validate(args), self.datasets)
+                else:
+                    data = self._domain(call.tool, args)
             elif call.tool == "DeepEarthGetUSGSEvent":
-                data = get_event(params, self.datasets)
+                if importlib.util.find_spec("pandas") is not None:
+                    data = self._domain(call.tool, params.model_dump())
+                else:
+                    data = get_event(EventQuery.model_validate(params.model_dump()), self.datasets)
+            elif call.tool == "GeoBigDataExecuteGeoSPARQL":
+                data = replay_query(params, self.datasets)
             else:
-                data = item.handler(params)
+                data = self._domain(call.tool, params.model_dump())
+            raw_output = data if isinstance(data, str) else json.dumps(data, ensure_ascii=False)
+            assessment = assess_tool_execution(raw_output)
+            if assessment.score == 0:
+                raise RuntimeError(raw_output)
+            if isinstance(data, str):
+                try:
+                    data = json.loads(data)
+                except ValueError:
+                    data = {"text": data}
             artifact = self.artifacts.write_json(call.id + ".json", data, call.tool)
+            produced = [artifact]
+            # Register file products without treating registration failure as a new physical call.
+            for path in self.artifacts.root.rglob("*"):
+                if path.is_file() and path not in self._known_files:
+                    self._known_files.add(path)
+                    if path.name != call.id + ".json":
+                        produced.append(self.artifacts.register(path, call.tool))
             result = ToolResult(
                 call_id=call.id,
                 tool=call.tool,
                 succeeded=True,
                 data=data,
-                artifacts=[artifact],
+                artifacts=produced,
                 source_type=item.source_type,
+                raw_output=raw_output,
             )
         except SandboxUnavailable as exc:
             result = ToolResult(
@@ -51,7 +93,8 @@ class LocalToolExecutor:
                 call_id=call.id,
                 tool=call.tool,
                 succeeded=False,
-                error=ToolError(code="execution_error", message=str(exc)),
+                error=ToolError(code="execution_error", message=str(exc), retryable=True),
+                raw_output=str(exc),
             )
         except KeyError:
             result = ToolResult(
@@ -67,6 +110,14 @@ class LocalToolExecutor:
                 succeeded=False,
                 error=ToolError(code="dependency_missing", message=str(exc)),
             )
+        except ImportError as exc:
+            result = ToolResult(
+                call_id=call.id,
+                tool=call.tool,
+                succeeded=False,
+                error=ToolError(code="dependency_missing", message=str(exc)),
+                raw_output=f"Tool function execution error, {type(exc).__name__}: {exc}",
+            )
         except (ValidationError, ValueError) as exc:
             result = ToolResult(
                 call_id=call.id,
@@ -81,6 +132,14 @@ class LocalToolExecutor:
                 "tool": call.tool,
                 "succeeded": result.succeeded,
                 "error": result.error.model_dump() if result.error else None,
+                "arguments": call.arguments,
+                "result": result.model_dump(mode="json"),
             },
         )
         return result
+
+    def _domain(self, name, arguments):
+        from agentgs.runtime.tools.dispatch import execute_domain
+
+        with tool_context(self.datasets.root.parent, self.artifacts.root):
+            return execute_domain(name, arguments)

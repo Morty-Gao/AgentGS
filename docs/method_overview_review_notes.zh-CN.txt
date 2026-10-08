@@ -1,0 +1,71 @@
+AgentGS新增方法概述章节：审阅依据与插入说明
+日期：2026-10-08
+
+当前交付状态（2026-10-08，方案一）
+用户选择并审阅通过方案一后，已将原第3、4章正式合并为“3 AgentGS方法”，设置3.1—3.6六个小节。当前文章为七章，图1位于总体流程之后，后续章节与引用编号同步更新。初稿与执行说明见docs/method_chapter_scheme1_draft_review.zh-CN.txt，核对报告见outputs/documents/method_scheme1_reorganization_report.json。以下八章结构及独立概述章记录均为此前方案历史。
+
+最新交付状态（2026-10-08）
+用户改为要求保留最初稿结构，并已批准融入方案。当前Word已撤回此前新增的概述章，恢复原稿八章结构，将图1(c)的六段详细流程说明融入第4章“超图补全与计划落实”开篇。图1已恢复原稿位置，具体记录见docs/figure_c_flow_integration_review.zh-CN.txt及outputs/documents/figure_c_flow_integration_report.json。以下概述章插入记录为已撤回方案的历史记录。
+
+插入完成记录（2026-10-08）
+用户已批准风格修订后的草稿，并要求直接插入Word及保持原稿排版。已将18个段落插入AgentGS-revisebycjx.docx的相关工作之后，沿用原稿一级标题、二级标题和正文的段落及文字属性；原第3—8章顺延为第4—9章，更新25个既有标题与3处章节引用。图1整体移至新第3章总体流程说明之后，保留跨栏分节设置与图像尺寸，并更新图注。
+修改前备份：outputs/documents/backups/AgentGS-revisebycjx.before-method-section.20261008T014311Z.docx。
+核对报告：outputs/documents/method_section_insertion_report.json。
+原有5个数学对象、5个图片对象、6张表格、15处分节属性、256处插入修订及84处删除修订均完整保留；DOCX包仅修改word/document.xml。新增段落格式与原稿模板逐项比对通过，文档经Pandoc独立解析通过。本环境无法渲染Word页面，未进行分页和页面外观检查。
+以下“交付边界”及“审批后Word插入事项”保留为插入前的历史审阅记录；当前交付状态以上述完成记录为准。
+
+语言风格修订记录（2026-10-08）
+按用户要求，重新对照Word第3、4、5章及案例部分修改概述草稿。采用原稿的直接陈述句和“系统首先……随后……”的流程说明，统一能力计划、前置依赖、候选工具范围、输入绑定及结果核验等称呼。减少英文模块名切换和工程实现用语，拆分长句，并将详细桥接搜索边界留在后续算法章节。保留总分结构、图1(c)的七步能力示例、执行反馈及用户要求的新Skill回写。此次仅更新审阅草稿，未修改Word正文。
+
+一、交付边界
+本轮提供新增第3章的审阅草稿，不修改AgentGS-revisebycjx.docx，也不修改英文LaTeX稿、算法或实验数据。
+用户已说明新Skill回写将马上加入项目，授权先在方法章节中描述。草稿第3.4节的新Skill生成、注册、SkillSet回写与GeoSkillKG更新属于拟补入的机制，不能据本稿推断当前仓库已实现或其效果已通过实验。
+截至草稿形成时，Judge失败回路的异步问题未收到明确答复，采用可由源码支持的表述：执行失败可以触发有限重规划，最终答案校验记录完成状态，不触发已成功工具链重跑。
+图中Retrieve的Yes/No暂解释为策略覆盖是否充分；覆盖不足时由GeoToolKG补充工具候选。未宣称当前skill_guided模式会因没有匹配Skill自动切换tool_only，源码没有这样的模式切换。
+本轮查看连接文档会话未发现可用会话，以工作区中的Word文件为审阅基准，其SHA256为c767d6bcd465ca45f1591e3b8143756b46e55117599621c6c5241125da5fc3e4。
+
+二、项目审阅范围与主要判断
+1. 阅读中文Word正文、表格、公式及参考文献，核对英文LaTeX对应章节和图示。现稿顺序为相关工作→分层表示→超图补全→系统→基准→实验→结论。新增章节承担总体方法说明，保留后续形式化表示和算法细节。
+2. 核对README、框架审计、实现状态、算法对齐契约、迁移说明；查看当前Skill定义、检索、选择、能力展开、grounding、执行反馈、AgentEngine、工具执行、产物、任务服务、评测与前后端入口及相应测试。当前工程处于迁移阶段，独立组件的对照通过不等于生产AgentEngine已经接通完整方法。
+3. 依据docs/algorithm_alignment.json定位并回查只读旧主项目GeoToolAgent的bridging.py、shared_bridge.py、hypergraph.py、library.py、models.py及retrieve_tool_info.py中的规划、执行恢复和最终回答路径。新章节以论文方法和原算法主线为依据，未将当前function-calling原型误写为完整超图规划实现。
+4. 当前范围声明为101项GeoToolEval工具、24个关联Skill、31个Capability。新章节无需重复规模与实验得分，避免混入旧110工具范围和原28 Skill/38 Capability范围。
+5. 当前Word图1包含a、b、c三个面板；用户截图是已有overview.png的c面板。可将完整图1移至新增第3章，并在新章引用图1(c)，保留分层表示章节对a、b面板的解释。
+6. 检索相关性、结构补全与科学适用性分别表述。没有声称类型兼容就证明科学正确，也没有声称分支唯一就证明其对任务目标必需。
+7. 现稿第4.3节强调局部恢复；原代码在修复耗尽后还可以有限重规划。新增章节采用可核实的分层反馈表述，不写最终答案Judge失败后无条件整体重规划。
+8. 现稿中摘要、第3.1节、第4.4节、案例与结论使用“候选Skill”。若新Skill回写实现完成，正式插入时需要结合用户审阅结果统一这几处措辞。回写功能的实现与跨任务复用收益的实验证明是两项不同事项。
+
+三、参考文献及所借鉴的组织方式
+仅参考结构与阐述顺序，正文为结合AgentGS项目撰写的原创内容。
+
+SciToolAgent，arXiv:2507.20280v1。
+https://arxiv.org/html/2507.20280v1
+对应部分：2.1 Overview of SciToolAgent；4.4 Implementation of SciToolAgent。
+参考点：先结合总图交代知识图谱与完整工作流，再分别展开Planner、Executor与Summarizer的职责和输入输出。
+
+Voyager，arXiv:2305.16291v2。
+https://arxiv.org/html/2305.16291v2
+对应部分：2 Method；2.2 Skill Library；2.3 Iterative Prompting Mechanism。
+参考点：方法开篇先列核心组成，再讲检索、执行反馈、验证与技能入库之间的连接。AgentGS的新Skill保存能力流程，不能直接套用Voyager的可执行代码技能及其终身学习结论。
+
+Tool-Planner，ICLR 2025。
+https://proceedings.iclr.cc/paper_files/paper/2025/file/7f605d59a0dbde101518b552cb616ddf-Paper-Conference.pdf
+对应部分：3 Methodology；3.1 Tool Clustering；Figure 2。
+参考点：先说明功能层面的规划对象，再讲具体API选择与失败处理。AgentGS的Skill成员超图、来源依赖和能力补全与其工具聚类不同。
+
+HyperAgent，arXiv:2608.02650v1。
+https://arxiv.org/html/2608.02650v1
+对应部分：Method中的HyperGraph Construction、Task-Level Planning、Task Execution、Tool-Level Planning。
+参考点：解释抽象计划与具体工具落实如何衔接，以及未满足需求为何触发补全。AgentGS采用Capability节点与Skill超边；HyperAgent采用schema节点与Tool超边，二者表示对象与搜索机制不同，草稿未混用。
+
+四、审批后Word插入事项
+1. 在“2 相关工作”之后、“3 面向任务组合的分层表示”之前插入新第3章，使用原文一级标题样式3、二级标题样式4及正文样式。
+2. 原第3—8章顺延为第4—9章，更新各级小节编号及正文中章节交叉引用。新增概述没有编号公式或算法，不需要改变已有公式与算法编号。
+3. 图1可整体前移至新增章节；保留完整a/b/c面板，避免重复插入同一图。相应调整原图注，使其涵盖表示、补全、执行与Skill回写。
+4. 统一GeoSkillKG与“技能超图”的称呼；ToolGraph仍指Capability—Tool实现映射，GeoToolKG仍指工具描述及关联图谱。
+5. 由用户对Judge含义作最终选择后，统一第3.3、3.4节与原执行恢复、案例表述。若按完整设计写最终结果失败后重规划，应同时说明其实现状态与停止条件。
+6. 备份原文件，插入与核对标题、图号、交叉引用、公式及版式后保存。当前没有执行上述修改。
+
+五、与本轮正文相关的既有待完善项
+原算法1引用式(3)，但中文稿缺少对应公式，英文稿为明确占位。
+外部GeoBenchX实验字段、部分图示及泛化/成本结果仍有占位；新增方法概述不为其补造证据。
+没有重新运行付费模型实验或宣称复现现稿分数。

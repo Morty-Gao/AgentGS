@@ -1,0 +1,64 @@
+% AgentGS English manuscript translated from AgentGS-revisebycjx.docx.
+\documentclass[sigconf,anonymous]{aamas}
+% For the camera-ready version: \documentclass[sigconf]{aamas}
+
+\usepackage{balance}
+\usepackage{tabularx}
+\usepackage{algorithm}
+\usepackage{algpseudocode}
+\graphicspath{{figures/}}
+
+% Visible draft placeholders; replace each item when the missing material is ready.
+\newcommand{\drafttodo}[1]{\textbf{[TODO: #1]}}
+
+% Official AAMAS 2027 copyright metadata.
+\makeatletter
+\gdef\@copyrightpermission{
+  \begin{minipage}{0.2\columnwidth}
+   \href{https://creativecommons.org/licenses/by/4.0/}{\includegraphics[width=0.90\textwidth]{by}}
+  \end{minipage}\hfill
+  \begin{minipage}{0.8\columnwidth}
+   \href{https://creativecommons.org/licenses/by/4.0/}{This work is licensed under a Creative Commons Attribution International 4.0 License.}
+  \end{minipage}
+  \vspace{5pt}
+}
+\makeatother
+
+\setcopyright{ifaamas}
+\acmConference[AAMAS 2027]{Proc.\@ of the 26th International Conference
+on Autonomous Agents and Multiagent Systems (AAMAS 2027)}{3--7 May 2027}{Hanoi, Vietnam}{M.~Baldoni, F.~Fang, W.~Yeoh, N.~Yorke-Smith (eds.)}
+\copyrightyear{2027}
+\acmYear{2027}
+\acmDOI{}
+%\acmPrice{}
+\acmISBN{}
+
+% TODO: replace with the OpenReview submission identifier.
+\acmSubmissionID{TBD}
+\submissionType{Research Paper Track}
+
+% DOCX paragraphs 000--001. Author names and affiliations were not supplied.
+\title[AgentGS]{AgentGS: Plan Composition and Completion over Skill Hypergraphs}
+\author{Anonymous Author(s)}
+% TODO: supply authors, affiliations, and emails for the camera-ready version.
+
+\input{sections/abstract}
+% DOCX paragraph 004.
+\keywords{LLM Agents, Compositional Planning, Tool Orchestration, Skill Hypergraph, Scientific Agent}
+
+\begin{document}
+\maketitle
+
+\input{sections/introduction}
+\input{sections/related_work}
+\input{sections/representation}
+\input{sections/completion}
+\input{sections/system}
+\input{sections/benchmark}
+\input{sections/experiments}
+\input{sections/conclusion}
+
+\bibliographystyle{format}
+\bibliography{references}
+
+\end{document}

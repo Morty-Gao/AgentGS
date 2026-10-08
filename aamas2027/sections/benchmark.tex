@@ -1,0 +1,63 @@
+\section{GeoToolEval: Design and Construction}
+\label{sec:benchmark}
+
+% DOCX paragraph 096.
+We construct GeoToolEval to evaluate tool use and multistep workflow orchestration in geoscientific tasks. Each evaluation record combines a natural-language question, input resources, reference tool invocations, and a reference answer. The benchmark integrates existing geoscientific question-answering resources and computational and analytical tasks derived from scientific data, supporting final-answer evaluation and execution-process analysis.
+
+\subsection{Evaluation Objectives and Design Principles}
+\label{sec:benchmark-principles}
+
+% DOCX paragraph 098.
+GeoToolEval examines whether agents select applicable operations, satisfy interstep dependencies, and use input data to produce verifiable results. Single-step tasks assess data location, parameter determination, and basic tool use. Multistep tasks examine the organization of multiple operations, transitions between steps, and use of intermediate results. Both categories are included to distinguish basic invocation performance from performance under workflow-orchestration requirements.
+
+% DOCX paragraph 099.
+Task themes follow the ten geoscientific research directions discussed in the introduction~\cite{zheng2025frontiers}, with concrete tasks determined by available data resources and executable operations. The number retained in each theme depends on available resources and screening outcomes. Domain groupings describe task backgrounds, whereas reference-chain length describes workflow composition under the current tool interfaces. These groupings support analyses by domain and invocation-chain length, respectively.
+
+\subsection{Data Sources and Task Construction}
+\label{sec:benchmark-construction}
+
+% DOCX paragraph 101.
+GeoToolEval is constructed in two ways: selecting tasks from existing question-answer records, and designing questions with reference answers computed from scientific data. For existing resources, the geoscientific big-data analysis theme contains 40 tasks selected from GeoQuestions1089 that concern physical geographic objects and spatial-analysis operations. The remote-sensing theme contains 49 tasks selected from Earth-Bench's 248 tasks~\cite{feng2026earthagent}, retaining the original questions, choices, and reference answers while adapting the tool calls to our interfaces. Critical-mineral and climate-change tasks are selected by theme from existing \nolinkurl{habitable_earth_dataset} question files. Their underlying data include USGS MRDS~\cite{usgs2026mrds}, paleoclimate reconstructions, NASA GISTEMP~\cite{gistemp2026}, and SSP warming summary tables.
+
+% DOCX paragraph 102.
+Data-derived tasks are designed around clearly identifiable objects, variables, and computational relationships, with reference results determined through the corresponding processing and calculations. Three-dimensional Earth-structure tasks use LITHO1.0~\cite{pasyanos2014litho}, SEMUCB-WM1~\cite{french2014semucb}, and the USGS earthquake catalog. Energy-resource tasks use mineral, power-facility, installed-capacity time-series, and population data. Tasks concerning the ocean carbon cycle use SOCAT~\cite{socat2026}, GLODAP~\cite{glodap2024}, and SNAPO-CO$_2$ observations. Data for the deep-time biosphere, carbon capture and storage, and natural-disaster statistics come from BioDeepTime~\cite{biodeeptime2023}, synthetic SCCS-OFPOSDU data, and local disaster-event tables, respectively. The disaster tables are sourced from EM-DAT~\cite{emdat2026}, as summarized in Table~\ref{tab:benchmark}.
+
+% DOCX paragraph 103.
+Tasks from different sources use a common record format containing the question, input resources, reference answer, answer type, and reference tool calls. Questions specify the required analysis and returned content; input resources identify the data or objects; reference answers support outcome evaluation. Reference calls are defined from the source task's operational requirements, map operations to registered tools, and record tool names, parameters, and relevant input/output information. Tasks taken from existing benchmarks retain source question identifiers or resource locators. Data-derived tasks retain data-location fields, derivation records, and computational scripts to document how reference results were obtained.
+
+% DOCX paragraph 104.
+A reference chain represents one way to complete a task through the current interfaces. Different tool wrappers can require different numbers of calls for the same task: one tool may encapsulate multiple processing operations in a single invocation. We therefore group tasks by their reference-chain length after adaptation to our interfaces, rather than directly adopting single-tool or multitool labels from source datasets.
+
+\subsection{Task Composition and Complexity Strata}
+\label{sec:benchmark-composition}
+
+% DOCX paragraphs 106--109 and table 1.
+GeoToolEval contains 603 evaluation records. Table~\ref{tab:benchmark} summarizes their sources and reference-chain lengths. Of these records, 424 require one reference call, 119 require two or three, and 60 require at least four. The 179 multistep records account for 29.68\% of the benchmark.
+
+\input{tables/benchmark}
+
+% DOCX paragraph 110.
+A step denotes one reference tool invocation and does not directly measure the number of scientific operations or scientific difficulty. For example, the energy-resource and ocean-carbon themes use task-level wrappers that may perform several internal processing operations in one call. Grouping by chain length therefore describes the number of calls an agent must orchestrate under the current tool packaging. Interpretation must also consider the interfaces and actual execution traces.
+
+% DOCX paragraph 111.
+The critical-mineral and climate-change themes share nine cross-theme questions, which are included in both themes. Thus, 603 denotes the number of evaluation records in this version, rather than 603 distinct questions.
+
+\subsection{Evaluation Metrics and Quality Control}
+\label{sec:metrics}
+
+% DOCX paragraph 113.
+We evaluate outcomes using the Final Answer Score (FAS), which ranges from zero to one and retains partial-credit scores. Scoring depends on answer type: multiple-choice answers are compared after choice normalization; dates and identifiers use corresponding matching rules; scalar numerical answers use numerical tolerances; multiple numerical values and multiple text items are scored by their matches; and structured answers are compared field by field. Empty answers receive zero.
+
+% DOCX paragraphs 114--116.
+For an evaluation set containing $N$ records, mean FAS is
+\begin{equation}
+  \overline{\mathrm{FAS}}=\frac{1}{N}\sum_{i=1}^{N}\mathrm{FAS}_i.
+  \label{eq:fas}
+\end{equation}
+The main experiment uses $N=603$. Domain and chain-length groups are averaged within their corresponding record sets, with failures retained. This is a task-level micro-average, distinct from a domain-balanced macro-average or the fraction of tasks receiving full credit.
+
+% DOCX paragraph 117.
+Quality control addresses source traceability, record completeness, consistency of reference invocations, and sample execution checks. Construction materials retain source questions or data locators and verify correspondence among question fields, tool names, and call details. Data-derived tasks provide computational scripts and intermediate results for recalculation, while existing question-answer tasks retain source answers for comparison. Sample executions check whether data reading and tool invocation behave as expected; their validation scope is recorded separately from final-answer evaluation across the full benchmark.
+
+% DOCX paragraph 118.
+Final-answer scores and execution-process analyses are reported separately. FAS measures agreement between outputs and reference results. Assessing operation selection, input binding, and use of intermediate artifacts additionally requires actual parameters, tool outputs, and execution traces. Reference chains provide a comparison basis; a different but valid invocation order is not automatically treated as incorrect.

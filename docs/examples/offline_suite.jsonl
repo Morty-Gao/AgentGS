@@ -1,2 +1,3 @@
-{"id": "distance", "input": {"calls": [{"tool": "GeoHaversineDistance", "arguments": {"lat1": 0, "lon1": 0, "lat2": 0, "lon2": 1}}]}, "expected_tools": ["GeoHaversineDistance"]}
-{"id": "energy", "input": {"calls": [{"tool": "GeoMagnitudeToEnergy", "arguments": {"magnitude": 7}}]}, "expected_tools": ["GeoMagnitudeToEnergy"]}
+{"id":"catalog","input":{"calls":[{"tool":"DeepEarthQueryUSGSCatalog","arguments":{"start_year":2010,"end_year":2020,"min_magnitude":8,"limit":10}}]},"expected_tools":["DeepEarthQueryUSGSCatalog"]}
+{"id":"catalog-top-event","input":{"calls":[{"tool":"DeepEarthQueryUSGSCatalog","arguments":{"min_magnitude":7,"limit":1}}]},"expected_tools":["DeepEarthQueryUSGSCatalog"]}
+{"id": "geoquestions-snapshot", "input": {"calls": [{"tool": "GeoBigDataExecuteGeoSPARQL", "arguments": {"source_id": 591}}]}, "expected_tools": ["GeoBigDataExecuteGeoSPARQL"]}

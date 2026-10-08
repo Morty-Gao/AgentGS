@@ -1,0 +1,321 @@
+[
+  {
+    "tool": "DeepEarthQueryLITHO1",
+    "arguments": {
+      "location_key": "beijing"
+    },
+    "expected": {
+      "distance_to_node_km": 23.8666,
+      "field": "moho_depth_km",
+      "location_key": "beijing",
+      "node_index": 14010,
+      "sampled_latitude": 40.0815,
+      "sampled_longitude": 116.2495,
+      "source": "LITHO1.0 pinned nearest-node sample",
+      "value_km": 46.54
+    }
+  },
+  {
+    "tool": "DeepEarthQuerySEMUCB",
+    "arguments": {
+      "location_key": "beijing",
+      "depth_km": 100
+    },
+    "expected": {
+      "depth_km": 100,
+      "dlnvs_percent": -1.222409,
+      "location_key": "beijing",
+      "radius_km": 6271.0,
+      "source": "SEMUCB-WM1 pinned spline sample"
+    }
+  },
+  {
+    "tool": "DeepEarthQueryUSGSCatalog",
+    "arguments": {
+      "operation": "total_energy",
+      "year": 2011
+    },
+    "expected": {
+      "event_count": 20,
+      "operation": "sum_energy",
+      "total_energy_j": 2.959294014309301e+18
+    }
+  },
+  {
+    "tool": "DeepEarthQueryUSGSCatalog",
+    "arguments": {
+      "operation": "largest",
+      "year": 2011
+    },
+    "expected": {
+      "event": {
+        "depth": 29.0,
+        "depthError": null,
+        "dmin": null,
+        "gap": 9.5,
+        "horizontalError": null,
+        "id": "official20110311054624120_30",
+        "latitude": 38.297,
+        "locationSource": "us",
+        "longitude": 142.373,
+        "mag": 9.1,
+        "magError": null,
+        "magNst": null,
+        "magSource": "official",
+        "magType": "mww",
+        "net": "official",
+        "nst": 541.0,
+        "place": "2011 Great Tohoku Earthquake, Japan",
+        "rms": 1.16,
+        "status": "reviewed",
+        "time": "2011-03-11T05:46:24.120000+00:00",
+        "type": "earthquake",
+        "updated": "2026-07-05T04:08:38.502Z"
+      },
+      "operation": "max_magnitude"
+    }
+  },
+  {
+    "tool": "DeepEarthQueryUSGSCatalog",
+    "arguments": {
+      "operation": "deepest",
+      "year": 2011
+    },
+    "expected": {
+      "event": {
+        "depth": 644.6,
+        "depthError": null,
+        "dmin": null,
+        "gap": 22.2,
+        "horizontalError": null,
+        "id": "usp000j83e",
+        "latitude": -21.611,
+        "locationSource": "us",
+        "longitude": -179.528,
+        "mag": 7.3,
+        "magError": null,
+        "magNst": null,
+        "magSource": "us",
+        "magType": "mww",
+        "net": "us",
+        "nst": 646.0,
+        "place": "Fiji region",
+        "rms": 1.06,
+        "status": "reviewed",
+        "time": "2011-09-15T19:31:04.080000+00:00",
+        "type": "earthquake",
+        "updated": "2022-04-08T22:04:57.338Z"
+      },
+      "operation": "deepest"
+    }
+  },
+  {
+    "tool": "MineralResourcesCountrySummary",
+    "arguments": {
+      "country": "United States"
+    },
+    "expected": {
+      "country": "United States",
+      "record_count": 6665,
+      "top_commodities": {
+        "Gold": 2167,
+        "Iron": 499,
+        "Unknown": 650
+      }
+    }
+  },
+  {
+    "tool": "MineralResourcesRankCommodityCountries",
+    "arguments": {
+      "commodity": "Copper"
+    },
+    "expected": {
+      "commodity": "Copper",
+      "countries": {
+        "Canada": 25,
+        "Chile": 137,
+        "Mexico": 25,
+        "Peru": 59,
+        "United States": 965
+      }
+    }
+  },
+  {
+    "tool": "ClimateQueryPresentMean",
+    "arguments": {
+      "year_start": 2010,
+      "year_end": 2020
+    },
+    "expected": {
+      "mean_temp_anomaly_c": 0.8245454545454546,
+      "n": 11,
+      "year_end": 2020,
+      "year_start": 2010
+    }
+  },
+  {
+    "tool": "ClimateCompareEpochs",
+    "arguments": {
+      "values": [
+        1,
+        2,
+        3
+      ]
+    },
+    "expected": {
+      "differences_from_first": [
+        0.0,
+        1.0,
+        2.0
+      ],
+      "values": [
+        1.0,
+        2.0,
+        3.0
+      ]
+    }
+  },
+  {
+    "tool": "RemoteSensingMean",
+    "arguments": {
+      "x": [
+        1,
+        2,
+        4
+      ]
+    },
+    "expected": {
+      "value": 2.3333333333333335
+    }
+  },
+  {
+    "tool": "RemoteSensingLinearTrend",
+    "arguments": {
+      "x": [
+        1,
+        2,
+        4
+      ]
+    },
+    "expected": {
+      "intercept": 0.8333333333333334,
+      "slope": 1.5000000000000004
+    }
+  },
+  {
+    "tool": "RemoteSensingSensSlope",
+    "arguments": {
+      "x": [
+        1,
+        2,
+        4
+      ]
+    },
+    "expected": {
+      "slope": 1.5
+    }
+  },
+  {
+    "tool": "RemoteSensingMannKendallTest",
+    "arguments": {
+      "x": [
+        1,
+        2,
+        4
+      ]
+    },
+    "expected": {
+      "p_value": 0.2962698714842864,
+      "s": 3,
+      "trend": "increasing",
+      "z": 1.044465935734187
+    }
+  },
+  {
+    "tool": "RemoteSensingCoefficientOfVariation",
+    "arguments": {
+      "x": [
+        1,
+        2,
+        4
+      ]
+    },
+    "expected": {
+      "value": 0.5345224838248487
+    }
+  },
+  {
+    "tool": "RemoteSensingKurtosis",
+    "arguments": {
+      "x": [
+        1,
+        2,
+        4
+      ]
+    },
+    "expected": {
+      "excess_kurtosis": -1.4999999999999996,
+      "kurtosis": 1.5000000000000004
+    }
+  },
+  {
+    "tool": "NaturalHazardCountRecords",
+    "arguments": {},
+    "expected": {
+      "count": 10764,
+      "filters": {}
+    }
+  },
+  {
+    "tool": "NaturalHazardGroupAggregate",
+    "arguments": {
+      "group_by": "Region"
+    },
+    "expected": {
+      "aggregate": "count",
+      "filters": {},
+      "group_by": "Region",
+      "ranking": [
+        {
+          "Region": "Asia",
+          "count": 4203
+        },
+        {
+          "Region": "Americas",
+          "count": 2494
+        },
+        {
+          "Region": "Africa",
+          "count": 2266
+        },
+        {
+          "Region": "Europe",
+          "count": 1405
+        },
+        {
+          "Region": "Oceania",
+          "count": 396
+        }
+      ],
+      "top": {
+        "Region": "Asia",
+        "count": 4203
+      }
+    }
+  },
+  {
+    "tool": "NaturalHazardBuildStartDate",
+    "arguments": {
+      "filters": {
+        "Region": "Asia"
+      }
+    },
+    "expected": {
+      "filters": {
+        "Region": "Asia"
+      },
+      "latest_date": "2026-05-21",
+      "valid_date_count": 3853
+    }
+  }
+]

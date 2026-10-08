@@ -1,0 +1,6975 @@
+[
+  {
+    "schema_version": "geoskill-0.1",
+    "id": "deep-earth-model-query",
+    "name": "deep-earth-model-query",
+    "display_name": "Deep-Earth Model Query",
+    "version": "0.1.0",
+    "description": "Query pinned Earth structure models at a named location or depth.",
+    "domain": {
+      "primary": "deep-earth",
+      "secondary": [
+        "model-lookup",
+        "geophysical-query"
+      ]
+    },
+    "task_types": [
+      "model-lookup",
+      "geophysical-query"
+    ],
+    "keywords": [
+      "LITHO1.0",
+      "SEMUCB-WM1",
+      "Moho",
+      "lithosphere",
+      "dlnVs",
+      "地球结构",
+      "莫霍"
+    ],
+    "goal": {
+      "capability": "deep-earth-model-query",
+      "description": "Query pinned Earth structure models at a named location or depth.",
+      "target_state": [
+        "validated-deep-earth-model-query-result"
+      ]
+    },
+    "inputs": [
+      {
+        "id": "query_or_resource",
+        "semantic_type": "Table|Parameter",
+        "data_type": "authoritative resource locator",
+        "required": true,
+        "description": "The benchmark locator or structured task parameters."
+      }
+    ],
+    "preconditions": {
+      "data": [
+        "The authoritative input resource or query parameters are available."
+      ],
+      "semantic": [
+        "The requested operation is represented by this capability."
+      ],
+      "environment": [
+        "GeoToolAgent runtime is available."
+      ],
+      "tool": [
+        "At least one compatible registered tool is available."
+      ]
+    },
+    "geo_constraints": {
+      "crs": {
+        "required": false,
+        "relation": [
+          "compatible",
+          "transformable"
+        ],
+        "accepted_crs": [],
+        "auto_fix": {
+          "enabled": true,
+          "preferred_skill": "geo-crs-normalization"
+        }
+      },
+      "spatial_extent": {
+        "required": false,
+        "relation": [
+          "overlap",
+          "within",
+          "contains"
+        ],
+        "auto_fix": {
+          "enabled": true,
+          "preferred_skill": "spatial-clip"
+        }
+      },
+      "spatial_resolution": {
+        "required": false,
+        "relation": [
+          "compatible",
+          "same"
+        ],
+        "target_resolution": null,
+        "unit": "meter",
+        "tolerance": null,
+        "auto_fix": {
+          "enabled": true,
+          "preferred_skill": "raster-resampling"
+        }
+      },
+      "temporal": {
+        "required": false,
+        "relation": [
+          "model-version-compatible"
+        ],
+        "tolerance": null,
+        "unit": "day"
+      },
+      "format": {
+        "required_formats": [],
+        "auto_conversion": true
+      },
+      "bands": {
+        "required": [],
+        "optional": []
+      },
+      "variables": {
+        "required": true,
+        "optional": [],
+        "required_variables": [
+          "model field"
+        ]
+      },
+      "units": {
+        "required": false,
+        "compatible_units": [
+          "km",
+          "%"
+        ],
+        "auto_conversion": true
+      },
+      "nodata": {
+        "allowed": true,
+        "handling": {
+          "strategy": "mask"
+        }
+      }
+    },
+    "workflow": {
+      "type": "sequential",
+      "steps": [
+        {
+          "id": "step_1",
+          "capability": "model-query",
+          "operation": "Select the authoritative model and retrieve the requested value",
+          "required": true,
+          "depends_on": [],
+          "tool_selection": {
+            "mode": "dynamic",
+            "candidates": [
+              "DeepEarthQueryLITHO1",
+              "DeepEarthQuerySEMUCB"
+            ],
+            "selection_criteria": [
+              "input_compatibility",
+              "tool_availability",
+              "geo_constraint_satisfaction",
+              "execution_feedback"
+            ]
+          }
+        }
+      ]
+    },
+    "outputs": [
+      {
+        "id": "result",
+        "semantic_type": "Scalar|Table",
+        "data_type": "validated geoscience result",
+        "description": "A numeric or structured result with provenance.",
+        "expected_format": "JSON"
+      }
+    ],
+    "tool_candidates": [
+      "DeepEarthQueryLITHO1",
+      "DeepEarthQuerySEMUCB"
+    ],
+    "validation": {
+      "input_validation": [
+        {
+          "id": "input-present",
+          "type": "schema",
+          "rule": "required inputs are present"
+        }
+      ],
+      "intermediate_validation": [],
+      "output_validation": [
+        {
+          "id": "output-present",
+          "type": "schema",
+          "rule": "the selected tool returns a structured result",
+          "on_failure": {
+            "action": "replan"
+          }
+        }
+      ]
+    },
+    "failure_modes": [
+      {
+        "id": "missing-input",
+        "condition": "A required input or source locator is missing.",
+        "severity": "planning_required",
+        "recovery": "retrieve-missing-data"
+      },
+      {
+        "id": "constraint-mismatch",
+        "condition": "CRS, extent, resolution, time, format, variable, unit, or NoData constraints do not align.",
+        "severity": "recoverable",
+        "recovery": "local-constraint-repair"
+      }
+    ],
+    "recovery": {
+      "strategies": {
+        "local-constraint-repair": {
+          "capability": "local geospatial normalization",
+          "preferred_skills": [
+            "geo-crs-normalization",
+            "spatial-clip",
+            "raster-resampling"
+          ],
+          "retry_original_skill": true
+        },
+        "retrieve-missing-data": {
+          "capability": "data retrieval",
+          "retry_original_skill": true
+        }
+      }
+    },
+    "provenance": {
+      "record": [
+        "input_dataset",
+        "data_source",
+        "crs",
+        "spatial_extent",
+        "spatial_resolution",
+        "selected_tools",
+        "tool_parameters",
+        "execution_order",
+        "validation_results"
+      ]
+    },
+    "planning": {
+      "abstraction_level": "skill",
+      "composable": true,
+      "reusable": true,
+      "deterministic": false,
+      "estimated_complexity": "low",
+      "prerequisites": {
+        "skills": []
+      },
+      "compatible_skills": [
+        "earthquake-event-model-sampling"
+      ],
+      "alternative_skills": [],
+      "downstream_capabilities": []
+    },
+    "evaluation": {
+      "success_conditions": [
+        "All required skill steps are grounded and validated."
+      ],
+      "metrics": [
+        {
+          "name": "execution_success",
+          "type": "boolean"
+        },
+        {
+          "name": "constraint_satisfaction",
+          "type": "ratio"
+        },
+        {
+          "name": "output_validity",
+          "type": "boolean"
+        }
+      ]
+    }
+  },
+  {
+    "schema_version": "geoskill-0.1",
+    "id": "earthquake-catalog-analysis",
+    "name": "earthquake-catalog-analysis",
+    "display_name": "Earthquake Catalog Analysis",
+    "version": "0.1.0",
+    "description": "Filter and summarize a frozen earthquake catalog by magnitude, time, depth, energy, or event identity.",
+    "domain": {
+      "primary": "natural-hazard",
+      "secondary": [
+        "earthquake-statistics",
+        "catalog-query"
+      ]
+    },
+    "task_types": [
+      "earthquake-statistics",
+      "catalog-query"
+    ],
+    "keywords": [
+      "earthquake",
+      "USGS",
+      "magnitude",
+      "震级",
+      "earthquake catalog",
+      "地震目录"
+    ],
+    "goal": {
+      "capability": "earthquake-catalog-analysis",
+      "description": "Filter and summarize a frozen earthquake catalog by magnitude, time, depth, energy, or event identity.",
+      "target_state": [
+        "validated-earthquake-catalog-analysis-result"
+      ]
+    },
+    "inputs": [
+      {
+        "id": "query_or_resource",
+        "semantic_type": "Table|Parameter",
+        "data_type": "authoritative resource locator",
+        "required": true,
+        "description": "The benchmark locator or structured task parameters."
+      }
+    ],
+    "preconditions": {
+      "data": [
+        "The authoritative input resource or query parameters are available."
+      ],
+      "semantic": [
+        "The requested operation is represented by this capability."
+      ],
+      "environment": [
+        "GeoToolAgent runtime is available."
+      ],
+      "tool": [
+        "At least one compatible registered tool is available."
+      ]
+    },
+    "geo_constraints": {
+      "crs": {
+        "required": false,
+        "relation": [
+          "compatible",
+          "transformable"
+        ],
+        "accepted_crs": [],
+        "auto_fix": {
+          "enabled": true,
+          "preferred_skill": "geo-crs-normalization"
+        }
+      },
+      "spatial_extent": {
+        "required": false,
+        "relation": [
+          "overlap",
+          "within",
+          "contains"
+        ],
+        "auto_fix": {
+          "enabled": true,
+          "preferred_skill": "spatial-clip"
+        }
+      },
+      "spatial_resolution": {
+        "required": false,
+        "relation": [
+          "compatible",
+          "same"
+        ],
+        "target_resolution": null,
+        "unit": "meter",
+        "tolerance": null,
+        "auto_fix": {
+          "enabled": true,
+          "preferred_skill": "raster-resampling"
+        }
+      },
+      "temporal": {
+        "required": true,
+        "relation": [
+          "within-window",
+          "same-date"
+        ],
+        "tolerance": null,
+        "unit": "day"
+      },
+      "format": {
+        "required_formats": [],
+        "auto_conversion": true
+      },
+      "bands": {
+        "required": [],
+        "optional": []
+      },
+      "variables": {
+        "required": true,
+        "optional": [],
+        "required_variables": [
+          "magnitude",
+          "time",
+          "depth"
+        ]
+      },
+      "units": {
+        "required": false,
+        "compatible_units": [
+          "km",
+          "Mw",
+          "J"
+        ],
+        "auto_conversion": true
+      },
+      "nodata": {
+        "allowed": true,
+        "handling": {
+          "strategy": "mask"
+        }
+      }
+    },
+    "workflow": {
+      "type": "sequential",
+      "steps": [
+        {
+          "id": "step_1",
+          "capability": "catalog-filter",
+          "operation": "Filter, rank, count, or aggregate earthquake records",
+          "required": true,
+          "depends_on": [],
+          "tool_selection": {
+            "mode": "dynamic",
+            "candidates": [
+              "DeepEarthQueryUSGSCatalog"
+            ],
+            "selection_criteria": [
+              "input_compatibility",
+              "tool_availability",
+              "geo_constraint_satisfaction",
+              "execution_feedback"
+            ]
+          }
+        }
+      ]
+    },
+    "outputs": [
+      {
+        "id": "result",
+        "semantic_type": "Scalar|Table",
+        "data_type": "validated geoscience result",
+        "description": "A numeric or structured result with provenance.",
+        "expected_format": "JSON"
+      }
+    ],
+    "tool_candidates": [
+      "DeepEarthQueryUSGSCatalog"
+    ],
+    "validation": {
+      "input_validation": [
+        {
+          "id": "input-present",
+          "type": "schema",
+          "rule": "required inputs are present"
+        }
+      ],
+      "intermediate_validation": [],
+      "output_validation": [
+        {
+          "id": "output-present",
+          "type": "schema",
+          "rule": "the selected tool returns a structured result",
+          "on_failure": {
+            "action": "replan"
+          }
+        }
+      ]
+    },
+    "failure_modes": [
+      {
+        "id": "missing-input",
+        "condition": "A required input or source locator is missing.",
+        "severity": "planning_required",
+        "recovery": "retrieve-missing-data"
+      },
+      {
+        "id": "constraint-mismatch",
+        "condition": "CRS, extent, resolution, time, format, variable, unit, or NoData constraints do not align.",
+        "severity": "recoverable",
+        "recovery": "local-constraint-repair"
+      }
+    ],
+    "recovery": {
+      "strategies": {
+        "local-constraint-repair": {
+          "capability": "local geospatial normalization",
+          "preferred_skills": [
+            "geo-crs-normalization",
+            "spatial-clip",
+            "raster-resampling"
+          ],
+          "retry_original_skill": true
+        },
+        "retrieve-missing-data": {
+          "capability": "data retrieval",
+          "retry_original_skill": true
+        }
+      }
+    },
+    "provenance": {
+      "record": [
+        "input_dataset",
+        "data_source",
+        "crs",
+        "spatial_extent",
+        "spatial_resolution",
+        "selected_tools",
+        "tool_parameters",
+        "execution_order",
+        "validation_results"
+      ]
+    },
+    "planning": {
+      "abstraction_level": "skill",
+      "composable": true,
+      "reusable": true,
+      "deterministic": false,
+      "estimated_complexity": "low",
+      "prerequisites": {
+        "skills": []
+      },
+      "compatible_skills": [
+        "deep-earth-model-query"
+      ],
+      "alternative_skills": [],
+      "downstream_capabilities": []
+    },
+    "evaluation": {
+      "success_conditions": [
+        "All required skill steps are grounded and validated."
+      ],
+      "metrics": [
+        {
+          "name": "execution_success",
+          "type": "boolean"
+        },
+        {
+          "name": "constraint_satisfaction",
+          "type": "ratio"
+        },
+        {
+          "name": "output_validity",
+          "type": "boolean"
+        }
+      ]
+    }
+  },
+  {
+    "schema_version": "geoskill-0.1",
+    "id": "earthquake-event-model-sampling",
+    "name": "earthquake-event-model-sampling",
+    "display_name": "Earthquake Event Model Sampling",
+    "version": "0.1.0",
+    "description": "Join a selected USGS event with nearest pinned Earth structure model samples.",
+    "domain": {
+      "primary": "natural-hazard",
+      "secondary": [
+        "event-retrieval",
+        "model-sampling"
+      ]
+    },
+    "task_types": [
+      "event-retrieval",
+      "model-sampling"
+    ],
+    "keywords": [
+      "event id",
+      "USGS event",
+      "LITHO1.0",
+      "SEMUCB",
+      "震源",
+      "事件采样"
+    ],
+    "goal": {
+      "capability": "earthquake-event-model-sampling",
+      "description": "Join a selected USGS event with nearest pinned Earth structure model samples.",
+      "target_state": [
+        "validated-earthquake-event-model-sampling-result"
+      ]
+    },
+    "inputs": [
+      {
+        "id": "query_or_resource",
+        "semantic_type": "Table|Parameter",
+        "data_type": "authoritative resource locator",
+        "required": true,
+        "description": "The benchmark locator or structured task parameters."
+      }
+    ],
+    "preconditions": {
+      "data": [
+        "The authoritative input resource or query parameters are available."
+      ],
+      "semantic": [
+        "The requested operation is represented by this capability."
+      ],
+      "environment": [
+        "GeoToolAgent runtime is available."
+      ],
+      "tool": [
+        "At least one compatible registered tool is available."
+      ]
+    },
+    "geo_constraints": {
+      "crs": {
+        "required": false,
+        "relation": [
+          "compatible",
+          "transformable"
+        ],
+        "accepted_crs": [],
+        "auto_fix": {
+          "enabled": true,
+          "preferred_skill": "geo-crs-normalization"
+        }
+      },
+      "spatial_extent": {
+        "required": false,
+        "relation": [
+          "overlap",
+          "within",
+          "contains"
+        ],
+        "auto_fix": {
+          "enabled": true,
+          "preferred_skill": "spatial-clip"
+        }
+      },
+      "spatial_resolution": {
+        "required": false,
+        "relation": [
+          "compatible",
+          "same"
+        ],
+        "target_resolution": null,
+        "unit": "meter",
+        "tolerance": null,
+        "auto_fix": {
+          "enabled": true,
+          "preferred_skill": "raster-resampling"
+        }
+      },
+      "temporal": {
+        "required": true,
+        "relation": [
+          "same-date",
+          "model-version-compatible"
+        ],
+        "tolerance": null,
+        "unit": "day"
+      },
+      "format": {
+        "required_formats": [],
+        "auto_conversion": true
+      },
+      "bands": {
+        "required": [],
+        "optional": []
+      },
+      "variables": {
+        "required": true,
+        "optional": [],
+        "required_variables": [
+          "event_id",
+          "depth"
+        ]
+      },
+      "units": {
+        "required": false,
+        "compatible_units": [],
+        "auto_conversion": true
+      },
+      "nodata": {
+        "allowed": true,
+        "handling": {
+          "strategy": "mask"
+        }
+      }
+    },
+    "workflow": {
+      "type": "sequential",
+      "steps": [
+        {
+          "id": "step_1",
+          "capability": "event-sampling",
+          "operation": "Retrieve an event and sample compatible model nodes",
+          "required": true,
+          "depends_on": [],
+          "tool_selection": {
+            "mode": "dynamic",
+            "candidates": [
+              "DeepEarthGetUSGSEvent",
+              "DeepEarthSampleEventModels"
+            ],
+            "selection_criteria": [
+              "input_compatibility",
+              "tool_availability",
+              "geo_constraint_satisfaction",
+              "execution_feedback"
+            ]
+          }
+        }
+      ]
+    },
+    "outputs": [
+      {
+        "id": "result",
+        "semantic_type": "Scalar|Table",
+        "data_type": "validated geoscience result",
+        "description": "A numeric or structured result with provenance.",
+        "expected_format": "JSON"
+      }
+    ],
+    "tool_candidates": [
+      "DeepEarthGetUSGSEvent",
+      "DeepEarthSampleEventModels"
+    ],
+    "validation": {
+      "input_validation": [
+        {
+          "id": "input-present",
+          "type": "schema",
+          "rule": "required inputs are present"
+        }
+      ],
+      "intermediate_validation": [],
+      "output_validation": [
+        {
+          "id": "output-present",
+          "type": "schema",
+          "rule": "the selected tool returns a structured result",
+          "on_failure": {
+            "action": "replan"
+          }
+        }
+      ]
+    },
+    "failure_modes": [
+      {
+        "id": "missing-input",
+        "condition": "A required input or source locator is missing.",
+        "severity": "planning_required",
+        "recovery": "retrieve-missing-data"
+      },
+      {
+        "id": "constraint-mismatch",
+        "condition": "CRS, extent, resolution, time, format, variable, unit, or NoData constraints do not align.",
+        "severity": "recoverable",
+        "recovery": "local-constraint-repair"
+      }
+    ],
+    "recovery": {
+      "strategies": {
+        "local-constraint-repair": {
+          "capability": "local geospatial normalization",
+          "preferred_skills": [
+            "geo-crs-normalization",
+            "spatial-clip",
+            "raster-resampling"
+          ],
+          "retry_original_skill": true
+        },
+        "retrieve-missing-data": {
+          "capability": "data retrieval",
+          "retry_original_skill": true
+        }
+      }
+    },
+    "provenance": {
+      "record": [
+        "input_dataset",
+        "data_source",
+        "crs",
+        "spatial_extent",
+        "spatial_resolution",
+        "selected_tools",
+        "tool_parameters",
+        "execution_order",
+        "validation_results"
+      ]
+    },
+    "planning": {
+      "abstraction_level": "skill",
+      "composable": true,
+      "reusable": true,
+      "deterministic": false,
+      "estimated_complexity": "low",
+      "prerequisites": {
+        "skills": []
+      },
+      "compatible_skills": [
+        "earthquake-catalog-analysis",
+        "deep-earth-model-query"
+      ],
+      "alternative_skills": [],
+      "downstream_capabilities": []
+    },
+    "evaluation": {
+      "success_conditions": [
+        "All required skill steps are grounded and validated."
+      ],
+      "metrics": [
+        {
+          "name": "execution_success",
+          "type": "boolean"
+        },
+        {
+          "name": "constraint_satisfaction",
+          "type": "ratio"
+        },
+        {
+          "name": "output_validity",
+          "type": "boolean"
+        }
+      ]
+    }
+  },
+  {
+    "schema_version": "geoskill-0.1",
+    "id": "semantic-geospatial-query",
+    "name": "semantic-geospatial-query",
+    "display_name": "Semantic Geospatial Query",
+    "version": "0.1.0",
+    "description": "Retrieve pinned GeoQuestions/YAGO2geo materialized results by source_id or historical SPARQL structure; offline snapshot replay.",
+    "domain": {
+      "primary": "geo-big-data",
+      "secondary": [
+        "geosparql",
+        "semantic-retrieval"
+      ]
+    },
+    "task_types": [
+      "geosparql",
+      "semantic-retrieval"
+    ],
+    "keywords": [
+      "GeoSPARQL",
+      "YAGO2geo",
+      "lake",
+      "forest",
+      "river",
+      "park",
+      "地理语义",
+      "空间查询",
+      "locality",
+      "localities",
+      "county",
+      "counties",
+      "municipality",
+      "municipalities",
+      "beach",
+      "beaches"
+    ],
+    "goal": {
+      "capability": "semantic-geospatial-query",
+      "description": "Retrieve pinned GeoQuestions/YAGO2geo materialized results by source_id or historical SPARQL structure; offline snapshot replay.",
+      "target_state": [
+        "validated-semantic-geospatial-query-result"
+      ]
+    },
+    "inputs": [
+      {
+        "id": "query_or_resource",
+        "semantic_type": "Table|Parameter",
+        "data_type": "authoritative resource locator",
+        "required": true,
+        "description": "The benchmark locator or structured task parameters."
+      }
+    ],
+    "preconditions": {
+      "data": [
+        "The authoritative input resource or query parameters are available."
+      ],
+      "semantic": [
+        "The requested operation is represented by this capability."
+      ],
+      "environment": [
+        "GeoToolAgent runtime is available."
+      ],
+      "tool": [
+        "At least one compatible registered tool is available."
+      ]
+    },
+    "geo_constraints": {
+      "crs": {
+        "required": false,
+        "relation": [
+          "compatible",
+          "transformable"
+        ],
+        "accepted_crs": [],
+        "auto_fix": {
+          "enabled": true,
+          "preferred_skill": "geo-crs-normalization"
+        }
+      },
+      "spatial_extent": {
+        "required": false,
+        "relation": [
+          "contains",
+          "overlap"
+        ],
+        "auto_fix": {
+          "enabled": true,
+          "preferred_skill": "spatial-clip"
+        }
+      },
+      "spatial_resolution": {
+        "required": false,
+        "relation": [
+          "compatible",
+          "same"
+        ],
+        "target_resolution": null,
+        "unit": "meter",
+        "tolerance": null,
+        "auto_fix": {
+          "enabled": true,
+          "preferred_skill": "raster-resampling"
+        }
+      },
+      "temporal": {
+        "required": false,
+        "relation": [
+          "overlap",
+          "same-date",
+          "within-window",
+          "nearest"
+        ],
+        "tolerance": null,
+        "unit": "day"
+      },
+      "format": {
+        "required_formats": [
+          "SPARQL",
+          "JSON"
+        ],
+        "auto_conversion": false
+      },
+      "bands": {
+        "required": [],
+        "optional": []
+      },
+      "variables": {
+        "required": [],
+        "optional": []
+      },
+      "units": {
+        "required": false,
+        "compatible_units": [],
+        "auto_conversion": true
+      },
+      "nodata": {
+        "allowed": true,
+        "handling": {
+          "strategy": "mask"
+        }
+      }
+    },
+    "workflow": {
+      "type": "sequential",
+      "steps": [
+        {
+          "id": "step_1",
+          "capability": "semantic-query",
+          "operation": "Resolve the requested entities and execute the semantic spatial query",
+          "required": true,
+          "depends_on": [],
+          "tool_selection": {
+            "mode": "dynamic",
+            "candidates": [
+              "GeoBigDataExecuteGeoSPARQL"
+            ],
+            "selection_criteria": [
+              "input_compatibility",
+              "tool_availability",
+              "geo_constraint_satisfaction",
+              "execution_feedback"
+            ]
+          }
+        }
+      ]
+    },
+    "outputs": [
+      {
+        "id": "result",
+        "semantic_type": "Scalar|Table",
+        "data_type": "validated geoscience result",
+        "description": "A numeric or structured result with provenance.",
+        "expected_format": "JSON"
+      }
+    ],
+    "tool_candidates": [
+      "GeoBigDataExecuteGeoSPARQL"
+    ],
+    "validation": {
+      "input_validation": [
+        {
+          "id": "input-present",
+          "type": "schema",
+          "rule": "required inputs are present"
+        }
+      ],
+      "intermediate_validation": [],
+      "output_validation": [
+        {
+          "id": "output-present",
+          "type": "schema",
+          "rule": "the selected tool returns a structured result",
+          "on_failure": {
+            "action": "replan"
+          }
+        }
+      ]
+    },
+    "failure_modes": [
+      {
+        "id": "missing-input",
+        "condition": "A required input or source locator is missing.",
+        "severity": "planning_required",
+        "recovery": "retrieve-missing-data"
+      },
+      {
+        "id": "constraint-mismatch",
+        "condition": "CRS, extent, resolution, time, format, variable, unit, or NoData constraints do not align.",
+        "severity": "recoverable",
+        "recovery": "local-constraint-repair"
+      }
+    ],
+    "recovery": {
+      "strategies": {
+        "local-constraint-repair": {
+          "capability": "local geospatial normalization",
+          "preferred_skills": [
+            "geo-crs-normalization",
+            "spatial-clip",
+            "raster-resampling"
+          ],
+          "retry_original_skill": true
+        },
+        "retrieve-missing-data": {
+          "capability": "data retrieval",
+          "retry_original_skill": true
+        }
+      }
+    },
+    "provenance": {
+      "record": [
+        "input_dataset",
+        "data_source",
+        "crs",
+        "spatial_extent",
+        "spatial_resolution",
+        "selected_tools",
+        "tool_parameters",
+        "execution_order",
+        "validation_results"
+      ]
+    },
+    "planning": {
+      "abstraction_level": "skill",
+      "composable": true,
+      "reusable": true,
+      "deterministic": false,
+      "estimated_complexity": "low",
+      "prerequisites": {
+        "skills": []
+      },
+      "compatible_skills": [
+        "spatial-clip"
+      ],
+      "alternative_skills": [],
+      "downstream_capabilities": []
+    },
+    "evaluation": {
+      "success_conditions": [
+        "All required skill steps are grounded and validated."
+      ],
+      "metrics": [
+        {
+          "name": "execution_success",
+          "type": "boolean"
+        },
+        {
+          "name": "constraint_satisfaction",
+          "type": "ratio"
+        },
+        {
+          "name": "output_validity",
+          "type": "boolean"
+        }
+      ]
+    }
+  },
+  {
+    "schema_version": "geoskill-0.1",
+    "id": "mineral-deposit-search",
+    "name": "mineral-deposit-search",
+    "display_name": "Mineral Deposit Search",
+    "version": "0.1.0",
+    "description": "Search and retrieve mineral deposit records by commodity, country, identifier, and location.",
+    "domain": {
+      "primary": "mineral-resources",
+      "secondary": [
+        "deposit-search",
+        "deposit-retrieval"
+      ]
+    },
+    "task_types": [
+      "deposit-search",
+      "deposit-retrieval"
+    ],
+    "keywords": [
+      "MRDS",
+      "deposit",
+      "commodity",
+      "mineral",
+      "critical mineral",
+      "矿产",
+      "矿床"
+    ],
+    "goal": {
+      "capability": "mineral-deposit-search",
+      "description": "Search and retrieve mineral deposit records by commodity, country, identifier, and location.",
+      "target_state": [
+        "validated-mineral-deposit-search-result"
+      ]
+    },
+    "inputs": [
+      {
+        "id": "query_or_resource",
+        "semantic_type": "Table|Parameter",
+        "data_type": "authoritative resource locator",
+        "required": true,
+        "description": "The benchmark locator or structured task parameters."
+      }
+    ],
+    "preconditions": {
+      "data": [
+        "The authoritative input resource or query parameters are available."
+      ],
+      "semantic": [
+        "The requested operation is represented by this capability."
+      ],
+      "environment": [
+        "GeoToolAgent runtime is available."
+      ],
+      "tool": [
+        "At least one compatible registered tool is available."
+      ]
+    },
+    "geo_constraints": {
+      "crs": {
+        "required": false,
+        "relation": [
+          "compatible",
+          "transformable"
+        ],
+        "accepted_crs": [],
+        "auto_fix": {
+          "enabled": true,
+          "preferred_skill": "geo-crs-normalization"
+        }
+      },
+      "spatial_extent": {
+        "required": false,
+        "relation": [
+          "within",
+          "contains"
+        ],
+        "auto_fix": {
+          "enabled": true,
+          "preferred_skill": "spatial-clip"
+        }
+      },
+      "spatial_resolution": {
+        "required": false,
+        "relation": [
+          "compatible",
+          "same"
+        ],
+        "target_resolution": null,
+        "unit": "meter",
+        "tolerance": null,
+        "auto_fix": {
+          "enabled": true,
+          "preferred_skill": "raster-resampling"
+        }
+      },
+      "temporal": {
+        "required": false,
+        "relation": [
+          "overlap",
+          "same-date",
+          "within-window",
+          "nearest"
+        ],
+        "tolerance": null,
+        "unit": "day"
+      },
+      "format": {
+        "required_formats": [],
+        "auto_conversion": true
+      },
+      "bands": {
+        "required": [],
+        "optional": []
+      },
+      "variables": {
+        "required": true,
+        "optional": [],
+        "required_variables": [
+          "commodity",
+          "country",
+          "dep_id"
+        ]
+      },
+      "units": {
+        "required": false,
+        "compatible_units": [],
+        "auto_conversion": true
+      },
+      "nodata": {
+        "allowed": true,
+        "handling": {
+          "strategy": "mask"
+        }
+      }
+    },
+    "workflow": {
+      "type": "sequential",
+      "steps": [
+        {
+          "id": "step_1",
+          "capability": "deposit-query",
+          "operation": "Search candidate deposits and retrieve selected records",
+          "required": true,
+          "depends_on": [],
+          "tool_selection": {
+            "mode": "dynamic",
+            "candidates": [
+              "MineralResourcesSearchDeposits",
+              "MineralResourcesGetDeposit"
+            ],
+            "selection_criteria": [
+              "input_compatibility",
+              "tool_availability",
+              "geo_constraint_satisfaction",
+              "execution_feedback"
+            ]
+          }
+        }
+      ]
+    },
+    "outputs": [
+      {
+        "id": "result",
+        "semantic_type": "Scalar|Table",
+        "data_type": "validated geoscience result",
+        "description": "A numeric or structured result with provenance.",
+        "expected_format": "JSON"
+      }
+    ],
+    "tool_candidates": [
+      "MineralResourcesSearchDeposits",
+      "MineralResourcesGetDeposit"
+    ],
+    "validation": {
+      "input_validation": [
+        {
+          "id": "input-present",
+          "type": "schema",
+          "rule": "required inputs are present"
+        }
+      ],
+      "intermediate_validation": [],
+      "output_validation": [
+        {
+          "id": "output-present",
+          "type": "schema",
+          "rule": "the selected tool returns a structured result",
+          "on_failure": {
+            "action": "replan"
+          }
+        }
+      ]
+    },
+    "failure_modes": [
+      {
+        "id": "missing-input",
+        "condition": "A required input or source locator is missing.",
+        "severity": "planning_required",
+        "recovery": "retrieve-missing-data"
+      },
+      {
+        "id": "constraint-mismatch",
+        "condition": "CRS, extent, resolution, time, format, variable, unit, or NoData constraints do not align.",
+        "severity": "recoverable",
+        "recovery": "local-constraint-repair"
+      }
+    ],
+    "recovery": {
+      "strategies": {
+        "local-constraint-repair": {
+          "capability": "local geospatial normalization",
+          "preferred_skills": [
+            "geo-crs-normalization",
+            "spatial-clip",
+            "raster-resampling"
+          ],
+          "retry_original_skill": true
+        },
+        "retrieve-missing-data": {
+          "capability": "data retrieval",
+          "retry_original_skill": true
+        }
+      }
+    },
+    "provenance": {
+      "record": [
+        "input_dataset",
+        "data_source",
+        "crs",
+        "spatial_extent",
+        "spatial_resolution",
+        "selected_tools",
+        "tool_parameters",
+        "execution_order",
+        "validation_results"
+      ]
+    },
+    "planning": {
+      "abstraction_level": "skill",
+      "composable": true,
+      "reusable": true,
+      "deterministic": false,
+      "estimated_complexity": "low",
+      "prerequisites": {
+        "skills": []
+      },
+      "compatible_skills": [
+        "mineral-resource-ranking",
+        "energy-spatial-analysis"
+      ],
+      "alternative_skills": [],
+      "downstream_capabilities": []
+    },
+    "evaluation": {
+      "success_conditions": [
+        "All required skill steps are grounded and validated."
+      ],
+      "metrics": [
+        {
+          "name": "execution_success",
+          "type": "boolean"
+        },
+        {
+          "name": "constraint_satisfaction",
+          "type": "ratio"
+        },
+        {
+          "name": "output_validity",
+          "type": "boolean"
+        }
+      ]
+    }
+  },
+  {
+    "schema_version": "geoskill-0.1",
+    "id": "mineral-resource-ranking",
+    "name": "mineral-resource-ranking",
+    "display_name": "Mineral Resource Ranking",
+    "version": "0.1.0",
+    "description": "Aggregate, rank, and compare mineral resources across countries and transition scenarios.",
+    "domain": {
+      "primary": "mineral-resources",
+      "secondary": [
+        "resource-summary",
+        "country-ranking"
+      ]
+    },
+    "task_types": [
+      "resource-summary",
+      "country-ranking"
+    ],
+    "keywords": [
+      "top countries",
+      "deposit records",
+      "lithium",
+      "copper",
+      "mineral ranking",
+      "关键矿产",
+      "资源排名"
+    ],
+    "goal": {
+      "capability": "mineral-resource-ranking",
+      "description": "Aggregate, rank, and compare mineral resources across countries and transition scenarios.",
+      "target_state": [
+        "validated-mineral-resource-ranking-result"
+      ]
+    },
+    "inputs": [
+      {
+        "id": "query_or_resource",
+        "semantic_type": "Table|Parameter",
+        "data_type": "authoritative resource locator",
+        "required": true,
+        "description": "The benchmark locator or structured task parameters."
+      }
+    ],
+    "preconditions": {
+      "data": [
+        "The authoritative input resource or query parameters are available."
+      ],
+      "semantic": [
+        "The requested operation is represented by this capability."
+      ],
+      "environment": [
+        "GeoToolAgent runtime is available."
+      ],
+      "tool": [
+        "At least one compatible registered tool is available."
+      ]
+    },
+    "geo_constraints": {
+      "crs": {
+        "required": false,
+        "relation": [
+          "compatible",
+          "transformable"
+        ],
+        "accepted_crs": [],
+        "auto_fix": {
+          "enabled": true,
+          "preferred_skill": "geo-crs-normalization"
+        }
+      },
+      "spatial_extent": {
+        "required": false,
+        "relation": [
+          "overlap",
+          "within",
+          "contains"
+        ],
+        "auto_fix": {
+          "enabled": true,
+          "preferred_skill": "spatial-clip"
+        }
+      },
+      "spatial_resolution": {
+        "required": false,
+        "relation": [
+          "compatible",
+          "same"
+        ],
+        "target_resolution": null,
+        "unit": "meter",
+        "tolerance": null,
+        "auto_fix": {
+          "enabled": true,
+          "preferred_skill": "raster-resampling"
+        }
+      },
+      "temporal": {
+        "required": false,
+        "relation": [
+          "overlap",
+          "same-date",
+          "within-window",
+          "nearest"
+        ],
+        "tolerance": null,
+        "unit": "day"
+      },
+      "format": {
+        "required_formats": [],
+        "auto_conversion": true
+      },
+      "bands": {
+        "required": [],
+        "optional": []
+      },
+      "variables": {
+        "required": true,
+        "optional": [],
+        "required_variables": [
+          "commodity",
+          "country",
+          "record count"
+        ]
+      },
+      "units": {
+        "required": false,
+        "compatible_units": [],
+        "auto_conversion": true
+      },
+      "nodata": {
+        "allowed": true,
+        "handling": {
+          "strategy": "mask"
+        }
+      }
+    },
+    "workflow": {
+      "type": "sequential",
+      "steps": [
+        {
+          "id": "step_1",
+          "capability": "resource-ranking",
+          "operation": "Summarize and rank country-level mineral records",
+          "required": true,
+          "depends_on": [],
+          "tool_selection": {
+            "mode": "dynamic",
+            "candidates": [
+              "MineralResourcesCountrySummary",
+              "MineralResourcesRankCommodityCountries"
+            ],
+            "selection_criteria": [
+              "input_compatibility",
+              "tool_availability",
+              "geo_constraint_satisfaction",
+              "execution_feedback"
+            ]
+          }
+        }
+      ]
+    },
+    "outputs": [
+      {
+        "id": "result",
+        "semantic_type": "Scalar|Table",
+        "data_type": "validated geoscience result",
+        "description": "A numeric or structured result with provenance.",
+        "expected_format": "JSON"
+      }
+    ],
+    "tool_candidates": [
+      "MineralResourcesCountrySummary",
+      "MineralResourcesRankCommodityCountries"
+    ],
+    "validation": {
+      "input_validation": [
+        {
+          "id": "input-present",
+          "type": "schema",
+          "rule": "required inputs are present"
+        }
+      ],
+      "intermediate_validation": [],
+      "output_validation": [
+        {
+          "id": "output-present",
+          "type": "schema",
+          "rule": "the selected tool returns a structured result",
+          "on_failure": {
+            "action": "replan"
+          }
+        }
+      ]
+    },
+    "failure_modes": [
+      {
+        "id": "missing-input",
+        "condition": "A required input or source locator is missing.",
+        "severity": "planning_required",
+        "recovery": "retrieve-missing-data"
+      },
+      {
+        "id": "constraint-mismatch",
+        "condition": "CRS, extent, resolution, time, format, variable, unit, or NoData constraints do not align.",
+        "severity": "recoverable",
+        "recovery": "local-constraint-repair"
+      }
+    ],
+    "recovery": {
+      "strategies": {
+        "local-constraint-repair": {
+          "capability": "local geospatial normalization",
+          "preferred_skills": [
+            "geo-crs-normalization",
+            "spatial-clip",
+            "raster-resampling"
+          ],
+          "retry_original_skill": true
+        },
+        "retrieve-missing-data": {
+          "capability": "data retrieval",
+          "retry_original_skill": true
+        }
+      }
+    },
+    "provenance": {
+      "record": [
+        "input_dataset",
+        "data_source",
+        "crs",
+        "spatial_extent",
+        "spatial_resolution",
+        "selected_tools",
+        "tool_parameters",
+        "execution_order",
+        "validation_results"
+      ]
+    },
+    "planning": {
+      "abstraction_level": "skill",
+      "composable": true,
+      "reusable": true,
+      "deterministic": false,
+      "estimated_complexity": "low",
+      "prerequisites": {
+        "skills": []
+      },
+      "compatible_skills": [
+        "mineral-deposit-search",
+        "climate-scenario-analysis"
+      ],
+      "alternative_skills": [],
+      "downstream_capabilities": []
+    },
+    "evaluation": {
+      "success_conditions": [
+        "All required skill steps are grounded and validated."
+      ],
+      "metrics": [
+        {
+          "name": "execution_success",
+          "type": "boolean"
+        },
+        {
+          "name": "constraint_satisfaction",
+          "type": "ratio"
+        },
+        {
+          "name": "output_validity",
+          "type": "boolean"
+        }
+      ]
+    }
+  },
+  {
+    "schema_version": "geoskill-0.1",
+    "id": "climate-scenario-analysis",
+    "name": "climate-scenario-analysis",
+    "display_name": "Climate Timescale and Scenario Analysis",
+    "version": "0.1.0",
+    "description": "Compare deep-time, present-day, and future scenario climate indicators with explicit temporal semantics.",
+    "domain": {
+      "primary": "climate",
+      "secondary": [
+        "paleoclimate-query",
+        "present-climate-query"
+      ]
+    },
+    "task_types": [
+      "paleoclimate-query",
+      "present-climate-query",
+      "scenario-query",
+      "epoch-comparison"
+    ],
+    "keywords": [
+      "climate",
+      "temperature anomaly",
+      "SSP",
+      "IPCC",
+      "GISTEMP",
+      "deep time",
+      "气候",
+      "温度异常",
+      "情景"
+    ],
+    "goal": {
+      "capability": "climate-scenario-analysis",
+      "description": "Compare deep-time, present-day, and future scenario climate indicators with explicit temporal semantics.",
+      "target_state": [
+        "validated-climate-scenario-analysis-result"
+      ]
+    },
+    "inputs": [
+      {
+        "id": "query_or_resource",
+        "semantic_type": "Table|Parameter",
+        "data_type": "authoritative resource locator",
+        "required": true,
+        "description": "The benchmark locator or structured task parameters."
+      }
+    ],
+    "preconditions": {
+      "data": [
+        "The authoritative input resource or query parameters are available."
+      ],
+      "semantic": [
+        "The requested operation is represented by this capability."
+      ],
+      "environment": [
+        "GeoToolAgent runtime is available."
+      ],
+      "tool": [
+        "At least one compatible registered tool is available."
+      ]
+    },
+    "geo_constraints": {
+      "crs": {
+        "required": false,
+        "relation": [
+          "compatible",
+          "transformable"
+        ],
+        "accepted_crs": [],
+        "auto_fix": {
+          "enabled": true,
+          "preferred_skill": "geo-crs-normalization"
+        }
+      },
+      "spatial_extent": {
+        "required": false,
+        "relation": [
+          "overlap",
+          "within",
+          "contains"
+        ],
+        "auto_fix": {
+          "enabled": true,
+          "preferred_skill": "spatial-clip"
+        }
+      },
+      "spatial_resolution": {
+        "required": false,
+        "relation": [
+          "compatible",
+          "same"
+        ],
+        "target_resolution": null,
+        "unit": "meter",
+        "tolerance": null,
+        "auto_fix": {
+          "enabled": true,
+          "preferred_skill": "raster-resampling"
+        }
+      },
+      "temporal": {
+        "required": true,
+        "relation": [
+          "same-date",
+          "within-window",
+          "nearest",
+          "model-version-compatible"
+        ],
+        "tolerance": null,
+        "unit": "day"
+      },
+      "format": {
+        "required_formats": [],
+        "auto_conversion": true
+      },
+      "bands": {
+        "required": [],
+        "optional": []
+      },
+      "variables": {
+        "required": true,
+        "optional": [],
+        "required_variables": [
+          "temperature",
+          "sea level",
+          "scenario"
+        ]
+      },
+      "units": {
+        "required": true,
+        "compatible_units": [
+          "°C",
+          "kyr BP",
+          "year"
+        ],
+        "auto_conversion": true
+      },
+      "nodata": {
+        "allowed": true,
+        "handling": {
+          "strategy": "mask"
+        }
+      }
+    },
+    "workflow": {
+      "type": "sequential",
+      "steps": [
+        {
+          "id": "step_1",
+          "capability": "climate-query",
+          "operation": "Retrieve climate values for requested epochs, periods, or scenarios",
+          "required": true,
+          "depends_on": [],
+          "tool_selection": {
+            "mode": "dynamic",
+            "candidates": [
+              "ClimateQueryDeepTime",
+              "ClimateQueryPresentMean",
+              "ClimateQueryFutureSSP",
+              "ClimateCompareEpochs"
+            ],
+            "selection_criteria": [
+              "input_compatibility",
+              "tool_availability",
+              "geo_constraint_satisfaction",
+              "execution_feedback"
+            ]
+          }
+        },
+        {
+          "id": "step_2",
+          "capability": "comparison",
+          "operation": "Compare compatible climate outputs across time",
+          "required": true,
+          "depends_on": [
+            "step_1"
+          ],
+          "tool_selection": {
+            "mode": "dynamic",
+            "candidates": [
+              "ClimateQueryDeepTime",
+              "ClimateQueryPresentMean",
+              "ClimateQueryFutureSSP",
+              "ClimateCompareEpochs"
+            ],
+            "selection_criteria": [
+              "input_compatibility",
+              "tool_availability",
+              "geo_constraint_satisfaction",
+              "execution_feedback"
+            ]
+          }
+        }
+      ]
+    },
+    "outputs": [
+      {
+        "id": "result",
+        "semantic_type": "Scalar|Table",
+        "data_type": "validated geoscience result",
+        "description": "A numeric or structured result with provenance.",
+        "expected_format": "JSON"
+      }
+    ],
+    "tool_candidates": [
+      "ClimateQueryDeepTime",
+      "ClimateQueryPresentMean",
+      "ClimateQueryFutureSSP",
+      "ClimateCompareEpochs"
+    ],
+    "validation": {
+      "input_validation": [
+        {
+          "id": "input-present",
+          "type": "schema",
+          "rule": "required inputs are present"
+        }
+      ],
+      "intermediate_validation": [],
+      "output_validation": [
+        {
+          "id": "output-present",
+          "type": "schema",
+          "rule": "the selected tool returns a structured result",
+          "on_failure": {
+            "action": "replan"
+          }
+        }
+      ]
+    },
+    "failure_modes": [
+      {
+        "id": "missing-input",
+        "condition": "A required input or source locator is missing.",
+        "severity": "planning_required",
+        "recovery": "retrieve-missing-data"
+      },
+      {
+        "id": "constraint-mismatch",
+        "condition": "CRS, extent, resolution, time, format, variable, unit, or NoData constraints do not align.",
+        "severity": "recoverable",
+        "recovery": "local-constraint-repair"
+      }
+    ],
+    "recovery": {
+      "strategies": {
+        "local-constraint-repair": {
+          "capability": "local geospatial normalization",
+          "preferred_skills": [
+            "geo-crs-normalization",
+            "spatial-clip",
+            "raster-resampling"
+          ],
+          "retry_original_skill": true
+        },
+        "retrieve-missing-data": {
+          "capability": "data retrieval",
+          "retry_original_skill": true
+        }
+      }
+    },
+    "provenance": {
+      "record": [
+        "input_dataset",
+        "data_source",
+        "crs",
+        "spatial_extent",
+        "spatial_resolution",
+        "selected_tools",
+        "tool_parameters",
+        "execution_order",
+        "validation_results"
+      ]
+    },
+    "planning": {
+      "abstraction_level": "skill",
+      "composable": true,
+      "reusable": true,
+      "deterministic": false,
+      "estimated_complexity": "low",
+      "prerequisites": {
+        "skills": []
+      },
+      "compatible_skills": [
+        "mineral-resource-ranking"
+      ],
+      "alternative_skills": [],
+      "downstream_capabilities": []
+    },
+    "evaluation": {
+      "success_conditions": [
+        "All required skill steps are grounded and validated."
+      ],
+      "metrics": [
+        {
+          "name": "execution_success",
+          "type": "boolean"
+        },
+        {
+          "name": "constraint_satisfaction",
+          "type": "ratio"
+        },
+        {
+          "name": "output_validity",
+          "type": "boolean"
+        }
+      ]
+    }
+  },
+  {
+    "schema_version": "geoskill-0.1",
+    "id": "energy-spatial-analysis",
+    "name": "energy-spatial-analysis",
+    "display_name": "Energy and Mineral Spatial Analysis",
+    "version": "0.1.0",
+    "description": "Measure distances, nearest facilities, bounding-box areas, and overlays among energy and mineral assets.",
+    "domain": {
+      "primary": "energy",
+      "secondary": [
+        "facility-distance",
+        "nearest-facility"
+      ]
+    },
+    "task_types": [
+      "facility-distance",
+      "nearest-facility",
+      "spatial-overlay"
+    ],
+    "keywords": [
+      "energy facility",
+      "power plant",
+      "renewable",
+      "nearest",
+      "distance",
+      "bounding box",
+      "能源设施",
+      "距离"
+    ],
+    "goal": {
+      "capability": "energy-spatial-analysis",
+      "description": "Measure distances, nearest facilities, bounding-box areas, and overlays among energy and mineral assets.",
+      "target_state": [
+        "validated-energy-spatial-analysis-result"
+      ]
+    },
+    "inputs": [
+      {
+        "id": "spatial_inputs",
+        "semantic_type": "Vector|Raster|Parameter",
+        "data_type": "geospatial assets or coordinates",
+        "required": true,
+        "description": "Spatial data, ROI, coordinates, or a resource locator."
+      }
+    ],
+    "preconditions": {
+      "data": [
+        "The authoritative input resource or query parameters are available."
+      ],
+      "semantic": [
+        "The requested operation is represented by this capability."
+      ],
+      "environment": [
+        "GeoToolAgent runtime is available."
+      ],
+      "tool": [
+        "At least one compatible registered tool is available."
+      ]
+    },
+    "geo_constraints": {
+      "crs": {
+        "required": false,
+        "relation": [
+          "compatible",
+          "transformable"
+        ],
+        "accepted_crs": [],
+        "auto_fix": {
+          "enabled": true,
+          "preferred_skill": "geo-crs-normalization"
+        }
+      },
+      "spatial_extent": {
+        "required": true,
+        "relation": [
+          "overlap",
+          "within"
+        ],
+        "auto_fix": {
+          "enabled": true,
+          "preferred_skill": "spatial-clip"
+        }
+      },
+      "spatial_resolution": {
+        "required": false,
+        "relation": [
+          "compatible",
+          "same"
+        ],
+        "target_resolution": null,
+        "unit": "meter",
+        "tolerance": null,
+        "auto_fix": {
+          "enabled": true,
+          "preferred_skill": "raster-resampling"
+        }
+      },
+      "temporal": {
+        "required": false,
+        "relation": [
+          "overlap",
+          "same-date",
+          "within-window",
+          "nearest"
+        ],
+        "tolerance": null,
+        "unit": "day"
+      },
+      "format": {
+        "required_formats": [],
+        "auto_conversion": true
+      },
+      "bands": {
+        "required": [],
+        "optional": []
+      },
+      "variables": {
+        "required": true,
+        "optional": [],
+        "required_variables": [
+          "facility coordinates",
+          "site identifiers"
+        ]
+      },
+      "units": {
+        "required": false,
+        "compatible_units": [
+          "km",
+          "km2"
+        ],
+        "auto_conversion": true
+      },
+      "nodata": {
+        "allowed": true,
+        "handling": {
+          "strategy": "mask"
+        }
+      }
+    },
+    "workflow": {
+      "type": "sequential",
+      "steps": [
+        {
+          "id": "step_1",
+          "capability": "spatial-analysis",
+          "operation": "Standardize spatial records and compute proximity, extent, or overlay metrics",
+          "required": true,
+          "depends_on": [],
+          "tool_selection": {
+            "mode": "dynamic",
+            "candidates": [
+              "EnergyFacilityDistance",
+              "EnergyMineralSiteDistance",
+              "EnergyBBoxArea",
+              "EnergyNearestFacility",
+              "EnergyNearestMineralSite",
+              "EnergyRegionalOverlaySummary"
+            ],
+            "selection_criteria": [
+              "input_compatibility",
+              "tool_availability",
+              "geo_constraint_satisfaction",
+              "execution_feedback"
+            ]
+          }
+        }
+      ]
+    },
+    "outputs": [
+      {
+        "id": "artifact",
+        "semantic_type": "Raster|Vector|Table",
+        "data_type": "validated spatial artifact or summary",
+        "description": "Spatial output, summary, or rendered artifact.",
+        "expected_format": "JSON or registered artifact"
+      }
+    ],
+    "tool_candidates": [
+      "EnergyFacilityDistance",
+      "EnergyMineralSiteDistance",
+      "EnergyBBoxArea",
+      "EnergyNearestFacility",
+      "EnergyNearestMineralSite",
+      "EnergyRegionalOverlaySummary"
+    ],
+    "validation": {
+      "input_validation": [
+        {
+          "id": "input-present",
+          "type": "schema",
+          "rule": "required inputs are present"
+        }
+      ],
+      "intermediate_validation": [],
+      "output_validation": [
+        {
+          "id": "output-present",
+          "type": "schema",
+          "rule": "the selected tool returns a structured result",
+          "on_failure": {
+            "action": "replan"
+          }
+        }
+      ]
+    },
+    "failure_modes": [
+      {
+        "id": "missing-input",
+        "condition": "A required input or source locator is missing.",
+        "severity": "planning_required",
+        "recovery": "retrieve-missing-data"
+      },
+      {
+        "id": "constraint-mismatch",
+        "condition": "CRS, extent, resolution, time, format, variable, unit, or NoData constraints do not align.",
+        "severity": "recoverable",
+        "recovery": "local-constraint-repair"
+      }
+    ],
+    "recovery": {
+      "strategies": {
+        "local-constraint-repair": {
+          "capability": "local geospatial normalization",
+          "preferred_skills": [
+            "geo-crs-normalization",
+            "spatial-clip",
+            "raster-resampling"
+          ],
+          "retry_original_skill": true
+        },
+        "retrieve-missing-data": {
+          "capability": "data retrieval",
+          "retry_original_skill": true
+        }
+      }
+    },
+    "provenance": {
+      "record": [
+        "input_dataset",
+        "data_source",
+        "crs",
+        "spatial_extent",
+        "spatial_resolution",
+        "selected_tools",
+        "tool_parameters",
+        "execution_order",
+        "validation_results"
+      ]
+    },
+    "planning": {
+      "abstraction_level": "skill",
+      "composable": true,
+      "reusable": true,
+      "deterministic": false,
+      "estimated_complexity": "medium",
+      "prerequisites": {
+        "skills": []
+      },
+      "compatible_skills": [
+        "mineral-deposit-search",
+        "geo-crs-normalization"
+      ],
+      "alternative_skills": [],
+      "downstream_capabilities": []
+    },
+    "evaluation": {
+      "success_conditions": [
+        "All required skill steps are grounded and validated."
+      ],
+      "metrics": [
+        {
+          "name": "execution_success",
+          "type": "boolean"
+        },
+        {
+          "name": "constraint_satisfaction",
+          "type": "ratio"
+        },
+        {
+          "name": "output_validity",
+          "type": "boolean"
+        }
+      ]
+    }
+  },
+  {
+    "schema_version": "geoskill-0.1",
+    "id": "energy-capacity-transition",
+    "name": "energy-capacity-transition",
+    "display_name": "Energy Capacity and Transition Analysis",
+    "version": "0.1.0",
+    "description": "Clean, align, aggregate, and compare renewable capacity, population, and transition indicators.",
+    "domain": {
+      "primary": "energy",
+      "secondary": [
+        "capacity-series",
+        "renewable-summary"
+      ]
+    },
+    "task_types": [
+      "capacity-series",
+      "renewable-summary",
+      "transition-metrics"
+    ],
+    "keywords": [
+      "installed capacity",
+      "capacity growth",
+      "renewable consumption",
+      "population",
+      "energy transition",
+      "装机容量",
+      "能源转型"
+    ],
+    "goal": {
+      "capability": "energy-capacity-transition",
+      "description": "Clean, align, aggregate, and compare renewable capacity, population, and transition indicators.",
+      "target_state": [
+        "validated-energy-capacity-transition-result"
+      ]
+    },
+    "inputs": [
+      {
+        "id": "query_or_resource",
+        "semantic_type": "Table|Parameter",
+        "data_type": "authoritative resource locator",
+        "required": true,
+        "description": "The benchmark locator or structured task parameters."
+      }
+    ],
+    "preconditions": {
+      "data": [
+        "The authoritative input resource or query parameters are available."
+      ],
+      "semantic": [
+        "The requested operation is represented by this capability."
+      ],
+      "environment": [
+        "GeoToolAgent runtime is available."
+      ],
+      "tool": [
+        "At least one compatible registered tool is available."
+      ]
+    },
+    "geo_constraints": {
+      "crs": {
+        "required": false,
+        "relation": [
+          "compatible",
+          "transformable"
+        ],
+        "accepted_crs": [],
+        "auto_fix": {
+          "enabled": true,
+          "preferred_skill": "geo-crs-normalization"
+        }
+      },
+      "spatial_extent": {
+        "required": false,
+        "relation": [
+          "overlap",
+          "within",
+          "contains"
+        ],
+        "auto_fix": {
+          "enabled": true,
+          "preferred_skill": "spatial-clip"
+        }
+      },
+      "spatial_resolution": {
+        "required": false,
+        "relation": [
+          "compatible",
+          "same"
+        ],
+        "target_resolution": null,
+        "unit": "meter",
+        "tolerance": null,
+        "auto_fix": {
+          "enabled": true,
+          "preferred_skill": "raster-resampling"
+        }
+      },
+      "temporal": {
+        "required": true,
+        "relation": [
+          "same-date",
+          "within-window"
+        ],
+        "tolerance": null,
+        "unit": "day"
+      },
+      "format": {
+        "required_formats": [],
+        "auto_conversion": true
+      },
+      "bands": {
+        "required": [],
+        "optional": []
+      },
+      "variables": {
+        "required": true,
+        "optional": [],
+        "required_variables": [
+          "capacity",
+          "year",
+          "population",
+          "consumption"
+        ]
+      },
+      "units": {
+        "required": true,
+        "compatible_units": [
+          "MW",
+          "%",
+          "GWh"
+        ],
+        "auto_conversion": true
+      },
+      "nodata": {
+        "allowed": true,
+        "handling": {
+          "strategy": "mask"
+        }
+      }
+    },
+    "workflow": {
+      "type": "sequential",
+      "steps": [
+        {
+          "id": "step_1",
+          "capability": "temporal-aggregation",
+          "operation": "Align time series and calculate capacity or transition indicators",
+          "required": true,
+          "depends_on": [],
+          "tool_selection": {
+            "mode": "dynamic",
+            "candidates": [
+              "EnergyCapacityValue",
+              "EnergyCapacityGrowth",
+              "EnergyCountryRenewableSummary",
+              "EnergyTransitionMetrics"
+            ],
+            "selection_criteria": [
+              "input_compatibility",
+              "tool_availability",
+              "geo_constraint_satisfaction",
+              "execution_feedback"
+            ]
+          }
+        }
+      ]
+    },
+    "outputs": [
+      {
+        "id": "result",
+        "semantic_type": "Scalar|Table",
+        "data_type": "validated geoscience result",
+        "description": "A numeric or structured result with provenance.",
+        "expected_format": "JSON"
+      }
+    ],
+    "tool_candidates": [
+      "EnergyCapacityValue",
+      "EnergyCapacityGrowth",
+      "EnergyCountryRenewableSummary",
+      "EnergyTransitionMetrics"
+    ],
+    "validation": {
+      "input_validation": [
+        {
+          "id": "input-present",
+          "type": "schema",
+          "rule": "required inputs are present"
+        }
+      ],
+      "intermediate_validation": [],
+      "output_validation": [
+        {
+          "id": "output-present",
+          "type": "schema",
+          "rule": "the selected tool returns a structured result",
+          "on_failure": {
+            "action": "replan"
+          }
+        }
+      ]
+    },
+    "failure_modes": [
+      {
+        "id": "missing-input",
+        "condition": "A required input or source locator is missing.",
+        "severity": "planning_required",
+        "recovery": "retrieve-missing-data"
+      },
+      {
+        "id": "constraint-mismatch",
+        "condition": "CRS, extent, resolution, time, format, variable, unit, or NoData constraints do not align.",
+        "severity": "recoverable",
+        "recovery": "local-constraint-repair"
+      }
+    ],
+    "recovery": {
+      "strategies": {
+        "local-constraint-repair": {
+          "capability": "local geospatial normalization",
+          "preferred_skills": [
+            "geo-crs-normalization",
+            "spatial-clip",
+            "raster-resampling"
+          ],
+          "retry_original_skill": true
+        },
+        "retrieve-missing-data": {
+          "capability": "data retrieval",
+          "retry_original_skill": true
+        }
+      }
+    },
+    "provenance": {
+      "record": [
+        "input_dataset",
+        "data_source",
+        "crs",
+        "spatial_extent",
+        "spatial_resolution",
+        "selected_tools",
+        "tool_parameters",
+        "execution_order",
+        "validation_results"
+      ]
+    },
+    "planning": {
+      "abstraction_level": "skill",
+      "composable": true,
+      "reusable": true,
+      "deterministic": false,
+      "estimated_complexity": "low",
+      "prerequisites": {
+        "skills": []
+      },
+      "compatible_skills": [
+        "energy-spatial-analysis"
+      ],
+      "alternative_skills": [],
+      "downstream_capabilities": []
+    },
+    "evaluation": {
+      "success_conditions": [
+        "All required skill steps are grounded and validated."
+      ],
+      "metrics": [
+        {
+          "name": "execution_success",
+          "type": "boolean"
+        },
+        {
+          "name": "constraint_satisfaction",
+          "type": "ratio"
+        },
+        {
+          "name": "output_validity",
+          "type": "boolean"
+        }
+      ]
+    }
+  },
+  {
+    "schema_version": "geoskill-0.1",
+    "id": "ocean-carbon-observation",
+    "name": "ocean-carbon-observation",
+    "display_name": "Ocean Carbon Observation",
+    "version": "0.1.0",
+    "description": "Retrieve, quality-control, and summarize ocean carbon observations in grids and vertical profiles.",
+    "domain": {
+      "primary": "ocean",
+      "secondary": [
+        "grid-lookup",
+        "profile-lookup"
+      ]
+    },
+    "task_types": [
+      "grid-lookup",
+      "profile-lookup",
+      "carbon-summary"
+    ],
+    "keywords": [
+      "SOCAT",
+      "GLODAP",
+      "fCO2",
+      "TCO2",
+      "ocean carbon",
+      "海洋碳",
+      "海洋观测"
+    ],
+    "goal": {
+      "capability": "ocean-carbon-observation",
+      "description": "Retrieve, quality-control, and summarize ocean carbon observations in grids and vertical profiles.",
+      "target_state": [
+        "validated-ocean-carbon-observation-result"
+      ]
+    },
+    "inputs": [
+      {
+        "id": "query_or_resource",
+        "semantic_type": "Table|Parameter",
+        "data_type": "authoritative resource locator",
+        "required": true,
+        "description": "The benchmark locator or structured task parameters."
+      }
+    ],
+    "preconditions": {
+      "data": [
+        "The authoritative input resource or query parameters are available."
+      ],
+      "semantic": [
+        "The requested operation is represented by this capability."
+      ],
+      "environment": [
+        "GeoToolAgent runtime is available."
+      ],
+      "tool": [
+        "At least one compatible registered tool is available."
+      ]
+    },
+    "geo_constraints": {
+      "crs": {
+        "required": false,
+        "relation": [
+          "compatible",
+          "transformable"
+        ],
+        "accepted_crs": [],
+        "auto_fix": {
+          "enabled": true,
+          "preferred_skill": "geo-crs-normalization"
+        }
+      },
+      "spatial_extent": {
+        "required": true,
+        "relation": [
+          "within",
+          "nearest"
+        ],
+        "auto_fix": {
+          "enabled": true,
+          "preferred_skill": "spatial-clip"
+        }
+      },
+      "spatial_resolution": {
+        "required": false,
+        "relation": [
+          "compatible",
+          "same"
+        ],
+        "target_resolution": null,
+        "unit": "meter",
+        "tolerance": null,
+        "auto_fix": {
+          "enabled": true,
+          "preferred_skill": "raster-resampling"
+        }
+      },
+      "temporal": {
+        "required": true,
+        "relation": [
+          "same-date",
+          "within-window"
+        ],
+        "tolerance": null,
+        "unit": "day"
+      },
+      "format": {
+        "required_formats": [],
+        "auto_conversion": true
+      },
+      "bands": {
+        "required": [],
+        "optional": []
+      },
+      "variables": {
+        "required": true,
+        "optional": [],
+        "required_variables": [
+          "fCO2",
+          "TCO2",
+          "depth"
+        ]
+      },
+      "units": {
+        "required": true,
+        "compatible_units": [
+          "µatm",
+          "µmol kg-1",
+          "m"
+        ],
+        "auto_conversion": true
+      },
+      "nodata": {
+        "allowed": true,
+        "handling": {
+          "strategy": "mask"
+        }
+      }
+    },
+    "workflow": {
+      "type": "sequential",
+      "steps": [
+        {
+          "id": "step_1",
+          "capability": "observation-query",
+          "operation": "Retrieve the requested grid, profile, or annual carbon value",
+          "required": true,
+          "depends_on": [],
+          "tool_selection": {
+            "mode": "dynamic",
+            "candidates": [
+              "OceanMonthlyGridValue",
+              "OceanProfileValue",
+              "OceanAnnualCarbonSummary"
+            ],
+            "selection_criteria": [
+              "input_compatibility",
+              "tool_availability",
+              "geo_constraint_satisfaction",
+              "execution_feedback"
+            ]
+          }
+        }
+      ]
+    },
+    "outputs": [
+      {
+        "id": "result",
+        "semantic_type": "Scalar|Table",
+        "data_type": "validated geoscience result",
+        "description": "A numeric or structured result with provenance.",
+        "expected_format": "JSON"
+      }
+    ],
+    "tool_candidates": [
+      "OceanMonthlyGridValue",
+      "OceanProfileValue",
+      "OceanAnnualCarbonSummary"
+    ],
+    "validation": {
+      "input_validation": [
+        {
+          "id": "input-present",
+          "type": "schema",
+          "rule": "required inputs are present"
+        }
+      ],
+      "intermediate_validation": [],
+      "output_validation": [
+        {
+          "id": "output-present",
+          "type": "schema",
+          "rule": "the selected tool returns a structured result",
+          "on_failure": {
+            "action": "replan"
+          }
+        }
+      ]
+    },
+    "failure_modes": [
+      {
+        "id": "missing-input",
+        "condition": "A required input or source locator is missing.",
+        "severity": "planning_required",
+        "recovery": "retrieve-missing-data"
+      },
+      {
+        "id": "constraint-mismatch",
+        "condition": "CRS, extent, resolution, time, format, variable, unit, or NoData constraints do not align.",
+        "severity": "recoverable",
+        "recovery": "local-constraint-repair"
+      }
+    ],
+    "recovery": {
+      "strategies": {
+        "local-constraint-repair": {
+          "capability": "local geospatial normalization",
+          "preferred_skills": [
+            "geo-crs-normalization",
+            "spatial-clip",
+            "raster-resampling"
+          ],
+          "retry_original_skill": true
+        },
+        "retrieve-missing-data": {
+          "capability": "data retrieval",
+          "retry_original_skill": true
+        }
+      }
+    },
+    "provenance": {
+      "record": [
+        "input_dataset",
+        "data_source",
+        "crs",
+        "spatial_extent",
+        "spatial_resolution",
+        "selected_tools",
+        "tool_parameters",
+        "execution_order",
+        "validation_results"
+      ]
+    },
+    "planning": {
+      "abstraction_level": "skill",
+      "composable": true,
+      "reusable": true,
+      "deterministic": false,
+      "estimated_complexity": "low",
+      "prerequisites": {
+        "skills": []
+      },
+      "compatible_skills": [
+        "ocean-profile-qc",
+        "ocean-spatial-analysis"
+      ],
+      "alternative_skills": [],
+      "downstream_capabilities": []
+    },
+    "evaluation": {
+      "success_conditions": [
+        "All required skill steps are grounded and validated."
+      ],
+      "metrics": [
+        {
+          "name": "execution_success",
+          "type": "boolean"
+        },
+        {
+          "name": "constraint_satisfaction",
+          "type": "ratio"
+        },
+        {
+          "name": "output_validity",
+          "type": "boolean"
+        }
+      ]
+    }
+  },
+  {
+    "schema_version": "geoskill-0.1",
+    "id": "ocean-profile-qc",
+    "name": "ocean-profile-qc",
+    "display_name": "Ocean Profile QC and Matching",
+    "version": "0.1.0",
+    "description": "Apply flag and duplicate checks, compare vertical profiles, and match surface/deep observations.",
+    "domain": {
+      "primary": "ocean",
+      "secondary": [
+        "quality-control",
+        "profile-deduplication"
+      ]
+    },
+    "task_types": [
+      "quality-control",
+      "profile-deduplication",
+      "profile-matching"
+    ],
+    "keywords": [
+      "QC",
+      "flag",
+      "duplicate",
+      "profile difference",
+      "surface deep match",
+      "剖面质控",
+      "去重"
+    ],
+    "goal": {
+      "capability": "ocean-profile-qc",
+      "description": "Apply flag and duplicate checks, compare vertical profiles, and match surface/deep observations.",
+      "target_state": [
+        "validated-ocean-profile-qc-result"
+      ]
+    },
+    "inputs": [
+      {
+        "id": "query_or_resource",
+        "semantic_type": "Table|Parameter",
+        "data_type": "authoritative resource locator",
+        "required": true,
+        "description": "The benchmark locator or structured task parameters."
+      }
+    ],
+    "preconditions": {
+      "data": [
+        "The authoritative input resource or query parameters are available."
+      ],
+      "semantic": [
+        "The requested operation is represented by this capability."
+      ],
+      "environment": [
+        "GeoToolAgent runtime is available."
+      ],
+      "tool": [
+        "At least one compatible registered tool is available."
+      ]
+    },
+    "geo_constraints": {
+      "crs": {
+        "required": false,
+        "relation": [
+          "compatible",
+          "transformable"
+        ],
+        "accepted_crs": [],
+        "auto_fix": {
+          "enabled": true,
+          "preferred_skill": "geo-crs-normalization"
+        }
+      },
+      "spatial_extent": {
+        "required": false,
+        "relation": [
+          "overlap",
+          "within",
+          "contains"
+        ],
+        "auto_fix": {
+          "enabled": true,
+          "preferred_skill": "spatial-clip"
+        }
+      },
+      "spatial_resolution": {
+        "required": false,
+        "relation": [
+          "compatible",
+          "same"
+        ],
+        "target_resolution": null,
+        "unit": "meter",
+        "tolerance": null,
+        "auto_fix": {
+          "enabled": true,
+          "preferred_skill": "raster-resampling"
+        }
+      },
+      "temporal": {
+        "required": true,
+        "relation": [
+          "same-date",
+          "same-year",
+          "within-window"
+        ],
+        "tolerance": null,
+        "unit": "day"
+      },
+      "format": {
+        "required_formats": [],
+        "auto_conversion": true
+      },
+      "bands": {
+        "required": [],
+        "optional": []
+      },
+      "variables": {
+        "required": true,
+        "optional": [],
+        "required_variables": [
+          "DIC",
+          "TALK",
+          "fCO2",
+          "quality flags"
+        ]
+      },
+      "units": {
+        "required": false,
+        "compatible_units": [],
+        "auto_conversion": true
+      },
+      "nodata": {
+        "allowed": false,
+        "handling": {
+          "strategy": "fail"
+        }
+      }
+    },
+    "workflow": {
+      "type": "sequential",
+      "steps": [
+        {
+          "id": "step_1",
+          "capability": "profile-qc",
+          "operation": "Filter, validate, deduplicate, and compare compatible ocean observations",
+          "required": true,
+          "depends_on": [],
+          "tool_selection": {
+            "mode": "dynamic",
+            "candidates": [
+              "OceanCruiseQC",
+              "OceanProfileDeduplication",
+              "OceanVerticalProfileDifference",
+              "OceanSurfaceDeepMatch"
+            ],
+            "selection_criteria": [
+              "input_compatibility",
+              "tool_availability",
+              "geo_constraint_satisfaction",
+              "execution_feedback"
+            ]
+          }
+        }
+      ]
+    },
+    "outputs": [
+      {
+        "id": "result",
+        "semantic_type": "Scalar|Table",
+        "data_type": "validated geoscience result",
+        "description": "A numeric or structured result with provenance.",
+        "expected_format": "JSON"
+      }
+    ],
+    "tool_candidates": [
+      "OceanCruiseQC",
+      "OceanProfileDeduplication",
+      "OceanVerticalProfileDifference",
+      "OceanSurfaceDeepMatch"
+    ],
+    "validation": {
+      "input_validation": [
+        {
+          "id": "input-present",
+          "type": "schema",
+          "rule": "required inputs are present"
+        }
+      ],
+      "intermediate_validation": [],
+      "output_validation": [
+        {
+          "id": "output-present",
+          "type": "schema",
+          "rule": "the selected tool returns a structured result",
+          "on_failure": {
+            "action": "replan"
+          }
+        }
+      ]
+    },
+    "failure_modes": [
+      {
+        "id": "missing-input",
+        "condition": "A required input or source locator is missing.",
+        "severity": "planning_required",
+        "recovery": "retrieve-missing-data"
+      },
+      {
+        "id": "constraint-mismatch",
+        "condition": "CRS, extent, resolution, time, format, variable, unit, or NoData constraints do not align.",
+        "severity": "recoverable",
+        "recovery": "local-constraint-repair"
+      }
+    ],
+    "recovery": {
+      "strategies": {
+        "local-constraint-repair": {
+          "capability": "local geospatial normalization",
+          "preferred_skills": [
+            "geo-crs-normalization",
+            "spatial-clip",
+            "raster-resampling"
+          ],
+          "retry_original_skill": true
+        },
+        "retrieve-missing-data": {
+          "capability": "data retrieval",
+          "retry_original_skill": true
+        }
+      }
+    },
+    "provenance": {
+      "record": [
+        "input_dataset",
+        "data_source",
+        "crs",
+        "spatial_extent",
+        "spatial_resolution",
+        "selected_tools",
+        "tool_parameters",
+        "execution_order",
+        "validation_results"
+      ]
+    },
+    "planning": {
+      "abstraction_level": "skill",
+      "composable": true,
+      "reusable": true,
+      "deterministic": false,
+      "estimated_complexity": "low",
+      "prerequisites": {
+        "skills": []
+      },
+      "compatible_skills": [
+        "ocean-carbon-observation"
+      ],
+      "alternative_skills": [],
+      "downstream_capabilities": []
+    },
+    "evaluation": {
+      "success_conditions": [
+        "All required skill steps are grounded and validated."
+      ],
+      "metrics": [
+        {
+          "name": "execution_success",
+          "type": "boolean"
+        },
+        {
+          "name": "constraint_satisfaction",
+          "type": "ratio"
+        },
+        {
+          "name": "output_validity",
+          "type": "boolean"
+        }
+      ]
+    }
+  },
+  {
+    "schema_version": "geoskill-0.1",
+    "id": "ocean-spatial-analysis",
+    "name": "ocean-spatial-analysis",
+    "display_name": "Ocean Spatial Analysis",
+    "version": "0.1.0",
+    "description": "Compute ocean station distances, study extents, and regional carbon map summaries.",
+    "domain": {
+      "primary": "ocean",
+      "secondary": [
+        "station-distance",
+        "bbox-area"
+      ]
+    },
+    "task_types": [
+      "station-distance",
+      "bbox-area",
+      "regional-map"
+    ],
+    "keywords": [
+      "station distance",
+      "ocean bbox",
+      "regional map",
+      "study area",
+      "海洋空间",
+      "区域地图"
+    ],
+    "goal": {
+      "capability": "ocean-spatial-analysis",
+      "description": "Compute ocean station distances, study extents, and regional carbon map summaries.",
+      "target_state": [
+        "validated-ocean-spatial-analysis-result"
+      ]
+    },
+    "inputs": [
+      {
+        "id": "spatial_inputs",
+        "semantic_type": "Vector|Raster|Parameter",
+        "data_type": "geospatial assets or coordinates",
+        "required": true,
+        "description": "Spatial data, ROI, coordinates, or a resource locator."
+      }
+    ],
+    "preconditions": {
+      "data": [
+        "The authoritative input resource or query parameters are available."
+      ],
+      "semantic": [
+        "The requested operation is represented by this capability."
+      ],
+      "environment": [
+        "GeoToolAgent runtime is available."
+      ],
+      "tool": [
+        "At least one compatible registered tool is available."
+      ]
+    },
+    "geo_constraints": {
+      "crs": {
+        "required": false,
+        "relation": [
+          "compatible",
+          "transformable"
+        ],
+        "accepted_crs": [],
+        "auto_fix": {
+          "enabled": true,
+          "preferred_skill": "geo-crs-normalization"
+        }
+      },
+      "spatial_extent": {
+        "required": true,
+        "relation": [
+          "within",
+          "overlap"
+        ],
+        "auto_fix": {
+          "enabled": true,
+          "preferred_skill": "spatial-clip"
+        }
+      },
+      "spatial_resolution": {
+        "required": false,
+        "relation": [
+          "compatible",
+          "same"
+        ],
+        "target_resolution": null,
+        "unit": "meter",
+        "tolerance": null,
+        "auto_fix": {
+          "enabled": true,
+          "preferred_skill": "raster-resampling"
+        }
+      },
+      "temporal": {
+        "required": false,
+        "relation": [
+          "same-date",
+          "within-window"
+        ],
+        "tolerance": null,
+        "unit": "day"
+      },
+      "format": {
+        "required_formats": [],
+        "auto_conversion": true
+      },
+      "bands": {
+        "required": [],
+        "optional": []
+      },
+      "variables": {
+        "required": true,
+        "optional": [],
+        "required_variables": [
+          "latitude",
+          "longitude",
+          "region"
+        ]
+      },
+      "units": {
+        "required": false,
+        "compatible_units": [
+          "km",
+          "km2",
+          "µatm"
+        ],
+        "auto_conversion": true
+      },
+      "nodata": {
+        "allowed": true,
+        "handling": {
+          "strategy": "mask"
+        }
+      }
+    },
+    "workflow": {
+      "type": "sequential",
+      "steps": [
+        {
+          "id": "step_1",
+          "capability": "ocean-spatial",
+          "operation": "Resolve compatible stations or regions and compute the requested spatial summary",
+          "required": true,
+          "depends_on": [],
+          "tool_selection": {
+            "mode": "dynamic",
+            "candidates": [
+              "OceanStationDistance",
+              "OceanBBoxArea",
+              "OceanRegionalMapSummary"
+            ],
+            "selection_criteria": [
+              "input_compatibility",
+              "tool_availability",
+              "geo_constraint_satisfaction",
+              "execution_feedback"
+            ]
+          }
+        }
+      ]
+    },
+    "outputs": [
+      {
+        "id": "artifact",
+        "semantic_type": "Raster|Vector|Table",
+        "data_type": "validated spatial artifact or summary",
+        "description": "Spatial output, summary, or rendered artifact.",
+        "expected_format": "JSON or registered artifact"
+      }
+    ],
+    "tool_candidates": [
+      "OceanStationDistance",
+      "OceanBBoxArea",
+      "OceanRegionalMapSummary"
+    ],
+    "validation": {
+      "input_validation": [
+        {
+          "id": "input-present",
+          "type": "schema",
+          "rule": "required inputs are present"
+        }
+      ],
+      "intermediate_validation": [],
+      "output_validation": [
+        {
+          "id": "output-present",
+          "type": "schema",
+          "rule": "the selected tool returns a structured result",
+          "on_failure": {
+            "action": "replan"
+          }
+        }
+      ]
+    },
+    "failure_modes": [
+      {
+        "id": "missing-input",
+        "condition": "A required input or source locator is missing.",
+        "severity": "planning_required",
+        "recovery": "retrieve-missing-data"
+      },
+      {
+        "id": "constraint-mismatch",
+        "condition": "CRS, extent, resolution, time, format, variable, unit, or NoData constraints do not align.",
+        "severity": "recoverable",
+        "recovery": "local-constraint-repair"
+      }
+    ],
+    "recovery": {
+      "strategies": {
+        "local-constraint-repair": {
+          "capability": "local geospatial normalization",
+          "preferred_skills": [
+            "geo-crs-normalization",
+            "spatial-clip",
+            "raster-resampling"
+          ],
+          "retry_original_skill": true
+        },
+        "retrieve-missing-data": {
+          "capability": "data retrieval",
+          "retry_original_skill": true
+        }
+      }
+    },
+    "provenance": {
+      "record": [
+        "input_dataset",
+        "data_source",
+        "crs",
+        "spatial_extent",
+        "spatial_resolution",
+        "selected_tools",
+        "tool_parameters",
+        "execution_order",
+        "validation_results"
+      ]
+    },
+    "planning": {
+      "abstraction_level": "skill",
+      "composable": true,
+      "reusable": true,
+      "deterministic": false,
+      "estimated_complexity": "low",
+      "prerequisites": {
+        "skills": []
+      },
+      "compatible_skills": [
+        "ocean-carbon-observation",
+        "geo-crs-normalization"
+      ],
+      "alternative_skills": [],
+      "downstream_capabilities": []
+    },
+    "evaluation": {
+      "success_conditions": [
+        "All required skill steps are grounded and validated."
+      ],
+      "metrics": [
+        {
+          "name": "execution_success",
+          "type": "boolean"
+        },
+        {
+          "name": "constraint_satisfaction",
+          "type": "ratio"
+        },
+        {
+          "name": "output_validity",
+          "type": "boolean"
+        }
+      ]
+    }
+  },
+  {
+    "schema_version": "geoskill-0.1",
+    "id": "deep-time-coordinate-spatial",
+    "name": "deep-time-coordinate-spatial",
+    "display_name": "Deep-Time Coordinate and Spatial Analysis",
+    "version": "0.1.0",
+    "description": "Convert coordinates and compute distances, bearings, and extents for BioDeepTime records.",
+    "domain": {
+      "primary": "deep-time",
+      "secondary": [
+        "coordinate-conversion",
+        "distance"
+      ]
+    },
+    "task_types": [
+      "coordinate-conversion",
+      "distance",
+      "bearing",
+      "bbox-area"
+    ],
+    "keywords": [
+      "BioDeepTime",
+      "coordinate",
+      "DMS",
+      "bearing",
+      "distance",
+      "深时坐标",
+      "方位角"
+    ],
+    "goal": {
+      "capability": "deep-time-coordinate-spatial",
+      "description": "Convert coordinates and compute distances, bearings, and extents for BioDeepTime records.",
+      "target_state": [
+        "validated-deep-time-coordinate-spatial-result"
+      ]
+    },
+    "inputs": [
+      {
+        "id": "spatial_inputs",
+        "semantic_type": "Vector|Raster|Parameter",
+        "data_type": "geospatial assets or coordinates",
+        "required": true,
+        "description": "Spatial data, ROI, coordinates, or a resource locator."
+      }
+    ],
+    "preconditions": {
+      "data": [
+        "The authoritative input resource or query parameters are available."
+      ],
+      "semantic": [
+        "The requested operation is represented by this capability."
+      ],
+      "environment": [
+        "GeoToolAgent runtime is available."
+      ],
+      "tool": [
+        "At least one compatible registered tool is available."
+      ]
+    },
+    "geo_constraints": {
+      "crs": {
+        "required": false,
+        "relation": [
+          "compatible",
+          "transformable"
+        ],
+        "accepted_crs": [],
+        "auto_fix": {
+          "enabled": true,
+          "preferred_skill": "geo-crs-normalization"
+        }
+      },
+      "spatial_extent": {
+        "required": true,
+        "relation": [
+          "within",
+          "contains"
+        ],
+        "auto_fix": {
+          "enabled": true,
+          "preferred_skill": "spatial-clip"
+        }
+      },
+      "spatial_resolution": {
+        "required": false,
+        "relation": [
+          "compatible",
+          "same"
+        ],
+        "target_resolution": null,
+        "unit": "meter",
+        "tolerance": null,
+        "auto_fix": {
+          "enabled": true,
+          "preferred_skill": "raster-resampling"
+        }
+      },
+      "temporal": {
+        "required": false,
+        "relation": [
+          "overlap",
+          "same-date",
+          "within-window",
+          "nearest"
+        ],
+        "tolerance": null,
+        "unit": "day"
+      },
+      "format": {
+        "required_formats": [],
+        "auto_conversion": true
+      },
+      "bands": {
+        "required": [],
+        "optional": []
+      },
+      "variables": {
+        "required": true,
+        "optional": [],
+        "required_variables": [
+          "latitude",
+          "longitude"
+        ]
+      },
+      "units": {
+        "required": true,
+        "compatible_units": [
+          "degree",
+          "DMS",
+          "km"
+        ],
+        "auto_conversion": true
+      },
+      "nodata": {
+        "allowed": true,
+        "handling": {
+          "strategy": "mask"
+        }
+      }
+    },
+    "workflow": {
+      "type": "sequential",
+      "steps": [
+        {
+          "id": "step_1",
+          "capability": "coordinate-spatial",
+          "operation": "Normalize coordinates and calculate the requested spatial relation",
+          "required": true,
+          "depends_on": [],
+          "tool_selection": {
+            "mode": "dynamic",
+            "candidates": [
+              "DeepTimeDecimalToDMS",
+              "DeepTimeHaversineDistance",
+              "DeepTimeBearing",
+              "DeepTimeBBoxArea"
+            ],
+            "selection_criteria": [
+              "input_compatibility",
+              "tool_availability",
+              "geo_constraint_satisfaction",
+              "execution_feedback"
+            ]
+          }
+        }
+      ]
+    },
+    "outputs": [
+      {
+        "id": "result",
+        "semantic_type": "Scalar|Table",
+        "data_type": "validated geoscience result",
+        "description": "A numeric or structured result with provenance.",
+        "expected_format": "JSON"
+      }
+    ],
+    "tool_candidates": [
+      "DeepTimeDecimalToDMS",
+      "DeepTimeHaversineDistance",
+      "DeepTimeBearing",
+      "DeepTimeBBoxArea"
+    ],
+    "validation": {
+      "input_validation": [
+        {
+          "id": "input-present",
+          "type": "schema",
+          "rule": "required inputs are present"
+        }
+      ],
+      "intermediate_validation": [],
+      "output_validation": [
+        {
+          "id": "output-present",
+          "type": "schema",
+          "rule": "the selected tool returns a structured result",
+          "on_failure": {
+            "action": "replan"
+          }
+        }
+      ]
+    },
+    "failure_modes": [
+      {
+        "id": "missing-input",
+        "condition": "A required input or source locator is missing.",
+        "severity": "planning_required",
+        "recovery": "retrieve-missing-data"
+      },
+      {
+        "id": "constraint-mismatch",
+        "condition": "CRS, extent, resolution, time, format, variable, unit, or NoData constraints do not align.",
+        "severity": "recoverable",
+        "recovery": "local-constraint-repair"
+      }
+    ],
+    "recovery": {
+      "strategies": {
+        "local-constraint-repair": {
+          "capability": "local geospatial normalization",
+          "preferred_skills": [
+            "geo-crs-normalization",
+            "spatial-clip",
+            "raster-resampling"
+          ],
+          "retry_original_skill": true
+        },
+        "retrieve-missing-data": {
+          "capability": "data retrieval",
+          "retry_original_skill": true
+        }
+      }
+    },
+    "provenance": {
+      "record": [
+        "input_dataset",
+        "data_source",
+        "crs",
+        "spatial_extent",
+        "spatial_resolution",
+        "selected_tools",
+        "tool_parameters",
+        "execution_order",
+        "validation_results"
+      ]
+    },
+    "planning": {
+      "abstraction_level": "skill",
+      "composable": true,
+      "reusable": true,
+      "deterministic": false,
+      "estimated_complexity": "low",
+      "prerequisites": {
+        "skills": []
+      },
+      "compatible_skills": [
+        "deep-time-vector-workflow"
+      ],
+      "alternative_skills": [],
+      "downstream_capabilities": []
+    },
+    "evaluation": {
+      "success_conditions": [
+        "All required skill steps are grounded and validated."
+      ],
+      "metrics": [
+        {
+          "name": "execution_success",
+          "type": "boolean"
+        },
+        {
+          "name": "constraint_satisfaction",
+          "type": "ratio"
+        },
+        {
+          "name": "output_validity",
+          "type": "boolean"
+        }
+      ]
+    }
+  },
+  {
+    "schema_version": "geoskill-0.1",
+    "id": "deep-time-vector-workflow",
+    "name": "deep-time-vector-workflow",
+    "display_name": "Deep-Time Vector Workflow",
+    "version": "0.1.0",
+    "description": "Standardize, validate, relate, and render BioDeepTime vector layers with dynamic spatial tools.",
+    "domain": {
+      "primary": "deep-time",
+      "secondary": [
+        "vector-standardization",
+        "geometry-validation"
+      ]
+    },
+    "task_types": [
+      "vector-standardization",
+      "geometry-validation",
+      "nearest-neighbor",
+      "buffer",
+      "overlay",
+      "rendering"
+    ],
+    "keywords": [
+      "BioDeepTime",
+      "standardize",
+      "validate geometry",
+      "nearest neighbor",
+      "buffer",
+      "overlay",
+      "地学矢量",
+      "空间叠加"
+    ],
+    "goal": {
+      "capability": "deep-time-vector-workflow",
+      "description": "Standardize, validate, relate, and render BioDeepTime vector layers with dynamic spatial tools.",
+      "target_state": [
+        "validated-deep-time-vector-workflow-result"
+      ]
+    },
+    "inputs": [
+      {
+        "id": "spatial_inputs",
+        "semantic_type": "Vector|Raster|Parameter",
+        "data_type": "geospatial assets or coordinates",
+        "required": true,
+        "description": "Spatial data, ROI, coordinates, or a resource locator."
+      }
+    ],
+    "preconditions": {
+      "data": [
+        "The authoritative input resource or query parameters are available."
+      ],
+      "semantic": [
+        "The requested operation is represented by this capability."
+      ],
+      "environment": [
+        "GeoToolAgent runtime is available."
+      ],
+      "tool": [
+        "At least one compatible registered tool is available."
+      ]
+    },
+    "geo_constraints": {
+      "crs": {
+        "required": true,
+        "relation": [
+          "same",
+          "transformable"
+        ],
+        "accepted_crs": [
+          "EPSG:4326"
+        ],
+        "auto_fix": {
+          "enabled": true,
+          "preferred_skill": "geo-crs-normalization"
+        }
+      },
+      "spatial_extent": {
+        "required": true,
+        "relation": [
+          "overlap",
+          "within"
+        ],
+        "auto_fix": {
+          "enabled": true,
+          "preferred_skill": "spatial-clip"
+        }
+      },
+      "spatial_resolution": {
+        "required": false,
+        "relation": [
+          "compatible",
+          "same"
+        ],
+        "target_resolution": null,
+        "unit": "meter",
+        "tolerance": null,
+        "auto_fix": {
+          "enabled": true,
+          "preferred_skill": "raster-resampling"
+        }
+      },
+      "temporal": {
+        "required": false,
+        "relation": [
+          "overlap",
+          "same-date",
+          "within-window",
+          "nearest"
+        ],
+        "tolerance": null,
+        "unit": "day"
+      },
+      "format": {
+        "required_formats": [
+          "GeoJSON",
+          "CSV",
+          "GeoPackage"
+        ],
+        "auto_conversion": true
+      },
+      "bands": {
+        "required": [],
+        "optional": []
+      },
+      "variables": {
+        "required": [],
+        "optional": []
+      },
+      "units": {
+        "required": false,
+        "compatible_units": [],
+        "auto_conversion": true
+      },
+      "nodata": {
+        "allowed": true,
+        "handling": {
+          "strategy": "mask"
+        }
+      }
+    },
+    "workflow": {
+      "type": "sequential",
+      "steps": [
+        {
+          "id": "step_1",
+          "capability": "vector-preprocessing",
+          "operation": "Normalize and quality-control spatial layers",
+          "required": true,
+          "depends_on": [],
+          "tool_selection": {
+            "mode": "dynamic",
+            "candidates": [
+              "DeepTimeStandardizeSpatialData",
+              "DeepTimeValidateSpatialData",
+              "DeepTimeNearestNeighbor",
+              "DeepTimeBuffer",
+              "DeepTimeOverlay",
+              "DeepTimeBatchVector",
+              "DeepTimeRenderMap"
+            ],
+            "selection_criteria": [
+              "input_compatibility",
+              "tool_availability",
+              "geo_constraint_satisfaction",
+              "execution_feedback"
+            ]
+          }
+        },
+        {
+          "id": "step_2",
+          "capability": "vector-analysis",
+          "operation": "Run proximity, buffer, overlay, or rendering operations",
+          "required": true,
+          "depends_on": [
+            "step_1"
+          ],
+          "tool_selection": {
+            "mode": "dynamic",
+            "candidates": [
+              "DeepTimeStandardizeSpatialData",
+              "DeepTimeValidateSpatialData",
+              "DeepTimeNearestNeighbor",
+              "DeepTimeBuffer",
+              "DeepTimeOverlay",
+              "DeepTimeBatchVector",
+              "DeepTimeRenderMap"
+            ],
+            "selection_criteria": [
+              "input_compatibility",
+              "tool_availability",
+              "geo_constraint_satisfaction",
+              "execution_feedback"
+            ]
+          }
+        }
+      ]
+    },
+    "outputs": [
+      {
+        "id": "artifact",
+        "semantic_type": "Raster|Vector|Table",
+        "data_type": "validated spatial artifact or summary",
+        "description": "Spatial output, summary, or rendered artifact.",
+        "expected_format": "JSON or registered artifact"
+      }
+    ],
+    "tool_candidates": [
+      "DeepTimeStandardizeSpatialData",
+      "DeepTimeValidateSpatialData",
+      "DeepTimeNearestNeighbor",
+      "DeepTimeBuffer",
+      "DeepTimeOverlay",
+      "DeepTimeBatchVector",
+      "DeepTimeRenderMap"
+    ],
+    "validation": {
+      "input_validation": [
+        {
+          "id": "input-present",
+          "type": "schema",
+          "rule": "required inputs are present"
+        }
+      ],
+      "intermediate_validation": [],
+      "output_validation": [
+        {
+          "id": "output-present",
+          "type": "schema",
+          "rule": "the selected tool returns a structured result",
+          "on_failure": {
+            "action": "replan"
+          }
+        }
+      ]
+    },
+    "failure_modes": [
+      {
+        "id": "missing-input",
+        "condition": "A required input or source locator is missing.",
+        "severity": "planning_required",
+        "recovery": "retrieve-missing-data"
+      },
+      {
+        "id": "constraint-mismatch",
+        "condition": "CRS, extent, resolution, time, format, variable, unit, or NoData constraints do not align.",
+        "severity": "recoverable",
+        "recovery": "local-constraint-repair"
+      }
+    ],
+    "recovery": {
+      "strategies": {
+        "local-constraint-repair": {
+          "capability": "local geospatial normalization",
+          "preferred_skills": [
+            "geo-crs-normalization",
+            "spatial-clip",
+            "raster-resampling"
+          ],
+          "retry_original_skill": true
+        },
+        "retrieve-missing-data": {
+          "capability": "data retrieval",
+          "retry_original_skill": true
+        }
+      }
+    },
+    "provenance": {
+      "record": [
+        "input_dataset",
+        "data_source",
+        "crs",
+        "spatial_extent",
+        "spatial_resolution",
+        "selected_tools",
+        "tool_parameters",
+        "execution_order",
+        "validation_results"
+      ]
+    },
+    "planning": {
+      "abstraction_level": "skill",
+      "composable": true,
+      "reusable": true,
+      "deterministic": false,
+      "estimated_complexity": "medium",
+      "prerequisites": {
+        "skills": []
+      },
+      "compatible_skills": [
+        "deep-time-coordinate-spatial",
+        "deep-time-raster-zonal"
+      ],
+      "alternative_skills": [],
+      "downstream_capabilities": []
+    },
+    "evaluation": {
+      "success_conditions": [
+        "All required skill steps are grounded and validated."
+      ],
+      "metrics": [
+        {
+          "name": "execution_success",
+          "type": "boolean"
+        },
+        {
+          "name": "constraint_satisfaction",
+          "type": "ratio"
+        },
+        {
+          "name": "output_validity",
+          "type": "boolean"
+        }
+      ]
+    }
+  },
+  {
+    "schema_version": "geoskill-0.1",
+    "id": "deep-time-raster-zonal",
+    "name": "deep-time-raster-zonal",
+    "display_name": "Deep-Time Raster and Zonal Analysis",
+    "version": "0.1.0",
+    "description": "Interpolate deep-time observations, apply raster algebra, summarize zones, and render maps.",
+    "domain": {
+      "primary": "deep-time",
+      "secondary": [
+        "interpolation",
+        "raster-algebra"
+      ]
+    },
+    "task_types": [
+      "interpolation",
+      "raster-algebra",
+      "zonal-statistics",
+      "rendering"
+    ],
+    "keywords": [
+      "IDW",
+      "raster",
+      "zonal statistics",
+      "interpolate",
+      "deep-time map",
+      "插值",
+      "分区统计"
+    ],
+    "goal": {
+      "capability": "deep-time-raster-zonal",
+      "description": "Interpolate deep-time observations, apply raster algebra, summarize zones, and render maps.",
+      "target_state": [
+        "validated-deep-time-raster-zonal-result"
+      ]
+    },
+    "inputs": [
+      {
+        "id": "raster_inputs",
+        "semantic_type": "Raster|Parameter",
+        "data_type": "GeoTIFF or raster resource group",
+        "required": true,
+        "description": "Raster assets and their band/variable metadata."
+      }
+    ],
+    "preconditions": {
+      "data": [
+        "The authoritative input resource or query parameters are available."
+      ],
+      "semantic": [
+        "The requested operation is represented by this capability."
+      ],
+      "environment": [
+        "GeoToolAgent runtime is available."
+      ],
+      "tool": [
+        "At least one compatible registered tool is available."
+      ]
+    },
+    "geo_constraints": {
+      "crs": {
+        "required": true,
+        "relation": [
+          "same",
+          "transformable"
+        ],
+        "accepted_crs": [],
+        "auto_fix": {
+          "enabled": true,
+          "preferred_skill": "geo-crs-normalization"
+        }
+      },
+      "spatial_extent": {
+        "required": true,
+        "relation": [
+          "overlap",
+          "within"
+        ],
+        "auto_fix": {
+          "enabled": true,
+          "preferred_skill": "spatial-clip"
+        }
+      },
+      "spatial_resolution": {
+        "required": true,
+        "relation": [
+          "compatible",
+          "same"
+        ],
+        "target_resolution": null,
+        "unit": "meter",
+        "tolerance": null,
+        "auto_fix": {
+          "enabled": true,
+          "preferred_skill": "raster-resampling"
+        }
+      },
+      "temporal": {
+        "required": false,
+        "relation": [
+          "overlap",
+          "same-date",
+          "within-window",
+          "nearest"
+        ],
+        "tolerance": null,
+        "unit": "day"
+      },
+      "format": {
+        "required_formats": [
+          "GeoTIFF"
+        ],
+        "auto_conversion": true
+      },
+      "bands": {
+        "required": [],
+        "optional": []
+      },
+      "variables": {
+        "required": [],
+        "optional": []
+      },
+      "units": {
+        "required": false,
+        "compatible_units": [],
+        "auto_conversion": true
+      },
+      "nodata": {
+        "allowed": true,
+        "handling": {
+          "strategy": "mask"
+        }
+      }
+    },
+    "workflow": {
+      "type": "sequential",
+      "steps": [
+        {
+          "id": "step_1",
+          "capability": "raster-analysis",
+          "operation": "Create and validate a continuous surface",
+          "required": true,
+          "depends_on": [],
+          "tool_selection": {
+            "mode": "dynamic",
+            "candidates": [
+              "DeepTimeInterpolateIDW",
+              "DeepTimeRasterAlgebra",
+              "DeepTimeZonalStatistics",
+              "DeepTimeRenderMap"
+            ],
+            "selection_criteria": [
+              "input_compatibility",
+              "tool_availability",
+              "geo_constraint_satisfaction",
+              "execution_feedback"
+            ]
+          }
+        },
+        {
+          "id": "step_2",
+          "capability": "zonal-summary",
+          "operation": "Summarize values by analysis zones and render provenance",
+          "required": true,
+          "depends_on": [
+            "step_1"
+          ],
+          "tool_selection": {
+            "mode": "dynamic",
+            "candidates": [
+              "DeepTimeInterpolateIDW",
+              "DeepTimeRasterAlgebra",
+              "DeepTimeZonalStatistics",
+              "DeepTimeRenderMap"
+            ],
+            "selection_criteria": [
+              "input_compatibility",
+              "tool_availability",
+              "geo_constraint_satisfaction",
+              "execution_feedback"
+            ]
+          }
+        }
+      ]
+    },
+    "outputs": [
+      {
+        "id": "artifact",
+        "semantic_type": "Raster|Vector|Table",
+        "data_type": "validated spatial artifact or summary",
+        "description": "Spatial output, summary, or rendered artifact.",
+        "expected_format": "JSON or registered artifact"
+      }
+    ],
+    "tool_candidates": [
+      "DeepTimeInterpolateIDW",
+      "DeepTimeRasterAlgebra",
+      "DeepTimeZonalStatistics",
+      "DeepTimeRenderMap"
+    ],
+    "validation": {
+      "input_validation": [
+        {
+          "id": "input-present",
+          "type": "schema",
+          "rule": "required inputs are present"
+        }
+      ],
+      "intermediate_validation": [],
+      "output_validation": [
+        {
+          "id": "output-present",
+          "type": "schema",
+          "rule": "the selected tool returns a structured result",
+          "on_failure": {
+            "action": "replan"
+          }
+        }
+      ]
+    },
+    "failure_modes": [
+      {
+        "id": "missing-input",
+        "condition": "A required input or source locator is missing.",
+        "severity": "planning_required",
+        "recovery": "retrieve-missing-data"
+      },
+      {
+        "id": "constraint-mismatch",
+        "condition": "CRS, extent, resolution, time, format, variable, unit, or NoData constraints do not align.",
+        "severity": "recoverable",
+        "recovery": "local-constraint-repair"
+      }
+    ],
+    "recovery": {
+      "strategies": {
+        "local-constraint-repair": {
+          "capability": "local geospatial normalization",
+          "preferred_skills": [
+            "geo-crs-normalization",
+            "spatial-clip",
+            "raster-resampling"
+          ],
+          "retry_original_skill": true
+        },
+        "retrieve-missing-data": {
+          "capability": "data retrieval",
+          "retry_original_skill": true
+        }
+      }
+    },
+    "provenance": {
+      "record": [
+        "input_dataset",
+        "data_source",
+        "crs",
+        "spatial_extent",
+        "spatial_resolution",
+        "selected_tools",
+        "tool_parameters",
+        "execution_order",
+        "validation_results"
+      ]
+    },
+    "planning": {
+      "abstraction_level": "skill",
+      "composable": true,
+      "reusable": true,
+      "deterministic": false,
+      "estimated_complexity": "low",
+      "prerequisites": {
+        "skills": []
+      },
+      "compatible_skills": [
+        "deep-time-vector-workflow"
+      ],
+      "alternative_skills": [],
+      "downstream_capabilities": []
+    },
+    "evaluation": {
+      "success_conditions": [
+        "All required skill steps are grounded and validated."
+      ],
+      "metrics": [
+        {
+          "name": "execution_success",
+          "type": "boolean"
+        },
+        {
+          "name": "constraint_satisfaction",
+          "type": "ratio"
+        },
+        {
+          "name": "output_validity",
+          "type": "boolean"
+        }
+      ]
+    }
+  },
+  {
+    "schema_version": "geoskill-0.1",
+    "id": "ccs-coordinate-spatial",
+    "name": "ccs-coordinate-spatial",
+    "display_name": "CCS Coordinate and Spatial Analysis",
+    "version": "0.1.0",
+    "description": "Compute coordinate conversions, distances, bearings, and extents for CCS assets.",
+    "domain": {
+      "primary": "ccs",
+      "secondary": [
+        "coordinate-conversion",
+        "distance"
+      ]
+    },
+    "task_types": [
+      "coordinate-conversion",
+      "distance",
+      "bearing",
+      "bbox-area"
+    ],
+    "keywords": [
+      "CCS",
+      "facility",
+      "DMS",
+      "bearing",
+      "distance",
+      "碳捕获",
+      "封存设施"
+    ],
+    "goal": {
+      "capability": "ccs-coordinate-spatial",
+      "description": "Compute coordinate conversions, distances, bearings, and extents for CCS assets.",
+      "target_state": [
+        "validated-ccs-coordinate-spatial-result"
+      ]
+    },
+    "inputs": [
+      {
+        "id": "spatial_inputs",
+        "semantic_type": "Vector|Raster|Parameter",
+        "data_type": "geospatial assets or coordinates",
+        "required": true,
+        "description": "Spatial data, ROI, coordinates, or a resource locator."
+      }
+    ],
+    "preconditions": {
+      "data": [
+        "The authoritative input resource or query parameters are available."
+      ],
+      "semantic": [
+        "The requested operation is represented by this capability."
+      ],
+      "environment": [
+        "GeoToolAgent runtime is available."
+      ],
+      "tool": [
+        "At least one compatible registered tool is available."
+      ]
+    },
+    "geo_constraints": {
+      "crs": {
+        "required": false,
+        "relation": [
+          "compatible",
+          "transformable"
+        ],
+        "accepted_crs": [],
+        "auto_fix": {
+          "enabled": true,
+          "preferred_skill": "geo-crs-normalization"
+        }
+      },
+      "spatial_extent": {
+        "required": true,
+        "relation": [
+          "within",
+          "contains"
+        ],
+        "auto_fix": {
+          "enabled": true,
+          "preferred_skill": "spatial-clip"
+        }
+      },
+      "spatial_resolution": {
+        "required": false,
+        "relation": [
+          "compatible",
+          "same"
+        ],
+        "target_resolution": null,
+        "unit": "meter",
+        "tolerance": null,
+        "auto_fix": {
+          "enabled": true,
+          "preferred_skill": "raster-resampling"
+        }
+      },
+      "temporal": {
+        "required": false,
+        "relation": [
+          "overlap",
+          "same-date",
+          "within-window",
+          "nearest"
+        ],
+        "tolerance": null,
+        "unit": "day"
+      },
+      "format": {
+        "required_formats": [],
+        "auto_conversion": true
+      },
+      "bands": {
+        "required": [],
+        "optional": []
+      },
+      "variables": {
+        "required": true,
+        "optional": [],
+        "required_variables": [
+          "facility coordinates",
+          "facility id"
+        ]
+      },
+      "units": {
+        "required": true,
+        "compatible_units": [
+          "degree",
+          "DMS",
+          "km",
+          "km2"
+        ],
+        "auto_conversion": true
+      },
+      "nodata": {
+        "allowed": true,
+        "handling": {
+          "strategy": "mask"
+        }
+      }
+    },
+    "workflow": {
+      "type": "sequential",
+      "steps": [
+        {
+          "id": "step_1",
+          "capability": "ccs-coordinate-spatial",
+          "operation": "Normalize facility coordinates and calculate spatial metrics",
+          "required": true,
+          "depends_on": [],
+          "tool_selection": {
+            "mode": "dynamic",
+            "candidates": [
+              "CCSDecimalToDMS",
+              "CCSHaversineDistance",
+              "CCSBearing",
+              "CCSBBoxArea"
+            ],
+            "selection_criteria": [
+              "input_compatibility",
+              "tool_availability",
+              "geo_constraint_satisfaction",
+              "execution_feedback"
+            ]
+          }
+        }
+      ]
+    },
+    "outputs": [
+      {
+        "id": "result",
+        "semantic_type": "Scalar|Table",
+        "data_type": "validated geoscience result",
+        "description": "A numeric or structured result with provenance.",
+        "expected_format": "JSON"
+      }
+    ],
+    "tool_candidates": [
+      "CCSDecimalToDMS",
+      "CCSHaversineDistance",
+      "CCSBearing",
+      "CCSBBoxArea"
+    ],
+    "validation": {
+      "input_validation": [
+        {
+          "id": "input-present",
+          "type": "schema",
+          "rule": "required inputs are present"
+        }
+      ],
+      "intermediate_validation": [],
+      "output_validation": [
+        {
+          "id": "output-present",
+          "type": "schema",
+          "rule": "the selected tool returns a structured result",
+          "on_failure": {
+            "action": "replan"
+          }
+        }
+      ]
+    },
+    "failure_modes": [
+      {
+        "id": "missing-input",
+        "condition": "A required input or source locator is missing.",
+        "severity": "planning_required",
+        "recovery": "retrieve-missing-data"
+      },
+      {
+        "id": "constraint-mismatch",
+        "condition": "CRS, extent, resolution, time, format, variable, unit, or NoData constraints do not align.",
+        "severity": "recoverable",
+        "recovery": "local-constraint-repair"
+      }
+    ],
+    "recovery": {
+      "strategies": {
+        "local-constraint-repair": {
+          "capability": "local geospatial normalization",
+          "preferred_skills": [
+            "geo-crs-normalization",
+            "spatial-clip",
+            "raster-resampling"
+          ],
+          "retry_original_skill": true
+        },
+        "retrieve-missing-data": {
+          "capability": "data retrieval",
+          "retry_original_skill": true
+        }
+      }
+    },
+    "provenance": {
+      "record": [
+        "input_dataset",
+        "data_source",
+        "crs",
+        "spatial_extent",
+        "spatial_resolution",
+        "selected_tools",
+        "tool_parameters",
+        "execution_order",
+        "validation_results"
+      ]
+    },
+    "planning": {
+      "abstraction_level": "skill",
+      "composable": true,
+      "reusable": true,
+      "deterministic": false,
+      "estimated_complexity": "low",
+      "prerequisites": {
+        "skills": []
+      },
+      "compatible_skills": [
+        "ccs-mrv-workflow"
+      ],
+      "alternative_skills": [],
+      "downstream_capabilities": []
+    },
+    "evaluation": {
+      "success_conditions": [
+        "All required skill steps are grounded and validated."
+      ],
+      "metrics": [
+        {
+          "name": "execution_success",
+          "type": "boolean"
+        },
+        {
+          "name": "constraint_satisfaction",
+          "type": "ratio"
+        },
+        {
+          "name": "output_validity",
+          "type": "boolean"
+        }
+      ]
+    }
+  },
+  {
+    "schema_version": "geoskill-0.1",
+    "id": "ccs-mrv-workflow",
+    "name": "ccs-mrv-workflow",
+    "display_name": "CCS MRV Spatial Workflow",
+    "version": "0.1.0",
+    "description": "Check, standardize, validate, relate, overlay, and render synthetic CCS MRV spatial assets.",
+    "domain": {
+      "primary": "ccs",
+      "secondary": [
+        "crs-check",
+        "spatial-standardization"
+      ]
+    },
+    "task_types": [
+      "crs-check",
+      "spatial-standardization",
+      "quality-control",
+      "nearest-neighbor",
+      "buffer",
+      "overlay",
+      "rendering"
+    ],
+    "keywords": [
+      "CCS MRV",
+      "CRS",
+      "facility",
+      "leak",
+      "buffer",
+      "overlay",
+      "MRV",
+      "封存监测"
+    ],
+    "goal": {
+      "capability": "ccs-mrv-workflow",
+      "description": "Check, standardize, validate, relate, overlay, and render synthetic CCS MRV spatial assets.",
+      "target_state": [
+        "validated-ccs-mrv-workflow-result"
+      ]
+    },
+    "inputs": [
+      {
+        "id": "spatial_inputs",
+        "semantic_type": "Vector|Raster|Parameter",
+        "data_type": "geospatial assets or coordinates",
+        "required": true,
+        "description": "Spatial data, ROI, coordinates, or a resource locator."
+      }
+    ],
+    "preconditions": {
+      "data": [
+        "The authoritative input resource or query parameters are available."
+      ],
+      "semantic": [
+        "The requested operation is represented by this capability."
+      ],
+      "environment": [
+        "GeoToolAgent runtime is available."
+      ],
+      "tool": [
+        "At least one compatible registered tool is available."
+      ]
+    },
+    "geo_constraints": {
+      "crs": {
+        "required": true,
+        "relation": [
+          "same",
+          "transformable"
+        ],
+        "accepted_crs": [
+          "EPSG:4326",
+          "EPSG:3857"
+        ],
+        "auto_fix": {
+          "enabled": true,
+          "preferred_skill": "geo-crs-normalization"
+        }
+      },
+      "spatial_extent": {
+        "required": true,
+        "relation": [
+          "overlap",
+          "within"
+        ],
+        "auto_fix": {
+          "enabled": true,
+          "preferred_skill": "spatial-clip"
+        }
+      },
+      "spatial_resolution": {
+        "required": false,
+        "relation": [
+          "compatible",
+          "same"
+        ],
+        "target_resolution": null,
+        "unit": "meter",
+        "tolerance": null,
+        "auto_fix": {
+          "enabled": true,
+          "preferred_skill": "raster-resampling"
+        }
+      },
+      "temporal": {
+        "required": false,
+        "relation": [
+          "overlap",
+          "same-date",
+          "within-window",
+          "nearest"
+        ],
+        "tolerance": null,
+        "unit": "day"
+      },
+      "format": {
+        "required_formats": [
+          "GeoJSON",
+          "CSV",
+          "GeoPackage"
+        ],
+        "auto_conversion": true
+      },
+      "bands": {
+        "required": [],
+        "optional": []
+      },
+      "variables": {
+        "required": [],
+        "optional": []
+      },
+      "units": {
+        "required": false,
+        "compatible_units": [],
+        "auto_conversion": true
+      },
+      "nodata": {
+        "allowed": true,
+        "handling": {
+          "strategy": "mask"
+        }
+      }
+    },
+    "workflow": {
+      "type": "sequential",
+      "steps": [
+        {
+          "id": "step_1",
+          "capability": "mrv-preprocessing",
+          "operation": "Check CRS and normalize spatial assets",
+          "required": true,
+          "depends_on": [],
+          "tool_selection": {
+            "mode": "dynamic",
+            "candidates": [
+              "CCSCheckCRSConsistency",
+              "CCSStandardizeSpatialData",
+              "CCSValidateSpatialData",
+              "CCSNearestNeighbor",
+              "CCSBuffer",
+              "CCSOverlay",
+              "CCSBatchVector",
+              "CCSRenderMap"
+            ],
+            "selection_criteria": [
+              "input_compatibility",
+              "tool_availability",
+              "geo_constraint_satisfaction",
+              "execution_feedback"
+            ]
+          }
+        },
+        {
+          "id": "step_2",
+          "capability": "mrv-analysis",
+          "operation": "Run proximity, buffer, overlay, or thematic rendering",
+          "required": true,
+          "depends_on": [
+            "step_1"
+          ],
+          "tool_selection": {
+            "mode": "dynamic",
+            "candidates": [
+              "CCSCheckCRSConsistency",
+              "CCSStandardizeSpatialData",
+              "CCSValidateSpatialData",
+              "CCSNearestNeighbor",
+              "CCSBuffer",
+              "CCSOverlay",
+              "CCSBatchVector",
+              "CCSRenderMap"
+            ],
+            "selection_criteria": [
+              "input_compatibility",
+              "tool_availability",
+              "geo_constraint_satisfaction",
+              "execution_feedback"
+            ]
+          }
+        }
+      ]
+    },
+    "outputs": [
+      {
+        "id": "artifact",
+        "semantic_type": "Raster|Vector|Table",
+        "data_type": "validated spatial artifact or summary",
+        "description": "Spatial output, summary, or rendered artifact.",
+        "expected_format": "JSON or registered artifact"
+      }
+    ],
+    "tool_candidates": [
+      "CCSCheckCRSConsistency",
+      "CCSStandardizeSpatialData",
+      "CCSValidateSpatialData",
+      "CCSNearestNeighbor",
+      "CCSBuffer",
+      "CCSOverlay",
+      "CCSBatchVector",
+      "CCSRenderMap"
+    ],
+    "validation": {
+      "input_validation": [
+        {
+          "id": "input-present",
+          "type": "schema",
+          "rule": "required inputs are present"
+        }
+      ],
+      "intermediate_validation": [],
+      "output_validation": [
+        {
+          "id": "output-present",
+          "type": "schema",
+          "rule": "the selected tool returns a structured result",
+          "on_failure": {
+            "action": "replan"
+          }
+        }
+      ]
+    },
+    "failure_modes": [
+      {
+        "id": "missing-input",
+        "condition": "A required input or source locator is missing.",
+        "severity": "planning_required",
+        "recovery": "retrieve-missing-data"
+      },
+      {
+        "id": "constraint-mismatch",
+        "condition": "CRS, extent, resolution, time, format, variable, unit, or NoData constraints do not align.",
+        "severity": "recoverable",
+        "recovery": "local-constraint-repair"
+      }
+    ],
+    "recovery": {
+      "strategies": {
+        "local-constraint-repair": {
+          "capability": "local geospatial normalization",
+          "preferred_skills": [
+            "geo-crs-normalization",
+            "spatial-clip",
+            "raster-resampling"
+          ],
+          "retry_original_skill": true
+        },
+        "retrieve-missing-data": {
+          "capability": "data retrieval",
+          "retry_original_skill": true
+        }
+      }
+    },
+    "provenance": {
+      "record": [
+        "input_dataset",
+        "data_source",
+        "crs",
+        "spatial_extent",
+        "spatial_resolution",
+        "selected_tools",
+        "tool_parameters",
+        "execution_order",
+        "validation_results"
+      ]
+    },
+    "planning": {
+      "abstraction_level": "skill",
+      "composable": true,
+      "reusable": true,
+      "deterministic": false,
+      "estimated_complexity": "medium",
+      "prerequisites": {
+        "skills": []
+      },
+      "compatible_skills": [
+        "ccs-coordinate-spatial",
+        "ccs-raster-zonal"
+      ],
+      "alternative_skills": [],
+      "downstream_capabilities": []
+    },
+    "evaluation": {
+      "success_conditions": [
+        "All required skill steps are grounded and validated."
+      ],
+      "metrics": [
+        {
+          "name": "execution_success",
+          "type": "boolean"
+        },
+        {
+          "name": "constraint_satisfaction",
+          "type": "ratio"
+        },
+        {
+          "name": "output_validity",
+          "type": "boolean"
+        }
+      ]
+    }
+  },
+  {
+    "schema_version": "geoskill-0.1",
+    "id": "ccs-raster-zonal",
+    "name": "ccs-raster-zonal",
+    "display_name": "CCS Raster and Zonal Analysis",
+    "version": "0.1.0",
+    "description": "Interpolate CCS measurements, apply raster algebra, summarize zones, and render MRV maps.",
+    "domain": {
+      "primary": "ccs",
+      "secondary": [
+        "interpolation",
+        "raster-algebra"
+      ]
+    },
+    "task_types": [
+      "interpolation",
+      "raster-algebra",
+      "zonal-statistics",
+      "rendering"
+    ],
+    "keywords": [
+      "CCS raster",
+      "injection intensity",
+      "reservoir pressure",
+      "IDW",
+      "zonal",
+      "CCS插值",
+      "MRV地图"
+    ],
+    "goal": {
+      "capability": "ccs-raster-zonal",
+      "description": "Interpolate CCS measurements, apply raster algebra, summarize zones, and render MRV maps.",
+      "target_state": [
+        "validated-ccs-raster-zonal-result"
+      ]
+    },
+    "inputs": [
+      {
+        "id": "raster_inputs",
+        "semantic_type": "Raster|Parameter",
+        "data_type": "GeoTIFF or raster resource group",
+        "required": true,
+        "description": "Raster assets and their band/variable metadata."
+      }
+    ],
+    "preconditions": {
+      "data": [
+        "The authoritative input resource or query parameters are available."
+      ],
+      "semantic": [
+        "The requested operation is represented by this capability."
+      ],
+      "environment": [
+        "GeoToolAgent runtime is available."
+      ],
+      "tool": [
+        "At least one compatible registered tool is available."
+      ]
+    },
+    "geo_constraints": {
+      "crs": {
+        "required": true,
+        "relation": [
+          "same",
+          "transformable"
+        ],
+        "accepted_crs": [],
+        "auto_fix": {
+          "enabled": true,
+          "preferred_skill": "geo-crs-normalization"
+        }
+      },
+      "spatial_extent": {
+        "required": true,
+        "relation": [
+          "overlap",
+          "within"
+        ],
+        "auto_fix": {
+          "enabled": true,
+          "preferred_skill": "spatial-clip"
+        }
+      },
+      "spatial_resolution": {
+        "required": true,
+        "relation": [
+          "compatible",
+          "same"
+        ],
+        "target_resolution": null,
+        "unit": "meter",
+        "tolerance": null,
+        "auto_fix": {
+          "enabled": true,
+          "preferred_skill": "raster-resampling"
+        }
+      },
+      "temporal": {
+        "required": false,
+        "relation": [
+          "overlap",
+          "same-date",
+          "within-window",
+          "nearest"
+        ],
+        "tolerance": null,
+        "unit": "day"
+      },
+      "format": {
+        "required_formats": [
+          "GeoTIFF"
+        ],
+        "auto_conversion": true
+      },
+      "bands": {
+        "required": [],
+        "optional": []
+      },
+      "variables": {
+        "required": [],
+        "optional": []
+      },
+      "units": {
+        "required": false,
+        "compatible_units": [],
+        "auto_conversion": true
+      },
+      "nodata": {
+        "allowed": true,
+        "handling": {
+          "strategy": "mask"
+        }
+      }
+    },
+    "workflow": {
+      "type": "sequential",
+      "steps": [
+        {
+          "id": "step_1",
+          "capability": "raster-analysis",
+          "operation": "Build and validate a continuous CCS surface",
+          "required": true,
+          "depends_on": [],
+          "tool_selection": {
+            "mode": "dynamic",
+            "candidates": [
+              "CCSInterpolateIDW",
+              "CCSRasterAlgebra",
+              "CCSZonalStatistics",
+              "CCSRenderMap"
+            ],
+            "selection_criteria": [
+              "input_compatibility",
+              "tool_availability",
+              "geo_constraint_satisfaction",
+              "execution_feedback"
+            ]
+          }
+        },
+        {
+          "id": "step_2",
+          "capability": "zonal-summary",
+          "operation": "Summarize the surface by MRV zones and render outputs",
+          "required": true,
+          "depends_on": [
+            "step_1"
+          ],
+          "tool_selection": {
+            "mode": "dynamic",
+            "candidates": [
+              "CCSInterpolateIDW",
+              "CCSRasterAlgebra",
+              "CCSZonalStatistics",
+              "CCSRenderMap"
+            ],
+            "selection_criteria": [
+              "input_compatibility",
+              "tool_availability",
+              "geo_constraint_satisfaction",
+              "execution_feedback"
+            ]
+          }
+        }
+      ]
+    },
+    "outputs": [
+      {
+        "id": "artifact",
+        "semantic_type": "Raster|Vector|Table",
+        "data_type": "validated spatial artifact or summary",
+        "description": "Spatial output, summary, or rendered artifact.",
+        "expected_format": "JSON or registered artifact"
+      }
+    ],
+    "tool_candidates": [
+      "CCSInterpolateIDW",
+      "CCSRasterAlgebra",
+      "CCSZonalStatistics",
+      "CCSRenderMap"
+    ],
+    "validation": {
+      "input_validation": [
+        {
+          "id": "input-present",
+          "type": "schema",
+          "rule": "required inputs are present"
+        }
+      ],
+      "intermediate_validation": [],
+      "output_validation": [
+        {
+          "id": "output-present",
+          "type": "schema",
+          "rule": "the selected tool returns a structured result",
+          "on_failure": {
+            "action": "replan"
+          }
+        }
+      ]
+    },
+    "failure_modes": [
+      {
+        "id": "missing-input",
+        "condition": "A required input or source locator is missing.",
+        "severity": "planning_required",
+        "recovery": "retrieve-missing-data"
+      },
+      {
+        "id": "constraint-mismatch",
+        "condition": "CRS, extent, resolution, time, format, variable, unit, or NoData constraints do not align.",
+        "severity": "recoverable",
+        "recovery": "local-constraint-repair"
+      }
+    ],
+    "recovery": {
+      "strategies": {
+        "local-constraint-repair": {
+          "capability": "local geospatial normalization",
+          "preferred_skills": [
+            "geo-crs-normalization",
+            "spatial-clip",
+            "raster-resampling"
+          ],
+          "retry_original_skill": true
+        },
+        "retrieve-missing-data": {
+          "capability": "data retrieval",
+          "retry_original_skill": true
+        }
+      }
+    },
+    "provenance": {
+      "record": [
+        "input_dataset",
+        "data_source",
+        "crs",
+        "spatial_extent",
+        "spatial_resolution",
+        "selected_tools",
+        "tool_parameters",
+        "execution_order",
+        "validation_results"
+      ]
+    },
+    "planning": {
+      "abstraction_level": "skill",
+      "composable": true,
+      "reusable": true,
+      "deterministic": false,
+      "estimated_complexity": "low",
+      "prerequisites": {
+        "skills": []
+      },
+      "compatible_skills": [
+        "ccs-mrv-workflow"
+      ],
+      "alternative_skills": [],
+      "downstream_capabilities": []
+    },
+    "evaluation": {
+      "success_conditions": [
+        "All required skill steps are grounded and validated."
+      ],
+      "metrics": [
+        {
+          "name": "execution_success",
+          "type": "boolean"
+        },
+        {
+          "name": "constraint_satisfaction",
+          "type": "ratio"
+        },
+        {
+          "name": "output_validity",
+          "type": "boolean"
+        }
+      ]
+    }
+  },
+  {
+    "schema_version": "geoskill-0.1",
+    "id": "remote-sensing-data-discovery",
+    "name": "remote-sensing-data-discovery",
+    "display_name": "Remote-Sensing Data Discovery",
+    "version": "0.1.0",
+    "description": "Discover and select spatially, temporally, and semantically compatible raster assets.",
+    "domain": {
+      "primary": "remote-sensing",
+      "secondary": [
+        "asset-discovery",
+        "scene-selection"
+      ]
+    },
+    "task_types": [
+      "asset-discovery",
+      "scene-selection"
+    ],
+    "keywords": [
+      "remote sensing",
+      "Landsat",
+      "Sentinel",
+      "GeoTIFF",
+      "files",
+      "遥感",
+      "影像检索",
+      "波段"
+    ],
+    "goal": {
+      "capability": "remote-sensing-data-discovery",
+      "description": "Discover and select spatially, temporally, and semantically compatible raster assets.",
+      "target_state": [
+        "validated-remote-sensing-data-discovery-result"
+      ]
+    },
+    "inputs": [
+      {
+        "id": "raster_inputs",
+        "semantic_type": "Raster|Parameter",
+        "data_type": "GeoTIFF or raster resource group",
+        "required": true,
+        "description": "Raster assets and their band/variable metadata."
+      }
+    ],
+    "preconditions": {
+      "data": [
+        "The authoritative input resource or query parameters are available."
+      ],
+      "semantic": [
+        "The requested operation is represented by this capability."
+      ],
+      "environment": [
+        "GeoToolAgent runtime is available."
+      ],
+      "tool": [
+        "At least one compatible registered tool is available."
+      ]
+    },
+    "geo_constraints": {
+      "crs": {
+        "required": false,
+        "relation": [
+          "compatible",
+          "transformable"
+        ],
+        "accepted_crs": [],
+        "auto_fix": {
+          "enabled": true,
+          "preferred_skill": "geo-crs-normalization"
+        }
+      },
+      "spatial_extent": {
+        "required": true,
+        "relation": [
+          "overlap",
+          "within"
+        ],
+        "auto_fix": {
+          "enabled": true,
+          "preferred_skill": "spatial-clip"
+        }
+      },
+      "spatial_resolution": {
+        "required": false,
+        "relation": [
+          "compatible",
+          "same"
+        ],
+        "target_resolution": null,
+        "unit": "meter",
+        "tolerance": null,
+        "auto_fix": {
+          "enabled": true,
+          "preferred_skill": "raster-resampling"
+        }
+      },
+      "temporal": {
+        "required": true,
+        "relation": [
+          "same-date",
+          "within-window",
+          "nearest"
+        ],
+        "tolerance": null,
+        "unit": "day"
+      },
+      "format": {
+        "required_formats": [
+          "GeoTIFF"
+        ],
+        "auto_conversion": true
+      },
+      "bands": {
+        "required": [],
+        "optional": [
+          "red",
+          "green",
+          "nir",
+          "swir",
+          "thermal",
+          "qa"
+        ]
+      },
+      "variables": {
+        "required": [],
+        "optional": []
+      },
+      "units": {
+        "required": false,
+        "compatible_units": [],
+        "auto_conversion": true
+      },
+      "nodata": {
+        "allowed": true,
+        "handling": {
+          "strategy": "mask"
+        }
+      }
+    },
+    "workflow": {
+      "type": "sequential",
+      "steps": [
+        {
+          "id": "step_1",
+          "capability": "asset-discovery",
+          "operation": "List candidate files and select compatible scenes",
+          "required": true,
+          "depends_on": [],
+          "tool_selection": {
+            "mode": "dynamic",
+            "candidates": [
+              "RemoteSensingListFiles"
+            ],
+            "selection_criteria": [
+              "input_compatibility",
+              "tool_availability",
+              "geo_constraint_satisfaction",
+              "execution_feedback"
+            ]
+          }
+        }
+      ]
+    },
+    "outputs": [
+      {
+        "id": "artifact",
+        "semantic_type": "Raster|Vector|Table",
+        "data_type": "validated spatial artifact or summary",
+        "description": "Spatial output, summary, or rendered artifact.",
+        "expected_format": "JSON or registered artifact"
+      }
+    ],
+    "tool_candidates": [
+      "RemoteSensingListFiles"
+    ],
+    "validation": {
+      "input_validation": [
+        {
+          "id": "input-present",
+          "type": "schema",
+          "rule": "required inputs are present"
+        }
+      ],
+      "intermediate_validation": [],
+      "output_validation": [
+        {
+          "id": "output-present",
+          "type": "schema",
+          "rule": "the selected tool returns a structured result",
+          "on_failure": {
+            "action": "replan"
+          }
+        }
+      ]
+    },
+    "failure_modes": [
+      {
+        "id": "missing-input",
+        "condition": "A required input or source locator is missing.",
+        "severity": "planning_required",
+        "recovery": "retrieve-missing-data"
+      },
+      {
+        "id": "constraint-mismatch",
+        "condition": "CRS, extent, resolution, time, format, variable, unit, or NoData constraints do not align.",
+        "severity": "recoverable",
+        "recovery": "local-constraint-repair"
+      }
+    ],
+    "recovery": {
+      "strategies": {
+        "local-constraint-repair": {
+          "capability": "local geospatial normalization",
+          "preferred_skills": [
+            "geo-crs-normalization",
+            "spatial-clip",
+            "raster-resampling"
+          ],
+          "retry_original_skill": true
+        },
+        "retrieve-missing-data": {
+          "capability": "data retrieval",
+          "retry_original_skill": true
+        }
+      }
+    },
+    "provenance": {
+      "record": [
+        "input_dataset",
+        "data_source",
+        "crs",
+        "spatial_extent",
+        "spatial_resolution",
+        "selected_tools",
+        "tool_parameters",
+        "execution_order",
+        "validation_results"
+      ]
+    },
+    "planning": {
+      "abstraction_level": "skill",
+      "composable": true,
+      "reusable": true,
+      "deterministic": false,
+      "estimated_complexity": "low",
+      "prerequisites": {
+        "skills": []
+      },
+      "compatible_skills": [
+        "remote-sensing-preprocessing",
+        "remote-sensing-raster-statistics"
+      ],
+      "alternative_skills": [],
+      "downstream_capabilities": []
+    },
+    "evaluation": {
+      "success_conditions": [
+        "All required skill steps are grounded and validated."
+      ],
+      "metrics": [
+        {
+          "name": "execution_success",
+          "type": "boolean"
+        },
+        {
+          "name": "constraint_satisfaction",
+          "type": "ratio"
+        },
+        {
+          "name": "output_validity",
+          "type": "boolean"
+        }
+      ]
+    }
+  },
+  {
+    "schema_version": "geoskill-0.1",
+    "id": "remote-sensing-preprocessing",
+    "name": "remote-sensing-preprocessing",
+    "display_name": "Remote-Sensing Preprocessing and Indices",
+    "version": "0.1.0",
+    "description": "Prepare compatible raster inputs, mask clouds, calculate spectral indices, and convert units.",
+    "domain": {
+      "primary": "remote-sensing",
+      "secondary": [
+        "cloud-mask",
+        "spectral-index"
+      ]
+    },
+    "task_types": [
+      "cloud-mask",
+      "spectral-index",
+      "thermal-conversion"
+    ],
+    "keywords": [
+      "NDVI",
+      "NDWI",
+      "NBR",
+      "NDSI",
+      "NDTI",
+      "cloud mask",
+      "thermal",
+      "云掩膜",
+      "指数"
+    ],
+    "goal": {
+      "capability": "remote-sensing-preprocessing",
+      "description": "Prepare compatible raster inputs, mask clouds, calculate spectral indices, and convert units.",
+      "target_state": [
+        "validated-remote-sensing-preprocessing-result"
+      ]
+    },
+    "inputs": [
+      {
+        "id": "raster_inputs",
+        "semantic_type": "Raster|Parameter",
+        "data_type": "GeoTIFF or raster resource group",
+        "required": true,
+        "description": "Raster assets and their band/variable metadata."
+      }
+    ],
+    "preconditions": {
+      "data": [
+        "The authoritative input resource or query parameters are available."
+      ],
+      "semantic": [
+        "The requested operation is represented by this capability."
+      ],
+      "environment": [
+        "GeoToolAgent runtime is available."
+      ],
+      "tool": [
+        "At least one compatible registered tool is available."
+      ]
+    },
+    "geo_constraints": {
+      "crs": {
+        "required": true,
+        "relation": [
+          "same",
+          "transformable"
+        ],
+        "accepted_crs": [],
+        "auto_fix": {
+          "enabled": true,
+          "preferred_skill": "geo-crs-normalization"
+        }
+      },
+      "spatial_extent": {
+        "required": true,
+        "relation": [
+          "overlap",
+          "within"
+        ],
+        "auto_fix": {
+          "enabled": true,
+          "preferred_skill": "spatial-clip"
+        }
+      },
+      "spatial_resolution": {
+        "required": true,
+        "relation": [
+          "compatible",
+          "same"
+        ],
+        "target_resolution": null,
+        "unit": "meter",
+        "tolerance": null,
+        "auto_fix": {
+          "enabled": true,
+          "preferred_skill": "raster-resampling"
+        }
+      },
+      "temporal": {
+        "required": true,
+        "relation": [
+          "same-date",
+          "within-window"
+        ],
+        "tolerance": null,
+        "unit": "day"
+      },
+      "format": {
+        "required_formats": [
+          "GeoTIFF"
+        ],
+        "auto_conversion": true
+      },
+      "bands": {
+        "required": [
+          "task-dependent band or variable"
+        ],
+        "optional": [
+          "red",
+          "green",
+          "nir",
+          "swir",
+          "thermal",
+          "qa"
+        ]
+      },
+      "variables": {
+        "required": [
+          "task-dependent spectral variable"
+        ],
+        "optional": []
+      },
+      "units": {
+        "required": false,
+        "compatible_units": [
+          "Kelvin",
+          "Celsius",
+          "dimensionless"
+        ],
+        "auto_conversion": true
+      },
+      "nodata": {
+        "allowed": true,
+        "handling": {
+          "strategy": "mask"
+        }
+      }
+    },
+    "workflow": {
+      "type": "sequential",
+      "steps": [
+        {
+          "id": "step_1",
+          "capability": "preprocess",
+          "operation": "Mask or align raster inputs according to band, NoData, CRS, and time constraints",
+          "required": true,
+          "depends_on": [],
+          "tool_selection": {
+            "mode": "dynamic",
+            "candidates": [
+              "RemoteSensingCloudMask",
+              "RemoteSensingNDVI",
+              "RemoteSensingNDWI",
+              "RemoteSensingNBR",
+              "RemoteSensingBatchNDSI",
+              "RemoteSensingNDTI",
+              "RemoteSensingKelvinToCelsius"
+            ],
+            "selection_criteria": [
+              "input_compatibility",
+              "tool_availability",
+              "geo_constraint_satisfaction",
+              "execution_feedback"
+            ]
+          }
+        },
+        {
+          "id": "step_2",
+          "capability": "derive-index",
+          "operation": "Calculate a spectral or thermal variable",
+          "required": true,
+          "depends_on": [
+            "step_1"
+          ],
+          "tool_selection": {
+            "mode": "dynamic",
+            "candidates": [
+              "RemoteSensingCloudMask",
+              "RemoteSensingNDVI",
+              "RemoteSensingNDWI",
+              "RemoteSensingNBR",
+              "RemoteSensingBatchNDSI",
+              "RemoteSensingNDTI",
+              "RemoteSensingKelvinToCelsius"
+            ],
+            "selection_criteria": [
+              "input_compatibility",
+              "tool_availability",
+              "geo_constraint_satisfaction",
+              "execution_feedback"
+            ]
+          }
+        }
+      ]
+    },
+    "outputs": [
+      {
+        "id": "artifact",
+        "semantic_type": "Raster|Vector|Table",
+        "data_type": "validated spatial artifact or summary",
+        "description": "Spatial output, summary, or rendered artifact.",
+        "expected_format": "JSON or registered artifact"
+      }
+    ],
+    "tool_candidates": [
+      "RemoteSensingCloudMask",
+      "RemoteSensingNDVI",
+      "RemoteSensingNDWI",
+      "RemoteSensingNBR",
+      "RemoteSensingBatchNDSI",
+      "RemoteSensingNDTI",
+      "RemoteSensingKelvinToCelsius"
+    ],
+    "validation": {
+      "input_validation": [
+        {
+          "id": "input-present",
+          "type": "schema",
+          "rule": "required inputs are present"
+        }
+      ],
+      "intermediate_validation": [],
+      "output_validation": [
+        {
+          "id": "output-present",
+          "type": "schema",
+          "rule": "the selected tool returns a structured result",
+          "on_failure": {
+            "action": "replan"
+          }
+        }
+      ]
+    },
+    "failure_modes": [
+      {
+        "id": "missing-input",
+        "condition": "A required input or source locator is missing.",
+        "severity": "planning_required",
+        "recovery": "retrieve-missing-data"
+      },
+      {
+        "id": "constraint-mismatch",
+        "condition": "CRS, extent, resolution, time, format, variable, unit, or NoData constraints do not align.",
+        "severity": "recoverable",
+        "recovery": "local-constraint-repair"
+      }
+    ],
+    "recovery": {
+      "strategies": {
+        "local-constraint-repair": {
+          "capability": "local geospatial normalization",
+          "preferred_skills": [
+            "geo-crs-normalization",
+            "spatial-clip",
+            "raster-resampling"
+          ],
+          "retry_original_skill": true
+        },
+        "retrieve-missing-data": {
+          "capability": "data retrieval",
+          "retry_original_skill": true
+        }
+      }
+    },
+    "provenance": {
+      "record": [
+        "input_dataset",
+        "data_source",
+        "crs",
+        "spatial_extent",
+        "spatial_resolution",
+        "selected_tools",
+        "tool_parameters",
+        "execution_order",
+        "validation_results"
+      ]
+    },
+    "planning": {
+      "abstraction_level": "skill",
+      "composable": true,
+      "reusable": true,
+      "deterministic": false,
+      "estimated_complexity": "medium",
+      "prerequisites": {
+        "skills": []
+      },
+      "compatible_skills": [
+        "remote-sensing-data-discovery",
+        "remote-sensing-raster-statistics"
+      ],
+      "alternative_skills": [],
+      "downstream_capabilities": []
+    },
+    "evaluation": {
+      "success_conditions": [
+        "All required skill steps are grounded and validated."
+      ],
+      "metrics": [
+        {
+          "name": "execution_success",
+          "type": "boolean"
+        },
+        {
+          "name": "constraint_satisfaction",
+          "type": "ratio"
+        },
+        {
+          "name": "output_validity",
+          "type": "boolean"
+        }
+      ]
+    }
+  },
+  {
+    "schema_version": "geoskill-0.1",
+    "id": "remote-sensing-raster-statistics",
+    "name": "remote-sensing-raster-statistics",
+    "display_name": "Remote-Sensing Raster Statistics",
+    "version": "0.1.0",
+    "description": "Aggregate, compare, and transform raster values across scenes, bands, and regions.",
+    "domain": {
+      "primary": "remote-sensing",
+      "secondary": [
+        "raster-aggregation",
+        "raster-algebra"
+      ]
+    },
+    "task_types": [
+      "raster-aggregation",
+      "raster-algebra",
+      "difference",
+      "ratio"
+    ],
+    "keywords": [
+      "mean",
+      "average",
+      "difference",
+      "sum",
+      "ratio",
+      "subtract",
+      "raster statistics",
+      "栅格统计",
+      "变化"
+    ],
+    "goal": {
+      "capability": "remote-sensing-raster-statistics",
+      "description": "Aggregate, compare, and transform raster values across scenes, bands, and regions.",
+      "target_state": [
+        "validated-remote-sensing-raster-statistics-result"
+      ]
+    },
+    "inputs": [
+      {
+        "id": "raster_inputs",
+        "semantic_type": "Raster|Parameter",
+        "data_type": "GeoTIFF or raster resource group",
+        "required": true,
+        "description": "Raster assets and their band/variable metadata."
+      }
+    ],
+    "preconditions": {
+      "data": [
+        "The authoritative input resource or query parameters are available."
+      ],
+      "semantic": [
+        "The requested operation is represented by this capability."
+      ],
+      "environment": [
+        "GeoToolAgent runtime is available."
+      ],
+      "tool": [
+        "At least one compatible registered tool is available."
+      ]
+    },
+    "geo_constraints": {
+      "crs": {
+        "required": true,
+        "relation": [
+          "same",
+          "transformable"
+        ],
+        "accepted_crs": [],
+        "auto_fix": {
+          "enabled": true,
+          "preferred_skill": "geo-crs-normalization"
+        }
+      },
+      "spatial_extent": {
+        "required": true,
+        "relation": [
+          "identical",
+          "overlap"
+        ],
+        "auto_fix": {
+          "enabled": true,
+          "preferred_skill": "spatial-clip"
+        }
+      },
+      "spatial_resolution": {
+        "required": true,
+        "relation": [
+          "same",
+          "compatible"
+        ],
+        "target_resolution": null,
+        "unit": "meter",
+        "tolerance": null,
+        "auto_fix": {
+          "enabled": true,
+          "preferred_skill": "raster-resampling"
+        }
+      },
+      "temporal": {
+        "required": true,
+        "relation": [
+          "same-date",
+          "within-window"
+        ],
+        "tolerance": null,
+        "unit": "day"
+      },
+      "format": {
+        "required_formats": [
+          "GeoTIFF"
+        ],
+        "auto_conversion": true
+      },
+      "bands": {
+        "required": [],
+        "optional": []
+      },
+      "variables": {
+        "required": [
+          "numeric raster variable"
+        ],
+        "optional": []
+      },
+      "units": {
+        "required": true,
+        "compatible_units": [
+          "same source unit"
+        ],
+        "auto_conversion": true
+      },
+      "nodata": {
+        "allowed": true,
+        "handling": {
+          "strategy": "mask"
+        }
+      }
+    },
+    "workflow": {
+      "type": "sequential",
+      "steps": [
+        {
+          "id": "step_1",
+          "capability": "raster-aggregate",
+          "operation": "Aggregate compatible scenes or bands",
+          "required": true,
+          "depends_on": [],
+          "tool_selection": {
+            "mode": "dynamic",
+            "candidates": [
+              "RemoteSensingBatchImageMean",
+              "RemoteSensingBatchImageSum",
+              "RemoteSensingMean",
+              "RemoteSensingTiffAverage",
+              "RemoteSensingTiffDifference",
+              "RemoteSensingDifference",
+              "RemoteSensingDivision",
+              "RemoteSensingSubtract"
+            ],
+            "selection_criteria": [
+              "input_compatibility",
+              "tool_availability",
+              "geo_constraint_satisfaction",
+              "execution_feedback"
+            ]
+          }
+        },
+        {
+          "id": "step_2",
+          "capability": "raster-algebra",
+          "operation": "Calculate differences, ratios, or other derived raster values",
+          "required": true,
+          "depends_on": [
+            "step_1"
+          ],
+          "tool_selection": {
+            "mode": "dynamic",
+            "candidates": [
+              "RemoteSensingBatchImageMean",
+              "RemoteSensingBatchImageSum",
+              "RemoteSensingMean",
+              "RemoteSensingTiffAverage",
+              "RemoteSensingTiffDifference",
+              "RemoteSensingDifference",
+              "RemoteSensingDivision",
+              "RemoteSensingSubtract"
+            ],
+            "selection_criteria": [
+              "input_compatibility",
+              "tool_availability",
+              "geo_constraint_satisfaction",
+              "execution_feedback"
+            ]
+          }
+        }
+      ]
+    },
+    "outputs": [
+      {
+        "id": "artifact",
+        "semantic_type": "Raster|Vector|Table",
+        "data_type": "validated spatial artifact or summary",
+        "description": "Spatial output, summary, or rendered artifact.",
+        "expected_format": "JSON or registered artifact"
+      }
+    ],
+    "tool_candidates": [
+      "RemoteSensingBatchImageMean",
+      "RemoteSensingBatchImageSum",
+      "RemoteSensingMean",
+      "RemoteSensingTiffAverage",
+      "RemoteSensingTiffDifference",
+      "RemoteSensingDifference",
+      "RemoteSensingDivision",
+      "RemoteSensingSubtract"
+    ],
+    "validation": {
+      "input_validation": [
+        {
+          "id": "input-present",
+          "type": "schema",
+          "rule": "required inputs are present"
+        }
+      ],
+      "intermediate_validation": [],
+      "output_validation": [
+        {
+          "id": "output-present",
+          "type": "schema",
+          "rule": "the selected tool returns a structured result",
+          "on_failure": {
+            "action": "replan"
+          }
+        }
+      ]
+    },
+    "failure_modes": [
+      {
+        "id": "missing-input",
+        "condition": "A required input or source locator is missing.",
+        "severity": "planning_required",
+        "recovery": "retrieve-missing-data"
+      },
+      {
+        "id": "constraint-mismatch",
+        "condition": "CRS, extent, resolution, time, format, variable, unit, or NoData constraints do not align.",
+        "severity": "recoverable",
+        "recovery": "local-constraint-repair"
+      }
+    ],
+    "recovery": {
+      "strategies": {
+        "local-constraint-repair": {
+          "capability": "local geospatial normalization",
+          "preferred_skills": [
+            "geo-crs-normalization",
+            "spatial-clip",
+            "raster-resampling"
+          ],
+          "retry_original_skill": true
+        },
+        "retrieve-missing-data": {
+          "capability": "data retrieval",
+          "retry_original_skill": true
+        }
+      }
+    },
+    "provenance": {
+      "record": [
+        "input_dataset",
+        "data_source",
+        "crs",
+        "spatial_extent",
+        "spatial_resolution",
+        "selected_tools",
+        "tool_parameters",
+        "execution_order",
+        "validation_results"
+      ]
+    },
+    "planning": {
+      "abstraction_level": "skill",
+      "composable": true,
+      "reusable": true,
+      "deterministic": false,
+      "estimated_complexity": "medium",
+      "prerequisites": {
+        "skills": []
+      },
+      "compatible_skills": [
+        "remote-sensing-data-discovery",
+        "remote-sensing-change-detection"
+      ],
+      "alternative_skills": [],
+      "downstream_capabilities": []
+    },
+    "evaluation": {
+      "success_conditions": [
+        "All required skill steps are grounded and validated."
+      ],
+      "metrics": [
+        {
+          "name": "execution_success",
+          "type": "boolean"
+        },
+        {
+          "name": "constraint_satisfaction",
+          "type": "ratio"
+        },
+        {
+          "name": "output_validity",
+          "type": "boolean"
+        }
+      ]
+    }
+  },
+  {
+    "schema_version": "geoskill-0.1",
+    "id": "remote-sensing-change-detection",
+    "name": "remote-sensing-change-detection",
+    "display_name": "Remote-Sensing Change and Hotspot Detection",
+    "version": "0.1.0",
+    "description": "Measure temporal or spatial change, hotspot proportions, threshold exceedance, and event increases.",
+    "domain": {
+      "primary": "remote-sensing",
+      "secondary": [
+        "change-detection",
+        "hotspot-analysis"
+      ]
+    },
+    "task_types": [
+      "change-detection",
+      "hotspot-analysis",
+      "threshold-analysis"
+    ],
+    "keywords": [
+      "change",
+      "percentage change",
+      "hotspot",
+      "threshold",
+      "snow loss",
+      "fire increase",
+      "变化检测",
+      "热点"
+    ],
+    "goal": {
+      "capability": "remote-sensing-change-detection",
+      "description": "Measure temporal or spatial change, hotspot proportions, threshold exceedance, and event increases.",
+      "target_state": [
+        "validated-remote-sensing-change-detection-result"
+      ]
+    },
+    "inputs": [
+      {
+        "id": "raster_inputs",
+        "semantic_type": "Raster|Parameter",
+        "data_type": "GeoTIFF or raster resource group",
+        "required": true,
+        "description": "Raster assets and their band/variable metadata."
+      }
+    ],
+    "preconditions": {
+      "data": [
+        "The authoritative input resource or query parameters are available."
+      ],
+      "semantic": [
+        "The requested operation is represented by this capability."
+      ],
+      "environment": [
+        "GeoToolAgent runtime is available."
+      ],
+      "tool": [
+        "At least one compatible registered tool is available."
+      ]
+    },
+    "geo_constraints": {
+      "crs": {
+        "required": true,
+        "relation": [
+          "same",
+          "transformable"
+        ],
+        "accepted_crs": [],
+        "auto_fix": {
+          "enabled": true,
+          "preferred_skill": "geo-crs-normalization"
+        }
+      },
+      "spatial_extent": {
+        "required": true,
+        "relation": [
+          "identical",
+          "overlap"
+        ],
+        "auto_fix": {
+          "enabled": true,
+          "preferred_skill": "spatial-clip"
+        }
+      },
+      "spatial_resolution": {
+        "required": true,
+        "relation": [
+          "same",
+          "compatible"
+        ],
+        "target_resolution": null,
+        "unit": "meter",
+        "tolerance": null,
+        "auto_fix": {
+          "enabled": true,
+          "preferred_skill": "raster-resampling"
+        }
+      },
+      "temporal": {
+        "required": true,
+        "relation": [
+          "same-date",
+          "within-window",
+          "nearest"
+        ],
+        "tolerance": null,
+        "unit": "day"
+      },
+      "format": {
+        "required_formats": [
+          "GeoTIFF"
+        ],
+        "auto_conversion": true
+      },
+      "bands": {
+        "required": [],
+        "optional": []
+      },
+      "variables": {
+        "required": [
+          "change variable",
+          "threshold variable"
+        ],
+        "optional": []
+      },
+      "units": {
+        "required": true,
+        "compatible_units": [
+          "same source unit",
+          "%"
+        ],
+        "auto_conversion": true
+      },
+      "nodata": {
+        "allowed": true,
+        "handling": {
+          "strategy": "mask"
+        }
+      }
+    },
+    "workflow": {
+      "type": "sequential",
+      "steps": [
+        {
+          "id": "step_1",
+          "capability": "change-metric",
+          "operation": "Align temporal outputs and calculate a change or percentage metric",
+          "required": true,
+          "depends_on": [],
+          "tool_selection": {
+            "mode": "dynamic",
+            "candidates": [
+              "RemoteSensingPercentageChange",
+              "RemoteSensingBatchHotspotPercentage",
+              "RemoteSensingBatchHotspotRaster",
+              "RemoteSensingExtremeSnowLossPercentage",
+              "RemoteSensingFireIncreaseMap",
+              "RemoteSensingCountAboveThreshold",
+              "RemoteSensingMaxValueAndIndex",
+              "RemoteSensingMinValueAndIndex",
+              "RemoteSensingArgmax"
+            ],
+            "selection_criteria": [
+              "input_compatibility",
+              "tool_availability",
+              "geo_constraint_satisfaction",
+              "execution_feedback"
+            ]
+          }
+        },
+        {
+          "id": "step_2",
+          "capability": "hotspot",
+          "operation": "Classify or summarize threshold exceedance",
+          "required": true,
+          "depends_on": [
+            "step_1"
+          ],
+          "tool_selection": {
+            "mode": "dynamic",
+            "candidates": [
+              "RemoteSensingPercentageChange",
+              "RemoteSensingBatchHotspotPercentage",
+              "RemoteSensingBatchHotspotRaster",
+              "RemoteSensingExtremeSnowLossPercentage",
+              "RemoteSensingFireIncreaseMap",
+              "RemoteSensingCountAboveThreshold",
+              "RemoteSensingMaxValueAndIndex",
+              "RemoteSensingMinValueAndIndex",
+              "RemoteSensingArgmax"
+            ],
+            "selection_criteria": [
+              "input_compatibility",
+              "tool_availability",
+              "geo_constraint_satisfaction",
+              "execution_feedback"
+            ]
+          }
+        }
+      ]
+    },
+    "outputs": [
+      {
+        "id": "artifact",
+        "semantic_type": "Raster|Vector|Table",
+        "data_type": "validated spatial artifact or summary",
+        "description": "Spatial output, summary, or rendered artifact.",
+        "expected_format": "JSON or registered artifact"
+      }
+    ],
+    "tool_candidates": [
+      "RemoteSensingPercentageChange",
+      "RemoteSensingBatchHotspotPercentage",
+      "RemoteSensingBatchHotspotRaster",
+      "RemoteSensingExtremeSnowLossPercentage",
+      "RemoteSensingFireIncreaseMap",
+      "RemoteSensingCountAboveThreshold",
+      "RemoteSensingMaxValueAndIndex",
+      "RemoteSensingMinValueAndIndex",
+      "RemoteSensingArgmax"
+    ],
+    "validation": {
+      "input_validation": [
+        {
+          "id": "input-present",
+          "type": "schema",
+          "rule": "required inputs are present"
+        }
+      ],
+      "intermediate_validation": [],
+      "output_validation": [
+        {
+          "id": "output-present",
+          "type": "schema",
+          "rule": "the selected tool returns a structured result",
+          "on_failure": {
+            "action": "replan"
+          }
+        }
+      ]
+    },
+    "failure_modes": [
+      {
+        "id": "missing-input",
+        "condition": "A required input or source locator is missing.",
+        "severity": "planning_required",
+        "recovery": "retrieve-missing-data"
+      },
+      {
+        "id": "constraint-mismatch",
+        "condition": "CRS, extent, resolution, time, format, variable, unit, or NoData constraints do not align.",
+        "severity": "recoverable",
+        "recovery": "local-constraint-repair"
+      }
+    ],
+    "recovery": {
+      "strategies": {
+        "local-constraint-repair": {
+          "capability": "local geospatial normalization",
+          "preferred_skills": [
+            "geo-crs-normalization",
+            "spatial-clip",
+            "raster-resampling"
+          ],
+          "retry_original_skill": true
+        },
+        "retrieve-missing-data": {
+          "capability": "data retrieval",
+          "retry_original_skill": true
+        }
+      }
+    },
+    "provenance": {
+      "record": [
+        "input_dataset",
+        "data_source",
+        "crs",
+        "spatial_extent",
+        "spatial_resolution",
+        "selected_tools",
+        "tool_parameters",
+        "execution_order",
+        "validation_results"
+      ]
+    },
+    "planning": {
+      "abstraction_level": "skill",
+      "composable": true,
+      "reusable": true,
+      "deterministic": false,
+      "estimated_complexity": "medium",
+      "prerequisites": {
+        "skills": []
+      },
+      "compatible_skills": [
+        "remote-sensing-preprocessing",
+        "remote-sensing-raster-statistics"
+      ],
+      "alternative_skills": [],
+      "downstream_capabilities": []
+    },
+    "evaluation": {
+      "success_conditions": [
+        "All required skill steps are grounded and validated."
+      ],
+      "metrics": [
+        {
+          "name": "execution_success",
+          "type": "boolean"
+        },
+        {
+          "name": "constraint_satisfaction",
+          "type": "ratio"
+        },
+        {
+          "name": "output_validity",
+          "type": "boolean"
+        }
+      ]
+    }
+  },
+  {
+    "schema_version": "geoskill-0.1",
+    "id": "remote-sensing-trend-distribution",
+    "name": "remote-sensing-trend-distribution",
+    "display_name": "Remote-Sensing Trend and Distribution Analysis",
+    "version": "0.1.0",
+    "description": "Estimate temporal trends, robust slopes, non-parametric significance, and distribution statistics.",
+    "domain": {
+      "primary": "remote-sensing",
+      "secondary": [
+        "trend",
+        "sen-slope"
+      ]
+    },
+    "task_types": [
+      "trend",
+      "sen-slope",
+      "mann-kendall",
+      "distribution"
+    ],
+    "keywords": [
+      "trend",
+      "linear regression",
+      "Sen slope",
+      "Mann-Kendall",
+      "kurtosis",
+      "coefficient of variation",
+      "趋势",
+      "统计分布"
+    ],
+    "goal": {
+      "capability": "remote-sensing-trend-distribution",
+      "description": "Estimate temporal trends, robust slopes, non-parametric significance, and distribution statistics.",
+      "target_state": [
+        "validated-remote-sensing-trend-distribution-result"
+      ]
+    },
+    "inputs": [
+      {
+        "id": "raster_inputs",
+        "semantic_type": "Raster|Parameter",
+        "data_type": "GeoTIFF or raster resource group",
+        "required": true,
+        "description": "Raster assets and their band/variable metadata."
+      }
+    ],
+    "preconditions": {
+      "data": [
+        "The authoritative input resource or query parameters are available."
+      ],
+      "semantic": [
+        "The requested operation is represented by this capability."
+      ],
+      "environment": [
+        "GeoToolAgent runtime is available."
+      ],
+      "tool": [
+        "At least one compatible registered tool is available."
+      ]
+    },
+    "geo_constraints": {
+      "crs": {
+        "required": false,
+        "relation": [
+          "compatible",
+          "same"
+        ],
+        "accepted_crs": [],
+        "auto_fix": {
+          "enabled": true,
+          "preferred_skill": "geo-crs-normalization"
+        }
+      },
+      "spatial_extent": {
+        "required": true,
+        "relation": [
+          "identical",
+          "overlap"
+        ],
+        "auto_fix": {
+          "enabled": true,
+          "preferred_skill": "spatial-clip"
+        }
+      },
+      "spatial_resolution": {
+        "required": false,
+        "relation": [
+          "compatible",
+          "same"
+        ],
+        "target_resolution": null,
+        "unit": "meter",
+        "tolerance": null,
+        "auto_fix": {
+          "enabled": true,
+          "preferred_skill": "raster-resampling"
+        }
+      },
+      "temporal": {
+        "required": true,
+        "relation": [
+          "within-window",
+          "same-date"
+        ],
+        "tolerance": null,
+        "unit": "day"
+      },
+      "format": {
+        "required_formats": [
+          "GeoTIFF"
+        ],
+        "auto_conversion": true
+      },
+      "bands": {
+        "required": [],
+        "optional": []
+      },
+      "variables": {
+        "required": [
+          "time-indexed raster variable"
+        ],
+        "optional": []
+      },
+      "units": {
+        "required": true,
+        "compatible_units": [
+          "same source unit"
+        ],
+        "auto_conversion": true
+      },
+      "nodata": {
+        "allowed": true,
+        "handling": {
+          "strategy": "mask"
+        }
+      }
+    },
+    "workflow": {
+      "type": "sequential",
+      "steps": [
+        {
+          "id": "step_1",
+          "capability": "time-series",
+          "operation": "Validate temporal compatibility and fit a trend or distribution statistic",
+          "required": true,
+          "depends_on": [],
+          "tool_selection": {
+            "mode": "dynamic",
+            "candidates": [
+              "RemoteSensingLinearTrend",
+              "RemoteSensingSensSlope",
+              "RemoteSensingMannKendallTest",
+              "RemoteSensingKurtosis",
+              "RemoteSensingCoefficientOfVariation"
+            ],
+            "selection_criteria": [
+              "input_compatibility",
+              "tool_availability",
+              "geo_constraint_satisfaction",
+              "execution_feedback"
+            ]
+          }
+        }
+      ]
+    },
+    "outputs": [
+      {
+        "id": "result",
+        "semantic_type": "Scalar|Table",
+        "data_type": "validated geoscience result",
+        "description": "A numeric or structured result with provenance.",
+        "expected_format": "JSON"
+      }
+    ],
+    "tool_candidates": [
+      "RemoteSensingLinearTrend",
+      "RemoteSensingSensSlope",
+      "RemoteSensingMannKendallTest",
+      "RemoteSensingKurtosis",
+      "RemoteSensingCoefficientOfVariation"
+    ],
+    "validation": {
+      "input_validation": [
+        {
+          "id": "input-present",
+          "type": "schema",
+          "rule": "required inputs are present"
+        }
+      ],
+      "intermediate_validation": [],
+      "output_validation": [
+        {
+          "id": "output-present",
+          "type": "schema",
+          "rule": "the selected tool returns a structured result",
+          "on_failure": {
+            "action": "replan"
+          }
+        }
+      ]
+    },
+    "failure_modes": [
+      {
+        "id": "missing-input",
+        "condition": "A required input or source locator is missing.",
+        "severity": "planning_required",
+        "recovery": "retrieve-missing-data"
+      },
+      {
+        "id": "constraint-mismatch",
+        "condition": "CRS, extent, resolution, time, format, variable, unit, or NoData constraints do not align.",
+        "severity": "recoverable",
+        "recovery": "local-constraint-repair"
+      }
+    ],
+    "recovery": {
+      "strategies": {
+        "local-constraint-repair": {
+          "capability": "local geospatial normalization",
+          "preferred_skills": [
+            "geo-crs-normalization",
+            "spatial-clip",
+            "raster-resampling"
+          ],
+          "retry_original_skill": true
+        },
+        "retrieve-missing-data": {
+          "capability": "data retrieval",
+          "retry_original_skill": true
+        }
+      }
+    },
+    "provenance": {
+      "record": [
+        "input_dataset",
+        "data_source",
+        "crs",
+        "spatial_extent",
+        "spatial_resolution",
+        "selected_tools",
+        "tool_parameters",
+        "execution_order",
+        "validation_results"
+      ]
+    },
+    "planning": {
+      "abstraction_level": "skill",
+      "composable": true,
+      "reusable": true,
+      "deterministic": false,
+      "estimated_complexity": "medium",
+      "prerequisites": {
+        "skills": []
+      },
+      "compatible_skills": [
+        "remote-sensing-data-discovery",
+        "remote-sensing-raster-statistics"
+      ],
+      "alternative_skills": [],
+      "downstream_capabilities": []
+    },
+    "evaluation": {
+      "success_conditions": [
+        "All required skill steps are grounded and validated."
+      ],
+      "metrics": [
+        {
+          "name": "execution_success",
+          "type": "boolean"
+        },
+        {
+          "name": "constraint_satisfaction",
+          "type": "ratio"
+        },
+        {
+          "name": "output_validity",
+          "type": "boolean"
+        }
+      ]
+    }
+  },
+  {
+    "schema_version": "geoskill-0.1",
+    "id": "natural-hazard-table-analytics",
+    "name": "natural-hazard-table-analytics",
+    "display_name": "Natural-Hazard Event Table Analytics",
+    "version": "0.1.0",
+    "description": "Load, filter, aggregate, rank, and select records from a natural-hazard event table.",
+    "domain": {
+      "primary": "natural-hazard",
+      "secondary": [
+        "event-table",
+        "filter"
+      ]
+    },
+    "task_types": [
+      "event-table",
+      "filter",
+      "aggregation",
+      "date-selection"
+    ],
+    "keywords": [
+      "natural disaster",
+      "EM-DAT",
+      "disaster event",
+      "deaths",
+      "damage",
+      "灾害事件",
+      "自然灾害"
+    ],
+    "goal": {
+      "capability": "natural-hazard-table-analytics",
+      "description": "Load, filter, aggregate, rank, and select records from a natural-hazard event table.",
+      "target_state": [
+        "validated-natural-hazard-table-analytics-result"
+      ]
+    },
+    "inputs": [
+      {
+        "id": "query_or_resource",
+        "semantic_type": "Table|Parameter",
+        "data_type": "authoritative resource locator",
+        "required": true,
+        "description": "The benchmark locator or structured task parameters."
+      }
+    ],
+    "preconditions": {
+      "data": [
+        "The authoritative input resource or query parameters are available."
+      ],
+      "semantic": [
+        "The requested operation is represented by this capability."
+      ],
+      "environment": [
+        "GeoToolAgent runtime is available."
+      ],
+      "tool": [
+        "At least one compatible registered tool is available."
+      ]
+    },
+    "geo_constraints": {
+      "crs": {
+        "required": false,
+        "relation": [
+          "compatible",
+          "transformable"
+        ],
+        "accepted_crs": [],
+        "auto_fix": {
+          "enabled": true,
+          "preferred_skill": "geo-crs-normalization"
+        }
+      },
+      "spatial_extent": {
+        "required": false,
+        "relation": [
+          "overlap",
+          "within",
+          "contains"
+        ],
+        "auto_fix": {
+          "enabled": true,
+          "preferred_skill": "spatial-clip"
+        }
+      },
+      "spatial_resolution": {
+        "required": false,
+        "relation": [
+          "compatible",
+          "same"
+        ],
+        "target_resolution": null,
+        "unit": "meter",
+        "tolerance": null,
+        "auto_fix": {
+          "enabled": true,
+          "preferred_skill": "raster-resampling"
+        }
+      },
+      "temporal": {
+        "required": false,
+        "relation": [
+          "within-window",
+          "same-date"
+        ],
+        "tolerance": null,
+        "unit": "day"
+      },
+      "format": {
+        "required_formats": [
+          "CSV",
+          "XLSX",
+          "JSON"
+        ],
+        "auto_conversion": true
+      },
+      "bands": {
+        "required": [],
+        "optional": []
+      },
+      "variables": {
+        "required": [
+          "event fields",
+          "filter fields"
+        ],
+        "optional": []
+      },
+      "units": {
+        "required": false,
+        "compatible_units": [],
+        "auto_conversion": true
+      },
+      "nodata": {
+        "allowed": false,
+        "handling": {
+          "strategy": "fail"
+        }
+      }
+    },
+    "workflow": {
+      "type": "sequential",
+      "steps": [
+        {
+          "id": "step_1",
+          "capability": "table-preparation",
+          "operation": "Load and filter authoritative event records",
+          "required": true,
+          "depends_on": [],
+          "tool_selection": {
+            "mode": "dynamic",
+            "candidates": [
+              "NaturalHazardLoadEventTable",
+              "NaturalHazardFilterRecords",
+              "NaturalHazardCountRecords",
+              "NaturalHazardGroupAggregate",
+              "NaturalHazardSumField",
+              "NaturalHazardSelectMaxRecord",
+              "NaturalHazardBuildStartDate",
+              "NaturalHazardSelectLatest"
+            ],
+            "selection_criteria": [
+              "input_compatibility",
+              "tool_availability",
+              "geo_constraint_satisfaction",
+              "execution_feedback"
+            ]
+          }
+        },
+        {
+          "id": "step_2",
+          "capability": "event-aggregation",
+          "operation": "Count, sum, rank, or select records using requested criteria",
+          "required": true,
+          "depends_on": [
+            "step_1"
+          ],
+          "tool_selection": {
+            "mode": "dynamic",
+            "candidates": [
+              "NaturalHazardLoadEventTable",
+              "NaturalHazardFilterRecords",
+              "NaturalHazardCountRecords",
+              "NaturalHazardGroupAggregate",
+              "NaturalHazardSumField",
+              "NaturalHazardSelectMaxRecord",
+              "NaturalHazardBuildStartDate",
+              "NaturalHazardSelectLatest"
+            ],
+            "selection_criteria": [
+              "input_compatibility",
+              "tool_availability",
+              "geo_constraint_satisfaction",
+              "execution_feedback"
+            ]
+          }
+        }
+      ]
+    },
+    "outputs": [
+      {
+        "id": "result",
+        "semantic_type": "Scalar|Table",
+        "data_type": "validated geoscience result",
+        "description": "A numeric or structured result with provenance.",
+        "expected_format": "JSON"
+      }
+    ],
+    "tool_candidates": [
+      "NaturalHazardLoadEventTable",
+      "NaturalHazardFilterRecords",
+      "NaturalHazardCountRecords",
+      "NaturalHazardGroupAggregate",
+      "NaturalHazardSumField",
+      "NaturalHazardSelectMaxRecord",
+      "NaturalHazardBuildStartDate",
+      "NaturalHazardSelectLatest"
+    ],
+    "validation": {
+      "input_validation": [
+        {
+          "id": "input-present",
+          "type": "schema",
+          "rule": "required inputs are present"
+        }
+      ],
+      "intermediate_validation": [],
+      "output_validation": [
+        {
+          "id": "output-present",
+          "type": "schema",
+          "rule": "the selected tool returns a structured result",
+          "on_failure": {
+            "action": "replan"
+          }
+        }
+      ]
+    },
+    "failure_modes": [
+      {
+        "id": "missing-input",
+        "condition": "A required input or source locator is missing.",
+        "severity": "planning_required",
+        "recovery": "retrieve-missing-data"
+      },
+      {
+        "id": "constraint-mismatch",
+        "condition": "CRS, extent, resolution, time, format, variable, unit, or NoData constraints do not align.",
+        "severity": "recoverable",
+        "recovery": "local-constraint-repair"
+      }
+    ],
+    "recovery": {
+      "strategies": {
+        "local-constraint-repair": {
+          "capability": "local geospatial normalization",
+          "preferred_skills": [
+            "geo-crs-normalization",
+            "spatial-clip",
+            "raster-resampling"
+          ],
+          "retry_original_skill": true
+        },
+        "retrieve-missing-data": {
+          "capability": "data retrieval",
+          "retry_original_skill": true
+        }
+      }
+    },
+    "provenance": {
+      "record": [
+        "input_dataset",
+        "data_source",
+        "crs",
+        "spatial_extent",
+        "spatial_resolution",
+        "selected_tools",
+        "tool_parameters",
+        "execution_order",
+        "validation_results"
+      ]
+    },
+    "planning": {
+      "abstraction_level": "skill",
+      "composable": true,
+      "reusable": true,
+      "deterministic": false,
+      "estimated_complexity": "medium",
+      "prerequisites": {
+        "skills": []
+      },
+      "compatible_skills": [
+        "earthquake-catalog-analysis"
+      ],
+      "alternative_skills": [],
+      "downstream_capabilities": []
+    },
+    "evaluation": {
+      "success_conditions": [
+        "All required skill steps are grounded and validated."
+      ],
+      "metrics": [
+        {
+          "name": "execution_success",
+          "type": "boolean"
+        },
+        {
+          "name": "constraint_satisfaction",
+          "type": "ratio"
+        },
+        {
+          "name": "output_validity",
+          "type": "boolean"
+        }
+      ]
+    }
+  }
+]

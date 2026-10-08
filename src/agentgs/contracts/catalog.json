@@ -1,0 +1,1164 @@
+{
+  "specs": [
+    {
+      "Name": "DeepEarthQueryLITHO1",
+      "Category": "DeepEarthTools",
+      "Function": "Query nearest-node Moho or lithospheric-lid depth from the pinned LITHO1.0 sample table.",
+      "Input": "JSON object: required location_key; optional node_index and layer (\"moho\" or \"lid\"). Example: {\"location_key\":\"beijing\",\"node_index\":14010,\"layer\":\"moho\"}",
+      "Output": "JSON result",
+      "Source": "GeoToolEval pinned datasets and open-source Python geospatial stack",
+      "Safety": "Yes",
+      "Next": ""
+    },
+    {
+      "Name": "DeepEarthQuerySEMUCB",
+      "Category": "DeepEarthTools",
+      "Function": "Query SEMUCB-WM1 dlnVs at a named location and model depth.",
+      "Input": "JSON object: required location_key and depth_km; optional parameter=\"S\". Example: {\"location_key\":\"beijing\",\"depth_km\":100,\"parameter\":\"S\"}",
+      "Output": "JSON result",
+      "Source": "GeoToolEval pinned datasets and open-source Python geospatial stack",
+      "Safety": "Yes",
+      "Next": ""
+    },
+    {
+      "Name": "DeepEarthQueryUSGSCatalog",
+      "Category": "DeepEarthTools",
+      "Function": "Filter, rank, count, or aggregate the frozen USGS M7+ earthquake catalog.",
+      "Input": "JSON object with operation and its filters. Supported operations: count, largest, deepest, total_energy, event. Optional fields: minimum_magnitude, year, start, end_exclusive, event_id, event_count, formula",
+      "Output": "JSON result",
+      "Source": "GeoToolEval pinned datasets and open-source Python geospatial stack",
+      "Safety": "Yes",
+      "Next": ""
+    },
+    {
+      "Name": "DeepEarthGetUSGSEvent",
+      "Category": "DeepEarthTools",
+      "Function": "Retrieve one earthquake by event identifier from the frozen USGS catalog.",
+      "Input": "JSON object with required event_id. Copy event_id from the authoritative source_locator when present",
+      "Output": "JSON result",
+      "Source": "GeoToolEval pinned datasets and open-source Python geospatial stack",
+      "Safety": "Yes",
+      "Next": "DeepEarthSampleEventModels"
+    },
+    {
+      "Name": "DeepEarthSampleEventModels",
+      "Category": "DeepEarthTools",
+      "Function": "Join a USGS event to its nearest LITHO1.0 node and SEMUCB-WM1 sample.",
+      "Input": "JSON object with required event_id; optional litho_node_index and semucb_depth_km",
+      "Output": "JSON result",
+      "Source": "GeoToolEval pinned datasets and open-source Python geospatial stack",
+      "Safety": "Yes",
+      "Next": ""
+    },
+    {
+      "Name": "GeoBigDataExecuteGeoSPARQL",
+      "Category": "GeoBigDataTools",
+      "Function": "Retrieve pinned GeoQuestions/YAGO2geo materialized results by source_id or historical SPARQL structure; offline snapshot replay.",
+      "Input": "JSON object: source_id (original GeoQuestions identifier), or query/sparql. Optional dataset provenance label; no endpoint or reference answer fields.",
+      "Output": "JSON pinned_yago2geo_snapshot result with source_id, query, result table and snapshot provenance.",
+      "Source": "GeoToolEval pinned datasets and open-source Python geospatial stack",
+      "Safety": "Yes",
+      "Next": ""
+    },
+    {
+      "Name": "MineralResourcesSearchDeposits",
+      "Category": "MineralResourcesTools",
+      "Function": "Filter USGS MRDS deposits by country and primary commodity.",
+      "Input": "JSON object with optional country and commodity filters and integer limit (default 3)",
+      "Output": "JSON result",
+      "Source": "GeoToolEval pinned datasets and open-source Python geospatial stack",
+      "Safety": "Yes",
+      "Next": "MineralResourcesGetDeposit"
+    },
+    {
+      "Name": "MineralResourcesGetDeposit",
+      "Category": "MineralResourcesTools",
+      "Function": "Retrieve a USGS MRDS deposit by dep_id.",
+      "Input": "JSON object with required integer dep_id",
+      "Output": "JSON result",
+      "Source": "GeoToolEval pinned datasets and open-source Python geospatial stack",
+      "Safety": "Yes",
+      "Next": ""
+    },
+    {
+      "Name": "MineralResourcesCountrySummary",
+      "Category": "MineralResourcesTools",
+      "Function": "Count a country's MRDS records and rank its primary commodities.",
+      "Input": "JSON object with required country and optional integer limit",
+      "Output": "JSON result",
+      "Source": "GeoToolEval pinned datasets and open-source Python geospatial stack",
+      "Safety": "Yes",
+      "Next": "MineralResourcesSearchDeposits"
+    },
+    {
+      "Name": "MineralResourcesRankCommodityCountries",
+      "Category": "MineralResourcesTools",
+      "Function": "Rank countries by records related to a critical commodity.",
+      "Input": "JSON object with required commodity and optional integer limit",
+      "Output": "JSON result",
+      "Source": "GeoToolEval pinned datasets and open-source Python geospatial stack",
+      "Safety": "Yes",
+      "Next": "ClimateQueryFutureSSP"
+    },
+    {
+      "Name": "ClimateQueryDeepTime",
+      "Category": "ClimateChangeTools",
+      "Function": "Select the nearest Friedrich2016 or Bintanja2005 deep-time climate observation.",
+      "Input": "JSON object with dataset and either age_kyr_bp or find=\"min_temp_friedrich\"",
+      "Output": "JSON result",
+      "Source": "GeoToolEval pinned datasets and open-source Python geospatial stack",
+      "Safety": "Yes",
+      "Next": "ClimateCompareEpochs"
+    },
+    {
+      "Name": "ClimateQueryPresentMean",
+      "Category": "ClimateChangeTools",
+      "Function": "Calculate a NASA GISTEMP mean over an inclusive year interval.",
+      "Input": "JSON object with required inclusive year_start and year_end integers",
+      "Output": "JSON result",
+      "Source": "GeoToolEval pinned datasets and open-source Python geospatial stack",
+      "Safety": "Yes",
+      "Next": "ClimateQueryFutureSSP,ClimateCompareEpochs"
+    },
+    {
+      "Name": "ClimateQueryFutureSSP",
+      "Category": "ClimateChangeTools",
+      "Function": "Retrieve IPCC AR6 SSP warming estimates for a scenario and horizon (SSP1-1.9/1-2.6/2-4.5/3-7.0/5-8.5; default endpoint 2100).",
+      "Input": "JSON object with scenario/ssp and horizon_year/ssp_horizon; if the locator omits the year, use the standard 2100 endpoint",
+      "Output": "JSON result",
+      "Source": "GeoToolEval pinned datasets and open-source Python geospatial stack",
+      "Safety": "Yes",
+      "Next": "ClimateCompareEpochs"
+    },
+    {
+      "Name": "ClimateCompareEpochs",
+      "Category": "ClimateChangeTools",
+      "Function": "Compare numeric climate values returned by earlier climate tools; accepts values/x arrays or upstream result objects.",
+      "Input": "JSON object with numeric values/x array (upstream result objects are accepted) and optional operation",
+      "Output": "JSON result",
+      "Source": "GeoToolEval pinned datasets and open-source Python geospatial stack",
+      "Safety": "Yes",
+      "Next": ""
+    },
+    {
+      "Name": "EnergyFacilityDistance",
+      "Category": "EnergyResourcesTools",
+      "Function": "Compute great-circle distance between selected OPSD facilities.",
+      "Input": "JSON object with country, solar_municipality and wind_municipality; preserve null municipality values from source_locator and include question_id if available",
+      "Output": "JSON result",
+      "Source": "GeoToolEval pinned datasets and open-source Python geospatial stack",
+      "Safety": "Yes",
+      "Next": ""
+    },
+    {
+      "Name": "EnergyMineralSiteDistance",
+      "Category": "EnergyResourcesTools",
+      "Function": "Compute distance between two MRDS critical-mineral sites.",
+      "Input": "JSON object with required integer dep_id_1 and dep_id_2; optional question_id",
+      "Output": "JSON result",
+      "Source": "GeoToolEval pinned datasets and open-source Python geospatial stack",
+      "Safety": "Yes",
+      "Next": ""
+    },
+    {
+      "Name": "EnergyBBoxArea",
+      "Category": "EnergyResourcesTools",
+      "Function": "Compute spherical area for an energy-resource WGS84 bounding box.",
+      "Input": "JSON object with required bbox=[min_lon,min_lat,max_lon,max_lat]; optional plant_name and question_id",
+      "Output": "JSON result",
+      "Source": "GeoToolEval pinned datasets and open-source Python geospatial stack",
+      "Safety": "Yes",
+      "Next": ""
+    },
+    {
+      "Name": "EnergyNearestFacility",
+      "Category": "EnergyResourcesTools",
+      "Function": "Retrieve the nearest OPSD facility to a national capital.",
+      "Input": "JSON object with required country and energy_source; optional capital and question_id",
+      "Output": "JSON result",
+      "Source": "GeoToolEval pinned datasets and open-source Python geospatial stack",
+      "Safety": "Yes",
+      "Next": ""
+    },
+    {
+      "Name": "EnergyCapacityValue",
+      "Category": "EnergyResourcesTools",
+      "Function": "Read a year-end installed-capacity time-series value.",
+      "Input": "JSON object with required series and year; optional question_id",
+      "Output": "JSON result",
+      "Source": "GeoToolEval pinned datasets and open-source Python geospatial stack",
+      "Safety": "Yes",
+      "Next": ""
+    },
+    {
+      "Name": "EnergyNearestMineralSite",
+      "Category": "EnergyResourcesTools",
+      "Function": "Join an energy facility to its nearest critical-mineral site.",
+      "Input": "JSON object with required plant_name; optional mrds_dep_id and question_id",
+      "Output": "JSON result",
+      "Source": "GeoToolEval pinned datasets and open-source Python geospatial stack",
+      "Safety": "Yes",
+      "Next": ""
+    },
+    {
+      "Name": "EnergyCountryRenewableSummary",
+      "Category": "EnergyResourcesTools",
+      "Function": "Aggregate operating renewable capacity by technology.",
+      "Input": "JSON object with required country; optional renewable_types array, status and question_id",
+      "Output": "JSON result",
+      "Source": "GeoToolEval pinned datasets and open-source Python geospatial stack",
+      "Safety": "Yes",
+      "Next": ""
+    },
+    {
+      "Name": "EnergyCapacityGrowth",
+      "Category": "EnergyResourcesTools",
+      "Function": "Calculate absolute and percentage capacity growth between two years.",
+      "Input": "JSON object with required series, start_year and end_year; optional question_id",
+      "Output": "JSON result",
+      "Source": "GeoToolEval pinned datasets and open-source Python geospatial stack",
+      "Safety": "Yes",
+      "Next": ""
+    },
+    {
+      "Name": "EnergyTransitionMetrics",
+      "Category": "EnergyResourcesTools",
+      "Function": "Join population, renewable capacity, and energy-consumption indicators.",
+      "Input": "JSON object with required country; optional population_year, consumption_year and question_id",
+      "Output": "JSON result",
+      "Source": "GeoToolEval pinned datasets and open-source Python geospatial stack",
+      "Safety": "Yes",
+      "Next": ""
+    },
+    {
+      "Name": "EnergyRegionalOverlaySummary",
+      "Category": "EnergyResourcesTools",
+      "Function": "Return a reproducible regional facility/mineral overlay summary.",
+      "Input": "JSON object with required region and bbox; optional question_id",
+      "Output": "JSON result",
+      "Source": "GeoToolEval pinned datasets and open-source Python geospatial stack",
+      "Safety": "Yes",
+      "Next": ""
+    },
+    {
+      "Name": "OceanMonthlyGridValue",
+      "Category": "OceanCarbonTools",
+      "Function": "Read a SOCAT monthly grid-cell fCO2 observation.",
+      "Input": "JSON object with required date, latitude and longitude; optional question_id",
+      "Output": "JSON result",
+      "Source": "GeoToolEval pinned datasets and open-source Python geospatial stack",
+      "Safety": "Yes",
+      "Next": ""
+    },
+    {
+      "Name": "OceanProfileValue",
+      "Category": "OceanCarbonTools",
+      "Function": "Read a deep GLODAP profile carbon value.",
+      "Input": "JSON object with required expocode and station; optional depth_m and question_id",
+      "Output": "JSON result",
+      "Source": "GeoToolEval pinned datasets and open-source Python geospatial stack",
+      "Safety": "Yes",
+      "Next": ""
+    },
+    {
+      "Name": "OceanCruiseQC",
+      "Category": "OceanCarbonTools",
+      "Function": "Summarize SNAPO cruise carbon quality flags.",
+      "Input": "JSON object with required cruise; optional required_flags and question_id",
+      "Output": "JSON result",
+      "Source": "GeoToolEval pinned datasets and open-source Python geospatial stack",
+      "Safety": "Yes",
+      "Next": ""
+    },
+    {
+      "Name": "OceanStationDistance",
+      "Category": "OceanCarbonTools",
+      "Function": "Compute distance between GLODAP and SNAPO stations.",
+      "Input": "JSON object with required glodap_expocode, glodap_station and snapo_cruise; optional question_id",
+      "Output": "JSON result",
+      "Source": "GeoToolEval pinned datasets and open-source Python geospatial stack",
+      "Safety": "Yes",
+      "Next": ""
+    },
+    {
+      "Name": "OceanBBoxArea",
+      "Category": "OceanCarbonTools",
+      "Function": "Compute spherical area of an ocean WGS84 bounding box.",
+      "Input": "JSON object with required bbox=[min_lon,min_lat,max_lon,max_lat]; optional region and question_id",
+      "Output": "JSON result",
+      "Source": "GeoToolEval pinned datasets and open-source Python geospatial stack",
+      "Safety": "Yes",
+      "Next": ""
+    },
+    {
+      "Name": "OceanAnnualCarbonSummary",
+      "Category": "OceanCarbonTools",
+      "Function": "Read a quality-controlled North Pacific annual SOCAT summary.",
+      "Input": "JSON object with required year; optional fCO2rec_flag and question_id",
+      "Output": "JSON result",
+      "Source": "GeoToolEval pinned datasets and open-source Python geospatial stack",
+      "Safety": "Yes",
+      "Next": ""
+    },
+    {
+      "Name": "OceanVerticalProfileDifference",
+      "Category": "OceanCarbonTools",
+      "Function": "Calculate surface-to-deep GLODAP carbon difference.",
+      "Input": "JSON object with required expocode and station; optional question_id",
+      "Output": "JSON result",
+      "Source": "GeoToolEval pinned datasets and open-source Python geospatial stack",
+      "Safety": "Yes",
+      "Next": ""
+    },
+    {
+      "Name": "OceanRegionalMapSummary",
+      "Category": "OceanCarbonTools",
+      "Function": "Read a reproducible SOCAT regional mapping summary.",
+      "Input": "JSON object with required region and bbox; optional year and question_id",
+      "Output": "JSON result",
+      "Source": "GeoToolEval pinned datasets and open-source Python geospatial stack",
+      "Safety": "Yes",
+      "Next": ""
+    },
+    {
+      "Name": "OceanSurfaceDeepMatch",
+      "Category": "OceanCarbonTools",
+      "Function": "Join nearest SOCAT surface and GLODAP deep observations.",
+      "Input": "JSON object with required glodap_expocode and glodap_station; optional socat_date and question_id",
+      "Output": "JSON result",
+      "Source": "GeoToolEval pinned datasets and open-source Python geospatial stack",
+      "Safety": "Yes",
+      "Next": ""
+    },
+    {
+      "Name": "OceanProfileDeduplication",
+      "Category": "OceanCarbonTools",
+      "Function": "Return SNAPO profile deduplication counts.",
+      "Input": "JSON object with required cruise; optional deduplication_key and question_id",
+      "Output": "JSON result",
+      "Source": "GeoToolEval pinned datasets and open-source Python geospatial stack",
+      "Safety": "Yes",
+      "Next": ""
+    },
+    {
+      "Name": "DeepTimeDecimalToDMS",
+      "Category": "DeepTimeBiosphereTools",
+      "Function": "Convert a deep-time site coordinate from decimal degrees to DMS.",
+      "Input": "JSON object with numeric value and axis field (field=\"lat\" or \"lon\"), or compact input_text=\"value,lat|lon\"",
+      "Output": "JSON result",
+      "Source": "GeoToolEval pinned datasets and open-source Python geospatial stack",
+      "Safety": "Yes",
+      "Next": ""
+    },
+    {
+      "Name": "DeepTimeHaversineDistance",
+      "Category": "DeepTimeBiosphereTools",
+      "Function": "Compute WGS84 great-circle/haversine distance between deep-time sites using coordinates or BioDeepTime series IDs.",
+      "Input": "JSON object with lat1, lon1, lat2, lon2, or series_ids=[id1,id2] plus input_assets; compact input_text=\"lat1,lon1;lat2,lon2\" is also accepted",
+      "Output": "JSON result",
+      "Source": "GeoToolEval pinned datasets and open-source Python geospatial stack",
+      "Safety": "Yes",
+      "Next": ""
+    },
+    {
+      "Name": "DeepTimeBearing",
+      "Category": "DeepTimeBiosphereTools",
+      "Function": "Compute initial bearing between deep-time sites.",
+      "Input": "JSON object with lat1, lon1, lat2, lon2, or series_ids=[from_id,to_id] plus input_assets, or compact input_text=\"lat1,lon1;lat2,lon2\"",
+      "Output": "JSON result",
+      "Source": "GeoToolEval pinned datasets and open-source Python geospatial stack",
+      "Safety": "Yes",
+      "Next": ""
+    },
+    {
+      "Name": "DeepTimeBBoxArea",
+      "Category": "DeepTimeBiosphereTools",
+      "Function": "Compute spherical area of a deep-time study bounding box.",
+      "Input": "JSON object with bbox=[min_lon,min_lat,max_lon,max_lat], or compact input_text with the four values",
+      "Output": "JSON result",
+      "Source": "GeoToolEval pinned datasets and open-source Python geospatial stack",
+      "Safety": "Yes",
+      "Next": ""
+    },
+    {
+      "Name": "DeepTimeStandardizeSpatialData",
+      "Category": "DeepTimeBiosphereTools",
+      "Function": "Read CSV/GeoJSON assets and emit standardized GeoJSON metadata.",
+      "Input": "JSON object with paths/input_assets array and optional lon_field, lat_field and _output_keys. Accepts CSV or GeoJSON and emits concrete standardized layer paths",
+      "Output": "JSON result",
+      "Source": "GeoToolEval pinned datasets and open-source Python geospatial stack",
+      "Safety": "Yes",
+      "Next": "DeepTimeValidateSpatialData,DeepTimeBatchVector"
+    },
+    {
+      "Name": "DeepTimeValidateSpatialData",
+      "Category": "DeepTimeBiosphereTools",
+      "Function": "Validate coordinate ranges, empty geometries, and duplicate features.",
+      "Input": "JSON object with paths/input_assets array or an upstream standardized layer path and optional _output_keys",
+      "Output": "JSON result",
+      "Source": "GeoToolEval pinned datasets and open-source Python geospatial stack",
+      "Safety": "Yes",
+      "Next": "DeepTimeNearestNeighbor,DeepTimeBuffer,DeepTimeOverlay,DeepTimeInterpolateIDW"
+    },
+    {
+      "Name": "DeepTimeNearestNeighbor",
+      "Category": "DeepTimeBiosphereTools",
+      "Function": "Calculate nearest neighbours for point features.",
+      "Input": "JSON object with paths containing an upstream point layer and optional neighbor_count and _output_keys",
+      "Output": "JSON result",
+      "Source": "GeoToolEval pinned datasets and open-source Python geospatial stack",
+      "Safety": "Yes",
+      "Next": "DeepTimeRenderMap"
+    },
+    {
+      "Name": "DeepTimeBuffer",
+      "Category": "DeepTimeBiosphereTools",
+      "Function": "Generate reproducible point-buffer envelope features.",
+      "Input": "JSON object with paths containing an upstream point layer, optional distance_km, and _output_keys",
+      "Output": "JSON result",
+      "Source": "GeoToolEval pinned datasets and open-source Python geospatial stack",
+      "Safety": "Yes",
+      "Next": "DeepTimeOverlay,DeepTimeRenderMap"
+    },
+    {
+      "Name": "DeepTimeOverlay",
+      "Category": "DeepTimeBiosphereTools",
+      "Function": "Perform point-in-polygon overlay for GeoJSON layers.",
+      "Input": "JSON object with paths containing point/buffer and polygon layers and optional _output_keys",
+      "Output": "JSON result",
+      "Source": "GeoToolEval pinned datasets and open-source Python geospatial stack",
+      "Safety": "Yes",
+      "Next": "DeepTimeInterpolateIDW,DeepTimeZonalStatistics,DeepTimeRenderMap"
+    },
+    {
+      "Name": "DeepTimeBatchVector",
+      "Category": "DeepTimeBiosphereTools",
+      "Function": "Standardize and batch-copy vector layers.",
+      "Input": "JSON object with paths/input_assets array and optional _output_keys",
+      "Output": "JSON result",
+      "Source": "GeoToolEval pinned datasets and open-source Python geospatial stack",
+      "Safety": "Yes",
+      "Next": "DeepTimeValidateSpatialData,DeepTimeOverlay"
+    },
+    {
+      "Name": "DeepTimeInterpolateIDW",
+      "Category": "DeepTimeBiosphereTools",
+      "Function": "Interpolate an explicit measured point field to a georeferenced GeoTIFF using bounded IDW.",
+      "Input": "JSON object with explicit value_field and exactly one point layer (points_path or single paths entry); optional lon_field, lat_field, grid_size, bbox and power. CSV temporal data require explicit date_field plus month=YYYY-MM, exact filters, or explicit allow_temporal_mixing=true. Emits a georeferenced GeoTIFF, never guesses an identifier as a measurement.",
+      "Output": "JSON result",
+      "Source": "GeoToolEval pinned datasets and open-source Python geospatial stack",
+      "Safety": "Yes",
+      "Next": "DeepTimeRasterAlgebra,DeepTimeZonalStatistics,DeepTimeRenderMap"
+    },
+    {
+      "Name": "DeepTimeRasterAlgebra",
+      "Category": "DeepTimeBiosphereTools",
+      "Function": "Apply a mask or arithmetic expression to a raster grid.",
+      "Input": "JSON object with exactly one raster_path or paths entry, operation=mask/add/subtract/multiply/divide, optional minimum/maximum or required scalar for arithmetic; preserves GeoTIFF georeference and emits raster_output.",
+      "Output": "JSON result",
+      "Source": "GeoToolEval pinned datasets and open-source Python geospatial stack",
+      "Safety": "Yes",
+      "Next": "DeepTimeZonalStatistics,DeepTimeRenderMap"
+    },
+    {
+      "Name": "DeepTimeZonalStatistics",
+      "Category": "DeepTimeBiosphereTools",
+      "Function": "Calculate raster summary statistics by analysis zone.",
+      "Input": "JSON object with raster_path plus zones_path and optional zone_field/band/operation, or table_path plus explicit zone_field/value_field; GeoTIFF spatial transform and real polygons are required for raster zonal statistics; raw NPY and global summaries are rejected.",
+      "Output": "JSON result",
+      "Source": "GeoToolEval pinned datasets and open-source Python geospatial stack",
+      "Safety": "Yes",
+      "Next": "DeepTimeRenderMap"
+    },
+    {
+      "Name": "DeepTimeRenderMap",
+      "Category": "DeepTimeBiosphereTools",
+      "Function": "Render a PNG and HTML inspection map from geospatial outputs.",
+      "Input": "JSON object with an explicit raster_path (georeferenced GeoTIFF) or vector_path (WGS84 CSV/GeoJSON), optional title; vector classification_field is only for vector attributes. Actual input geometry or values are rendered; empty input is rejected. Emits map_png and map_html.",
+      "Output": "JSON result",
+      "Source": "GeoToolEval pinned datasets and open-source Python geospatial stack",
+      "Safety": "Yes",
+      "Next": ""
+    },
+    {
+      "Name": "CCSDecimalToDMS",
+      "Category": "CCSTools",
+      "Function": "Convert a CCS facility coordinate from decimal degrees to DMS.",
+      "Input": "JSON object with numeric value and axis field (field=\"lat\" or \"lon\"), or case_id/facility_id plus input_assets, or compact input_text=\"value,lat|lon\"",
+      "Output": "JSON result",
+      "Source": "GeoToolEval pinned datasets and open-source Python geospatial stack",
+      "Safety": "Yes",
+      "Next": ""
+    },
+    {
+      "Name": "CCSHaversineDistance",
+      "Category": "CCSTools",
+      "Function": "Compute WGS84 great-circle/haversine distance between CCS facilities using coordinates or CCS case IDs.",
+      "Input": "JSON object with lat1, lon1, lat2, lon2, or case_ids=[id1,id2] plus input_assets; compact input_text=\"lat1,lon1;lat2,lon2\" is also accepted",
+      "Output": "JSON result",
+      "Source": "GeoToolEval pinned datasets and open-source Python geospatial stack",
+      "Safety": "Yes",
+      "Next": ""
+    },
+    {
+      "Name": "CCSBearing",
+      "Category": "CCSTools",
+      "Function": "Compute initial bearing between CCS facilities.",
+      "Input": "JSON object with lat1, lon1, lat2, lon2, or case_ids=[from_id,to_id] plus input_assets, or compact input_text=\"lat1,lon1;lat2,lon2\"",
+      "Output": "JSON result",
+      "Source": "GeoToolEval pinned datasets and open-source Python geospatial stack",
+      "Safety": "Yes",
+      "Next": ""
+    },
+    {
+      "Name": "CCSBBoxArea",
+      "Category": "CCSTools",
+      "Function": "Compute spherical area of a CCS study bounding box.",
+      "Input": "JSON object with bbox=[min_lon,min_lat,max_lon,max_lat], or compact input_text with the four values",
+      "Output": "JSON result",
+      "Source": "GeoToolEval pinned datasets and open-source Python geospatial stack",
+      "Safety": "Yes",
+      "Next": ""
+    },
+    {
+      "Name": "CCSCheckCRSConsistency",
+      "Category": "CCSTools",
+      "Function": "Check whether CCS input layers use a consistent CRS.",
+      "Input": "JSON object with crs_values array, input_assets pointing to a CRS inventory, or compact input_text containing CRS identifiers",
+      "Output": "JSON result",
+      "Source": "GeoToolEval pinned datasets and open-source Python geospatial stack",
+      "Safety": "Yes",
+      "Next": ""
+    },
+    {
+      "Name": "CCSStandardizeSpatialData",
+      "Category": "CCSTools",
+      "Function": "Read CCS CSV/GeoJSON assets and emit standardized GeoJSON metadata.",
+      "Input": "JSON object with paths/input_assets array and optional lon_field, lat_field and _output_keys. Accepts CSV or GeoJSON and emits concrete standardized layer paths",
+      "Output": "JSON result",
+      "Source": "GeoToolEval pinned datasets and open-source Python geospatial stack",
+      "Safety": "Yes",
+      "Next": "CCSValidateSpatialData,CCSBatchVector"
+    },
+    {
+      "Name": "CCSValidateSpatialData",
+      "Category": "CCSTools",
+      "Function": "Validate CCS coordinates, geometries, and identifiers.",
+      "Input": "JSON object with paths/input_assets array or an upstream standardized layer path and optional _output_keys",
+      "Output": "JSON result",
+      "Source": "GeoToolEval pinned datasets and open-source Python geospatial stack",
+      "Safety": "Yes",
+      "Next": "CCSNearestNeighbor,CCSBuffer,CCSOverlay,CCSInterpolateIDW"
+    },
+    {
+      "Name": "CCSNearestNeighbor",
+      "Category": "CCSTools",
+      "Function": "Calculate nearest CCS facilities.",
+      "Input": "JSON object with paths containing an upstream point layer and optional neighbor_count and _output_keys",
+      "Output": "JSON result",
+      "Source": "GeoToolEval pinned datasets and open-source Python geospatial stack",
+      "Safety": "Yes",
+      "Next": "CCSRenderMap"
+    },
+    {
+      "Name": "CCSBuffer",
+      "Category": "CCSTools",
+      "Function": "Generate point-buffer envelope features for CCS monitoring.",
+      "Input": "JSON object with paths containing an upstream point layer, optional distance_km, and _output_keys",
+      "Output": "JSON result",
+      "Source": "GeoToolEval pinned datasets and open-source Python geospatial stack",
+      "Safety": "Yes",
+      "Next": "CCSOverlay,CCSRenderMap"
+    },
+    {
+      "Name": "CCSOverlay",
+      "Category": "CCSTools",
+      "Function": "Perform CCS facility/analysis-zone overlay.",
+      "Input": "JSON object with paths containing point/buffer and polygon layers and optional _output_keys",
+      "Output": "JSON result",
+      "Source": "GeoToolEval pinned datasets and open-source Python geospatial stack",
+      "Safety": "Yes",
+      "Next": "CCSInterpolateIDW,CCSZonalStatistics,CCSRenderMap"
+    },
+    {
+      "Name": "CCSBatchVector",
+      "Category": "CCSTools",
+      "Function": "Standardize and batch-copy CCS vector layers.",
+      "Input": "JSON object with paths/input_assets array and optional _output_keys",
+      "Output": "JSON result",
+      "Source": "GeoToolEval pinned datasets and open-source Python geospatial stack",
+      "Safety": "Yes",
+      "Next": "CCSValidateSpatialData,CCSOverlay"
+    },
+    {
+      "Name": "CCSInterpolateIDW",
+      "Category": "CCSTools",
+      "Function": "Interpolate an explicit CCS measurement field to a georeferenced GeoTIFF after requested observation selection.",
+      "Input": "JSON object with explicit value_field and exactly one point layer (points_path or single paths entry); optional lon_field, lat_field, grid_size, bbox and power. CSV temporal data require explicit date_field plus month=YYYY-MM, exact filters, or explicit allow_temporal_mixing=true. Emits a georeferenced GeoTIFF, never guesses an identifier as a measurement.",
+      "Output": "JSON result",
+      "Source": "GeoToolEval pinned datasets and open-source Python geospatial stack",
+      "Safety": "Yes",
+      "Next": "CCSRasterAlgebra,CCSZonalStatistics,CCSRenderMap"
+    },
+    {
+      "Name": "CCSRasterAlgebra",
+      "Category": "CCSTools",
+      "Function": "Apply a mask or arithmetic expression to a CCS raster grid.",
+      "Input": "JSON object with exactly one raster_path or paths entry, operation=mask/add/subtract/multiply/divide, optional minimum/maximum or required scalar for arithmetic; preserves GeoTIFF georeference and emits raster_output.",
+      "Output": "JSON result",
+      "Source": "GeoToolEval pinned datasets and open-source Python geospatial stack",
+      "Safety": "Yes",
+      "Next": "CCSZonalStatistics,CCSRenderMap"
+    },
+    {
+      "Name": "CCSZonalStatistics",
+      "Category": "CCSTools",
+      "Function": "Calculate CCS raster or tabular zone statistics.",
+      "Input": "JSON object with raster_path plus zones_path and optional zone_field/band/operation, or table_path plus explicit zone_field/value_field; GeoTIFF spatial transform and real polygons are required for raster zonal statistics; raw NPY and global summaries are rejected.",
+      "Output": "JSON result",
+      "Source": "GeoToolEval pinned datasets and open-source Python geospatial stack",
+      "Safety": "Yes",
+      "Next": "CCSRenderMap"
+    },
+    {
+      "Name": "CCSRenderMap",
+      "Category": "CCSTools",
+      "Function": "Render a PNG and HTML inspection map from CCS outputs.",
+      "Input": "JSON object with an explicit raster_path (georeferenced GeoTIFF) or vector_path (WGS84 CSV/GeoJSON), optional title; vector classification_field is only for vector attributes. Actual input geometry or values are rendered; empty input is rejected. Emits map_png and map_html.",
+      "Output": "JSON result",
+      "Source": "GeoToolEval pinned datasets and open-source Python geospatial stack",
+      "Safety": "Yes",
+      "Next": ""
+    },
+    {
+      "Name": "RemoteSensingListFiles",
+      "Category": "RemoteSensingTools",
+      "Function": "List files in a bundled EarthBench asset directory.",
+      "Input": "JSON object with required string field: {\"dir_path\":\"EarthBench asset directory\"}",
+      "Output": "JSON result",
+      "Source": "GeoToolEval pinned datasets and open-source Python geospatial stack",
+      "Safety": "Yes",
+      "Next": "RemoteSensingBatchImageMean,RemoteSensingTiffAverage,RemoteSensingBatchNDSI,RemoteSensingNDWI,RemoteSensingNBR,RemoteSensingCloudMask,RemoteSensingNDVI,RemoteSensingNDTI,RemoteSensingTiffDifference"
+    },
+    {
+      "Name": "RemoteSensingBatchImageMean",
+      "Category": "RemoteSensingTools",
+      "Function": "Calculate finite-pixel means for a batch of GeoTIFF/raster assets; accepts an EarthBench question directory or explicit file_list.",
+      "Input": "JSON object with required non-empty file_list of the complete intended scene/cohort. Optional rs_statistic_mode: per_scene_statistics returns per-scene scalar means without a composite (different grids allowed); pixelwise_composite requires aligned grids; omitted/legacy retains both scalar means and average_raster with grid checks. Optional rs_date_window=[start,end] declares the requested dates; never discard scenes just to make a failed call succeed.",
+      "Output": "JSON result",
+      "Source": "GeoToolEval pinned datasets and open-source Python geospatial stack",
+      "Safety": "Yes",
+      "Next": "RemoteSensingMean,RemoteSensingDifference,RemoteSensingPercentageChange,RemoteSensingLinearTrend,RemoteSensingMaxValueAndIndex,RemoteSensingMinValueAndIndex,RemoteSensingKurtosis,RemoteSensingKelvinToCelsius"
+    },
+    {
+      "Name": "RemoteSensingBatchHotspotPercentage",
+      "Category": "RemoteSensingTools",
+      "Function": "Calculate per-image percentage above a threshold.",
+      "Input": "JSON object with required file_list array and numeric threshold",
+      "Output": "JSON result",
+      "Source": "GeoToolEval pinned datasets and open-source Python geospatial stack",
+      "Safety": "Yes",
+      "Next": ""
+    },
+    {
+      "Name": "RemoteSensingTiffAverage",
+      "Category": "RemoteSensingTools",
+      "Function": "Create a pixelwise average GeoTIFF from an image batch.",
+      "Input": "JSON object with required file_list array and optional output_path",
+      "Output": "JSON result",
+      "Source": "GeoToolEval pinned datasets and open-source Python geospatial stack",
+      "Safety": "Yes",
+      "Next": "RemoteSensingBatchImageSum,RemoteSensingBatchHotspotPercentage"
+    },
+    {
+      "Name": "RemoteSensingBatchNDSI",
+      "Category": "RemoteSensingTools",
+      "Function": "Calculate NDSI rasters from green and SWIR bands.",
+      "Input": "JSON object with required non-empty equal-length green_file_list and swir_file_list, paired by acquisition and scene; optional output_path_list. Do not pair different dates or truncate an unmatched band list.",
+      "Output": "JSON result",
+      "Source": "GeoToolEval pinned datasets and open-source Python geospatial stack",
+      "Safety": "Yes",
+      "Next": "RemoteSensingBatchImageMean,RemoteSensingTiffAverage"
+    },
+    {
+      "Name": "RemoteSensingNDWI",
+      "Category": "RemoteSensingTools",
+      "Function": "Calculate normalized-difference water index rasters from one green/NIR pair or aligned multi-date path arrays.",
+      "Input": "JSON object with input_swir_path (green band) and input_nir_path, or equal-length input_swir_paths/input_nir_paths arrays for multi-date batch execution; optional output_path",
+      "Output": "JSON result",
+      "Source": "GeoToolEval pinned datasets and open-source Python geospatial stack",
+      "Safety": "Yes",
+      "Next": ""
+    },
+    {
+      "Name": "RemoteSensingNBR",
+      "Category": "RemoteSensingTools",
+      "Function": "Calculate normalized burn ratio rasters from one NIR/SWIR pair or aligned multi-date path arrays.",
+      "Input": "JSON object with input_nir_path and input_swir_path, or equal-length input_nir_paths/input_swir_paths arrays for multi-date batch execution; optional output_path",
+      "Output": "JSON result",
+      "Source": "GeoToolEval pinned datasets and open-source Python geospatial stack",
+      "Safety": "Yes",
+      "Next": ""
+    },
+    {
+      "Name": "RemoteSensingCloudMask",
+      "Category": "RemoteSensingTools",
+      "Function": "Apply Landsat QA cloud and shadow bit masks to one raster pair or aligned multi-date path arrays.",
+      "Input": "JSON object with sr_band_path and qa_pixel_path, or equal-length sr_band_paths/qa_pixel_paths arrays for multi-date batch execution; optional output_path",
+      "Output": "JSON result",
+      "Source": "GeoToolEval pinned datasets and open-source Python geospatial stack",
+      "Safety": "Yes",
+      "Next": ""
+    },
+    {
+      "Name": "RemoteSensingBatchHotspotRaster",
+      "Category": "RemoteSensingTools",
+      "Function": "Create threshold binary rasters from input rasters.",
+      "Input": "JSON object with required file_list and numeric threshold; optional output_path_list",
+      "Output": "JSON result",
+      "Source": "GeoToolEval pinned datasets and open-source Python geospatial stack",
+      "Safety": "Yes",
+      "Next": ""
+    },
+    {
+      "Name": "RemoteSensingNDVI",
+      "Category": "RemoteSensingTools",
+      "Function": "Calculate NDVI rasters from one NIR/red pair or aligned multi-date path arrays.",
+      "Input": "JSON object with nir_band_file/red_band_file, or equal-length nir_band_files/red_band_files arrays for multi-date batch execution; optional output_file",
+      "Output": "JSON result",
+      "Source": "GeoToolEval pinned datasets and open-source Python geospatial stack",
+      "Safety": "Yes",
+      "Next": ""
+    },
+    {
+      "Name": "RemoteSensingNDTI",
+      "Category": "RemoteSensingTools",
+      "Function": "Calculate NDTI rasters from scene/date-paired green and red band inputs.",
+      "Input": "JSON object with required input_pairs array of input_green_path/input_red_path objects",
+      "Output": "JSON result",
+      "Source": "GeoToolEval pinned datasets and open-source Python geospatial stack",
+      "Safety": "Yes",
+      "Next": "RemoteSensingBatchImageMean,RemoteSensingArgmax"
+    },
+    {
+      "Name": "RemoteSensingCountAboveThreshold",
+      "Category": "RemoteSensingTools",
+      "Function": "Count finite raster pixels above a threshold.",
+      "Input": "JSON object with required file_path and optional numeric threshold",
+      "Output": "JSON result",
+      "Source": "GeoToolEval pinned datasets and open-source Python geospatial stack",
+      "Safety": "Yes",
+      "Next": ""
+    },
+    {
+      "Name": "RemoteSensingBatchImageSum",
+      "Category": "RemoteSensingTools",
+      "Function": "Calculate finite-pixel sums for a batch of GeoTIFFs.",
+      "Input": "JSON object with required non-empty array: {\"file_list\":[\"GeoTIFF path\", ...]}",
+      "Output": "JSON result",
+      "Source": "GeoToolEval pinned datasets and open-source Python geospatial stack",
+      "Safety": "Yes",
+      "Next": ""
+    },
+    {
+      "Name": "RemoteSensingTiffDifference",
+      "Category": "RemoteSensingTools",
+      "Function": "Create one pixelwise difference GeoTIFF or a batch of aligned adjacent-date difference rasters.",
+      "Input": "JSON object with image_a_path/image_b_path OR equal-length image_a_paths/image_b_paths arrays, never both. Computes A minus B. Use one batch or disjoint per-pair instances; do not replay the whole batch in each instance. Optional output_path.",
+      "Output": "JSON result",
+      "Source": "GeoToolEval pinned datasets and open-source Python geospatial stack",
+      "Safety": "Yes",
+      "Next": "RemoteSensingCountAboveThreshold,RemoteSensingFireIncreaseMap"
+    },
+    {
+      "Name": "RemoteSensingExtremeSnowLossPercentage",
+      "Category": "RemoteSensingTools",
+      "Function": "Calculate snow-loss percentage from a binary map.",
+      "Input": "JSON object with required binary_map_path and optional threshold",
+      "Output": "JSON result",
+      "Source": "GeoToolEval pinned datasets and open-source Python geospatial stack",
+      "Safety": "Yes",
+      "Next": ""
+    },
+    {
+      "Name": "RemoteSensingSubtract",
+      "Category": "RemoteSensingTools",
+      "Function": "Subtract one raster from another and write the result.",
+      "Input": "JSON object with required img1_path and img2_path; optional output_path and nodata_as_zero for sparse event rasters",
+      "Output": "JSON result",
+      "Source": "GeoToolEval pinned datasets and open-source Python geospatial stack",
+      "Safety": "Yes",
+      "Next": ""
+    },
+    {
+      "Name": "RemoteSensingFireIncreaseMap",
+      "Category": "RemoteSensingTools",
+      "Function": "Create a fire-increase binary map from a change raster.",
+      "Input": "JSON object with required change_image_path and threshold; optional output_path",
+      "Output": "JSON result",
+      "Source": "GeoToolEval pinned datasets and open-source Python geospatial stack",
+      "Safety": "Yes",
+      "Next": ""
+    },
+    {
+      "Name": "RemoteSensingMean",
+      "Category": "RemoteSensingTools",
+      "Function": "Calculate an arithmetic mean.",
+      "Input": "JSON object with required numeric array: {\"x\":[number, ...]}",
+      "Output": "JSON result",
+      "Source": "GeoToolEval pinned datasets and open-source Python geospatial stack",
+      "Safety": "Yes",
+      "Next": ""
+    },
+    {
+      "Name": "RemoteSensingPercentageChange",
+      "Category": "RemoteSensingTools",
+      "Function": "Calculate percentage change from a to b.",
+      "Input": "JSON object with required numeric fields: {\"a\":number,\"b\":number}",
+      "Output": "JSON result",
+      "Source": "GeoToolEval pinned datasets and open-source Python geospatial stack",
+      "Safety": "Yes",
+      "Next": ""
+    },
+    {
+      "Name": "RemoteSensingDifference",
+      "Category": "RemoteSensingTools",
+      "Function": "Subtract b from a.",
+      "Input": "JSON object with required numeric fields: {\"a\":number,\"b\":number}",
+      "Output": "JSON result",
+      "Source": "GeoToolEval pinned datasets and open-source Python geospatial stack",
+      "Safety": "Yes",
+      "Next": ""
+    },
+    {
+      "Name": "RemoteSensingDivision",
+      "Category": "RemoteSensingTools",
+      "Function": "Divide scalar a by b or calculate an aligned time-series ratio from numeric arrays.",
+      "Input": "JSON object with numeric a and b, or equal-length numeric a_values and b_values arrays for time-series ratios",
+      "Output": "JSON result",
+      "Source": "GeoToolEval pinned datasets and open-source Python geospatial stack",
+      "Safety": "Yes",
+      "Next": ""
+    },
+    {
+      "Name": "RemoteSensingLinearTrend",
+      "Category": "RemoteSensingTools",
+      "Function": "Fit a least-squares linear trend.",
+      "Input": "JSON object with required numeric y array and optional x array: {\"y\":[number, ...],\"x\":[number, ...]}",
+      "Output": "JSON result",
+      "Source": "GeoToolEval pinned datasets and open-source Python geospatial stack",
+      "Safety": "Yes",
+      "Next": ""
+    },
+    {
+      "Name": "RemoteSensingMaxValueAndIndex",
+      "Category": "RemoteSensingTools",
+      "Function": "Return the maximum value and zero-based index.",
+      "Input": "JSON object with required numeric array: {\"x\":[number, ...]}",
+      "Output": "JSON result",
+      "Source": "GeoToolEval pinned datasets and open-source Python geospatial stack",
+      "Safety": "Yes",
+      "Next": ""
+    },
+    {
+      "Name": "RemoteSensingKelvinToCelsius",
+      "Category": "RemoteSensingTools",
+      "Function": "Convert kelvin to degrees Celsius.",
+      "Input": "JSON object with required numeric field: {\"kelvin\":number}",
+      "Output": "JSON result",
+      "Source": "GeoToolEval pinned datasets and open-source Python geospatial stack",
+      "Safety": "Yes",
+      "Next": ""
+    },
+    {
+      "Name": "RemoteSensingMinValueAndIndex",
+      "Category": "RemoteSensingTools",
+      "Function": "Return the minimum value and zero-based index.",
+      "Input": "JSON object with required numeric array: {\"x\":[number, ...]}",
+      "Output": "JSON result",
+      "Source": "GeoToolEval pinned datasets and open-source Python geospatial stack",
+      "Safety": "Yes",
+      "Next": ""
+    },
+    {
+      "Name": "RemoteSensingSensSlope",
+      "Category": "RemoteSensingTools",
+      "Function": "Calculate the median pairwise Sen slope.",
+      "Input": "JSON object with required numeric array: {\"x\":[number, ...]}",
+      "Output": "JSON result",
+      "Source": "GeoToolEval pinned datasets and open-source Python geospatial stack",
+      "Safety": "Yes",
+      "Next": ""
+    },
+    {
+      "Name": "RemoteSensingCoefficientOfVariation",
+      "Category": "RemoteSensingTools",
+      "Function": "Calculate standard deviation divided by mean.",
+      "Input": "JSON object with required numeric array: {\"x\":[number, ...]}",
+      "Output": "JSON result",
+      "Source": "GeoToolEval pinned datasets and open-source Python geospatial stack",
+      "Safety": "Yes",
+      "Next": ""
+    },
+    {
+      "Name": "RemoteSensingKurtosis",
+      "Category": "RemoteSensingTools",
+      "Function": "Calculate population Pearson kurtosis and excess kurtosis.",
+      "Input": "JSON object with required numeric array: {\"x\":[number, ...]}",
+      "Output": "JSON result",
+      "Source": "GeoToolEval pinned datasets and open-source Python geospatial stack",
+      "Safety": "Yes",
+      "Next": ""
+    },
+    {
+      "Name": "RemoteSensingMannKendallTest",
+      "Category": "RemoteSensingTools",
+      "Function": "Calculate a Mann-Kendall trend statistic and p-value.",
+      "Input": "JSON object with required numeric array: {\"x\":[number, ...]}",
+      "Output": "JSON result",
+      "Source": "GeoToolEval pinned datasets and open-source Python geospatial stack",
+      "Safety": "Yes",
+      "Next": ""
+    },
+    {
+      "Name": "RemoteSensingArgmax",
+      "Category": "RemoteSensingTools",
+      "Function": "Return the zero-based index of the maximum value.",
+      "Input": "JSON object with required numeric array: {\"x\":[number, ...]}",
+      "Output": "JSON result",
+      "Source": "GeoToolEval pinned datasets and open-source Python geospatial stack",
+      "Safety": "Yes",
+      "Next": ""
+    },
+    {
+      "Name": "NaturalHazardLoadEventTable",
+      "Category": "NaturalHazardTools",
+      "Function": "Load and describe the EM-DAT-compatible event workbook.",
+      "Input": "JSON object with required source workbook path and sheet name: {\"source\":\".xlsx path\",\"sheet\":\"Sheet1\"}",
+      "Output": "JSON result",
+      "Source": "GeoToolEval pinned datasets and open-source Python geospatial stack",
+      "Safety": "Yes",
+      "Next": "NaturalHazardFilterRecords"
+    },
+    {
+      "Name": "NaturalHazardFilterRecords",
+      "Category": "NaturalHazardTools",
+      "Function": "Filter natural-hazard records with exact field predicates.",
+      "Input": "JSON object with source workbook path, sheet name, and required non-empty exact-match filters object",
+      "Output": "JSON result",
+      "Source": "GeoToolEval pinned datasets and open-source Python geospatial stack",
+      "Safety": "Yes",
+      "Next": "NaturalHazardCountRecords,NaturalHazardSumField,NaturalHazardGroupAggregate,NaturalHazardSelectMaxRecord,NaturalHazardBuildStartDate"
+    },
+    {
+      "Name": "NaturalHazardCountRecords",
+      "Category": "NaturalHazardTools",
+      "Function": "Count filtered natural-hazard records.",
+      "Input": "JSON object with filtered_records_path, or with source/sheet and filters",
+      "Output": "JSON result",
+      "Source": "GeoToolEval pinned datasets and open-source Python geospatial stack",
+      "Safety": "Yes",
+      "Next": ""
+    },
+    {
+      "Name": "NaturalHazardSumField",
+      "Category": "NaturalHazardTools",
+      "Function": "Sum a numeric field over filtered records.",
+      "Input": "JSON object with filters and required measure; optional filtered_records_path, source and sheet",
+      "Output": "JSON result",
+      "Source": "GeoToolEval pinned datasets and open-source Python geospatial stack",
+      "Safety": "Yes",
+      "Next": ""
+    },
+    {
+      "Name": "NaturalHazardGroupAggregate",
+      "Category": "NaturalHazardTools",
+      "Function": "Group filtered EM-DAT-compatible disaster records and calculate count or sum rankings; group_by/grouping_fields may be a field name or one-item list.",
+      "Input": "JSON object with filters and required group_by; optional measure for sum ranking and filtered_records_path",
+      "Output": "JSON result",
+      "Source": "GeoToolEval pinned datasets and open-source Python geospatial stack",
+      "Safety": "Yes",
+      "Next": ""
+    },
+    {
+      "Name": "NaturalHazardSelectMaxRecord",
+      "Category": "NaturalHazardTools",
+      "Function": "Return the event identifier with the maximum measure.",
+      "Input": "JSON object with filters and required measure; optional filtered_records_path",
+      "Output": "JSON result",
+      "Source": "GeoToolEval pinned datasets and open-source Python geospatial stack",
+      "Safety": "Yes",
+      "Next": ""
+    },
+    {
+      "Name": "NaturalHazardBuildStartDate",
+      "Category": "NaturalHazardTools",
+      "Function": "Build valid ISO dates from Start Year/Month/Day fields.",
+      "Input": "JSON object with filters and optional date_fields array and filtered_records_path",
+      "Output": "JSON result",
+      "Source": "GeoToolEval pinned datasets and open-source Python geospatial stack",
+      "Safety": "Yes",
+      "Next": "NaturalHazardSelectLatest"
+    },
+    {
+      "Name": "NaturalHazardSelectLatest",
+      "Category": "NaturalHazardTools",
+      "Function": "Return the latest complete start date after filtering.",
+      "Input": "JSON object with filters and optional date_fields array and filtered_records_path",
+      "Output": "JSON result",
+      "Source": "GeoToolEval pinned datasets and open-source Python geospatial stack",
+      "Safety": "Yes",
+      "Next": ""
+    }
+  ],
+  "next": {
+    "DeepEarthGetUSGSEvent": [
+      "DeepEarthSampleEventModels"
+    ],
+    "MineralResourcesSearchDeposits": [
+      "MineralResourcesGetDeposit"
+    ],
+    "MineralResourcesCountrySummary": [
+      "MineralResourcesSearchDeposits"
+    ],
+    "MineralResourcesRankCommodityCountries": [
+      "ClimateQueryFutureSSP"
+    ],
+    "ClimateQueryDeepTime": [
+      "ClimateCompareEpochs"
+    ],
+    "ClimateQueryPresentMean": [
+      "ClimateQueryFutureSSP",
+      "ClimateCompareEpochs"
+    ],
+    "ClimateQueryFutureSSP": [
+      "ClimateCompareEpochs"
+    ],
+    "DeepTimeStandardizeSpatialData": [
+      "DeepTimeValidateSpatialData",
+      "DeepTimeBatchVector"
+    ],
+    "DeepTimeValidateSpatialData": [
+      "DeepTimeNearestNeighbor",
+      "DeepTimeBuffer",
+      "DeepTimeOverlay",
+      "DeepTimeInterpolateIDW"
+    ],
+    "DeepTimeNearestNeighbor": [
+      "DeepTimeRenderMap"
+    ],
+    "DeepTimeBuffer": [
+      "DeepTimeOverlay",
+      "DeepTimeRenderMap"
+    ],
+    "DeepTimeOverlay": [
+      "DeepTimeInterpolateIDW",
+      "DeepTimeZonalStatistics",
+      "DeepTimeRenderMap"
+    ],
+    "DeepTimeBatchVector": [
+      "DeepTimeValidateSpatialData",
+      "DeepTimeOverlay"
+    ],
+    "DeepTimeInterpolateIDW": [
+      "DeepTimeRasterAlgebra",
+      "DeepTimeZonalStatistics",
+      "DeepTimeRenderMap"
+    ],
+    "DeepTimeRasterAlgebra": [
+      "DeepTimeZonalStatistics",
+      "DeepTimeRenderMap"
+    ],
+    "DeepTimeZonalStatistics": [
+      "DeepTimeRenderMap"
+    ],
+    "CCSStandardizeSpatialData": [
+      "CCSValidateSpatialData",
+      "CCSBatchVector"
+    ],
+    "CCSValidateSpatialData": [
+      "CCSNearestNeighbor",
+      "CCSBuffer",
+      "CCSOverlay",
+      "CCSInterpolateIDW"
+    ],
+    "CCSNearestNeighbor": [
+      "CCSRenderMap"
+    ],
+    "CCSBuffer": [
+      "CCSOverlay",
+      "CCSRenderMap"
+    ],
+    "CCSOverlay": [
+      "CCSInterpolateIDW",
+      "CCSZonalStatistics",
+      "CCSRenderMap"
+    ],
+    "CCSBatchVector": [
+      "CCSValidateSpatialData",
+      "CCSOverlay"
+    ],
+    "CCSInterpolateIDW": [
+      "CCSRasterAlgebra",
+      "CCSZonalStatistics",
+      "CCSRenderMap"
+    ],
+    "CCSRasterAlgebra": [
+      "CCSZonalStatistics",
+      "CCSRenderMap"
+    ],
+    "CCSZonalStatistics": [
+      "CCSRenderMap"
+    ],
+    "RemoteSensingListFiles": [
+      "RemoteSensingBatchImageMean",
+      "RemoteSensingTiffAverage",
+      "RemoteSensingBatchNDSI",
+      "RemoteSensingNDWI",
+      "RemoteSensingNBR",
+      "RemoteSensingCloudMask",
+      "RemoteSensingNDVI",
+      "RemoteSensingNDTI",
+      "RemoteSensingTiffDifference"
+    ],
+    "RemoteSensingBatchImageMean": [
+      "RemoteSensingMean",
+      "RemoteSensingDifference",
+      "RemoteSensingPercentageChange",
+      "RemoteSensingLinearTrend",
+      "RemoteSensingMaxValueAndIndex",
+      "RemoteSensingMinValueAndIndex",
+      "RemoteSensingKurtosis",
+      "RemoteSensingKelvinToCelsius"
+    ],
+    "RemoteSensingTiffAverage": [
+      "RemoteSensingBatchImageSum",
+      "RemoteSensingBatchHotspotPercentage"
+    ],
+    "RemoteSensingBatchNDSI": [
+      "RemoteSensingBatchImageMean",
+      "RemoteSensingTiffAverage"
+    ],
+    "RemoteSensingNDTI": [
+      "RemoteSensingBatchImageMean",
+      "RemoteSensingArgmax"
+    ],
+    "RemoteSensingTiffDifference": [
+      "RemoteSensingCountAboveThreshold",
+      "RemoteSensingFireIncreaseMap"
+    ],
+    "NaturalHazardLoadEventTable": [
+      "NaturalHazardFilterRecords"
+    ],
+    "NaturalHazardFilterRecords": [
+      "NaturalHazardCountRecords",
+      "NaturalHazardSumField",
+      "NaturalHazardGroupAggregate",
+      "NaturalHazardSelectMaxRecord",
+      "NaturalHazardBuildStartDate"
+    ],
+    "NaturalHazardBuildStartDate": [
+      "NaturalHazardSelectLatest"
+    ]
+  }
+}

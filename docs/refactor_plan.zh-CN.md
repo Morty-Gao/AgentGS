@@ -1,6 +1,42 @@
 # AgentGS 全面重构计划
 
-日期：2026-10-07。状态：讨论稿；本轮只制定方案，不迁移生产代码、不安装第三方工具。依据旧 GeoToolAgent 实际源码和本仓库现状，承接 current_framework_audit.zh-CN.md。
+初稿日期：2026-10-07；范围更新：2026-10-08。基础框架与部分算法组件已实现，当前迁移范围遵循下面的最新用户约束；早期目录蓝图不代表全部模块已完成。
+
+## 最新范围：仅保留GeoToolEval相关能力
+
+用户2026-10-08明确要求仅保留101项GeoToolEval工具，以及它们关联的Skill和Capability。权威范围为src/agentgs/skills/tool_scope.json：101工具、24 Skill、31 Capability。移除geodesic-coordinate-analysis、earthquake-energy-estimation及两项Geo扩展Skill，保留关联的共享节点；其检索、规划、grounding语料同步裁剪。删除声明改变IDF语料与候选范围，属于用户授权的范围变更；评分公式、阈值、排序与执行意图保持原基线。执行沙箱属于runtime基础设施，不冒充领域工具。
+
+## 用户授权例外：GeoQuestions恢复快照协议（2026-10-08）
+
+用户明确要求GeoBigDataExecuteGeoSPARQL改回“通过source_id或查询结构匹配物化结果快照”的协议。该指令优先于原契约中此工具“只允许真实端点”的要求；仅修改此工具及对应Skill描述、prompt和数据准备流程。范围仍为101工具、24 Skill、31 Capability，其余算法保持原要求。
+
+匹配规则来自旧2026-09-07源码快照，保留原权重与阈值。数据从本地官方GeoQuestions1089文件按原40项选择构建，每条结果与旧子集核验一致。参数ID优先、查不到则查询匹配；模糊或无匹配失败，结果明确derived_lookup和answer_lookup=true。endpoint不再进入此工具的typed合同。完整源码身份、用户授权、声明覆盖和125组旧匹配器oracle见algorithm_alignment.json的authorized_algorithm_changes及包内datasets/geoquestions_snapshot.json。
+
+该工具从公开答案文件准备回放数据，是明确选择的工具协议；独立评测gold仍不作为TaskInput传入，但不能继续称其为真实RDF执行或严格未知答案测试。分阶段Agent、最终回答与整体评测迁移仍未完成。
+
+## 最新约束：先严格对齐算法意图
+
+用户后续明确要求：**核心算法完全不变，细节实现可以调整，按原算法意图重构，不能直接照搬混乱的组织。** 该要求优先于下面早期讨论稿中关于删除历史回退、改变策略的建议。
+
+权威对齐契约为 [algorithm_alignment.json](algorithm_alignment.json)，以旧主项目实际工作树中48个关键文件的字节与顶层算法符号AST哈希固定基线。不是用旧Git HEAD冒充生产工作树版本，也不把101工具交付副本或51 Skill向量实验分支拼进基线。用户最新指定只保留其中101项GeoToolEval工具及关联24 Skill、31 Capability；按该声明子集重新执行原算法生成验收oracle。原源码110/28/38的身份保留为历史来源，不再作为迁移目标；vector/hybrid另作版本。
+
+算法边界包括检索语料与token化、IDF资格集合、评分/阈值/同分顺序、规则分支、能力补全、桥接、grounding、调用基数、参数与资源绑定、反馈预算、成功前缀复用、模型各阶段prompt、完成状态、非修改性答案验证及冻结评分。改这些行为必须作为算法版本变更单独说明，不能称作工程整理。
+
+已拆出的纯算法组件有加权Skill检索、Skill选择和完整计划、约束元数据诊断、CapabilityGraph/ToolGraph、grounding、候选上下文序列化、工具输出分类。24项保留Skill声明与范围清单放在包内JSON资源，生产代码不引用外部旧仓库。声明存在不表示后端可执行；新runtime的默认领域注册表含两项USGS工具与GeoQuestions快照工具；ExecutePython仅用于显式内部沙箱请求。
+
+验收用例由hash核验后的旧源码直接执行生成，覆盖70组查询/工具提示/门控输入、4组候选权重、8组grounding、24组输出分类、4组候选上下文；另冻结16组旧证据校验输出，后者尚未计入新实现通过项。无付费模型、线上工具或benchmark标准答案输入。新代码对照旧决策，不能用新代码输出自生成期望。
+
+```bash
+.venv/bin/python scripts/build/audit_algorithm_alignment.py
+.venv/bin/python scripts/build/audit_algorithm_alignment.py --require-runtime-parity
+.venv/bin/python -m agentgs skills plan 'Count earthquake events in the frozen USGS catalog.' --inferred-tool DeepEarthQueryUSGSCatalog --summary
+```
+
+第一条检查组件差分；第二条必须在生产全链路尚未对齐时返回非零。`skills plan`只查看已对齐的确定性规划阶段，不执行模型、规则工具检索或科学计算。旧源码oracle可用capture_algorithm_baseline.py从明确的--source读取，但只有源文件哈希与契约一致才允许生成，而且--output必须是新路径且不能写入旧项目。
+
+当前AgentEngine仍为简化function-calling原型，不能报告为算法等价。先保留其原型身份，避免在KG/规则路由、桥接、领域绑定、真实反馈/重规划、最终模型回答与验证尚未对齐时，通过接入部分新组件宣称全链路完成。
+
+特别保留以下容易误改的原意图：候选允许跨Skill扩充；未完成出口仍要求模型回答原问题并标Not Completed；当前v3.3证据验证保留模型原回答，历史修正建议只诊断；约束检查记录元数据而不冒称兼容性证明；具体工具重复实例不能全局去重。依赖排序和按工具名称复用前缀的已知历史局限列在契约中，不能顺手换算法。
 
 ## 一、总体决策
 
@@ -8,7 +44,7 @@
 
 建议展示模块使用正确拼写 visualization，命令使用 `agentgs ui`。若用户要求保留 visulization，可统一替换目录名；不要同时维护两个名字。
 
-主工作仓库 `/home/gaosong/Code/Project/AgentGS`；旧主项目只作为源材料。默认以旧主项目110工具注册面与28Skill作为迁移清单，记录交付副本101工具的差异；迁移目标是保持有效科学能力与可解释行为，不复制所有历史回退和错误实现。废弃项应记录去向，不静默丢弃。
+主工作仓库 `/home/gaosong/Code/Project/AgentGS`；旧主项目只作为源材料。默认仅以旧主项目GeoEval catalog的101工具与关联24 Skill、31 Capability作为迁移清单，排除额外9项工具与独有声明；记录交付副本的实现差异而不切换源码版本；迁移目标是保留完整算法意图与决策语义，按职责重组实现。现有回退若参与算法决策同样纳入对齐，不能以清理代码为由删除。废弃项应记录去向，不静默丢弃。
 
 ## 二、依赖方向
 
@@ -179,7 +215,7 @@ SkillSpec：稳定id、版本、说明、输入输出schema、能力标签、约
 
 Skill不内置向量库或KG算法。它提供可检索的descriptor和约束；agent/retrieval中的SkillRetriever接口实现关键词、向量或混合检索，返回统一SkillMatch。组合能力的扩展、选择和bridge规划放在agent/planning；具体Skill执行与领域约束在skills内部。
 
-Tool是原子操作；Skill是任务能力或工作流。28Skill不应机械展开成110个工具Skill。内部工具实现按领域放runtime/tools/domains；某个Skill专属的绑定/校验留在其目录，跨Skill可复用操作只保留一份。
+Tool是原子操作；Skill是任务能力或工作流。24个Skill不应机械展开成101个工具Skill。内部工具实现按领域放runtime/tools/domains；某个Skill专属的绑定/校验留在其目录，跨Skill可复用操作只保留一份。
 
 ToolSpec：稳定id、输入输出schema、effects、资源需求、backend/data依赖、timeout和retry_policy。ToolCall/ToolResult结构化，错误分validation、transport、dependency_missing、domain、timeout、resource_limit等；科学指标中的error字段不能自动当作执行失败。迁移期只在旧工具边界保留str->str适配器，新内核不继续字符串拼JSON。
 
@@ -293,11 +329,11 @@ Pydantic/JSON Schema生成前端类型，避免三套Task模型。frontend源与
 
 ## 十一、实施阶段与验收
 
-0. 固定迁移清单：110工具、28Skill、数据与外部backend依赖；记载两个旧版本差异，得到每项能力的迁移状态。保留旧项目，只写新仓库。
+0. 固定迁移清单：101项GeoToolEval工具、24 Skill、31 Capability、数据与外部backend依赖；记载两个旧版本差异，得到每项能力的迁移状态。保留旧项目，只写新仓库。
 1. 基础：contracts、config、client、TyperCLI、uv依赖分组与secret模板。验收配置校验、环境引用、模型能力检查、包安装及资源包含；mock验证client协议，无需付费调用。
 2. Runtime纵向链路：TaskService -> taskworker ->一个实际简单工具->artifact/result，做queue/cancel/events/resource与bwrap探测。验收多个任务隔离、进程树取消、限制能力与回退记录；具体RSS阈值通过实测选定。
 3. Skill+agent闭环：先选真实地震目录任务和一条可多步验证的空间/栅格任务，不迁移全部巨型模块。打通检索->计划->绑定->工具执行->最终答案，观测每个决定来源。验收真实算法输出、约束错误、恢复与成功前缀复用。
-4. 全领域迁移与pipeline：逐域替换旧runtime，数据清单/prepare/build、第三方安装profile并行按职责推进。每项工具依赖要有可用/缺失明确状态；KG/Skill索引由统一registry生成，消除101/110不一致。
+4. 全领域迁移与pipeline：逐域替换旧runtime，数据清单/prepare/build、第三方安装profile并行按职责推进。每项工具依赖要有可用/缺失明确状态；KG/Skill索引由统一registry生成，确保101项工具范围、关联声明与可执行子集分别标识，额外9项不再进入目标索引。
 5. Evaluation：导入真实样本，核验评分与断点证据；全量付费评测是单独实验，不作为日常重构测试默认执行。
 6. React展示与交付：API契约驱动前端、SSE重连、错误与产物展示；WSL/Linux主路径验收及Windows路由/原生能力边界。前端构建、uv安装、prompt资源、脚本help/verify人工检查，清洁环境复现后才能称交付可用。
 

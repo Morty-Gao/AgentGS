@@ -1,0 +1,41 @@
+\section{System Architecture and Implementation}
+\label{sec:system}
+
+% DOCX paragraph 076.
+AgentGS integrates the planning and capability-completion method into an agent system with an interactive interface. It supports natural-language task input, plan construction, tool execution, and result feedback. The system organizes tool calls using task inputs and strategy knowledge, and exposes planning information, invocation records, and execution feedback for inspection and verification.
+
+\subsection{Overall Architecture}
+\label{sec:architecture}
+
+% DOCX paragraph 078.
+AgentGS comprises four connected components for user interaction, task orchestration, knowledge and capability support, and tool execution. Users submit natural-language questions and inspect results through the frontend. The orchestration service retrieves applicable Skills, organizes and completes required capabilities, and determines concrete tools. Knowledge and capability resources provide strategy definitions, capability-to-implementation mappings, and tool associations. The tool execution service invokes geoscientific tools through a unified interface.
+
+% DOCX paragraph 079.
+These components cooperate by exchanging plans, parameters, and results. The orchestration service organizes capabilities and dependencies according to task requirements, then matches each operation to a tool satisfying its instance constraints. The execution service calls the corresponding interface by tool identifier, passes parameters and resources, and returns results or failure information. Execution feedback identifies the current step's state and supports the decision to initiate local recovery. By organizing planning and execution separately and invoking tools through unified interfaces, the system grounds capability plans in concrete operations.
+
+% DOCX paragraphs 081--082 and embedded image 2.
+\input{figures/architecture}
+
+\subsection{Tool Integration and Execution Management}
+\label{sec:tool-integration}
+
+% DOCX paragraph 084.
+The system separately maintains operation definitions within strategies, capability-to-tool relationships, and invocation interfaces. Integrating a tool involves registering its interface information and associating it with capabilities: the system records its function, parameters, inputs, and outputs, and maps it to corresponding Capabilities. The containing Skill constrains an operation's prerequisites and eligible tools. Tool selection therefore considers functional matching, instance constraints, and input compatibility, ensuring that the selected tool can perform the desired operation and can be invoked at the current step.
+
+% DOCX paragraph 085.
+Intermediate artifacts retain type and provenance information, including the generating tool, the corresponding step, and relevant metadata. Subsequent steps retrieve files or computed results by artifact reference and bind them to tool parameters, avoiding reliance solely on natural-language descriptions for data transfer. A tool requiring a raster file receives the corresponding file reference; a tool requiring a statistic of that raster receives the appropriate numerical value. Inputs thus match the parameter requirements.
+
+% DOCX paragraph 086.
+The system stores task-planning information and tool invocation records, and reports execution states from invocation results. Recovery reuses successful preceding results and handles the failed call according to retry rules and capability-instance constraints. Users can revisit saved questions, final answers, and execution traces. These traces support checking tool choices against task requirements, following parameter propagation, and locating failures.
+
+\subsection{Interactive Interface and Process Inspection}
+\label{sec:interface}
+
+% DOCX paragraph 090.
+The frontend supports task dialogue, tool-graph browsing, and configuration management. In the task-dialogue interface, users submit natural-language geoscientific questions, receive answers, and expand records to inspect planning and invocation processes. Execution feedback shows each tool call's state, attempt count, and explanations, allowing users to identify failures or retries. The history view provides access to earlier questions, answers, and associated execution records.
+
+% DOCX paragraph 091.
+The graph interface visualizes GeoToolKG tools as nodes and their recommended transitions as edges. Selecting a tool displays its function, input/output information, provenance, and recommended successors, helping users understand its operations and possible combinations. The graph shows possible transitions between tools. For a concrete task, the system follows the capability plan and checks whether each step satisfies its instance constraints and execution conditions.
+
+% DOCX paragraphs 093--094 and embedded image 3.
+\input{figures/interface}

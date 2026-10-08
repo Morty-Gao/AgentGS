@@ -41,6 +41,8 @@ class ChatReply(Model):
     message: dict[str, Any]
     usage: dict[str, Any] | None = None
     attempts: int = 1
+    response_model: str | None = None
+    response_id: str | None = None
 
 
 class ModelClient(Protocol):

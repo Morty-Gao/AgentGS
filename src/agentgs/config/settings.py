@@ -15,6 +15,7 @@ class RuntimeSettings(Model):
     code_timeout_seconds: float = Field(default=20, gt=0, le=300)
     sandbox: str = "auto"
     allow_proot: bool = False
+    worker_python: str | None = None
 
 
 def load_runtime(root: Path) -> RuntimeSettings:

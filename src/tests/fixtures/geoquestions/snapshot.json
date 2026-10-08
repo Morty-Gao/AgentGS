@@ -1,0 +1,756 @@
+[
+  {
+    "source_id": 591,
+    "gold_sparql": "SELECT DISTINCT (strdf:area(?parkGeo) AS ?parkArea) WHERE { yago:Essex geo:hasGeometry ?o1 . ?o1 geo:asWKT ?countyGeo . ?park rdf:type y2geoo:OSM_park ; geo:hasGeometry ?o2 . ?o2 geo:asWKT ?parkGeo FILTER geof:sfWithin(?parkGeo, ?countyGeo) } ",
+    "result": {
+      "format": "table",
+      "columns": [
+        "parkArea"
+      ],
+      "rows": [
+        [
+          "5.835162072998658E-5"
+        ]
+      ],
+      "source_raw": "parkArea\r\n5.835162072998658E-5\r\n"
+    }
+  },
+  {
+    "source_id": 600,
+    "gold_sparql": "SELECT ?forest (strdf:area(?forestWKT) AS ?forestArea) WHERE { yago:geoentity_Scarawalsh_Bridge_3304299 geo:hasGeometry ?o1 . ?o1 geo:asWKT ?baronyWKT . ?forest rdf:type y2geoo:OSM_forest ; geo:hasGeometry ?o3 . ?o3 geo:asWKT ?forestWKT FILTER geof:sfWithin(?forestWKT, ?baronyWKT) } ",
+    "result": {
+      "format": "table",
+      "columns": [
+        "forest",
+        "forestArea"
+      ],
+      "rows": [
+        [
+          "http://yago-knowledge.org/resource/geoentity_Killoughrum_Forest_2963306",
+          "8.170903020995307E-5"
+        ],
+        [
+          "http://yago-knowledge.org/resource/geoentity_Tombrick_Wood_3302725",
+          "6.0697087429997614E-5"
+        ]
+      ],
+      "source_raw": "forest,forestArea\r\nhttp://yago-knowledge.org/resource/geoentity_Killoughrum_Forest_2963306,8.170903020995307E-5\r\nhttp://yago-knowledge.org/resource/geoentity_Tombrick_Wood_3302725,6.0697087429997614E-5\r\n"
+    }
+  },
+  {
+    "source_id": 608,
+    "gold_sparql": "SELECT DISTINCT ?locality (strdf:area(?locality_geoWKT) AS ?lakeArea) WHERE { yago:Epping_Forest geo:hasGeometry ?for_geo . ?for_geo geo:asWKT ?for_geoWKT . ?county rdf:type y2geoo:OS_County ; geo:hasGeometry ?county_geo . ?county_geo geo:asWKT ?county_geoWKT FILTER strdf:above(?for_geoWKT, ?county_geoWKT) ?locality rdf:type y2geoo:OSM_lake ; geo:hasGeometry ?locality_geo . ?locality_geo geo:asWKT ?locality_geoWKT FILTER geof:sfWithin(?locality_geoWKT, ?county_geoWKT) } ORDER BY DESC(?lakeArea) LIMIT 1 ",
+    "result": {
+      "format": "table",
+      "columns": [
+        "locality",
+        "lakeArea"
+      ],
+      "rows": [
+        [
+          "http://yago-knowledge.org/resource/geoentity_Boldermere_Lake_7116376",
+          "7.223164074996838E-6"
+        ]
+      ],
+      "source_raw": "locality,lakeArea\r\nhttp://yago-knowledge.org/resource/geoentity_Boldermere_Lake_7116376,7.223164074996838E-6\r\n"
+    }
+  },
+  {
+    "source_id": 614,
+    "gold_sparql": "SELECT (COUNT(DISTINCT ?x) AS ?forests) WHERE { yago:England geo:hasGeometry ?geomLC . ?geomLC geo:asWKT ?lcnWKT . ?x rdf:type y2geoo:OSM_forest ; geo:hasGeometry ?geomL . ?geomL geo:asWKT ?lWKT FILTER geof:sfWithin(?lWKT, ?lcnWKT) } ",
+    "result": {
+      "format": "table",
+      "columns": [
+        "forests"
+      ],
+      "rows": [
+        [
+          "28"
+        ]
+      ],
+      "source_raw": "forests\r\n28\r\n"
+    }
+  },
+  {
+    "source_id": 615,
+    "gold_sparql": "SELECT (COUNT(DISTINCT ?locality) AS ?total) (SUM(strdf:area(?WKT2)) AS ?sum) (AVG(strdf:area(?WKT2)) AS ?avg) WHERE { yago:County_Roscommon geo:hasGeometry ?rep1 . ?rep1 geo:asWKT ?WKT1 . ?locality rdf:type y2geoo:OSM_locality ; geo:hasGeometry ?rep2 . ?rep2 geo:asWKT ?WKT2 FILTER geof:sfWithin(?WKT2, ?WKT1) } ",
+    "result": {
+      "format": "table",
+      "columns": [
+        "total",
+        "sum",
+        "avg"
+      ],
+      "rows": [
+        [
+          "13",
+          "1.8424967596399934E-3",
+          "1.417305199723072E-4"
+        ]
+      ],
+      "source_raw": "total,sum,avg\r\n13,1.8424967596399934E-3,1.417305199723072E-4\r\n"
+    }
+  },
+  {
+    "source_id": 616,
+    "gold_sparql": "SELECT ?reg_unit (AVG(?no_of_beaches) AS ?avg_no_of_beaches) WHERE { <http://yago-knowledge.org/resource/Pyrgos,_Elis> geo:hasGeometry ?pirgos_geo . ?pirgos_geo geo:asWKT ?pirgos_geoWKT . ?reg_unit rdf:type y2geoo:GAG_Municipality ; geo:hasGeometry ?reg_unitgeo . ?reg_unitgeo geo:asWKT ?reg_unitgeoWKT FILTER strdf:left(?reg_unitgeoWKT, ?pirgos_geoWKT) ?locality rdf:type y2geoo:OSM_beach ; geo:hasGeometry ?locality_geo . ?locality_geo geo:asWKT ?locality_geoWKT FILTER geof:sfWithin(?locality_geoWKT, ?reg_unitgeoWKT) } GROUP BY ?reg_unit ",
+    "result": {
+      "format": "table",
+      "columns": [
+        "reg_unit",
+        "avg_no_of_beaches"
+      ],
+      "rows": [
+        [
+          "http://yago-knowledge.org/resource/geoentity_Dimos_Igoumenitsa_8133725",
+          "0.0E0"
+        ],
+        [
+          "http://yago-knowledge.org/resource/geoentity_Dimos_Parga_8133742",
+          "0.0E0"
+        ],
+        [
+          "http://yago-knowledge.org/resource/geoentity_Dimos_Lefkada_8133851",
+          "0.0E0"
+        ],
+        [
+          "http://yago-knowledge.org/resource/geoentity_Dimos_Corfu_8133855",
+          "0.0E0"
+        ],
+        [
+          "http://yago-knowledge.org/resource/geoentity_Dimos_Paxoi_8133911",
+          "0.0E0"
+        ]
+      ],
+      "source_raw": "reg_unit,avg_no_of_beaches\r\nhttp://yago-knowledge.org/resource/geoentity_Dimos_Igoumenitsa_8133725,0.0E0\r\nhttp://yago-knowledge.org/resource/geoentity_Dimos_Parga_8133742,0.0E0\r\nhttp://yago-knowledge.org/resource/geoentity_Dimos_Lefkada_8133851,0.0E0\r\nhttp://yago-knowledge.org/resource/geoentity_Dimos_Corfu_8133855,0.0E0\r\nhttp://yago-knowledge.org/resource/geoentity_Dimos_Paxoi_8133911,0.0E0\r\n"
+    }
+  },
+  {
+    "source_id": 617,
+    "gold_sparql": "SELECT (COUNT(DISTINCT ?lake) AS ?total_lakes) (COUNT(DISTINCT ?stream) AS ?total_streams) WHERE { yago:geoentity_Cork_City_7778678 geo:hasGeometry ?o . ?o geo:asWKT ?A . ?lake rdf:type y2geoo:OSM_lake ; geo:hasGeometry ?geomB . ?geomB geo:asWKT ?B . ?stream rdf:type y2geoo:OSM_stream ; geo:hasGeometry ?geomC . ?geomC geo:asWKT ?C FILTER geof:sfWithin(?B, ?A) FILTER geof:sfWithin(?C, ?A) } ",
+    "result": {
+      "format": "table",
+      "columns": [
+        "total_lakes",
+        "total_streams"
+      ],
+      "rows": [
+        [
+          "19",
+          "39"
+        ]
+      ],
+      "source_raw": "total_lakes,total_streams\r\n19,39\r\n"
+    }
+  },
+  {
+    "source_id": 622,
+    "gold_sparql": "SELECT (SUM(?lakeArea) AS ?oSum) WHERE { { SELECT (strdf:area(?lakeWKT) AS ?lakeArea) WHERE { y2geor:osientity_2AE1962941E413A3E055000000000001 geo:hasGeometry ?o1 . ?o1 geo:asWKT ?baronyWKT . ?lake rdf:type y2geoo:OSM_lake ; geo:hasGeometry ?o2 . ?o2 geo:asWKT ?lakeWKT FILTER geof:sfWithin(?lakeWKT, ?baronyWKT) } } } ",
+    "result": {
+      "format": "table",
+      "columns": [
+        "oSum"
+      ],
+      "rows": [
+        [
+          "0"
+        ]
+      ],
+      "source_raw": "oSum\r\n0\r\n"
+    }
+  },
+  {
+    "source_id": 623,
+    "gold_sparql": "SELECT DISTINCT ?county (COUNT(?lake) AS ?lake_count) WHERE { ?county rdf:type y2geoo:OS_County ; geo:hasGeometry ?geomLC . ?geomLC geo:asWKT ?lcWKT . ?lake rdf:type y2geoo:OSM_lake ; geo:hasGeometry ?geomL . ?geomL geo:asWKT ?lWKT FILTER geof:sfIntersects(?lWKT, ?lcWKT) } GROUP BY ?county ",
+    "result": {
+      "format": "table",
+      "columns": [
+        "county",
+        "lake_count"
+      ],
+      "rows": [
+        [
+          "http://yago-knowledge.org/resource/North_Yorkshire",
+          "2"
+        ],
+        [
+          "http://yago-knowledge.org/resource/Cambridge",
+          "8"
+        ],
+        [
+          "http://yago-knowledge.org/resource/Surrey",
+          "4"
+        ],
+        [
+          "http://yago-knowledge.org/resource/Norfolk",
+          "10"
+        ],
+        [
+          "http://yago-knowledge.org/resource/Cumbria",
+          "20"
+        ]
+      ],
+      "source_raw": "county,lake_count\r\nhttp://yago-knowledge.org/resource/North_Yorkshire,2\r\nhttp://yago-knowledge.org/resource/Cambridge,8\r\nhttp://yago-knowledge.org/resource/Surrey,4\r\nhttp://yago-knowledge.org/resource/Norfolk,10\r\nhttp://yago-knowledge.org/resource/Cumbria,20\r\n"
+    }
+  },
+  {
+    "source_id": 624,
+    "gold_sparql": "SELECT DISTINCT (MAX(strdf:area(?geoWKT2)) AS ?maxLakeArea) WHERE { yago:County_Cavan geo:hasGeometry ?o1 . ?o1 geo:asWKT ?geoWKT1 . ?lake rdf:type y2geoo:OSM_lake ; geo:hasGeometry ?o2 . ?o2 geo:asWKT ?geoWKT2 FILTER geof:sfWithin(?geoWKT2, ?geoWKT1) } ",
+    "result": {
+      "format": "table",
+      "columns": [
+        "maxLakeArea"
+      ],
+      "rows": [
+        [
+          "9.683881436250193E-4"
+        ]
+      ],
+      "source_raw": "maxLakeArea\r\n9.683881436250193E-4\r\n"
+    }
+  },
+  {
+    "source_id": 625,
+    "gold_sparql": "SELECT (MIN(strdf:area(?forest_geoWKT)) AS ?areas_min) (MAX(strdf:area(?forest_geoWKT)) AS ?areas_max) (AVG(strdf:area(?forest_geoWKT)) AS ?areas_avg) WHERE { yago:Staffordshire geo:hasGeometry ?Suffolk_geo . ?Suffolk_geo geo:asWKT ?Suffolk_geoWKT . ?district rdf:type y2geoo:OS_District ; geo:hasGeometry ?district_geo . ?district_geo geo:asWKT ?district_geoWKT FILTER strdf:below(?district_geoWKT, ?Suffolk_geoWKT) ?forest rdf:type y2geoo:OSM_forest ; geo:hasGeometry ?forest_geo . ?forest_geo geo:asWKT ?forest_geoWKT FILTER geof:sfWithin(?forest_geoWKT, ?district_geoWKT) } ",
+    "result": {
+      "format": "table",
+      "columns": [
+        "areas_min",
+        "areas_max",
+        "areas_avg"
+      ],
+      "rows": [
+        [
+          "1.8218561900008377E-6",
+          "7.697400551350174E-4",
+          "1.4819109035088407E-4"
+        ]
+      ],
+      "source_raw": "areas_min,areas_max,areas_avg\r\n1.8218561900008377E-6,7.697400551350174E-4,1.4819109035088407E-4\r\n"
+    }
+  },
+  {
+    "source_id": 626,
+    "gold_sparql": "SELECT (AVG(?areas) AS ?areas_avg) WHERE { SELECT (strdf:area(?forest_geoWKT) AS ?areas) WHERE { yago:geoentity_Cork_City_7778678 geo:hasGeometry ?Cork_geo . ?Cork_geo geo:asWKT ?Cork_geoWKT . ?rural_area rdf:type y2geoo:OSI_Rural_Area ; geo:hasGeometry ?rural_area_geo . ?rural_area_geo geo:asWKT ?rural_area_geoWKT FILTER strdf:above(?rural_area_geoWKT, ?Cork_geoWKT) ?forest rdf:type y2geoo:OSM_forest ; geo:hasGeometry ?forest_geo . ?forest_geo geo:asWKT ?forest_geoWKT FILTER geof:sfWithin(?forest_geoWKT, ?rural_area_geoWKT) } } ",
+    "result": {
+      "format": "table",
+      "columns": [
+        "areas_avg"
+      ],
+      "rows": [
+        [
+          "2.2398264837615153E-4"
+        ]
+      ],
+      "source_raw": "areas_avg\r\n2.2398264837615153E-4\r\n"
+    }
+  },
+  {
+    "source_id": 633,
+    "gold_sparql": "SELECT (COUNT(DISTINCT ?forest) AS ?forests) WHERE { ?forest rdf:type y2geoo:OSM_forest ; geo:hasGeometry ?x1Geo . ?x1Geo geo:asWKT ?x1WKT . ?lake rdf:type y2geoo:OSM_lake ; geo:hasGeometry ?x2Geo . ?x2Geo geo:asWKT ?x2WKT FILTER geof:sfTouches(?x1WKT, ?x2WKT) } ",
+    "result": {
+      "format": "table",
+      "columns": [
+        "forests"
+      ],
+      "rows": [
+        [
+          "36"
+        ]
+      ],
+      "source_raw": "forests\r\n36\r\n"
+    }
+  },
+  {
+    "source_id": 640,
+    "gold_sparql": "SELECT (COUNT(DISTINCT ?county) AS ?counties) WHERE { { ?county rdf:type y2geoo:OSI_County_Council } UNION { ?county rdf:type y2geoo:OSI_City_and_County_Council } UNION { ?county rdf:type y2geoo:OS_County } ?county geo:hasGeometry ?geomc . ?geomc geo:asWKT ?WKT1 . ?forest rdf:type y2geoo:OSM_lake ; geo:hasGeometry ?geomf . ?geomf geo:asWKT ?WKT2 FILTER geof:sfIntersects(?WKT2, ?WKT1) } ",
+    "result": {
+      "format": "table",
+      "columns": [
+        "counties"
+      ],
+      "rows": [
+        [
+          "27"
+        ]
+      ],
+      "source_raw": "counties\r\n27\r\n"
+    }
+  },
+  {
+    "source_id": 642,
+    "gold_sparql": "SELECT (COUNT(DISTINCT ?nature_reserve) AS ?nature_reserves) WHERE { ?nature_reserve rdf:type y2geoo:OSM_nature_reserve ; geo:hasGeometry ?nature_reserve_geo . ?nature_reserve_geo geo:asWKT ?nature_reserve_geoWKT . ?forest rdf:type y2geoo:OSM_forest ; geo:hasGeometry ?forest_geo . ?forest_geo geo:asWKT ?forest_geoWKT FILTER geof:sfIntersects(?forest_geoWKT, ?nature_reserve_geoWKT) } ",
+    "result": {
+      "format": "table",
+      "columns": [
+        "nature_reserves"
+      ],
+      "rows": [
+        [
+          "7"
+        ]
+      ],
+      "source_raw": "nature_reserves\r\n7\r\n"
+    }
+  },
+  {
+    "source_id": 649,
+    "gold_sparql": "SELECT (COUNT(DISTINCT ?lake) AS ?lakes) WHERE { ?CountyCouncil rdf:type y2geoo:OSI_County_Council ; geo:hasGeometry ?geomL . ?geomL geo:asWKT ?A . ?lake rdf:type y2geoo:OSM_lake ; geo:hasGeometry ?geom . ?geom geo:asWKT ?B FILTER geof:sfWithin(?B, ?A) } ",
+    "result": {
+      "format": "table",
+      "columns": [
+        "lakes"
+      ],
+      "rows": [
+        [
+          "849"
+        ]
+      ],
+      "source_raw": "lakes\r\n849\r\n"
+    }
+  },
+  {
+    "source_id": 655,
+    "gold_sparql": "SELECT (COUNT(DISTINCT ?p1) AS ?streams) WHERE { ?p1 rdf:type y2geoo:OSM_stream ; geo:hasGeometry ?p1geo . ?p1geo geo:asWKT ?p1WKT . ?p2 rdf:type y2geoo:OSM_lake ; geo:hasGeometry ?p2geo . ?p2geo geo:asWKT ?p2WKT FILTER geof:sfIntersects(?p1WKT, ?p2WKT) } ",
+    "result": {
+      "format": "table",
+      "columns": [
+        "streams"
+      ],
+      "rows": [
+        [
+          "2589"
+        ]
+      ],
+      "source_raw": "streams\r\n2589\r\n"
+    }
+  },
+  {
+    "source_id": 662,
+    "gold_sparql": "SELECT (COUNT(DISTINCT ?x) AS ?villages) WHERE { yago:Crete geo:hasGeometry ?oGeo . ?oGeo geo:asWKT ?oWKT . ?x rdf:type y2geoo:OSM_village ; geo:hasGeometry ?xgeo . ?xgeo geo:asWKT ?xWKT . ?y rdf:type y2geoo:OSM_forest ; geo:hasGeometry ?ygeo . ?ygeo geo:asWKT ?yWKT FILTER ( ( geof:sfContains(?oWKT, ?yWKT) && geof:sfContains(?oWKT, ?yWKT) ) && strdf:above(?xWKT, ?yWKT) ) } ",
+    "result": {
+      "format": "table",
+      "columns": [
+        "villages"
+      ],
+      "rows": [
+        [
+          "0"
+        ]
+      ],
+      "source_raw": "villages\r\n0\r\n"
+    }
+  },
+  {
+    "source_id": 680,
+    "gold_sparql": "SELECT (COUNT(DISTINCT ?river) AS ?rivers) WHERE { ?river rdf:type y2geoo:OSM_stream ; geo:hasGeometry ?g1 . ?g1 geo:asWKT ?wkt1 . ?county rdf:type y2geoo:OSI_Townland ; geo:hasGeometry ?g2 . ?g2 geo:asWKT ?wkt2 . yago:County_Kildare geo:hasGeometry ?kildare_geo . ?kildare_geo geo:asWKT ?kildare_geoWKT FILTER ( ( geof:sfWithin(?wkt1, ?kildare_geoWKT) && geof:sfWithin(?wkt2, ?kildare_geoWKT) ) && geof:sfCrosses(?wkt1, ?wkt2) ) } ",
+    "result": {
+      "format": "table",
+      "columns": [
+        "rivers"
+      ],
+      "rows": [
+        [
+          "6"
+        ]
+      ],
+      "source_raw": "rivers\r\n6\r\n"
+    }
+  },
+  {
+    "source_id": 682,
+    "gold_sparql": "SELECT (COUNT(DISTINCT ?stream) AS ?streams) WHERE { ?stream rdf:type y2geoo:OSM_stream ; geo:hasGeometry ?rep1 . ?rep1 geo:asWKT ?sWKT . ?reserve rdf:type y2geoo:OSM_nature_reserve ; geo:hasGeometry ?rep2 . ?rep2 geo:asWKT ?rWKT . yago:Oxford geo:hasGeometry ?egeo . ?egeo geo:asWKT ?eWKT FILTER ( ( geof:sfWithin(?sWKT, ?eWKT) && geof:sfWithin(?rWKT, ?eWKT) ) && geof:sfCrosses(?sWKT, ?rWKT) ) } ",
+    "result": {
+      "format": "table",
+      "columns": [
+        "streams"
+      ],
+      "rows": [
+        [
+          "0"
+        ]
+      ],
+      "source_raw": "streams\r\n0\r\n"
+    }
+  },
+  {
+    "source_id": 683,
+    "gold_sparql": "SELECT (COUNT(DISTINCT ?forest) AS ?forests) WHERE { ?forest rdf:type y2geoo:OSM_forest ; geo:hasGeometry ?rep1 . ?rep1 geo:asWKT ?fWKT . ?lagoon rdf:type y2geoo:OSM_lagoon ; geo:hasGeometry ?rep2 . ?rep2 geo:asWKT ?lWKT . yago:County_Longford geo:hasGeometry ?g . ?g geo:asWKT ?geoWKT FILTER ( geof:sfWithin(?fWKT, ?geoWKT) && geof:sfWithin(?lWKT, ?fWKT) ) } ",
+    "result": {
+      "format": "table",
+      "columns": [
+        "forests"
+      ],
+      "rows": [
+        [
+          "0"
+        ]
+      ],
+      "source_raw": "forests\r\n0\r\n"
+    }
+  },
+  {
+    "source_id": 693,
+    "gold_sparql": "SELECT (COUNT(DISTINCT ?beach) AS ?numBeaches) (SUM(strdf:area(?bWKT)) AS ?totalArea) WHERE { ?beach rdf:type y2geoo:OSM_beach ; geo:hasGeometry ?bgeo . ?bgeo geo:asWKT ?bWKT . yago:England geo:hasGeometry ?eGeom . ?eGeom geo:asWKT ?eWKT FILTER geof:sfWithin(?bWKT, ?eWKT) } ",
+    "result": {
+      "format": "table",
+      "columns": [
+        "numBeaches",
+        "totalArea"
+      ],
+      "rows": [
+        [
+          "3",
+          "2.155678840002368E-6"
+        ]
+      ],
+      "source_raw": "numBeaches,totalArea\r\n3,2.155678840002368E-6\r\n"
+    }
+  },
+  {
+    "source_id": 706,
+    "gold_sparql": "SELECT (SUM(?lakeArea) AS ?oSum) WHERE { { SELECT (strdf:area(?lakeWKT) AS ?lakeArea) WHERE { yago:Texas geo:hasGeometry ?o1 . ?o1 geo:asWKT ?baronyWKT . ?lake rdf:type y2geoo:OSM_lake ; geo:hasGeometry ?o2 . ?o2 geo:asWKT ?lakeWKT FILTER geof:sfWithin(?lakeWKT, ?baronyWKT) } } } ",
+    "result": {
+      "format": "table",
+      "columns": [
+        "oSum"
+      ],
+      "rows": [
+        [
+          "6.465682141949049E-2"
+        ]
+      ],
+      "source_raw": "oSum\r\n6.465682141949049E-2\r\n"
+    }
+  },
+  {
+    "source_id": 712,
+    "gold_sparql": "SELECT (COUNT(DISTINCT ?district) AS ?districts) WHERE { yago:England geo:hasGeometry ?eGeo . ?eGeo geo:asWKT ?eWKT . ?district rdf:type y2geoo:OS_District ; geo:hasGeometry ?o . ?o geo:asWKT ?WKT . ?park rdf:type y2geoo:OSM_lake ; geo:hasGeometry ?o1 . ?o1 geo:asWKT ?WKT1 FILTER ( geof:sfWithin(?WKT, ?eWKT) && geof:sfContains(?WKT, ?WKT1) ) } ",
+    "result": {
+      "format": "table",
+      "columns": [
+        "districts"
+      ],
+      "rows": [
+        [
+          "5"
+        ]
+      ],
+      "source_raw": "districts\r\n5\r\n"
+    }
+  },
+  {
+    "source_id": 718,
+    "gold_sparql": "SELECT (COUNT(DISTINCT ?lake) AS ?lakes) WHERE { ?lake rdf:type y2geoo:OSM_lake ; geo:hasGeometry ?g . ?g geo:asWKT ?geoWKT . ?f rdf:type y2geoo:OSM_forest ; geo:hasGeometry ?g2 . ?g2 geo:asWKT ?geoWKT2 FILTER geof:sfIntersects(?geoWKT, ?geoWKT2) } ",
+    "result": {
+      "format": "table",
+      "columns": [
+        "lakes"
+      ],
+      "rows": [
+        [
+          "259"
+        ]
+      ],
+      "source_raw": "lakes\r\n259\r\n"
+    }
+  },
+  {
+    "source_id": 720,
+    "gold_sparql": "SELECT (COUNT(DISTINCT ?x) AS ?streams) WHERE { yago:United_States geo:hasGeometry ?oGeo . ?oGeo geo:asWKT ?oWKT . ?x rdf:type y2geoo:OSM_canal ; geo:hasGeometry ?xgeo . ?xgeo geo:asWKT ?xWKT . ?y rdf:type y2geoo:OSM_lake ; geo:hasGeometry ?ygeo . ?ygeo geo:asWKT ?yWKT FILTER ( geof:sfContains(?oWKT, ?yWKT) && geof:sfIntersects(?xWKT, ?yWKT) ) } ",
+    "result": {
+      "format": "table",
+      "columns": [
+        "streams"
+      ],
+      "rows": [
+        [
+          "11"
+        ]
+      ],
+      "source_raw": "streams\r\n11\r\n"
+    }
+  },
+  {
+    "source_id": 729,
+    "gold_sparql": "SELECT (COUNT(DISTINCT ?r) AS ?rs) WHERE { ?forest rdf:type y2geoo:OSM_forest ; geo:hasGeometry ?forestGeom . ?forestGeom geo:asWKT ?forestWKT . ?r rdf:type y2geoo:OSM_stream ; geo:hasGeometry ?lakeGeom . ?lakeGeom geo:asWKT ?lakeWKT FILTER geof:sfWithin(?lakeWKT, ?forestWKT) } ",
+    "result": {
+      "format": "table",
+      "columns": [
+        "rs"
+      ],
+      "rows": [
+        [
+          "303"
+        ]
+      ],
+      "source_raw": "rs\r\n303\r\n"
+    }
+  },
+  {
+    "source_id": 417,
+    "gold_sparql": "SELECT DISTINCT ?lake (strdf:area(?sWKT) AS ?area) WHERE { yago:County_Kerry geo:hasGeometry ?lgeo . ?lgeo geo:asWKT ?lWKT . ?lake rdf:type y2geoo:OSM_lake ; geo:hasGeometry ?sgeo . ?sgeo geo:asWKT ?sWKT FILTER geof:sfWithin(?sWKT, ?lWKT) } ORDER BY DESC(?area) LIMIT 1 ",
+    "result": {
+      "format": "table",
+      "columns": [
+        "lake",
+        "area"
+      ],
+      "rows": [
+        [
+          "http://yago-knowledge.org/resource/Lough_Leane",
+          "2.575920421759999E-3"
+        ]
+      ],
+      "source_raw": "lake,area\r\nhttp://yago-knowledge.org/resource/Lough_Leane,2.575920421759999E-3\r\n"
+    }
+  },
+  {
+    "source_id": 759,
+    "gold_sparql": "SELECT DISTINCT ?forest WHERE { ?forest rdf:type y2geoo:OSM_forest ; geo:hasGeometry ?fg . ?fg geo:asWKT ?fw . yago:geoentity_City_of_Belfast_3333223 geo:hasGeometry ?x2Geo . ?x2Geo geo:asWKT ?cw } ORDER BY geof:distance(?fw, ?cw, uom:metre) LIMIT 1 ",
+    "result": {
+      "format": "table",
+      "columns": [
+        "forest"
+      ],
+      "rows": [
+        [
+          "http://yago-knowledge.org/resource/geoentity_Rossmore_Forest_Park_3310609"
+        ]
+      ],
+      "source_raw": "forest\r\nhttp://yago-knowledge.org/resource/geoentity_Rossmore_Forest_Park_3310609\r\n"
+    }
+  },
+  {
+    "source_id": 767,
+    "gold_sparql": "SELECT ?forest (strdf:area(?WKT1) AS ?area1) WHERE { yago:Essex geo:hasGeometry ?o . ?o geo:asWKT ?WKT . ?forest rdf:type y2geoo:OSM_forest ; geo:hasGeometry ?o1 . ?o1 geo:asWKT ?WKT1 FILTER geof:sfIntersects(?WKT1, ?WKT) } ORDER BY ?area1 LIMIT 1 ",
+    "result": {
+      "format": "table",
+      "columns": [
+        "forest",
+        "area1"
+      ],
+      "rows": [
+        [
+          "http://yago-knowledge.org/resource/geoentity_Pedlars_Wood_9883765",
+          "1.8218561900008377E-6"
+        ]
+      ],
+      "source_raw": "forest,area1\r\nhttp://yago-knowledge.org/resource/geoentity_Pedlars_Wood_9883765,1.8218561900008377E-6\r\n"
+    }
+  },
+  {
+    "source_id": 769,
+    "gold_sparql": "SELECT DISTINCT ?forest (strdf:area(?fWKT) AS ?totalArea) WHERE { ?forest rdf:type y2geoo:OSM_forest ; geo:hasGeometry ?fGeom . ?fGeom geo:asWKT ?fWKT . yago:England geo:hasGeometry ?lcGeom . ?lcGeom geo:asWKT ?lcWKT FILTER geof:sfWithin(?fWKT, ?lcWKT) } ORDER BY DESC(?totalArea) LIMIT 1 ",
+    "result": {
+      "format": "table",
+      "columns": [
+        "forest",
+        "totalArea"
+      ],
+      "rows": [
+        [
+          "http://yago-knowledge.org/resource/Savernake_Forest",
+          "1.5999443545550666E-3"
+        ]
+      ],
+      "source_raw": "forest,totalArea\r\nhttp://yago-knowledge.org/resource/Savernake_Forest,1.5999443545550666E-3\r\n"
+    }
+  },
+  {
+    "source_id": 777,
+    "gold_sparql": "SELECT ?forest WHERE { yago:County_Wexford geo:hasGeometry ?rep1 . ?rep1 geo:asWKT ?WKT1 . ?forest rdf:type y2geoo:OSM_forest ; geo:hasGeometry ?rep2 . ?rep2 geo:asWKT ?WKT2 FILTER geof:sfWithin(?WKT2, ?WKT1) } ORDER BY DESC(strdf:area(?WKT2)) LIMIT 1 ",
+    "result": {
+      "format": "table",
+      "columns": [
+        "forest"
+      ],
+      "rows": [
+        [
+          "http://yago-knowledge.org/resource/geoentity_Killoughrum_Forest_2963306"
+        ]
+      ],
+      "source_raw": "forest\r\nhttp://yago-knowledge.org/resource/geoentity_Killoughrum_Forest_2963306\r\n"
+    }
+  },
+  {
+    "source_id": 873,
+    "gold_sparql": "SELECT DISTINCT ?district WHERE { ?village rdf:type y2geoo:OSM_lake ; geo:hasGeometry ?o1 . ?o1 geo:asWKT ?geoWKT1 . ?district rdf:type y2geoo:OS_District ; geo:hasGeometry ?o2 . ?o2 geo:asWKT ?geoWKT2 . yago:England geo:hasGeometry ?egeo . ?egeo geo:asWKT ?eWKT FILTER ( geof:sfWithin(?geoWKT2, ?eWKT) && geof:sfWithin(?geoWKT1, ?geoWKT2) ) } GROUP BY ?district ORDER BY DESC(COUNT(?village)) LIMIT 1 ",
+    "result": {
+      "format": "table",
+      "columns": [
+        "district"
+      ],
+      "rows": [
+        [
+          "http://yago-knowledge.org/resource/geoentity_Craven_District_7290606"
+        ]
+      ],
+      "source_raw": "district\r\nhttp://yago-knowledge.org/resource/geoentity_Craven_District_7290606\r\n"
+    }
+  },
+  {
+    "source_id": 876,
+    "gold_sparql": "SELECT DISTINCT ?county WHERE { ?lake rdf:type y2geoo:OSM_lake ; geo:hasGeometry ?o . ?o geo:asWKT ?geoWKT { ?county rdf:type y2geoo:OSI_County_Council } UNION { ?county rdf:type y2geoo:OSI_City_and_County_Council } ?county geo:hasGeometry ?o1 . ?o1 geo:asWKT ?geoWKT1 FILTER geof:sfWithin(?geoWKT, ?geoWKT1) } GROUP BY ?county ORDER BY DESC(COUNT(?lake)) LIMIT 1 ",
+    "result": {
+      "format": "table",
+      "columns": [
+        "county"
+      ],
+      "rows": [
+        [
+          "http://yago-knowledge.org/resource/County_Mayo"
+        ]
+      ],
+      "source_raw": "county\r\nhttp://yago-knowledge.org/resource/County_Mayo\r\n"
+    }
+  },
+  {
+    "source_id": 877,
+    "gold_sparql": "SELECT DISTINCT ?island WHERE { yago:Greece geo:hasGeometry ?o . ?o geo:asWKT ?geoWKT . ?island rdf:type y2geoo:OSM_island ; geo:hasGeometry ?o1 . ?o1 geo:asWKT ?geoWKT1 . ?beach rdf:type y2geoo:OSM_beach ; geo:hasGeometry ?o2 . ?o2 geo:asWKT ?geoWKT2 FILTER ( geof:sfWithin(?geoWKT1, ?geoWKT) && geof:sfWithin(?geoWKT2, ?geoWKT1) ) } GROUP BY ?island ORDER BY DESC(COUNT(?beach)) LIMIT 1 ",
+    "result": {
+      "format": "table",
+      "columns": [
+        "island"
+      ],
+      "rows": [
+        [
+          "http://yago-knowledge.org/resource/Crete"
+        ]
+      ],
+      "source_raw": "island\r\nhttp://yago-knowledge.org/resource/Crete\r\n"
+    }
+  },
+  {
+    "source_id": 878,
+    "gold_sparql": "SELECT DISTINCT ?county WHERE { ?county rdf:type y2geoo:OS_County ; geo:hasGeometry ?geomLC . ?geomLC geo:asWKT ?lcnWKT . ?lake rdf:type y2geoo:OSM_lake ; geo:hasGeometry ?geomL . ?geomL geo:asWKT ?lWKT FILTER geof:sfWithin(?lWKT, ?lcnWKT) } GROUP BY ?county ORDER BY DESC(COUNT(?lWKT)) LIMIT 1 ",
+    "result": {
+      "format": "table",
+      "columns": [
+        "county"
+      ],
+      "rows": [
+        [
+          "http://yago-knowledge.org/resource/Cumbria"
+        ]
+      ],
+      "source_raw": "county\r\nhttp://yago-knowledge.org/resource/Cumbria\r\n"
+    }
+  },
+  {
+    "source_id": 879,
+    "gold_sparql": "SELECT DISTINCT ?county WHERE { ?county rdf:type y2geoo:OS_County ; geo:hasGeometry ?geoC . ?geoC geo:asWKT ?cWKT . ?forest rdf:type y2geoo:OSM_forest ; geo:hasGeometry ?geoF . ?geoF geo:asWKT ?fWKT FILTER geof:sfWithin(?fWKT, ?cWKT) } GROUP BY ?county ORDER BY DESC(COUNT(?forest)) LIMIT 5 ",
+    "result": {
+      "format": "table",
+      "columns": [
+        "county"
+      ],
+      "rows": [
+        [
+          "http://yago-knowledge.org/resource/Essex"
+        ],
+        [
+          "http://yago-knowledge.org/resource/Norfolk"
+        ],
+        [
+          "http://yago-knowledge.org/resource/Kent"
+        ],
+        [
+          "http://yago-knowledge.org/resource/Derbyshire"
+        ],
+        [
+          "http://yago-knowledge.org/resource/North_Yorkshire"
+        ]
+      ],
+      "source_raw": "county\r\nhttp://yago-knowledge.org/resource/Essex\r\nhttp://yago-knowledge.org/resource/Norfolk\r\nhttp://yago-knowledge.org/resource/Kent\r\nhttp://yago-knowledge.org/resource/Derbyshire\r\nhttp://yago-knowledge.org/resource/North_Yorkshire\r\n"
+    }
+  },
+  {
+    "source_id": 882,
+    "gold_sparql": "SELECT ?m (COUNT(?l) AS ?count) WHERE { ?m rdf:type y2geoo:OS_County ; geo:hasGeometry ?mg . ?mg geo:asWKT ?mw . ?l rdf:type y2geoo:OSM_forest ; geo:hasGeometry ?lg . ?lg geo:asWKT ?lw FILTER geof:sfWithin(?lw, ?mw) } GROUP BY ?m ORDER BY DESC(?count) LIMIT 10 ",
+    "result": {
+      "format": "table",
+      "columns": [
+        "m",
+        "count"
+      ],
+      "rows": [
+        [
+          "http://yago-knowledge.org/resource/Essex",
+          "6"
+        ],
+        [
+          "http://yago-knowledge.org/resource/Norfolk",
+          "6"
+        ],
+        [
+          "http://yago-knowledge.org/resource/Kent",
+          "4"
+        ],
+        [
+          "http://yago-knowledge.org/resource/Derbyshire",
+          "2"
+        ],
+        [
+          "http://yago-knowledge.org/resource/North_Yorkshire",
+          "2"
+        ],
+        [
+          "http://yago-knowledge.org/resource/Staffordshire",
+          "2"
+        ],
+        [
+          "http://yago-knowledge.org/resource/Cambridge",
+          "2"
+        ],
+        [
+          "http://yago-knowledge.org/resource/Suffolk",
+          "2"
+        ],
+        [
+          "http://yago-knowledge.org/resource/Surrey",
+          "2"
+        ],
+        [
+          "http://yago-knowledge.org/resource/Nottinghamshire",
+          "2"
+        ]
+      ],
+      "source_raw": "m,count\r\nhttp://yago-knowledge.org/resource/Essex,6\r\nhttp://yago-knowledge.org/resource/Norfolk,6\r\nhttp://yago-knowledge.org/resource/Kent,4\r\nhttp://yago-knowledge.org/resource/Derbyshire,2\r\nhttp://yago-knowledge.org/resource/North_Yorkshire,2\r\nhttp://yago-knowledge.org/resource/Staffordshire,2\r\nhttp://yago-knowledge.org/resource/Cambridge,2\r\nhttp://yago-knowledge.org/resource/Suffolk,2\r\nhttp://yago-knowledge.org/resource/Surrey,2\r\nhttp://yago-knowledge.org/resource/Nottinghamshire,2\r\n"
+    }
+  },
+  {
+    "source_id": 886,
+    "gold_sparql": "SELECT (AVG(?areas) AS ?areas_avg) WHERE { SELECT (strdf:area(?forest_geoWKT) AS ?areas) WHERE { yago:Nevada geo:hasGeometry ?Cork_geo . ?Cork_geo geo:asWKT ?Cork_geoWKT . ?forest rdf:type y2geoo:OSM_lake ; geo:hasGeometry ?forest_geo . ?forest_geo geo:asWKT ?forest_geoWKT FILTER geof:sfWithin(?forest_geoWKT, ?Cork_geoWKT) } } ",
+    "result": {
+      "format": "table",
+      "columns": [
+        "areas_avg"
+      ],
+      "rows": [
+        [
+          "2.003668558597946E-3"
+        ]
+      ],
+      "source_raw": "areas_avg\r\n2.003668558597946E-3\r\n"
+    }
+  },
+  {
+    "source_id": 889,
+    "gold_sparql": "SELECT ?county (COUNT(?lake) AS ?lakeCount) WHERE { ?county y2geoo:hasGADM_Description \"County\" ; geo:hasGeometry ?countyGeom . ?countyGeom geo:asWKT ?countyWKT . yago:Texas geo:hasGeometry ?tGeom . ?tGeom geo:asWKT ?texasWKT FILTER geof:sfWithin(?countyWKT, ?texasWKT) ?lake rdf:type y2geoo:OSM_lake ; geo:hasGeometry ?lakeGeom . ?lakeGeom geo:asWKT ?lakeWkt FILTER geof:sfWithin(?lakeWkt, ?countyWKT) } GROUP BY ?county ORDER BY DESC(?lakeCount) LIMIT 1 ",
+    "result": {
+      "format": "table",
+      "columns": [
+        "county",
+        "lakeCount"
+      ],
+      "rows": [
+        [
+          "http://yago-knowledge.org/resource/Gregg_County,_Texas",
+          "40"
+        ]
+      ],
+      "source_raw": "county,lakeCount\r\n\"http://yago-knowledge.org/resource/Gregg_County,_Texas\",40\r\n"
+    }
+  }
+]

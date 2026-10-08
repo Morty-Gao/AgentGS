@@ -51,6 +51,7 @@ class ToolResult(Model):
     artifacts: list[ArtifactRef] = Field(default_factory=list)
     error: ToolError | None = None
     source_type: Literal["raw_compute", "derived_lookup", "external_backend"] = "raw_compute"
+    raw_output: str | None = None
 
 
 class ToolSpec(Model):
@@ -58,6 +59,9 @@ class ToolSpec(Model):
     description: str
     input_schema: dict[str, Any]
     effects: Literal["read", "write"] = "read"
+    category: str = ""
+    legacy_input: str = ""
+    legacy_output: str = ""
 
 
 class TaskInput(Model):
@@ -66,7 +70,14 @@ class TaskInput(Model):
     model: str | None = None
     effort: str | None = None
     skill_ids: list[str] = Field(default_factory=list)
-    max_model_calls: int = Field(default=8, ge=1, le=100)
+    max_model_calls: int | None = Field(default=None, ge=1, le=10000)
+    input_resource: Any = None
+    file_path_list: list[str] = Field(default_factory=list)
+    output_contract: dict[str, Any] | None = None
+    planning_mode: Literal["tool_only", "skill_guided"] | None = None
+    require_llm: bool | None = None
+    input_domain: str | None = None
+    algorithm: Literal["legacy", "prototype"] = "legacy"
 
 
 class TaskSpec(Model):
@@ -80,6 +91,12 @@ class AgentResult(Model):
     answer: str
     tool_results: list[ToolResult] = Field(default_factory=list)
     usage: list[dict[str, Any]] = Field(default_factory=list)
+    trace: list[dict[str, Any]] = Field(default_factory=list)
+    completion_status: Literal["Completed", "Not Completed"] = "Completed"
+    tool_chain_completed: bool = True
+    answer_generation_status: str = "success"
+    algorithm_id: str = ""
+    provenance: dict[str, Any] = Field(default_factory=dict)
 
 
 class TaskRecord(Model):

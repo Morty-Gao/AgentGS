@@ -10,7 +10,7 @@ def test_submit_events_artifact_and_errors(project):
         assert client.get("/api/tasks/missing").status_code == 404
         response = client.post(
             "/api/tasks",
-            json={"calls": [{"tool": "GeoMagnitudeToEnergy", "arguments": {"magnitude": 7}}]},
+            json={"calls": [{"tool": "DeepEarthQueryUSGSCatalog", "arguments": {"min_magnitude": 8}}]},
         )
         assert response.status_code == 202
         task_id = response.json()["spec"]["id"]

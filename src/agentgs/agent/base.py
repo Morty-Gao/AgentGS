@@ -1,5 +1,5 @@
 from dataclasses import dataclass
-from typing import Mapping
+from typing import Any, Callable, Mapping
 
 from agentgs.agent.retrieval.skills import SkillRetriever
 from agentgs.client.models import ModelClient
@@ -15,3 +15,10 @@ class AgentContext:
     skills: Mapping[str, Skill]
     retriever: SkillRetriever
     client: ModelClient | None = None
+    tool_retriever: Any = None
+    planner: Any = None
+    options: Any = None
+    resource_resolver: Callable | None = None
+    answer_contract_lookup: Callable | None = None
+    answer_system_prompt: str = ""
+    checkpoint: Callable | None = None

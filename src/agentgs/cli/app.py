@@ -96,6 +96,42 @@ def list_skills():
     emit([s.spec.model_dump() for s in builtin_skills().values()])
 
 
+@skill_app.command("plan")
+def plan_skills(
+    question: str = typer.Argument(...),
+    inferred_tool: list[str] | None = typer.Option(None, "--inferred-tool"),
+    mapping_extensions: bool = typer.Option(True, "--mapping-extensions/--no-mapping-extensions"),
+    summary: bool = typer.Option(False, "--summary"),
+):
+    """Inspect the frozen Skill algorithm. This does not call models or execute tools."""
+    from agentgs.agent.planning.grounding import ground_plan
+    from agentgs.agent.planning.skills import builtin_planner
+    from agentgs.runtime.tools.registry import builtin_tools
+
+    planner = builtin_planner(mapping_extensions=mapping_extensions)
+    plan = planner.plan(question, inferred_tool or [])
+    available = list(builtin_tools())
+    grounded = ground_plan(planner.graph, plan, available)
+    if summary:
+        emit(
+            {
+                "execution_status": "not_executed",
+                "baseline_id": "geotoolagent-geotooleval-101-snapshot-20261008",
+                "selected_skills": [step["skill_id"] for step in plan["steps"]],
+                "candidates": plan["candidates"],
+                "capabilities": plan["capability_expansion"]["capability_ids"],
+                "available_tools": available,
+                "grounded_tools": grounded["tool_chain"],
+                "constraints": [
+                    {"skill_id": row["skill_id"], "status": row["status"]}
+                    for row in plan["constraints"]
+                ],
+            }
+        )
+    else:
+        emit({"execution_status": "not_executed", "skill_plan": plan, "grounding": grounded})
+
+
 @tool_app.command("list")
 def list_tools():
     from agentgs.runtime.tools.registry import builtin_tools
@@ -166,6 +202,62 @@ def evaluate_command(cases: Path, project: Path = typer.Option(Path.cwd(), "--pr
             await service.close()
 
     typer.echo(str(asyncio.run(execute())))
+
+
+@eval_app.command("benchmark")
+def benchmark_command(
+    project: Path = typer.Option(Path.cwd(), "--project"),
+    output: Path = typer.Option(Path("outputs/evaluations/geotooleval"), "--output"),
+    ids: str = typer.Option("", "--ids"),
+    retry_failed: bool = typer.Option(False, "--retry-failed"),
+    planning_mode: str = typer.Option("skill_guided", "--planning-mode"),
+    require_llm: bool = typer.Option(True, "--require-llm/--allow-rule-routing"),
+):
+    """Run actual Agent requests with frozen FAS/flow metrics; preserve every attempt."""
+    from agentgs.evaluation.benchmark import run_benchmark
+    from agentgs.runtime.answer_contracts import AnswerContracts
+
+    root = project_root(project)
+    chosen = {int(value) for value in ids.split(",") if value.strip()} if ids else None
+
+    async def execute():
+        service = TaskService(root)
+        try:
+            return await run_benchmark(
+                service,
+                root / "data/geotooleval/GeoToolEval.xlsx",
+                root / output,
+                ids=chosen,
+                retry_failed=retry_failed,
+                planning_mode=planning_mode,
+                require_llm=require_llm,
+                contract_provider=AnswerContracts(root),
+            )
+        finally:
+            await service.close()
+
+    report = asyncio.run(execute())
+    emit({key: value for key, value in report.items() if key != "results"})
+
+
+@eval_app.command("score")
+def score_benchmark(
+    predictions: Path,
+    project: Path = typer.Option(Path.cwd(), "--project"),
+    output: Path = typer.Option(Path("outputs/evaluations/scored.json"), "--output"),
+    allow_partial: bool = typer.Option(False, "--allow-partial"),
+):
+    """Score saved original model answers without any new model calls."""
+    from agentgs.evaluation.benchmark import score_predictions
+
+    root = project_root(project)
+    report = score_predictions(
+        root / "data/geotooleval/GeoToolEval.xlsx",
+        predictions,
+        root / output,
+        allow_partial=allow_partial,
+    )
+    emit({key: value for key, value in report.items() if key != "results"})
 
 
 @ui_app.command("serve")

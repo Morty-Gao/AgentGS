@@ -1,5 +1,6 @@
 import hashlib
 import json
+import mimetypes
 from pathlib import Path
 from uuid import uuid4
 
@@ -27,5 +28,20 @@ class LocalArtifactStore:
             media_type="application/json",
             sha256=hashlib.sha256(content).hexdigest(),
             bytes=len(content),
+            source=source,
+        )
+
+    def register(self, path, source):
+        path = Path(path).resolve()
+        if not path.is_relative_to(self.root) or not path.is_file():
+            raise ValueError("Only produced files in the task artifact directory can be registered")
+        with path.open("rb") as stream:
+            fingerprint = hashlib.file_digest(stream, "sha256").hexdigest()
+        return ArtifactRef(
+            id=uuid4().hex,
+            path=str(path.relative_to(self.root)),
+            media_type=mimetypes.guess_type(path.name)[0] or "application/octet-stream",
+            sha256=fingerprint,
+            bytes=path.stat().st_size,
             source=source,
         )

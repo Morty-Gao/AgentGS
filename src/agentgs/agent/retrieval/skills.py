@@ -1,5 +1,5 @@
 import re
-from dataclasses import dataclass
+from dataclasses import dataclass, field
 from typing import Protocol
 
 
@@ -7,6 +7,16 @@ from typing import Protocol
 class SkillMatch:
     skill_id: str
     score: float
+    matched_terms: tuple[str, ...] = ()
+    score_components: dict[str, float] = field(default_factory=dict)
+
+    def as_dict(self) -> dict:
+        return {
+            "skill_id": self.skill_id,
+            "score": round(self.score, 4),
+            "matched_terms": list(self.matched_terms),
+            "score_components": {k: round(v, 4) for k, v in self.score_components.items()},
+        }
 
 
 class SkillRetriever(Protocol):

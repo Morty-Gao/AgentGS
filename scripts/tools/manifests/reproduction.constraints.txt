@@ -1,0 +1,13 @@
+# Original scientific/embedding distribution versions, independently installed on Python 3.12.
+numpy==1.26.4
+scipy==1.15.3
+pandas==2.2.3
+rasterio==1.4.3
+shapely==2.1.2
+pyproj==3.8.0
+pillow==12.3.0
+openpyxl==3.1.5
+fastembed==0.8.0
+onnxruntime==1.27.0
+tokenizers==0.23.1
+huggingface-hub==1.24.0

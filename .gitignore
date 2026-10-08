@@ -63,3 +63,5 @@ node_modules/
 # Pipeline source directory is not a build artifact
 !scripts/build/
 !scripts/build/**
+/scripts/build/**/__pycache__/
+/scripts/build/**/*.py[cod]

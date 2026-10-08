@@ -36,8 +36,9 @@
     {
       "id": "GeoBigDataExecuteGeoSPARQL",
       "category": "GeoBigDataTools",
-      "description": "Execute the caller-supplied GeoSPARQL query on a configured spatial RDF endpoint over original RDF geometries. Return actual SPARQL results; backend errors propagate, with no answer lookup.",
-      "status": "pending"
+      "description": "Retrieve pinned GeoQuestions/YAGO2geo materialized results by source_id or historical SPARQL structure; offline snapshot replay.",
+      "status": "migrated",
+      "protocol": "pinned_yago2geo_snapshot"
     },
     {
       "id": "MineralResourcesSearchDeposits",
@@ -608,51 +609,6 @@
       "category": "NaturalHazardTools",
       "description": "Return the latest complete start date after filtering.",
       "status": "pending"
-    },
-    {
-      "id": "GeoCheckCRSConsistency",
-      "category": "GeoscienceTools",
-      "status": "migrated"
-    },
-    {
-      "id": "GeoHaversineDistance",
-      "category": "GeoscienceTools",
-      "status": "migrated"
-    },
-    {
-      "id": "GeoMagnitudeToEnergy",
-      "category": "GeoscienceTools",
-      "status": "migrated"
-    },
-    {
-      "id": "GeoBearing",
-      "category": "GeoscienceTools",
-      "status": "migrated"
-    },
-    {
-      "id": "GeoDecimalToDMS",
-      "category": "GeoscienceTools",
-      "status": "migrated"
-    },
-    {
-      "id": "GeoWGS84BBoxAreaKm2",
-      "category": "GeoscienceTools",
-      "status": "migrated"
-    },
-    {
-      "id": "USGS 地震数据获取",
-      "category": "GeoTools",
-      "status": "pending"
-    },
-    {
-      "id": "地震数据清洗与分级",
-      "category": "GeoTools",
-      "status": "pending"
-    },
-    {
-      "id": "地震事件地图可视化",
-      "category": "GeoTools",
-      "status": "pending"
     }
   ],
   "skills": [
@@ -670,7 +626,8 @@
     },
     {
       "id": "semantic-geospatial-query",
-      "status": "pending"
+      "status": "partial",
+      "protocol": "pinned_yago2geo_snapshot"
     },
     {
       "id": "mineral-deposit-search",
@@ -749,24 +706,75 @@
       "status": "pending"
     },
     {
-      "id": "geodesic-coordinate-analysis",
+      "id": "natural-hazard-table-analytics",
       "status": "pending"
+    }
+  ],
+  "scope": "geotooleval-101",
+  "scope_manifest": "src/agentgs/skills/tool_scope.json",
+  "excluded_tools": [
+    {
+      "id": "GeoCheckCRSConsistency",
+      "category": "GeoscienceTools",
+      "status": "excluded_by_user"
+    },
+    {
+      "id": "GeoHaversineDistance",
+      "category": "GeoscienceTools",
+      "status": "excluded_by_user"
+    },
+    {
+      "id": "GeoMagnitudeToEnergy",
+      "category": "GeoscienceTools",
+      "status": "excluded_by_user"
+    },
+    {
+      "id": "GeoBearing",
+      "category": "GeoscienceTools",
+      "status": "excluded_by_user"
+    },
+    {
+      "id": "GeoDecimalToDMS",
+      "category": "GeoscienceTools",
+      "status": "excluded_by_user"
+    },
+    {
+      "id": "GeoWGS84BBoxAreaKm2",
+      "category": "GeoscienceTools",
+      "status": "excluded_by_user"
+    },
+    {
+      "id": "USGS 地震数据获取",
+      "category": "GeoTools",
+      "status": "excluded_by_user"
+    },
+    {
+      "id": "地震数据清洗与分级",
+      "category": "GeoTools",
+      "status": "excluded_by_user"
+    },
+    {
+      "id": "地震事件地图可视化",
+      "category": "GeoTools",
+      "status": "excluded_by_user"
+    }
+  ],
+  "excluded_skills": [
+    {
+      "id": "geodesic-coordinate-analysis",
+      "status": "excluded_by_user"
     },
     {
       "id": "earthquake-energy-estimation",
-      "status": "pending"
-    },
-    {
-      "id": "natural-hazard-table-analytics",
-      "status": "pending"
+      "status": "excluded_by_user"
     },
     {
       "id": "extension-geoscience-result-cartography",
-      "status": "pending"
+      "status": "excluded_by_user"
     },
     {
       "id": "extension-earthquake-catalog-preparation",
-      "status": "pending"
+      "status": "excluded_by_user"
     }
   ]
 }

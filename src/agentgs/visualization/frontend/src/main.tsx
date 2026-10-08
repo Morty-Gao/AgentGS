@@ -4,10 +4,10 @@ import {request, type Task, type Tool, type Event} from './api';
 import './style.css';
 
 const labels:Record<string,string>={queued:'排队',preparing:'准备',running:'运行中',succeeded:'已完成',failed:'失败',cancelled:'已取消'};
-const defaults:Record<string,object>={GeoHaversineDistance:{lat1:0,lon1:0,lat2:0,lon2:1},GeoBearing:{lat1:0,lon1:0,lat2:1,lon2:1},GeoMagnitudeToEnergy:{magnitude:7},GeoWGS84BBoxAreaKm2:{west:0,south:0,east:1,north:1},GeoCheckCRSConsistency:{values:['EPSG:4326','EPSG:4326']},GeoDecimalToDMS:{value:43.8},DeepEarthQueryUSGSCatalog:{start_year:2010,end_year:2020,min_magnitude:8,limit:10},DeepEarthGetUSGSEvent:{event_id:''},ExecutePython:{code:'print(1 + 1)'}};
+const defaults:Record<string,object>={DeepEarthQueryUSGSCatalog:{start_year:2010,end_year:2020,min_magnitude:8,limit:10},DeepEarthGetUSGSEvent:{event_id:''},GeoBigDataExecuteGeoSPARQL:{source_id:591}};
 function App(){
  const[tasks,setTasks]=useState<Task[]>([]),[tools,setTools]=useState<Tool[]>([]),[selected,setSelected]=useState(''),[events,setEvents]=useState<Event[]>([]);
- const[mode,setMode]=useState('tool'),[tool,setTool]=useState('GeoHaversineDistance'),[argumentsText,setArguments]=useState(JSON.stringify(defaults.GeoHaversineDistance,null,2)),[question,setQuestion]=useState(''),[error,setError]=useState(''),[busy,setBusy]=useState(false);
+ const[mode,setMode]=useState('tool'),[tool,setTool]=useState('DeepEarthQueryUSGSCatalog'),[argumentsText,setArguments]=useState(JSON.stringify(defaults.DeepEarthQueryUSGSCatalog,null,2)),[question,setQuestion]=useState(''),[error,setError]=useState(''),[busy,setBusy]=useState(false);
  const refresh=async()=>{try{setTasks(await request<Task[]>('/tasks'));}catch(e){setError(String(e));}};
  useEffect(()=>{void refresh();request<Tool[]>('/tools').then(setTools).catch(e=>setError(String(e)));const timer=setInterval(()=>void refresh(),2000);return()=>clearInterval(timer);},[]);
  useEffect(()=>{if(!selected)return;setEvents([]);const source=new EventSource(`/api/tasks/${selected}/events`);source.onmessage=message=>{const event:Event=JSON.parse(message.data);setEvents(current=>current.some(e=>e.sequence===event.sequence)?current:[...current,event]);if(['task.succeeded','task.failed','task.cancelled'].includes(event.type)){source.close();void refresh();}};return()=>source.close();},[selected]);

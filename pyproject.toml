@@ -6,12 +6,14 @@ readme = "README.md"
 requires-python = ">=3.12,<3.15"
 authors = [{name = "Morty-Gao", email = "2021420270@qq.com"}]
 dependencies = [
-  "numpy>=2.5.3", "scipy>=1.18.1", "pydantic>=2.10,<3",
+  "numpy>=1.26,<3", "scipy>=1.15,<2", "pydantic>=2.10,<3",
   "httpx>=0.28,<1", "typer>=0.16,<1", "rich>=14,<15",
   "psutil>=7,<8", "python-dotenv>=1,<2",
 ]
 [project.optional-dependencies]
 visualization = ["fastapi>=0.115,<1", "uvicorn>=0.34,<1"]
+scientific = ["pandas>=2.2,<3", "openpyxl>=3.1,<4", "rasterio>=1.4,<2", "shapely>=2,<3", "pyproj>=3.6,<4", "pillow>=10,<13"]
+retrieval = ["fastembed==0.8.0"]
 [dependency-groups]
 dev = ["pytest>=8,<10", "pytest-asyncio>=0.26,<2", "ruff>=0.12,<1"]
 [project.scripts]
@@ -28,7 +30,7 @@ line-length = 100
 select = ["E4", "E7", "E9", "F", "I"]
 
 [tool.uv.build-backend]
-source-include = ["scripts/**", "src/tests/**", "llm.toml", "runtime.toml", ".env.example"]
+source-include = ["scripts/**", "src/tests/**", "docs/algorithm_alignment.json", "llm.toml", "runtime.toml", ".env.example"]
 source-exclude = ["**/node_modules/**", "**/__pycache__/**", "**/.pytest_cache/**"]
 wheel-exclude = ["**/node_modules/**", "**/frontend/src/**", "**/frontend/package*.json", "**/frontend/tsconfig.json", "**/frontend/vite.config.ts"]
 

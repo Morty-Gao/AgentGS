@@ -1,0 +1,11 @@
+\section{Discussion and Conclusion}
+\label{sec:conclusion}
+
+% DOCX paragraph 161.
+We presented AgentGS, which separates task strategies, shared operations, and tool implementations through a Skill--Capability--Tool hierarchy to support local capability composition across Skills. Hypergraph-based missing-capability completion uses dependencies carrying strategy provenance, together with type and tool constraints, to add missing intermediate capabilities. Tool selection, parameter and artifact binding, and local recovery ground capability plans in actual invocations. Composed workflows can additionally be organized into candidate Skills, providing a basis for strategy reuse in subsequent tasks.
+
+% DOCX paragraph 162.
+GeoToolEval experiments demonstrate strong overall task performance and advantages in capability composition and tool orchestration on multistep tasks. Ablations further establish the contributions of predecessor expansion, missing-capability completion, and execution mechanisms. The results indicate that hierarchical capability organization and constrained plan completion can support complex scientific tasks effectively.
+
+% DOCX paragraph 163.
+The method remains dependent on the coverage of registered knowledge. Structural and type constraints alone do not fully establish whether an inserted operation is necessary for a task's objective, and local recovery is limited by the existing capability plan. Packaging a composed workflow as a new Skill preserves combinations of existing capabilities but does not automatically broaden underlying capability or tool coverage. Its effects on subsequent task performance and planning cost have not been independently evaluated. Future work will integrate task semantics and execution feedback more closely into completion and plan revision, assess the applicability and reuse benefits of new Skills across tasks, and extend generalization studies to unseen capability combinations and tool changes.

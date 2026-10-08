@@ -34,15 +34,15 @@ async def test_llm_tool_loop_without_live_provider(project):
                                 "id": "call-1",
                                 "type": "function",
                                 "function": {
-                                    "name": "GeoMagnitudeToEnergy",
-                                    "arguments": '{"magnitude":7}',
+                                    "name": "DeepEarthQueryUSGSCatalog",
+                                    "arguments": '{"min_magnitude":8}',
                                 },
                             }
                         ],
                     }
                 )
             assert messages[-1]["role"] == "tool"
-            return ChatReply(message={"role": "assistant", "content": "Energy computed."})
+            return ChatReply(message={"role": "assistant", "content": "Catalog queried."})
 
     events = Events()
     artifacts = LocalArtifactStore(project / "artifacts")
@@ -50,9 +50,13 @@ async def test_llm_tool_loop_without_live_provider(project):
     skills = builtin_skills()
     client = Client()
     result = await AgentEngine().run(
-        TaskInput(question="earthquake energy"),
+        TaskInput(question="earthquake catalog", algorithm="prototype"),
         AgentContext(tools, artifacts, events, skills, KeywordSkillRetriever(skills), client),
     )
-    assert result.tool_results[0].data["energy_joules"] > 1e15
+    assert result.tool_results[0].data["count"] == 2
     assert result.usage[0]["usage"] is None
     assert any(kind == "skill.selected" for kind, _ in events.rows)
+    schemas = tools.specs()
+    from agentgs.skills.definitions import load_tool_scope
+    assert {s.id for s in schemas} == set(load_tool_scope()["tool_ids"])
+    assert not tools.internal

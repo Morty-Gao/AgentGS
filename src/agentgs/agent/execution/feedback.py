@@ -1,0 +1,319 @@
+"""Original result-classification policy, separated from transport and retries.
+
+This classifies the legacy boundary representation. A typed ToolResult adapter
+must preserve these distinctions before the policy is wired into the harness.
+"""
+
+from __future__ import annotations
+
+import json
+import re
+from dataclasses import asdict, dataclass
+from typing import Any, Awaitable, Callable, Sequence
+
+INVALID_INPUT = re.compile(
+    "^\\s*(?:input\\s+error|invalid\\s+input|parameter\\s+error|输入错误|参数错误)\\s*[:：]", re.I
+)
+RUNTIME_ERROR = re.compile(
+    "^\\s*(?:runtime\\s+error|execution\\s+error|tool\\s+error|error|执行错误|工具错误)\\s*[:：]",
+    re.I,
+)
+
+
+@dataclass(frozen=True)
+class ExecutionFeedback:
+    status: str
+    score: float
+    error_type: str
+    summary: str
+    suggestion: str
+    retryable: bool
+
+    def as_dict(self):
+        return asdict(self)
+
+    def to_trace(self, *, tool_name: str, attempt: int, max_attempts: int) -> dict:
+        return {
+            "type": "execution_feedback",
+            "tool_name": tool_name,
+            "attempt": attempt,
+            "max_attempts": max_attempts,
+            "status": self.status,
+            "score": self.score,
+            "error_type": self.error_type,
+            "summary": self.summary,
+            "suggestion": self.suggestion,
+            "will_retry": self.retryable and attempt < max_attempts,
+        }
+
+
+def stringify(output):
+    if output is None:
+        return ""
+    if isinstance(output, str):
+        return output
+    try:
+        return json.dumps(output, ensure_ascii=False, default=str)
+    except (TypeError, ValueError):
+        return str(output)
+
+
+def error_envelope(text):
+    try:
+        payload = json.loads(text)
+    except (TypeError, ValueError):
+        return False
+    if not isinstance(payload, dict):
+        return False
+    if payload.get("success") is False or str(payload.get("status", "")).casefold() in {
+        "error",
+        "failed",
+        "failure",
+    }:
+        return True
+    code = payload.get("status_code")
+    if isinstance(code, int) and (not isinstance(code, bool)) and (code >= 400):
+        return True
+    error = payload.get("error")
+    return bool(error) and isinstance(error, (str, dict, list))
+
+
+def assess_tool_execution(output, *, input_format="", attempt=1, max_attempts=3):
+    text = stringify(output).strip()
+    can_retry = attempt < max_attempts
+
+    def failure(kind, summary, suggestion):
+        return ExecutionFeedback(
+            "retrying" if can_retry else "failed", 0.0, kind, summary, suggestion, can_retry
+        )
+
+    shortened = text if len(text) <= 800 else text[:800] + "…"
+    if not text:
+        return failure(
+            "empty_output",
+            "The tool returned an empty result.",
+            "Run the tool again; if this repeats, inspect the tool implementation and service logs.",
+        )
+    if text.lower().startswith("tool function execution error"):
+        transport = any(
+            (
+                value in text.lower()
+                for value in [
+                    "http ",
+                    "clientconnector",
+                    "connection",
+                    "timeout",
+                    "non-json response",
+                ]
+            )
+        )
+        return failure(
+            "transport_error" if transport else "tool_runtime_error",
+            shortened,
+            "Retry the same input after checking that the tool service on port 60002 is available."
+            if transport
+            else "Use the runtime message to correct the input or choose another tool.",
+        )
+    if INVALID_INPUT.search(text):
+        expected = f" Expected input format: {input_format}." if input_format else ""
+        return failure(
+            "invalid_input",
+            shortened,
+            "Generate a corrected input from the user question and do not repeat the rejected input."
+            + expected,
+        )
+    if (
+        RUNTIME_ERROR.search(text)
+        or text.lower().startswith("traceback (most recent call last)")
+        or error_envelope(text)
+    ):
+        return failure(
+            "tool_runtime_error",
+            shortened,
+            "Use this runtime error to repair the input; choose an alternative tool if repair is impossible.",
+        )
+    return ExecutionFeedback(
+        "passed",
+        1.0,
+        "none",
+        "Tool execution completed and returned a usable result.",
+        "Continue to the next planned step.",
+        False,
+    )
+
+
+@dataclass(frozen=True)
+class ToolAttempt:
+    attempt: int
+    tool_input: str
+    tool_output: str
+    feedback: ExecutionFeedback
+
+    def to_prompt_context(self) -> dict:
+        return {
+            "attempt": self.attempt,
+            "input": self.tool_input,
+            "output": _shorten(self.tool_output),
+            "feedback": {
+                "status": self.feedback.status,
+                "error_type": self.feedback.error_type,
+                "summary": self.feedback.summary,
+                "suggestion": self.feedback.suggestion,
+            },
+        }
+
+
+@dataclass(frozen=True)
+class ToolExecutionResult:
+    tool_name: str
+    succeeded: bool
+    final_input: str
+    output: str
+    attempts: tuple[ToolAttempt, ...]
+
+    @property
+    def final_feedback(self) -> ExecutionFeedback:
+        return self.attempts[-1].feedback
+
+    def render_for_agent(self) -> str:
+        if self.succeeded:
+            return f"\n\nNow we have run the **{self.tool_name}** with input `{self.final_input}` and obtained result\n {self.output}."
+        return f"\n\nTool **{self.tool_name}** failed after {len(self.attempts)} attempts.\nExecution feedback: {self.final_feedback.summary}\nLast tool output: {self.output}"
+
+
+async def run_tool_with_feedback(
+    *,
+    tool_name: str,
+    file_path_list: list,
+    input_provider: InputProvider,
+    tool_runner: ToolRunner,
+    input_format: str = "",
+    max_attempts: int = 3,
+    trace_list: list | None = None,
+    producer_step: str = "",
+) -> ToolExecutionResult:
+    """Execute, assess, and (when possible) repair one tool call."""
+    max_attempts = max(1, int(max_attempts))
+    attempts: list[ToolAttempt] = []
+    for attempt_number in range(1, max_attempts + 1):
+        tool_input = str(await input_provider(attempt_number, tuple(attempts))).strip()
+        from contextlib import nullcontext
+
+        from agentgs.agent.execution import scope as migration
+        from agentgs.agent.execution.references import binding_error_response
+
+        binding_error = binding_error_response(tool_input)
+        call_context = (
+            migration.call_scope()
+            if migration.active() and binding_error is None
+            else nullcontext()
+        )
+        identity = {}
+        produced_records = []
+        try:
+            with call_context as call_id:
+                if call_id:
+                    identity = {"request_id": migration.current_request_id(), "call_id": call_id}
+                try:
+                    raw_output = (
+                        binding_error
+                        if binding_error is not None
+                        else await tool_runner(tool_name, tool_input, file_path_list)
+                    )
+                except Exception as exc:
+                    raw_output = f"Tool function execution error, {type(exc).__name__}: {exc}"
+                registry = migration.current_registry()
+                if identity and registry is not None:
+                    try:
+                        produced_records = registry.ingest_tool_output(
+                            tool_name,
+                            producer_step,
+                            raw_output,
+                            execution_info={
+                                **identity,
+                                "attempt": attempt_number,
+                                "succeeded": assess_tool_execution(
+                                    raw_output,
+                                    input_format=input_format,
+                                    attempt=attempt_number,
+                                    max_attempts=max_attempts,
+                                ).status
+                                == "passed",
+                            },
+                        )
+                    except Exception as exc:
+                        if trace_list is not None:
+                            trace_list.append(
+                                {
+                                    "type": "artifact_provenance_error",
+                                    **identity,
+                                    "error_type": type(exc).__name__,
+                                }
+                            )
+        except Exception as exc:
+            raw_output = f"Tool function execution error, {type(exc).__name__}: {exc}"
+        tool_output = _stringify_output(raw_output)
+        feedback = assess_tool_execution(
+            tool_output,
+            input_format=input_format,
+            attempt=attempt_number,
+            max_attempts=max_attempts,
+        )
+        record = ToolAttempt(
+            attempt=attempt_number,
+            tool_input=tool_input,
+            tool_output=tool_output,
+            feedback=feedback,
+        )
+        attempts.append(record)
+        if trace_list is not None:
+            trace_list.append(
+                {
+                    "type": "tool_call" if feedback.status == "passed" else "tool_retry",
+                    "tool_name": tool_name,
+                    "tool_input": tool_input,
+                    "tool_output": tool_output,
+                    "attempt": attempt_number,
+                    "status": "success" if feedback.status == "passed" else feedback.status,
+                    **identity,
+                }
+            )
+            trace_list.append(
+                feedback.to_trace(
+                    tool_name=tool_name, attempt=attempt_number, max_attempts=max_attempts
+                )
+            )
+        if trace_list is not None and produced_records:
+            trace_list.append(
+                {
+                    "type": "artifact_production",
+                    **identity,
+                    "artifacts": [record.as_dict() for record in produced_records],
+                }
+            )
+        if feedback.status == "passed":
+            return ToolExecutionResult(
+                tool_name=tool_name,
+                succeeded=True,
+                final_input=tool_input,
+                output=tool_output,
+                attempts=tuple(attempts),
+            )
+    return ToolExecutionResult(
+        tool_name=tool_name,
+        succeeded=False,
+        final_input=attempts[-1].tool_input,
+        output=attempts[-1].tool_output,
+        attempts=tuple(attempts),
+    )
+
+
+InputProvider = Callable[[int, Sequence[ToolAttempt]], Awaitable[str]]
+ToolRunner = Callable[[str, str, list], Awaitable[Any]]
+
+_stringify_output = stringify
+
+
+def _shorten(text, limit=800):
+    text = text.strip()
+    return text if len(text) <= limit else text[:limit] + "…"

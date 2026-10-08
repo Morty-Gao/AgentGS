@@ -4,8 +4,8 @@ from typing import Callable
 from pydantic import Field
 
 from agentgs.contracts.models import Model, ToolSpec
-from agentgs.runtime.tools.domains import geoscience as geo
-from agentgs.runtime.tools.domains.earthquake import CatalogQuery, EventQuery
+from agentgs.runtime.tools.domains.geosparql import SnapshotQuery
+from agentgs.skills.definitions import load_tool_scope
 
 
 class CodeInput(Model):
@@ -21,54 +21,59 @@ class RegisteredTool:
 
 
 def builtin_tools():
-    rows = [
-        (
-            "GeoHaversineDistance",
-            "Great-circle distance between WGS84 points",
-            geo.Points,
-            geo.distance,
-        ),
-        ("GeoBearing", "Initial spherical bearing between WGS84 points", geo.Points, geo.bearing),
-        (
-            "GeoMagnitudeToEnergy",
-            "Estimate earthquake energy from moment magnitude",
-            geo.Magnitude,
-            geo.energy,
-        ),
-        (
-            "GeoWGS84BBoxAreaKm2",
-            "Spherical area of an ordered WGS84 bounding box",
-            geo.BBox,
-            geo.area,
-        ),
-        ("GeoCheckCRSConsistency", "Compare normalized CRS labels", geo.CRSList, geo.crs),
-        ("GeoDecimalToDMS", "Convert decimal degrees to signed DMS", geo.DecimalDegrees, geo.dms),
-        (
-            "DeepEarthQueryUSGSCatalog",
-            "Filter and rank the frozen USGS M7+ catalog",
-            CatalogQuery,
+    from typing import Any
+
+    from pydantic import RootModel
+
+    from agentgs.contracts.catalog import load_catalog
+
+    class Arguments(RootModel[dict[str, Any]]):
+        pass
+
+    allowed = set(load_tool_scope()["tool_ids"])
+    result = {}
+    for row in load_catalog()["specs"]:
+        name = row["Name"]
+        if name not in allowed:
+            continue
+        schema = SnapshotQuery if name == "GeoBigDataExecuteGeoSPARQL" else Arguments
+        lookup = name.startswith(
+            ("DeepEarthQueryLITHO", "DeepEarthQuerySEMUCB", "DeepEarthSample", "Ocean")
+        ) or name in {
+            "EnergyCapacityValue",
+            "EnergyNearestFacility",
+            "EnergyCountryRenewableSummary",
+            "EnergyTransitionMetrics",
+        }
+        result[name] = RegisteredTool(
+            ToolSpec(
+                id=name,
+                description=row["Function"],
+                input_schema=schema.model_json_schema(),
+                category=row["Category"],
+                legacy_input=row["Input"],
+                legacy_output=row["Output"],
+            ),
+            schema,
             None,
-        ),
-        ("DeepEarthGetUSGSEvent", "Find an event in the frozen USGS M7+ catalog", EventQuery, None),
-    ]
-    rows.append(
-        (
-            "ExecutePython",
-            "Run Python in the configured code sandbox (network disabled with bwrap)",
+            source_type="derived_lookup"
+            if lookup or name == "GeoBigDataExecuteGeoSPARQL"
+            else "raw_compute",
+        )
+    return result
+
+
+def internal_operations():
+    """Infrastructure operations for explicit requests; excluded from tool retrieval."""
+    return {
+        "ExecutePython": RegisteredTool(
+            ToolSpec(
+                id="ExecutePython",
+                description="Run Python in the configured code sandbox",
+                input_schema=CodeInput.model_json_schema(),
+                effects="write",
+            ),
             CodeInput,
             None,
         )
-    )
-    return {
-        name: RegisteredTool(
-            ToolSpec(
-                id=name,
-                description=description,
-                input_schema=model.model_json_schema(),
-                effects="write" if name == "ExecutePython" else "read",
-            ),
-            model,
-            handler,
-        )
-        for name, description, model, handler in rows
     }
