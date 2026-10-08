@@ -57,8 +57,9 @@ def test_runtime_registries_respect_the_selected_scope():
     from agentgs.skills.registry import builtin_skills
 
     scope = load_tool_scope()
-    assert set(builtin_tools()) <= set(scope["tool_ids"])
-    assert set(builtin_skills()) <= set(scope["skill_ids"])
+    assert set(builtin_tools()) == set(scope["tool_ids"])
+    assert all(callable(tool.handler) for tool in builtin_tools().values())
+    assert set(builtin_skills()) == set(scope["skill_ids"])
     assert all(set(s.spec.tools) <= set(scope["tool_ids"]) for s in builtin_skills().values())
 
 

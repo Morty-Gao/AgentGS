@@ -16,6 +16,27 @@ logger = logging.getLogger(__name__)
 Embedding = list[float]
 
 
+class LazyToolRetriever:
+    """Initialize the frozen KG only when an execution route actually needs it."""
+
+    def __init__(self, factory):
+        self.factory, self.instance = factory, None
+
+    def _get(self):
+        if self.instance is None:
+            self.instance = self.factory()
+        return self.instance
+
+    async def retrieve(self, query):
+        return await self._get().retrieve(query)
+
+    def get_tool_subgraph(self, *args, **kwargs):
+        return self._get().get_tool_subgraph(*args, **kwargs)
+
+    def get_tool_info(self, *args, **kwargs):
+        return self._get().get_tool_info(*args, **kwargs)
+
+
 class KGToolRetriever:
     def __init__(
         self,

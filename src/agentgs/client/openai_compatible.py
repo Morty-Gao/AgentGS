@@ -1,4 +1,5 @@
 import asyncio
+import json
 import random
 
 import httpx
@@ -116,6 +117,10 @@ class OpenAICompatibleClient:
         if stage == "tool_argument_generation":
             attempts = min(attempts, settings.argument_attempts)
         for attempt in range(attempts):
+            if self.events:
+                self.events.emit(
+                    "model.attempt", {"model": name, "stage": stage, "attempt": attempt + 1}
+                )
             try:
                 response = await self.http.post(
                     provider.base_url.rstrip("/") + "/chat/completions",
@@ -141,7 +146,7 @@ class OpenAICompatibleClient:
                     )
                 if code not in {408, 409, 425, 429} and code < 500 or attempt + 1 == attempts:
                     raise ProviderError(code) from None
-            except (httpx.TransportError, ValueError) as exc:
+            except (httpx.TransportError, json.JSONDecodeError) as exc:
                 if self.events:
                     self.events.emit(
                         "model.attempt_failed",

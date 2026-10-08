@@ -2,6 +2,7 @@
 
 import tomllib
 from pathlib import Path
+from typing import Literal
 
 from pydantic import Field
 
@@ -9,7 +10,7 @@ from agentgs.contracts.models import Model
 
 
 class AlgorithmSettings(Model):
-    planning_mode: str = "tool_only"
+    planning_mode: Literal["tool_only", "skill_guided"] = "tool_only"
     require_llm: bool = False
     shared_bridge: bool = True
     rs_local_contracts: bool = True

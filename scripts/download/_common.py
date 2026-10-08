@@ -1,18 +1,19 @@
 """Download original bytes from versioned manifests, without preprocessing."""
+
 from __future__ import annotations
 
 import argparse
-from concurrent.futures import ThreadPoolExecutor, as_completed
 import hashlib
 import json
 import os
-from pathlib import Path
 import shutil
 import sys
 import tempfile
 import time
 import urllib.request
 import zlib
+from concurrent.futures import ThreadPoolExecutor, as_completed
+from pathlib import Path
 
 
 def download_bytes(url: str, part: Path, size: int | None, timeout: float) -> None:
@@ -47,7 +48,10 @@ def download_bytes(url: str, part: Path, size: int | None, timeout: float) -> No
         end = min(start + chunk_size, size) - 1
         request = urllib.request.Request(url, headers={**headers, "Range": f"bytes={start}-{end}"})
         with urllib.request.urlopen(request, timeout=timeout) as response:
-            if response.status != 206 or response.headers.get("Content-Range") != f"bytes {start}-{end}/{size}":
+            if (
+                response.status != 206
+                or response.headers.get("Content-Range") != f"bytes {start}-{end}/{size}"
+            ):
                 raise ValueError(f"Unexpected HTTP range {start}-{end}")
             written = 0
             with part.open("r+b") as output:
@@ -58,7 +62,9 @@ def download_bytes(url: str, part: Path, size: int | None, timeout: float) -> No
                         raise ValueError("Oversized HTTP range")
                     output.write(block)
             if written != end - start + 1:
-                raise ValueError(f"Incomplete HTTP range {start}-{end}: {written}/{end - start + 1} bytes")
+                raise ValueError(
+                    f"Incomplete HTTP range {start}-{end}: {written}/{end - start + 1} bytes"
+                )
             return written
 
     def fetch(start: int) -> int:
@@ -110,7 +116,9 @@ def validate(path: Path, entry: dict) -> None:
             with path.open("rb") as stream:
                 actual = hashlib.file_digest(stream, algorithm).hexdigest()
             if actual != entry[algorithm]:
-                raise ValueError(f"{algorithm} mismatch: {path}; expected {entry[algorithm]}, got {actual}")
+                raise ValueError(
+                    f"{algorithm} mismatch: {path}; expected {entry[algorithm]}, got {actual}"
+                )
     if "crc32" in entry:
         checksum = 0
         with path.open("rb") as stream:
@@ -129,7 +137,9 @@ def acquire(target: Path, entry: dict, source: Path | None, timeout: float, retr
         raise ValueError(entry.get("note", "No public download URL; supply --source-dir"))
     attempts = 1 if source is not None else retries + 1
     for attempt in range(attempts):
-        fd, temporary = tempfile.mkstemp(prefix=f".{target.name}.", suffix=".part", dir=target.parent)
+        fd, temporary = tempfile.mkstemp(
+            prefix=f".{target.name}.", suffix=".part", dir=target.parent
+        )
         os.close(fd)
         part = Path(temporary)
         try:
@@ -158,10 +168,25 @@ def main(dataset: str) -> int:
     manifest_path = Path(__file__).parent / "manifests" / f"{dataset}.json"
     manifest = json.loads(manifest_path.read_text(encoding="utf-8"))
     parser = argparse.ArgumentParser(description=manifest["description"])
-    parser.add_argument("--output-dir", default=f"data/{dataset}", help="Output path, relative to repo root by default")
-    parser.add_argument("--source-dir", help="Import original files from this directory, using manifest-relative names")
-    parser.add_argument("--verify-only", action="store_true", help="Check all files without downloading or importing")
-    parser.add_argument("--list", action="store_true", help="Print source manifest without accessing data or network")
+    parser.add_argument(
+        "--output-dir",
+        default=f"data/{dataset}",
+        help="Output path, relative to repo root by default",
+    )
+    parser.add_argument(
+        "--source-dir",
+        help="Import original files from this directory, using manifest-relative names",
+    )
+    parser.add_argument(
+        "--verify-only",
+        action="store_true",
+        help="Check all files without downloading or importing",
+    )
+    parser.add_argument(
+        "--list",
+        action="store_true",
+        help="Print source manifest without accessing data or network",
+    )
     parser.add_argument("--timeout", type=float, default=60, help="HTTP socket timeout in seconds")
     parser.add_argument("--retries", type=int, default=2)
     args = parser.parse_args()

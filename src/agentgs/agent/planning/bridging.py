@@ -12,7 +12,10 @@ from collections import defaultdict
 from typing import TYPE_CHECKING, Any, Iterable
 
 if TYPE_CHECKING:
-    from .hypergraph import CapabilityExpansion, CapabilityNode, SkillHypergraph
+    from types import SimpleNamespace as CapabilityExpansion
+
+    from .bridge import BridgeNode as CapabilityNode
+    from .bridge import DeclaredBridgeGraph as SkillHypergraph
 
 
 def _data_types(values: Iterable[str]) -> set[str]:

@@ -16,3 +16,9 @@ def within(root: Path, relative: str) -> Path:
     if not target.is_relative_to(root.resolve()):
         raise ValueError("Path escapes its declared root")
     return target
+
+
+def data_resource(root: Path, relative: str) -> Path:
+    """Resolve inside the declared data root, including a linked local data bundle."""
+    path = Path(relative).relative_to("data")
+    return within(root / "data", str(path))

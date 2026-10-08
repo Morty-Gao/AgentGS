@@ -22,7 +22,9 @@ def test_frozen_fas_all_answer_types_match_original_source():
     }
     assert len(tasks) == 603
     for case in cases:
-        assert score_answer(tasks[case["question_id"]], case["answer"]) == case["expected"]
+        # The oracle is JSON; numeric detail pairs are tuples in the Python scorer.
+        actual = score_answer(tasks[case["question_id"]], case["answer"])
+        assert json.loads(json.dumps(actual)) == case["expected"]
 
 
 def test_public_task_never_contains_private_reference_data():
@@ -66,3 +68,15 @@ def test_missing_usage_remains_unknown_for_original_cost_metrics():
         token_usage={"usage_complete": False, "total_tokens": 0},
     )
     assert result["cost_score"] is None and result["final_score"] is None
+
+
+def test_inflight_or_retried_requests_cannot_be_reported_as_complete_token_usage():
+    from agentgs.evaluation.benchmark import usage_summary
+
+    partial = usage_summary(
+        [{"usage": {"total_tokens": 10}, "attempts": 1}, {"usage": None, "attempts": None}]
+    )
+    assert partial["usage_complete"] is False and partial["total_tokens"] is None
+    assert partial["reported_tokens"] == 10
+    retried = usage_summary([{"usage": {"total_tokens": 10}, "attempts": 2}])
+    assert retried["usage_complete"] is False and retried["total_tokens"] is None

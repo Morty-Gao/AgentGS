@@ -133,7 +133,7 @@ async def test_agent_selects_snapshot_skill_and_calls_query(snapshot_project):
         async def chat(self, messages, **kwargs):
             self.calls += 1
             if self.calls == 1:
-                assert "materialized query results" in messages[0]["content"]
+                assert "pinned GeoQuestions/YAGO2geo materialized results" in messages[0]["content"]
                 return ChatReply(
                     message={
                         "role": "assistant",

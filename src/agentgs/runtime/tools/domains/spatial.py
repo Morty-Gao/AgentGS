@@ -12,7 +12,7 @@ import re
 from pathlib import Path
 from typing import Any
 
-from agentgs.runtime.tools.context import paths
+from agentgs.runtime.tools.context import paths as task_paths
 from agentgs.runtime.tools.domains.shared import (
     _bbox_area,
     _clean,
@@ -216,7 +216,7 @@ def _standardize_spatial(params: dict[str, Any]) -> str:
     skipped = []
     for path in _extract_paths(params):
         try:
-            output = paths().outputs / "vector" / f"{path.stem}_standardized.geojson"
+            output = task_paths().outputs / "vector" / f"{path.stem}_standardized.geojson"
             output.parent.mkdir(parents=True, exist_ok=True)
             if path.suffix.lower() == ".csv":
                 collection = _feature_collection_from_csv(path, params)
@@ -269,7 +269,7 @@ def _validate_spatial(params: dict[str, Any]) -> str:
                 continue
             seen.add(key)
             valid.append(feature)
-        output = paths().outputs / "vector" / f"{path.stem}_validated.geojson"
+        output = task_paths().outputs / "vector" / f"{path.stem}_validated.geojson"
         output.parent.mkdir(parents=True, exist_ok=True)
         output.write_text(
             json.dumps({"type": "FeatureCollection", "features": valid}, ensure_ascii=False),
@@ -353,7 +353,7 @@ def _buffer_points(params: dict[str, Any]) -> str:
                 }
             )
     distance_label = "_".join((f"{value:g}" for value in distances))
-    output = paths().outputs / "vector" / f"{path.stem}_buffer_{distance_label}km.geojson"
+    output = task_paths().outputs / "vector" / f"{path.stem}_buffer_{distance_label}km.geojson"
     output.parent.mkdir(parents=True, exist_ok=True)
     output.write_text(
         json.dumps({"type": "FeatureCollection", "features": features}, ensure_ascii=False),
@@ -420,7 +420,10 @@ def _overlay(params: dict[str, Any]) -> str:
     polygon_path = polygon_paths[-1] if polygon_paths else None
     if point_path is None or polygon_path is None:
         if len(polygon_paths) >= 2:
-            output = paths().outputs / "vector" / f"{polygon_paths[0].stem}_polygon_overlay.json"
+            output = (
+                task_paths().outputs / "vector" / f"{polygon_paths[0].stem}_polygon_overlay.json"
+            )
+            output.parent.mkdir(parents=True, exist_ok=True)
             payload = {
                 "operation": "polygon_overlay_inspection",
                 "layers": [str(path) for path in polygon_paths],
@@ -455,7 +458,8 @@ def _overlay(params: dict[str, Any]) -> str:
                     }
                 )
                 break
-    output = paths().outputs / "vector" / f"{point_path.stem}_overlay.json"
+    output = task_paths().outputs / "vector" / f"{point_path.stem}_overlay.json"
+    output.parent.mkdir(parents=True, exist_ok=True)
     output.write_text(json.dumps(joined, ensure_ascii=False), encoding="utf-8")
     return _result(overlay_output=output, joined_count=len(joined))
 
@@ -472,8 +476,8 @@ def _interpolate_idw(params: dict[str, Any]) -> str:
     from agentgs.runtime.tools.scientific.spatial import interpolate_idw
 
     paths = explicit_spatial_paths(params, "idw", _resolve_path, _extract_paths)
-    selected, selection = select_observation_rows(params, paths, paths().outputs)
-    result = interpolate_idw(params, selected, paths().outputs)
+    selected, selection = select_observation_rows(params, paths, task_paths().outputs)
+    result = interpolate_idw(params, selected, task_paths().outputs)
     if selection:
         result["observation_selection"] = selection
     return _result(**result)
@@ -487,7 +491,7 @@ def _raster_algebra(params: dict[str, Any]) -> str:
         **raster_algebra(
             params,
             explicit_spatial_paths(params, "raster", _resolve_path, _extract_paths),
-            paths().outputs,
+            task_paths().outputs,
         )
     )
 
@@ -500,7 +504,7 @@ def _zonal_stats(params: dict[str, Any]) -> str:
         **zonal_statistics(
             params,
             explicit_spatial_paths(params, "zonal", _resolve_path, _extract_paths),
-            paths().outputs,
+            task_paths().outputs,
         )
     )
 
@@ -513,6 +517,6 @@ def _render_map(params: dict[str, Any]) -> str:
         **render_spatial_map(
             params,
             explicit_spatial_paths(params, "render", _resolve_path, _extract_paths),
-            paths().outputs,
+            task_paths().outputs,
         )
     )

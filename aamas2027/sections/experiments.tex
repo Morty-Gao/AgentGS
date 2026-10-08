@@ -1,83 +1,88 @@
+% DOCX paragraph 130.
 \section{Experiments}
 \label{sec:experiments}
 
-% DOCX paragraph 120.
+% DOCX paragraph 131.
 We evaluate AgentGS's overall performance and the contribution of its components through baseline comparisons and ablations. The experimental analysis also considers generalization to new combinations of existing capabilities and substitution of tools implementing the same capability, together with runtime costs. Finally, execution cases are used to examine performance differences and causes of failure. \drafttodo{generalization and runtime-cost results mentioned in the initial draft are to be supplied}.
 
+% DOCX paragraph 132.
 \subsection{Tasks and Experimental Setup}
 \label{sec:experimental-setup}
 
-% DOCX paragraph 122.
+% DOCX paragraph 133.
 \paragraph{Data and evaluation scope.}
 The main experiment uses all 603 GeoToolEval records. Ablations use a fixed subset of 57 records. All GeoToolEval experiments evaluate final answers with the FAS defined in Section~\ref{sec:metrics}, averaged over their respective evaluation sets with failures retained. To analyze workflow complexity, the main experiment additionally groups results by reference-chain length. The ablation subset is described in Section~\ref{sec:ablations}.
 
-% DOCX paragraph 123. Model labels are retained as reported in the source.
+% DOCX paragraph 134. Model labels are retained as reported in the source.
 \paragraph{Run configuration.}
 We use GPT-5.6 Terra as the backbone and compute results from the raw records of AgentGS's first complete run over all 603 records, retaining both partial-credit and failed cases.
 
-% DOCX paragraph 124.
+% DOCX paragraph 135.
 \paragraph{Baselines.}
 We compare scientific agents and language models. Agent baselines include GeoAgent~\cite{chen2024geoagent} and Earth-Agent~\cite{feng2026earthagent}. Both use GPT-5.6 Terra, as does AgentGS, to compare different agent systems with the same backbone. Language-model baselines include DeepSeek V4 Pro, GPT-5.6 Terra, GPT-5.4, Qwen-Plus, and GeoGPT. These compare direct language-model answers with answers obtained by agents using tools.
 
+% DOCX paragraph 136.
 \subsection{Main Results and Baseline Comparison}
 \label{sec:main-results}
 
-% DOCX paragraphs 126--129 and table 2.
+% DOCX paragraphs 137--139 and table 2.
 Table~\ref{tab:main-results} reports mean FAS for AgentGS and the baselines. AgentGS achieves 0.8731, exceeding GeoAgent's 0.7804. It also outperforms the same GPT-5.6 Terra backbone answering directly, which scores 0.3137, and the other language-model baselines. We next analyze task strata and ablations to examine performance across tasks and the contributions of capability composition, hypergraph completion, and execution mechanisms.
 
 \input{tables/main_results}
 
-% DOCX paragraph 130.
+% DOCX paragraph 140.
 \paragraph{Task complexity and domain differences.}
-Grouped by reference-chain length, AgentGS achieves mean FAS values of 0.9425 for single-step tasks, 0.7557 for two- to three-step tasks, and 0.6167 for tasks with at least four steps. Figure~\ref{fig:performance} reports results by domain. Longer chains are concentrated in remote sensing, creating overlap between chain-length and domain factors. Performance differences should therefore be interpreted using both groupings. \drafttodo{reconcile the stratified scores with the overall FAS using per-record results; the reported counts and rounded stratum means imply approximately 0.8732}.
+Grouped by reference-chain length, AgentGS achieves mean FAS values of 0.9425 for single-step tasks, 0.7557 for two- to three-step tasks, and 0.6167 for tasks with at least four steps. Figure~\ref{fig:performance} reports results by domain. Longer chains are concentrated in remote sensing, creating overlap between chain-length and domain factors. Performance differences should therefore be interpreted using both groupings.
 
-% DOCX paragraph 131 and embedded image 4.
+% DOCX paragraph 141 and embedded image 4.
 \input{figures/performance}
 
+% DOCX paragraph 143.
 \subsection{External Evaluation on GeoBenchX}
 \label{sec:external-evaluation}
 
-% DOCX paragraph 134.
+% DOCX paragraph 144.
 To assess applicability in a different tool environment, we conduct an external evaluation on GeoBenchX~\cite{krechetova2025geobenchx}. We integrate its official tool set and separately construct corresponding Skills and Capabilities. Capabilities are defined from tool functions and input/output requirements, strategy dependencies are organized, and tool mappings are established. AgentGS then performs task planning and tool orchestration.
 
-% DOCX paragraph 135. All experimental fields below were placeholders in the source.
+% DOCX paragraph 145. All experimental fields below were placeholders in the source.
 The experiment uses \drafttodo{number of tasks} tasks and compares against \drafttodo{baseline method}. AgentGS and the baseline use \drafttodo{AgentGS backbone and version} and \drafttodo{baseline backbone and version}, respectively, under \drafttodo{experimental conditions actually held constant}. Evaluation is performed by \drafttodo{judge model and score aggregation} using GeoBenchX's reference-solution matching criterion: scores of 0, 1, and 2 indicate a mismatch, a partial match, and a match, respectively. We report mean score and full-match rate. These metrics are computed separately from GeoToolEval FAS.
 
-% DOCX paragraph 136.
+% DOCX paragraph 146.
 As shown in Table~\ref{tab:external-results}, AgentGS's mean score is \drafttodo{value}, versus \drafttodo{value} for the baseline, a difference of \drafttodo{difference} points. Their full-match rates are \drafttodo{percentage} and \drafttodo{percentage}, a difference of \drafttodo{difference} percentage points. \drafttodo{principal comparative conclusion supported by the actual results}. These results provide evidence of AgentGS's performance in an external benchmark after integrating its official tools and constructing dedicated Skills and Capabilities.
 
-% DOCX paragraphs 137--138 and table 3.
+% DOCX paragraphs 147--147 and table 3.
 \input{tables/external_results}
 
+% DOCX paragraph 148.
 \subsection{Ablation Experiments}
 \label{sec:ablations}
 
-% DOCX paragraph 140.
+% DOCX paragraph 149.
 Ablations use 57 GeoToolEval records covering all ten geoscientific domains. There are 22 single-step records, 20 with two or three steps, and 15 with at least four steps; multistep records comprise 61.40\% of the subset. All configurations are evaluated on the same subset, with the full method on that subset serving as the reference. Each experiment disables or changes one mechanism. We compare mean FAS over the full subset and over its multistep records to analyze hierarchical planning, missing-capability completion, and execution mechanisms.
 
-% DOCX paragraph 141.
+% DOCX paragraph 150.
 \paragraph{Hierarchical planning and predecessor expansion.}
 A1 retains the same strategy, dependency, and tool information but plans directly at the tool level, providing a structural control for hierarchical decision making. A2 retains initial capability selection and dependency declarations while disabling automatic expansion of mandatory predecessors. It tests the contribution of explicitly inserting prerequisite operations. Since subsequent completion may restore omitted predecessors, the analysis also records plan changes and compensatory insertions.
 
-% DOCX paragraph 142.
+% DOCX paragraph 151.
 \paragraph{Missing-capability completion.}
 A3 retains gap diagnosis but disables automatic insertion of supporting capabilities, including directed bridging, to test the overall contribution of independent completion. A4 disables only directed bridging while retaining other completion mechanisms, testing the additional benefit of connecting branches from inactive Skills. Both ablations are analyzed alongside required-operation coverage, dependency satisfaction, and actual use of upstream artifacts.
 
-% DOCX paragraph 143.
+% DOCX paragraph 152.
 \paragraph{Tool selection and execution recovery.}
 A5 retains capability requirements, instance-specific candidate scopes, and execution validation, but selects the first valid candidate in a predefined fixed order. This tests the contribution of selection optimization. A6 disables local recovery after execution failures while retaining planning, tool selection, and input binding before the first execution. It tests the contribution of recovery to task completion.
 
-% DOCX paragraphs 144--146 and table 4.
+% DOCX paragraphs 153--154 and table 4.
 \input{tables/ablation}
 
-% DOCX paragraph 147.
+% DOCX paragraph 155.
 \paragraph{Ablation analysis.}
 Hierarchical planning, predecessor expansion, and independent completion all have substantial effects. Relative to the full method, A1's direct tool-level planning reduces overall mean FAS by 25.82 percentage points and multistep FAS by 24.74 points. This supports first determining capabilities and their dependencies, then selecting tools. Disabling predecessor expansion (A2) and independent completion (A3) reduces overall mean FAS by 24.43 and 23.94 points, respectively, and multistep FAS by 27.43 and 26.88 points. The larger multistep declines indicate that completing mandatory prerequisites and missing capabilities is particularly important for multistep tasks.
 
-% DOCX paragraph 148.
+% DOCX paragraph 156.
 With the other completion mechanisms retained, disabling directed bridging alone (A4) reduces overall mean FAS by 2.27 points and multistep FAS by 4.20 points. Directed bridging therefore adds benefits beyond the existing completion mechanisms, with larger benefits on multistep tasks. Compared with disabling all independent completion, this result also indicates that bridging is an effective complement to the broader completion mechanism.
 
-% DOCX paragraph 149.
+% DOCX paragraph 157.
 Execution mechanisms have different effects. Disabling execution recovery (A6) reduces overall and multistep FAS by 4.15 and 7.20 points, respectively, suggesting that local recovery reduces the impact of execution failures on task completion. In contrast, disabling tool-selection optimization (A5) slightly increases overall mean FAS from 0.6387 to 0.6415, while reducing multistep FAS from 0.5333 to 0.5184. These results support its benefit on multistep tasks, but do not show a consistent improvement in overall score.
 
 \input{sections/case_study}

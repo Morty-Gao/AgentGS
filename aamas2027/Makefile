@@ -9,9 +9,22 @@ MAIN := main.tex
 OUTDIR := build
 LATEXFLAGS := -pdf -interaction=nonstopmode -halt-on-error -file-line-error -synctex=1 -outdir=$(OUTDIR)
 
-.PHONY: all pdf compile watch clean distclean rebuild import-assets check-tools help
+.PHONY: all pdf full supplement word compile watch clean distclean rebuild import-assets check-tools help
 
-all compile: pdf
+all: pdf full supplement
+
+compile: pdf
+
+full: check-tools
+	$(LATEXMK) $(LATEXFLAGS) full.tex
+	@printf 'Full translation: $(OUTDIR)/full.pdf\n'
+
+supplement: check-tools
+	$(LATEXMK) $(LATEXFLAGS) supplement.tex
+	@printf 'Supplement: $(OUTDIR)/supplement.pdf\n'
+
+word: full
+	python3 scripts/export_word.py
 
 pdf: check-tools
 	$(LATEXMK) $(LATEXFLAGS) $(MAIN)
@@ -46,6 +59,10 @@ check-tools:
 help:
 	@printf '%s\n' \
 	  'make / make pdf / make compile  Compile build/main.pdf (incremental)' \
+	  'make full                      Compile the complete Word translation' \
+	  'make supplement                Compile the anonymous supplementary figures' \
+	  'make word                      Export the complete translation to Word' \
+	  'make all                       Compile all three documents' \
 	  'make watch                     Recompile automatically on changes' \
 	  'make clean                     Remove auxiliary files; keep PDF' \
 	  'make distclean                 Remove generated files, including PDF' \

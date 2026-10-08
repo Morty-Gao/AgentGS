@@ -19,6 +19,7 @@ def apply(state):
             "gold_sparql",
             "gold_answer",
             "endpoint",
+            "input_resource",
         ):
             state.params.pop(forbidden, None)
         if isinstance(state.resource, str):

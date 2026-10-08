@@ -1,9 +1,12 @@
 """Observable algorithm decisions and durable partial results."""
 
 import hashlib
+import logging
 from dataclasses import dataclass, field
 
 from agentgs.contracts.models import AgentResult
+
+logger = logging.getLogger(__name__)
 
 
 class AgentExecutionError(RuntimeError):
@@ -27,7 +30,17 @@ class RunState:
 
     def emit(self, kind, payload):
         self.trace.append({"type": kind, **payload})
-        self.context.events.emit(kind, payload)
+        try:
+            self.context.events.emit(kind, payload)
+        except Exception as exc:
+            logger.warning("Auxiliary agent event could not be saved: %s", type(exc).__name__)
+            self.trace.append(
+                {
+                    "type": "event_recording_error",
+                    "event_type": kind,
+                    "error_type": type(exc).__name__,
+                }
+            )
         self.save()
 
     def result(self):
@@ -44,12 +57,29 @@ class RunState:
 
     def save(self):
         if self.context.checkpoint is not None:
-            self.context.checkpoint(self.result())
+            try:
+                self.context.checkpoint(self.result())
+            except Exception as exc:
+                logger.warning("Agent checkpoint could not be saved: %s", type(exc).__name__)
+                if not any(row.get("type") == "checkpoint_error" for row in self.trace):
+                    self.trace.append(
+                        {"type": "checkpoint_error", "error_type": type(exc).__name__}
+                    )
 
     async def model(self, prompt, *, stage, system_prompt=""):
         if self.task.max_model_calls is not None and self.model_calls >= self.task.max_model_calls:
             raise RuntimeError("Explicit model call budget exhausted")
         self.model_calls += 1
+        row = {
+            "call": self.model_calls,
+            "stage": stage,
+            "usage": None,
+            "attempts": None,
+            "response_model": None,
+            "response_id": None,
+            "status": "started",
+        }
+        self.usage.append(row)
         self.emit(
             "model.started",
             {
@@ -59,37 +89,45 @@ class RunState:
             },
         )
         client = self.context.client
-        if hasattr(client, "text"):
-            reply = await client.text(
-                prompt,
-                stage=stage,
-                settings=self.context.options,
-                model=self.task.model,
-                effort=self.task.effort,
-                system_prompt=system_prompt,
+        try:
+            if hasattr(client, "text"):
+                reply = await client.text(
+                    prompt,
+                    stage=stage,
+                    settings=self.context.options,
+                    model=self.task.model,
+                    effort=self.task.effort,
+                    system_prompt=system_prompt,
+                )
+            else:
+                reply = await client.chat(
+                    [
+                        {
+                            "role": "system",
+                            "content": system_prompt
+                            or "You are ChatGPT, a large language model trained by OpenAI.\n",
+                        },
+                        {"role": "user", "content": prompt},
+                    ],
+                    model=self.task.model,
+                    effort=self.task.effort,
+                )
+        except Exception as exc:
+            row.update(status="failed", error_type=type(exc).__name__)
+            self.emit(
+                "model.failed",
+                {"call": self.model_calls, "stage": stage, "error_type": type(exc).__name__},
             )
-        else:
-            reply = await client.chat(
-                [
-                    {
-                        "role": "system",
-                        "content": system_prompt
-                        or "You are ChatGPT, a large language model trained by OpenAI.\n",
-                    },
-                    {"role": "user", "content": prompt},
-                ],
-                model=self.task.model,
-                effort=self.task.effort,
-            )
-        row = {
-            "call": self.model_calls,
-            "stage": stage,
-            "usage": reply.usage,
-            "attempts": reply.attempts,
-            "response_model": getattr(reply, "response_model", None),
-            "response_id": getattr(reply, "response_id", None),
-        }
-        self.usage.append(row)
+            raise
+        row.update(
+            {
+                "usage": reply.usage,
+                "attempts": reply.attempts,
+                "response_model": getattr(reply, "response_model", None),
+                "response_id": getattr(reply, "response_id", None),
+                "status": "completed",
+            }
+        )
         self.emit("model.completed", row)
         answer = reply.message.get("content")
         if not isinstance(answer, str):

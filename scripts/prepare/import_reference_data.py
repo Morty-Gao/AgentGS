@@ -32,7 +32,10 @@ def main():
         parser.error("Import destination must be outside the read-only source")
     groups = [
         ("datasets/deep_earth_toolqa/data/derived", "data/processed/deep_earth/derived"),
-        ("datasets/deep_earth_toolqa/data/source_snapshot", "data/processed/deep_earth/source_snapshot"),
+        (
+            "datasets/deep_earth_toolqa/data/source_snapshot",
+            "data/processed/deep_earth/source_snapshot",
+        ),
         ("datasets/energy_resources_toolqa/data/derived", "data/processed/energy/derived"),
         ("datasets/ocean_carbon_toolqa/data/derived", "data/processed/ocean/derived"),
         ("_dataset_work/habitable_earth_dataset/processed", "data/processed/habitable"),
@@ -42,9 +45,11 @@ def main():
     if not args.skip_assets:
         groups.append(("data/benchmarks", "data/benchmarks"))
     previous = root / "data/processed/resource_manifest.json"
-    manifest = json.loads(previous.read_text()) if previous.exists() else {
-        "version": 1, "records": [], "aliases": {}, "kind": "frozen_reference_inputs"
-    }
+    manifest = (
+        json.loads(previous.read_text())
+        if previous.exists()
+        else {"version": 1, "records": [], "aliases": {}, "kind": "frozen_reference_inputs"}
+    )
     records = {row["path"]: row for row in manifest["records"]}
     aliases = manifest["aliases"]
     basenames = defaultdict(list)
@@ -73,10 +78,14 @@ def main():
             if original.is_dir():
                 add_aliases(original, target_root / rel)
                 continue
-            if original.suffix.lower() == ".zip" or any(
-                part.casefold() in {"questions", "answers", "reports", "evaluation", "logs"}
-                for part in rel.parts
-            ) or original.name.casefold().startswith(("questions", "answers", "predictions")):
+            if (
+                original.suffix.lower() == ".zip"
+                or any(
+                    part.casefold() in {"questions", "answers", "reports", "evaluation", "logs"}
+                    for part in rel.parts
+                )
+                or original.name.casefold().startswith(("questions", "answers", "predictions"))
+            ):
                 continue
             if original.name.casefold() == "question.json":
                 continue
@@ -91,8 +100,17 @@ def main():
                 if digest(target) != fingerprint:
                     raise ValueError(f"Imported resource checksum differs: {target}")
             key = str(target.relative_to(root))
-            records[key] = {"path": key, "sha256": fingerprint, "bytes": target.stat().st_size,
-                            "source": str(original), "role": "model" if "models" in destination else "index" if "indexes" in destination else "input"}
+            records[key] = {
+                "path": key,
+                "sha256": fingerprint,
+                "bytes": target.stat().st_size,
+                "source": str(original),
+                "role": "model"
+                if "models" in destination
+                else "index"
+                if "indexes" in destination
+                else "input",
+            }
             add_aliases(original, target)
             basenames[original.name].append((key, fingerprint))
             count += 1
@@ -100,8 +118,23 @@ def main():
                 print(json.dumps({"imported_or_verified": count}), flush=True)
     # Online readers require the original full GEM/MRDS/SNAPO parsers, not their question generators.
     for original, target in [
-        (source / "dataset_work/extracted/gem-data/Global-Integrated-Power-March-2026-II.xlsx", root / "data/processed/raw_sources/gem-data/Global-Integrated-Power-March-2026-II.xlsx"),
-        (source / "dataset_work/extracted/mrds-csv/mrds.csv", root / "data/processed/raw_sources/mrds-csv/mrds.csv"),
+        (source / "dataset_work/数据集下载/113597.xlsx", root / "data/snapo/113597.xlsx"),
+        (
+            source / "data/answer_formats/geotooleval_v1_1.jsonl",
+            root / "data/answer_formats/geotooleval_v1_1.jsonl",
+        ),
+        (
+            source / "data/answer_formats/geotooleval_v1_1_system.txt",
+            root / "data/answer_formats/geotooleval_v1_1_system.txt",
+        ),
+        (
+            source / "dataset_work/extracted/gem-data/Global-Integrated-Power-March-2026-II.xlsx",
+            root / "data/processed/raw_sources/gem-data/Global-Integrated-Power-March-2026-II.xlsx",
+        ),
+        (
+            source / "dataset_work/extracted/mrds-csv/mrds.csv",
+            root / "data/processed/raw_sources/mrds-csv/mrds.csv",
+        ),
     ]:
         target.parent.mkdir(parents=True, exist_ok=True)
         sha = digest(original)
@@ -110,12 +143,18 @@ def main():
         if digest(target) != sha:
             raise ValueError(f"Raw input checksum differs: {target}")
         key = str(target.relative_to(root))
-        records[key] = {"path": key, "sha256": sha, "bytes": target.stat().st_size, "source": str(original), "role": "input"}
+        records[key] = {
+            "path": key,
+            "sha256": sha,
+            "bytes": target.stat().st_size,
+            "source": str(original),
+            "role": "public_output_contract" if "answer_formats" in key else "input",
+        }
         add_aliases(original, target)
     for key, row in records.items():
         basenames[Path(key).name].append((key, row["sha256"]))
         if key.startswith("data/benchmarks/earthbench_geotoolagent/") and "/question" in key:
-            tail = key[key.index("question"):]
+            tail = key[key.index("question") :]
             aliases["benchmark/data/" + tail] = key
             parts = Path(tail).parts
             for count in range(1, len(parts)):

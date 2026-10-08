@@ -9,6 +9,15 @@ import re
 def apply(state):
     from agentgs.contracts.remote_sensing import prepare_step
 
+    if state.tool_name == "GeoBigDataExecuteGeoSPARQL":
+        # The authorized snapshot interface receives a locator, not generic
+        # resource annotations or live-endpoint parameters.
+        state.params = {
+            key: value
+            for key, value in state.params.items()
+            if key in {"source_id", "query", "dataset"}
+        }
+
     rs_report = prepare_step(
         state.tool_name,
         state.params,

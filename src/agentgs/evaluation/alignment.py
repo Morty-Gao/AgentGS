@@ -7,6 +7,7 @@ harness, backend execution, model prompts or benchmark scores.
 import hashlib
 import json
 
+from agentgs.agent.answering.validation import validate_returned_evidence
 from agentgs.agent.execution.feedback import assess_tool_execution
 from agentgs.agent.planning.candidate_context import build_candidate_context
 from agentgs.agent.planning.capabilities import CapabilityGraph
@@ -158,6 +159,19 @@ def verify_components(snapshot):
             for case in snapshot["feedback_cases"]
         ],
     )
+    compare(
+        "returned-evidence-validation",
+        [
+            (
+                case["id"],
+                validate_returned_evidence(
+                    case["question"], case["answer"], case["outputs"], completed=case["completed"]
+                ),
+                (case["expected_answer"], case["expected_event"]),
+            )
+            for case in snapshot["validation_cases"]
+        ],
+    )
     return checks
 
 
@@ -198,5 +212,20 @@ def alignment_report(contract, snapshot):
         "production_algorithm": contract["acceptance"]["production_algorithm"],
         "runtime_equivalent": equivalent,
         "runtime_pending_algorithms": missing,
-        "scope": "Pure deterministic component parity; no model experiment or end-to-end equivalence claim.",
+        "runtime_unverified_algorithms": missing,
+        "missing_implementations": [
+            unit["id"]
+            for unit in contract["algorithms"]
+            if unit["implementation_status"] in {"pending", "missing", "diverged"}
+        ],
+        "implementation_status": {
+            unit["id"]: {
+                "implementation": unit["implementation_status"],
+                "integration": unit.get("integration_status"),
+                "acceptance": unit.get("runtime_acceptance_status"),
+            }
+            for unit in contract["algorithms"]
+        },
+        "additional_evidence": contract["acceptance"].get("evidence", {}),
+        "scope": "Deterministic component parity plus separately recorded tool/worker evidence. runtime_pending_algorithms denotes unverified end-to-end parity, not missing implementation.",
     }

@@ -215,6 +215,7 @@ def benchmark_command(
 ):
     """Run actual Agent requests with frozen FAS/flow metrics; preserve every attempt."""
     from agentgs.evaluation.benchmark import run_benchmark
+    from agentgs.evaluation.datasets.version import benchmark_workbook
     from agentgs.runtime.answer_contracts import AnswerContracts
 
     root = project_root(project)
@@ -225,7 +226,7 @@ def benchmark_command(
         try:
             return await run_benchmark(
                 service,
-                root / "data/geotooleval/GeoToolEval.xlsx",
+                benchmark_workbook(root),
                 root / output,
                 ids=chosen,
                 retry_failed=retry_failed,
@@ -249,10 +250,11 @@ def score_benchmark(
 ):
     """Score saved original model answers without any new model calls."""
     from agentgs.evaluation.benchmark import score_predictions
+    from agentgs.evaluation.datasets.version import benchmark_workbook
 
     root = project_root(project)
     report = score_predictions(
-        root / "data/geotooleval/GeoToolEval.xlsx",
+        benchmark_workbook(root),
         predictions,
         root / output,
         allow_partial=allow_partial,

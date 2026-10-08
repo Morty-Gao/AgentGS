@@ -1,34 +1,37 @@
+% DOCX paragraph 058.
 \section{Hypergraph Completion and Plan Grounding}
 \label{sec:completion}
 
-% DOCX paragraph 047.
+% DOCX paragraph 059.
 Building on the capabilities and dependencies supplied by the hierarchy, the completion algorithm identifies missing operations in the current plan and searches for additional branches that satisfy the constraints. The system first determines required capabilities and expands their mandatory dependencies, then fills missing operations, and finally chooses concrete tool implementations. All stages communicate through the capability plan $P$, preserving the strategy provenance of both instances and dependencies.
 
+% DOCX paragraph 060.
 \subsection{Initial Selection and Scoped Composition}
 \label{sec:initial-selection}
 
-% DOCX paragraph 049.
+% DOCX paragraph 061.
 Initial capability planning consists of strategy retrieval and capability selection. The system retrieves relevant Skills using the task description, domain, and input types. It selects strategies according to applicability and requirement coverage, and selects the capabilities needed for the task without automatically including every optional step. An LLM may assist selection within the candidate Skills; invalid outputs trigger a fallback to rules. The selected capabilities provide the starting point for dependency expansion and missing-capability completion.
 
-% DOCX paragraph 050.
+% DOCX paragraph 062.
 \emph{Hypergraph Composition} organizes the initially selected capabilities and their mandatory predecessors into $P$, using dependencies declared by the selected Skills. It retains each instance's strategy provenance, candidate-tool scope, and input references. \emph{Missing Capability Completion} then checks whether the plan omits required operations and whether existing operations have the necessary inputs and available implementations. On detecting a gap, the system searches for supporting capabilities, adds them to the plan, and checks again for satisfied prerequisites and conflicts with existing dependencies.
 
-% DOCX paragraph 051.
+% DOCX paragraph 063.
 The search scope depends on the gap. When a required operation is missing, the system searches activated Skills and Skills directly compatible with them. When an existing operation has an unsatisfied input dependency, it may search multiple hops along explicitly declared Skill-compatibility relations. Directed bridging offers another route: it searches inactive Skills for branches connecting endpoints in the current plan, as described next.
 
+% DOCX paragraph 064.
 \subsection{Directed Bridging with a Fixed Active Boundary}
 \label{sec:bridging}
 
-% DOCX paragraph 053.
+% DOCX paragraph 065.
 Suppose the current plan selects Skills $A$ and $B$, but lacks a connecting operation. If an inactive Skill $C$ contains a path $u\to m\to v$, where $u$ and $v$ are selected capabilities of $A$ and $B$, the system considers this path as a candidate and inserts only the required intermediate capability $m$.
 
-% DOCX paragraph 054.
+% DOCX paragraph 066.
 Directed bridging retrieves reusable connecting branches from inactive Skills to complete the current capability plan. Let $u$ in activated Skill $A$ lie on the output boundary of its current local workflow, and let $v$ in activated Skill $B$ lie on the input boundary: $u$ has no successor among $A$'s activated dependencies, and $v$ has no predecessor among $B$'s activated dependencies. If inactive Skill $C$ declares a directed path $u\to m\to v$, the system treats it as a candidate bridge and considers inserting $m$ without importing $C$'s entire workflow.
 
-% DOCX paragraph 055.
+% DOCX paragraph 067.
 The search uses the active capability set at its start as a fixed reference. Each candidate path must come from one inactive Skill and contain at least one inactive intermediate capability. Membership relations first identify Skills containing both endpoints. The algorithm then enumerates directed simple paths along their explicit dependencies or applicable conditional-ordering relations. Capability co-occurrence and list order do not establish direction. A candidate is excluded if the current plan already contains an indirect data path from $u$ to $v$; a direct connection alone does not exclude it. The remaining candidates must pass joint-prerequisite, type-compatibility, tool-availability, cycle, and ambiguity checks before insertion is attempted. Newly inserted capabilities are not used to recursively extend this round of bridge search.
 
-% DOCX paragraph 056.
+% DOCX paragraph 068.
 A candidate branch must satisfy the following checks before the system attempts to add it:
 \begin{enumerate}
   \item \textbf{Explicit execution direction.} The order of each pair of adjacent capabilities must be supported by an explicit dependency or an applicable conditional-ordering relation.
@@ -38,16 +41,16 @@ A candidate branch must satisfy the following checks before the system attempts 
   \item \textbf{Acyclic dependencies.} Adding a branch must not introduce a cycle, and the joint insertion of multiple candidate branches must also preserve acyclicity.
 \end{enumerate}
 
-% DOCX paragraph 057.
-For an ordered endpoint pair, automatic insertion is allowed only when exactly one valid candidate branch exists. Multiple candidates trigger an ambiguity report and stop automatic completion for that pair. On insertion, the system preserves the entry instance's original dependencies and candidate tools, and updates the exit instance's dependencies, tool scope, and input bindings according to the branch. It then recomposes the plan. A branch is rejected if recomposition introduces a new capability outside the branch or leaves a mandatory dependency unsatisfied. Algorithm~\ref{alg:bridging} summarizes this procedure. Figure~\ref{fig:bridging} is reserved for typical accepted and rejected cases.
+% DOCX paragraph 069.
+For an ordered endpoint pair, automatic insertion is allowed only when exactly one valid candidate branch exists. Multiple candidates trigger an ambiguity report and stop automatic completion for that pair. On insertion, the system preserves the entry instance's original dependencies and candidate tools, and updates the exit instance's dependencies, tool scope, and input bindings according to the branch. It then recomposes the plan. A branch is rejected if recomposition introduces a new capability outside the branch or leaves a mandatory dependency unsatisfied. Algorithm~\ref{alg:bridging} summarizes this procedure. Figure~\ref{fig:bridging} illustrates typical accepted and rejected cases (\drafttodo{figure not supplied in the source}).
 
-% The source refers to equation (3), but supplies no equation. Author-approved placeholder.
+% The source refers to equation (3), but supplies no equation. Missing-source placeholder; no eligibility formula is supplied.
 \begin{equation}
   \boxed{\text{TODO: bridge eligibility conditions}}
   \label{eq:bridge}
 \end{equation}
 
-% DOCX paragraphs 058--067.
+% DOCX paragraphs 070--079.
 \begin{algorithm}[t]
 \caption{Directed Bridging from a Single Provider}
 \label{alg:bridging}
@@ -66,25 +69,27 @@ For an ordered endpoint pair, automatic insertion is allowed only when exactly o
 
 \input{figures/bridging}
 
+% DOCX paragraph 080.
 \subsection{Tool Selection and Plan Execution}
 \label{sec:execution}
 
-% DOCX paragraph 069.
+% DOCX paragraph 081.
 \paragraph{Tool Grounding and Tool Execution.}
 Tool Grounding filters candidates according to capability requirements, instance provenance, and retry constraints. An LLM may assist selection within the candidate scope when needed. Tool Execution preferentially uses rules to bind task resources, parameter values, and upstream artifacts to tool inputs, with LLM assistance when necessary. Upstream artifacts must originate from successful preceding steps and have matching types; binding failure blocks the current invocation. The final answer is generated from structured execution results, with an LLM organizing its wording when required.
 
-% DOCX paragraph 070.
+% DOCX paragraph 082.
 \paragraph{Failure Recovery.}
 After a tool failure, the system locally recovers the current capability instance while retaining successful preceding steps to avoid repeated execution. By default, it permits at most three attempts per tool and one local tool substitution. A substitute must implement the same capability, belong to the instance's permitted candidate scope, and pass fresh checks for parameter and upstream-artifact compatibility. The system does not automatically replay calls with uncertain outcomes, partial execution, or outputs violating the schema. Recovery is confined to the existing capability plan; if continuing requires a new capability, subsequent steps are suspended.
 
+% DOCX paragraph 083.
 \subsection{Packaging Composed Workflows as Reusable Skills}
 \label{sec:skill-packaging}
 
-% DOCX paragraph 072.
+% DOCX paragraph 084.
 After successful execution and result verification, the system organizes the capability workflow into a candidate Skill. It records the task objective, applicable inputs, expected artifacts, capability steps, and dependencies, and preserves each step's candidate-tool scope and necessary constraints. Concrete file paths, reference values, and intermediate-artifact references are converted into input roles that can be rebound, allowing the strategy to operate on new task resources.
 
-% DOCX paragraph 073.
+% DOCX paragraph 085.
 Candidate Skills are organized around capability instances and their dependencies. When the same Capability acts on different input objects, those operations remain distinct steps. Operations taken from different original Skills retain their provenance and usage constraints. Forming a candidate Skill does not automatically relax these constraints or make composed capabilities arbitrarily interchangeable.
 
-% DOCX paragraph 074.
+% DOCX paragraph 086.
 Once registered, a candidate Skill can participate in subsequent strategy retrieval and capability planning. Reuse still requires checking applicability to the new task, selecting required steps, binding resources, and determining concrete tools. Successful execution provides evidence for one instance of the workflow, but does not establish applicability to other inputs or tasks. The effectiveness of reuse across tasks requires further validation.

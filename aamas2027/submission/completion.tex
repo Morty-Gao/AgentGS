@@ -1,0 +1,49 @@
+\section{Completion and Execution}
+\label{sec:completion}
+\subsection{Initial Selection and Scoped Composition}
+AgentGS retrieves Skills using the task description, domain, and input types, selects applicable strategies, and chooses capabilities covering task requirements. An LLM may assist selection within the retrieved candidates; invalid outputs trigger a rule-based fallback. Hypergraph Composition expands mandatory predecessors and constructs $P$, retaining provenance, candidate-tool scopes, and input references.
+
+Missing Capability Completion checks for missing required operations, unsatisfied inputs, and unavailable implementations. Missing operations are supported through activated Skills or directly compatible Skills. Unsatisfied input dependencies may trigger multihop search along explicit compatibility relations. After insertion, the system rechecks prerequisites and dependency conflicts. Directed bridging provides a separate route through inactive Skills.
+
+\subsection{Directed Bridging with a Fixed Active Boundary}
+Suppose activated Skills $A$ and $B$ supply disconnected fragments. Let $u$ be an output-boundary capability of $A$, with no successor among its active dependencies, and $v$ an input-boundary capability of $B$, with no predecessor among its active dependencies. If inactive Skill $C$ declares $u\to m\to v$, this branch can supply intermediate capability $m$ without importing the entire Skill.
+
+The active capability set is fixed at search start. Each branch must come from a single inactive Skill and contain at least one inactive intermediate capability. Membership first identifies Skills containing both endpoints; explicit dependencies or applicable conditional-ordering relations then determine directed simple paths. Co-occurrence and list order do not establish direction. An existing indirect data path from $u$ to $v$ excludes the candidate pair; a direct connection alone does not. Newly inserted capabilities do not recursively extend the current search.
+
+Candidate branches must satisfy five checks:
+\begin{enumerate}
+\item \textbf{Direction:} each adjacent pair follows an explicit dependency or applicable conditional order.
+\item \textbf{Prerequisites:} all required predecessors belong to the fixed active set or candidate branch.
+\item \textbf{Types:} upstream outputs and downstream inputs share at least one concrete type, excluding generic labels such as \texttt{Any} and \texttt{Parameter}.
+\item \textbf{Implementations:} branch operations and required predecessors have available tools within permitted scopes. The entry and external active predecessors retain their original scopes; other branch nodes use the provider Skill's constraints.
+\item \textbf{Acyclicity:} both individual and joint insertions preserve acyclic dependencies.
+\end{enumerate}
+For each ordered endpoint pair, only a unique valid branch may be inserted automatically. Multiple candidates produce an ambiguity report and halt completion for that pair. Insertion preserves the entry instance's dependencies and tools, updates the exit's dependencies, tool scope, and bindings, and recomposes the plan. A branch is rejected if recomposition adds capabilities outside the branch or leaves mandatory dependencies unsatisfied. Algorithm~\ref{alg:bridging} summarizes the procedure.
+
+\begin{algorithm}[t]
+\caption{Directed Bridging from a Single Provider}
+\label{alg:bridging}
+\begin{algorithmic}[1]
+\Require Plan $P$ after compatibility completion; registered knowledge; available tools
+\Ensure Updated $P$ and acceptance/rejection records
+\State Return if bridging is disabled, recovery is active, or $P$ has already been searched
+\State Fix active capabilities; mark $P$ as searched
+\State Enumerate boundary pairs from different Skills; skip pairs with an indirect data path
+\State Search inactive Skills for single-provider branches satisfying the five validity checks
+\State Deduplicate by provider/path; reject ambiguous pairs; check joint acyclicity
+\State Attempt insertion, preserving entry constraints and updating exit dependencies, tools, and bindings
+\State Recompose; reject external additions or unmet mandatory dependencies
+\end{algorithmic}
+\end{algorithm}
+
+\subsection{Tool Grounding and Recovery}
+Tool Grounding filters implementations by capability requirements, instance provenance, and retry constraints, using an LLM within the candidate scope when needed. Tool Execution preferentially binds task resources, values, and upstream artifacts through rules, with LLM assistance when necessary. Artifacts must come from successful preceding steps and have matching types. Binding failure blocks invocation. The final answer is generated from structured execution results.
+
+Failure Recovery handles the failed capability instance locally while retaining successful preceding results. Defaults permit at most three attempts per tool and one local substitution. A substitute must implement the same capability, lie within the instance's permitted scope, and pass fresh parameter/artifact checks. Calls with uncertain outcomes, partial execution, or schema-invalid outputs are not automatically replayed. Recovery remains within the existing capability plan; execution is suspended if continuing requires another capability.
+
+\subsection{Reusable Candidate Skills}
+After successful execution and result verification, the workflow can be packaged as a candidate Skill recording objectives, applicable inputs, artifacts, capability steps, dependencies, tool scopes, and constraints. Concrete paths, reference values, and artifact references become rebindable input roles. Distinct input objects remain distinct steps, and source provenance and usage constraints are preserved. Once registered, the candidate participates in retrieval and planning, but reuse still requires checking applicability, selecting steps, binding resources, and choosing tools. Success on one task does not establish cross-task applicability or reuse benefits.
+
+\subsection{System Implementation}
+\label{sec:system}
+AgentGS connects an interactive frontend, an orchestration service, knowledge/capability resources, and a unified tool execution service. The frontend supports task dialogue, graph browsing, configuration, and history inspection. The orchestration service constructs plans and passes tool identifiers, parameters, and resources to execution, which returns results or failure states. Intermediate artifacts carry type and provenance metadata, including their generating tools and steps, so later calls consume explicit file or value references. Stored plans and traces expose tool choices, parameter propagation, attempts, and failures for inspection. Detailed architecture and interface figures appear in the supplementary material.

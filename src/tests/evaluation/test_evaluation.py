@@ -9,7 +9,9 @@ from agentgs.runtime.service import TaskService
 async def test_gold_is_kept_outside_runtime(project):
     case = EvaluationCase(
         id="case",
-        input=TaskInput(calls=[ToolCall(tool="DeepEarthQueryUSGSCatalog", arguments={"min_magnitude": 8})]),
+        input=TaskInput(
+            calls=[ToolCall(tool="DeepEarthQueryUSGSCatalog", arguments={"min_magnitude": 8})]
+        ),
         expected_answer="PRIVATE_GOLD",
         expected_tools=["DeepEarthQueryUSGSCatalog"],
     )

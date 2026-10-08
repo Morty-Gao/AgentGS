@@ -1,7 +1,21 @@
-% DOCX paragraphs 093--094, image 3.
+% DOCX paragraphs 104--106, image 3.
 \begin{figure*}[t]
   \centering
-  \includegraphics[width=\textwidth]{interface.png}
+  \ifdefined\anonymizeinterface
+    % Redact local filesystem paths for the anonymous supplement.
+    % The original raster remains unchanged for the faithful full translation.
+    \begin{tikzpicture}
+      \node[anchor=south west,inner sep=0] (screen) at (0,0)
+        {\includegraphics[width=\textwidth]{interface.png}};
+      \begin{scope}[x={(screen.south east)},y={(screen.north west)}]
+        \fill[white] (0.792,0.562) rectangle (0.984,0.823);
+        \node[align=center,font=\small,text width=0.16\textwidth]
+          at (0.888,0.692) {Local filesystem\\paths anonymized};
+      \end{scope}
+    \end{tikzpicture}
+  \else
+    \includegraphics[width=\textwidth]{interface.png}
+  \fi
   \caption{Task dialogue and process inspection in AgentGS. The left panel shows the task, answer, and execution records. The upper right shows one tool call's input/output and execution feedback; the lower right shows part of the complete execution log.}
   \label{fig:interface}
   \Description{An example remote-sensing temperature task in the AgentGS chat interface, with expandable tool calls and detailed structured execution feedback.}

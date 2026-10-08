@@ -1,5 +1,6 @@
 import importlib.util
 import json
+import logging
 
 from pydantic import ValidationError
 
@@ -13,8 +14,9 @@ from agentgs.runtime.tools.domains.earthquake import (
     get_event,
     query_catalog,
 )
-from agentgs.runtime.tools.domains.geosparql import replay_query
 from agentgs.runtime.tools.registry import builtin_tools, internal_operations
+
+logger = logging.getLogger(__name__)
 
 
 class LocalToolExecutor:
@@ -31,7 +33,7 @@ class LocalToolExecutor:
         return [item.spec for item in self.registry.values()]
 
     async def execute(self, call):
-        self.events.emit("tool.started", {"call_id": call.id, "tool": call.tool})
+        self._emit("tool.started", {"call_id": call.id, "tool": call.tool})
         item = self.registry.get(call.tool) or self.internal.get(call.tool)
         try:
             if not item:
@@ -42,19 +44,19 @@ class LocalToolExecutor:
             elif call.tool == "DeepEarthQueryUSGSCatalog":
                 args = params.model_dump()
                 modern = {"start_year", "end_year", "min_magnitude", "limit"}
-                if set(args).issubset(modern):
+                if args and set(args).issubset(modern):
                     data = query_catalog(CatalogQuery.model_validate(args), self.datasets)
                 else:
-                    data = self._domain(call.tool, args)
+                    data = self._domain(call.tool, args, call_id=call.id)
             elif call.tool == "DeepEarthGetUSGSEvent":
                 if importlib.util.find_spec("pandas") is not None:
-                    data = self._domain(call.tool, params.model_dump())
+                    data = self._domain(call.tool, params.model_dump(), call_id=call.id)
                 else:
                     data = get_event(EventQuery.model_validate(params.model_dump()), self.datasets)
             elif call.tool == "GeoBigDataExecuteGeoSPARQL":
-                data = replay_query(params, self.datasets)
+                data = item.handler(params, self.datasets)
             else:
-                data = self._domain(call.tool, params.model_dump())
+                data = self._domain(call.tool, params.model_dump(), call_id=call.id)
             raw_output = data if isinstance(data, str) else json.dumps(data, ensure_ascii=False)
             assessment = assess_tool_execution(raw_output)
             if assessment.score == 0:
@@ -64,14 +66,7 @@ class LocalToolExecutor:
                     data = json.loads(data)
                 except ValueError:
                     data = {"text": data}
-            artifact = self.artifacts.write_json(call.id + ".json", data, call.tool)
-            produced = [artifact]
-            # Register file products without treating registration failure as a new physical call.
-            for path in self.artifacts.root.rglob("*"):
-                if path.is_file() and path not in self._known_files:
-                    self._known_files.add(path)
-                    if path.name != call.id + ".json":
-                        produced.append(self.artifacts.register(path, call.tool))
+            produced = self._register_products(call, data)
             result = ToolResult(
                 call_id=call.id,
                 tool=call.tool,
@@ -125,7 +120,7 @@ class LocalToolExecutor:
                 succeeded=False,
                 error=ToolError(code="validation", message=str(exc)),
             )
-        self.events.emit(
+        self._emit(
             "tool.completed",
             {
                 "call_id": call.id,
@@ -138,8 +133,41 @@ class LocalToolExecutor:
         )
         return result
 
-    def _domain(self, name, arguments):
-        from agentgs.runtime.tools.dispatch import execute_domain
+    def _emit(self, kind, payload):
+        try:
+            self.events.emit(kind, payload)
+        except Exception:
+            logger.exception("Auxiliary tool event could not be saved: %s", kind)
 
-        with tool_context(self.datasets.root.parent, self.artifacts.root):
-            return execute_domain(name, arguments)
+    def _register_products(self, call, data):
+        produced = []
+        try:
+            produced.append(self.artifacts.write_json(call.id + ".json", data, call.tool))
+        except Exception as exc:
+            self._artifact_failure(call, exc)
+        try:
+            paths = list(self.artifacts.root.rglob("*"))
+        except Exception as exc:
+            self._artifact_failure(call, exc)
+            return produced
+        for path in paths:
+            try:
+                if path.is_file() and path not in self._known_files:
+                    self._known_files.add(path)
+                    if path.name != call.id + ".json":
+                        produced.append(self.artifacts.register(path, call.tool))
+            except Exception as exc:
+                self._artifact_failure(call, exc)
+        return produced
+
+    def _artifact_failure(self, call, exc):
+        logger.warning("Tool %s succeeded but artifact recording failed: %s", call.tool, exc)
+        self._emit(
+            "tool.artifact_failed",
+            {"call_id": call.id, "tool": call.tool, "error_type": type(exc).__name__},
+        )
+
+    def _domain(self, name, arguments, *, call_id=None):
+        output = self.artifacts.root / "calls" / call_id if call_id else self.artifacts.root
+        with tool_context(self.datasets.root.parent, output, self.artifacts.root):
+            return self.registry[name].handler(arguments)

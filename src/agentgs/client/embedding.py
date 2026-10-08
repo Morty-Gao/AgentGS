@@ -24,8 +24,12 @@ class LocalEmbedding:
             if not self.cache.is_dir():
                 raise FileNotFoundError(f"Frozen embedding cache missing: {self.cache}")
             from fastembed import TextEmbedding
-            candidates = [path.parent for path in self.cache.rglob("model_optimized.onnx")
-                          if self.model_name.rsplit("/", 1)[-1].casefold() in str(path).casefold()]
+
+            candidates = [
+                path.parent
+                for path in self.cache.rglob("model_optimized.onnx")
+                if self.model_name.rsplit("/", 1)[-1].casefold() in str(path).casefold()
+            ]
             if len(candidates) != 1:
                 raise ValueError("Frozen embedding model directory is missing or ambiguous")
             self.model = TextEmbedding(

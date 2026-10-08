@@ -1,120 +1,128 @@
 # AgentGS
 
-基于类型契约的地学 agent 与 task runtime。工作仓库位于 Ubuntu-24.04 的 `/home/gaosong/Code/Project/AgentGS`。
+标准 Python 地学 Agent 项目。当前范围为 **101 项 GeoToolEval 工具、24 个 Skill、31 个 Capability**，默认执行原版的分阶段流程。核心源码以原主项目冻结版本为基线；生产包独立于旧源码目录。
 
-## 算法保真约束
+## 当前重构状态
 
-重构遵循“核心算法完全不变，按意图重组实现”。全链路决策、来源版本与待迁移项见 [algorithm_alignment.json](docs/algorithm_alignment.json)。按2026-10-08用户确认，迁移范围仅为旧主项目GeoEval catalog的101项GeoToolEval工具、24个关联Skill和31个Capability。算法源码仍以原主项目为基线，不切换交付副本或独立向量实验版本。范围清单见 [tool_scope.json](src/agentgs/skills/tool_scope.json)。
+101 项工具均有实际处理函数，已在科学复现环境逐项执行成功。100 项科学工具使用同一输入与旧源码对照一致；GeoQuestions 按用户授权保留 40 条物化结果的 source_id / 查询结构匹配协议，另有 125 项独立回放对照。已迁入能源、海洋共享解析器、空间/栅格科学操作及相应数据定位。
 
-已有独立实现通过旧源码决策对照：加权Skill检索、选择与完整Skill计划、能力图/候选工具评分、grounding、候选上下文和输出分类。24项声明属于算法数据；默认可运行领域工具目前为两项USGS工具与GeoQuestions快照查询工具。当前问答Engine仍是function-calling原型，KG/桥接/领域绑定/恢复/最终验证尚未接齐，不能称为旧Agent的等价实现。
+默认 Agent 已连接 Skill 检索、KG 检索、规划、桥接、grounding、参数绑定、原子反馈、重规划、成功前缀复用、最终模型回答和非修改性验证。原 function-calling 原型仅在显式选择 `algorithm=prototype` 时使用。24 项 Skill 是动态能力声明，不代表 24 条固定工具链。
 
-```bash
-.venv/bin/python scripts/build/audit_algorithm_alignment.py
-.venv/bin/python scripts/build/audit_algorithm_alignment.py --require-runtime-parity
-uv run --locked agentgs skills plan 'Count earthquake events in the frozen USGS catalog.' --inferred-tool DeepEarthQueryUSGSCatalog --summary
-```
+已验收的独立对照包括 341 项确定性组件决策、16 项原 KG/SDK 检索、298 项参数绑定、65 组科学结果和产物、2,412 项原 FAS 分数。保存实验答案的 28 组 original / compatibility 复评一致。真实 TaskService/worker 已验证失败恢复、六步空间链和跨领域产物传递。
 
-组件审计与生产全链路审计分别报告；全链路尚未对齐时第二条返回非零。`skills plan`只检查确定性规划阶段，不调用模型或执行工具。规划组件差分测试使用旧纯算法生成的冻结结果，无须旧项目目录。GeoQuestions恢复历史快照协议是用户明确授权的算法版本例外，单独记录并验收。
+**尚未完成旧 harness 所有入口、模式与桥接组合的同响应回放验收，因此 `runtime_equivalent=false` 保留。** 这表示全链路等价证据尚不充分；迁移清单不再把已实现模块标成占位。完整证据与未验收范围见 [algorithm_alignment.json](docs/algorithm_alignment.json) 和 [migration_inventory.json](docs/migration_inventory.json)。
 
-## 当前实现范围
+## 十领域抽样交付验收
 
-- `contracts`：任务、工具、产物、结果与事件模型。
-- `client`：provider/model 分离的 OpenAI 兼容异步调用，能力/effort校验、连接复用、有限重试、未知usage保留为null。首版使用非流式chat completions。
-- `skills`：独立描述、prompt与准备/执行接口。内置地震目录与GeoQuestions快照查询两项执行能力；确定性规划使用24项关联Skill声明。
-- `agent`：可替换检索接口、关键词Skill选择、模型工具调用循环与显式工具计划。
-- `runtime`：独立任务worker、并发队列、取消/超时、RSS监测、SQLite事件、产物校验和、bwrap与显式PRoot兼容回退。
-- `evaluation`：同一TaskService运行JSONL用例，gold不进入运行请求；首版提供工具链与答案精确匹配，尚未替代旧FAS评测器。
-- `cli`：Typer/Rich子命令；`visualization`：FastAPI、SSE与React任务控制台。
+按用户最新要求，本地完成10个领域各1题的实际Agent抽样，全部任务成功、冻结FAS=1；模型gpt-5.6-terra，共22个模型阶段。样题为Q61、Q106、Q141、Q199、Q287、Q347、Q447、Q471、Q496、Q544，其中遥感/自然灾害包含多步链。科学复现环境完整测试714项通过、无跳过。结果汇总为 `outputs/verification/delivery.json`，逐题请求、trace、用量和评分保留在 `domains-1-5.json` 与 `domains-6-10.json`。
 
-101项目标工具中，USGS GetEvent与GeoSPARQL快照协议已迁入，USGS Query为部分迁移（旧聚合接口尚未补齐），其余98项及其派生数据/索引仍为pending，见 `docs/migration_inventory.json`。原额外9项Geo/Geoscience工具及其独有的4个Skill、7个Capability已移出默认注册表与规划语料；共享能力仍保留。ExecutePython仅为显式请求可用的内部沙箱操作，不计入101项领域工具，不进入模型工具列表、检索或前端工具菜单。未导入整个旧runtime或vendor，也未声称全量科学工具/旧分数已复现。
+603题Agent端到端实验按用户决定在服务器运行。本地的2412项评分oracle检查是离线评分验证，未执行603题模型实验；`runtime_equivalent=false`保留为更广泛形式验收边界，不阻碍本次约定的十领域抽样交付。
 
-## 安装与离线执行
+## 环境准备
+
+运行路径为 Linux / WSL，科学复现环境使用 Python 3.12，NumPy 1.26.4、SciPy 1.15.3 等原分发版本。默认开发环境与复现环境分别管理。
 
 ```bash
 cd /home/gaosong/Code/Project/AgentGS
 uv sync --locked --extra visualization
-uv run --locked agentgs --help
-uv run --locked agentgs run --tool DeepEarthQueryUSGSCatalog   --arguments '{"start_year":2010,"end_year":2020,"min_magnitude":8,"limit":10}'
+.venv/bin/python scripts/tools/install_reproduction.py --python 3.12
+.venv/bin/python scripts/tools/install_reproduction.py --verify
 ```
 
-工具参数已经采用类型schema，旧工具的字符串输入不能原样套用。USGS读取已下载原始 `data/usgs/usgs_2010_2020_m7.csv`。结果、事件和产物存储于outputs；工具结果带来源类型，目录查询不冒充实时数据。
-
-## GeoQuestions离线快照协议
-
-用户2026-10-08要求GeoBigDataExecuteGeoSPARQL恢复物化结果快照协议。固定覆盖原GeoToolEval地学大数据领域的40条记录，不需要GEOSPARQL_ENDPOINT或空间RDF服务。
+原始数据保留在 `data/`，不包含在 wheel 中。当前工作区已准备数据；新工作区可从原项目导入冻结输入、模型和 KG，按 SHA256 校验，不导入旧运行代码：
 
 ```bash
-.venv/bin/python scripts/prepare/prepare_geoquestions.py
-.venv/bin/python -m agentgs run --tool GeoBigDataExecuteGeoSPARQL --arguments '{"source_id":591}'
-.venv/bin/python -m agentgs run --tool GeoBigDataExecuteGeoSPARQL --arguments '{"query":"SELECT (COUNT(DISTINCT ?forest) AS ?forests) WHERE { yago:England geo:hasGeometry ?eg . ?eg geo:asWKT ?ew . ?forest rdf:type y2geoo:OSM_forest ; geo:hasGeometry ?fg . ?fg geo:asWKT ?fw FILTER geof:sfWithin(?fw, ?ew) }"}'
+tools/envs/reproduction/bin/python scripts/prepare/import_reference_data.py --source /mnt/d/gaosong/Desktop/GeoToolAgent
+tools/envs/reproduction/bin/python scripts/prepare/prepare_usgs.py
+tools/envs/reproduction/bin/python scripts/prepare/prepare_geoquestions.py
+tools/envs/reproduction/bin/python scripts/prepare/prepare_geotooleval.py --source /mnt/d/gaosong/Desktop/GeoToolAgent --contracts-source '/mnt/d/gaosong/Desktop/大创项目（新)/AgentGS_主项目_20261006'
 ```
 
-prepare校验本地data/geoquestions1089下两份官方完整JSON的SHA，生成processed/geobigdata_snapshot.json；原始文件保持原样。source_id是原GeoQuestions编号，例如591，不是GeoToolEval题号101。有效ID优先；ID未命中时，按query（别名sparql）继续匹配。完整查询按空白/大小写规范化；结构匹配保留原实体/类别/函数/聚合/排序打分与阈值。无法唯一匹配时明确失败。查询签名是历史启发式匹配，不保证任意改写在SPARQL语义上等价。
+GeoToolEval 原始工作簿和自然灾害表由 `scripts/download/download_geotooleval.py --source-dir <原数据目录>` 导入，清单校验原字节。`import_reference_data.py` 保留原 derived 表、完整 GEM/MRDS 输入与模型缓存；尚未把所有历史 QA/derived 生成脚本迁为重建入口，当前复现依赖冻结输入导入。
 
-结果保持原列名、数值字符串精度与表格内容，返回mode=pinned_yago2geo_snapshot、query_match、snapshot_sha256，ToolResult标记derived_lookup，answer_lookup=true。默认接口只接受source_id/query/dataset；不接受endpoint或gold字段。dataset仅是来源标签。工具不读取自然语言问题来查表，不重新计算几何。
+## 最新数据与算法版本
 
-这是用户指定的冻结结果回放协议，其结果来自公开GeoQuestions答案文件；应单独记录该实验协议。它不代表未知知识图谱查询或完整RDF空间计算。评测私有gold仍不进入TaskInput，但不能把该工具称为答案隔离的实时科学后端。125项回放对照期望由hash固定的旧匹配器直接执行生成。
+最新公开回答合同为 v1.2，含 2026-10-07 的 Q106/Q111 修订，SHA256 为 `a9cdf8fef4f82021cd6b5f5afa55ef9a262ea7ca1def3e2dcaeae0c0bdb60c25`。文件来源与选择记录在 `data/geotooleval/version_manifest.json`。保留发布的 603 题 v1.1 扩列工作簿，其前九列与原题表完全相同；当前运行提示使用更新的 v1.2 公开合同。旧文件及之前的验证结果均保留。
 
-## 模型配置
+GeoQuestions 只按公开 numeric source_id 或提交的 SPARQL 结构定位物化结果，符号 topic 不充当 ID。查询匹配保留原权重、阈值和歧义规则，未匹配返回失败。结果标记 `derived_lookup`、`answer_lookup=true`，不声称执行了 RDF 端点。
 
-复制 `.env.example` 为 `.env` 并填写 `LLM_BASE_URL`、`LLM_API_KEY` 和 `LLM_MODEL`。`llm.toml` 只引用 `${VAR}`，不存秘密。配置按 `.env` 后进程环境覆盖加载，不修改进程全局变量。
+`agent.toml` 固定算法开关与预算；`llm.toml` 管理 provider、model 和角色；`.env` 保存本机连接信息并被 Git 忽略。模型模式需要 `LLM_BASE_URL`（含 `/v1`）、`LLM_API_KEY`、`LLM_MODEL`。用量缺失、失败或中断时保留 unknown，成本和综合分不可据此补零。
+
+## 启动与示例
+
+显式工具调用无需模型密钥：
 
 ```bash
-uv run --locked agentgs config validate
-uv run --locked agentgs run '查询2010到2020年震级至少8的地震数量'
+tools/envs/reproduction/bin/python -m agentgs --help
+tools/envs/reproduction/bin/python -m agentgs run --tool DeepEarthQueryUSGSCatalog --arguments '{"year":2011,"operation":"largest"}'
+tools/envs/reproduction/bin/python -m agentgs run --tool GeoBigDataExecuteGeoSPARQL --arguments '{"source_id":591}'
+tools/envs/reproduction/bin/python -m agentgs ui serve
 ```
 
-按实际模型修改context/output预算、supported_efforts及tool_calling能力。支持`--model`选择配置模型、`--effort`选择声明的effort。provider可设置`output_token_parameter="max_completion_tokens"`，默认max_tokens。当前配置语法是本项目方案，不声称复刻未明确的grok项目。没有配置模型时显式工具任务仍然可运行。
+浏览器访问 `http://127.0.0.1:8000`。任务、事件、失败记录与产物位于 `outputs/`。每次工具调用有独立产物目录，后续调用可读取同一任务的已产生文件。ExecutePython 是显式内部沙箱操作，未纳入 101 项领域工具或模型候选列表。原生 Windows 科学运行尚未验收，使用 WSL。
 
-## 外部工具与代码沙箱
+## 验收与评测
 
 ```bash
-.venv/bin/python scripts/tools/install_node.py
-.venv/bin/python scripts/tools/install_bwrap.py
-.venv/bin/python scripts/tools/install_proot.py  # 可选
-uv run --locked agentgs tools doctor
-uv run --locked agentgs run --tool ExecutePython --arguments '{"code":"print(1 + 1)"}'
+tools/envs/reproduction/bin/python -m pytest -q
+.venv/bin/ruff check src scripts
+.venv/bin/ruff format --check src scripts
+tools/envs/reproduction/bin/python scripts/build/audit_algorithm_alignment.py --output outputs/alignment/current.json
+tools/envs/reproduction/bin/python scripts/evaluation/verify_tool_coverage.py --output outputs/verification/tools-new
+tools/envs/reproduction/bin/python scripts/evaluation/validate_workers.py --output outputs/verification/workers-new
+tools/envs/reproduction/bin/python scripts/evaluation/replay_reference_scores.py
 ```
 
-安装结果放tools，manifest记录固定版本、平台与hash。已提供Ubuntu24.04 x64 bwrap/PRoot及Linux/Windows x64/arm64 Node清单；其它发行版/架构不冒充已验证支持。无sudo或系统包修改。
+工具覆盖验证使用 reference / synthetic 参数，属于工具验收，不是模型规划实验。旧科学源码对照可加 `--source /mnt/d/gaosong/Desktop/GeoToolAgent`；仅验收脚本读旧源码，生产代码没有该依赖。`audit_algorithm_alignment.py --require-runtime-parity` 在完整旧 harness 回放验收前返回非零。
 
-代码进程只挂载必要运行环境和task代码目录，环境变量使用白名单；bwrap路径隔离网络，启动前功能探测。PRoot是弱兼容环境，只有runtime.toml明确allow_proot=true才允许回退，结果标明network_isolated=false。缺失后端不会直接在宿主执行代码。
-
-RSS上限由进程树watchdog实施，采样可能存在瞬时超限；当前没有cgroup强制限制或Windows原生AppContainer。Windows主路径通过WSL，已提供无shell拼接的CLI桥接：
-
-```powershell
-agentgs wsl -- run --tool DeepEarthQueryUSGSCatalog --arguments '{"min_magnitude":8}'
-```
-
-原生Windows科学工具与沙箱尚未端到端验收。并发/资源参数见runtime.toml。初版每task独立进程，未实现池化、跨runtime全局配额、崩溃自动续跑。
-
-## 数据处理、索引与展示
+已有预测可以离线评分；原 FAS、复合指标及历史兼容层分别报告：
 
 ```bash
-.venv/bin/python scripts/prepare/prepare_usgs.py
-.venv/bin/python scripts/build/build_tool_index.py
-.venv/bin/python scripts/build/build_skill_index.py
-.venv/bin/python scripts/build/build_api_types.py
-.venv/bin/python scripts/build/build_frontend.py
-uv run --locked --extra visualization agentgs ui serve
+tools/envs/reproduction/bin/python -m agentgs evaluate score predictions.jsonl --allow-partial --output outputs/evaluations/scored.json
 ```
 
-浏览器访问 `http://127.0.0.1:8000`。前端类型由Pydantic序列化schema生成；显示真实任务状态、执行事件、结果与产物，无演示统计。JSONL评测可运行：
+有界真实模型验收最多 5 题、每题最多 12 个模型阶段，结果保留每次失败，不按分数选择重跑：
 
 ```bash
-.venv/bin/python scripts/evaluation/run_suite.py --cases docs/examples/offline_suite.jsonl
+tools/envs/reproduction/bin/python scripts/evaluation/validate_live.py --ids 61,86 --max-model-calls 8 --timeout 240 --output outputs/verification/live-new.json
 ```
 
-下载层只下载原始字节；prepare写独立处理产物。现有download脚本与此前已下载数据保留；其余领域prepare/build随工具迁移补齐。
+603 题实验入口为 `agentgs evaluate benchmark`，可先用 `--ids 61,86 --output outputs/evaluations/small-run`。完整实验没有在本次验收中启动。续跑检查源码、数据和配置身份；不同版本使用新目录。标准答案仅用于 evaluator，不进入 Agent 请求。
 
-## 验证与目录约定
+实际模型验收使用 gpt-5.6-terra：Q61 FAS=1，Q86 FAS=0.75（218.015 的最终取舍与冻结答案不同）；Geo 参数修复后的 Q106/Q111 均 FAS=1。失败尝试和超时报告同时保留于 `outputs/verification/`，这些小样本不证明全部实验性能复现。
+
+## 前端与安装包
 
 ```bash
-uv run --locked --extra visualization pytest -q
-uv run --locked ruff check src scripts/tools scripts/build scripts/prepare scripts/evaluation
+tools/envs/reproduction/bin/python scripts/build/build_api_types.py
+tools/envs/reproduction/bin/python scripts/build/build_frontend.py
 uv build
 ```
 
-所有自动化测试在src/tests按模块划分；scripts通过人工CLI/实际输出验证，不另写镜像测试。前端执行TypeScript检查和Vite构建。wheel包含prompt和已构建静态资源，排除node_modules与测试目录；构建前运行frontend脚本。
+产物为 `dist/agentgs-0.2.0-py3-none-any.whl` 与 `dist/agentgs-0.2.0.tar.gz`。wheel 包含工具目录、声明、GeoQuestions 选择清单与前端静态资源；sdist 包含环境约束、准备脚本、算法契约、测试及非敏感配置。原始数据、密钥、工具环境及 node_modules 不打包。
 
-模型工具循环通过mock HTTP验证，没有执行付费模型实验。旧项目只读保留，全部工作在新仓库；代码迁移计划见docs/refactor_plan.zh-CN.md。
+## 服务器运行603题
+
+本地已准备可迁移数据包 `dist/agentgs-data-final.tar` 与逐文件校验清单 `dist/agentgs-data-final.manifest.json`。它只包含实际runtime/evaluator所需的冻结数据、模型、KG及最新格式版本，没有密钥、旧源码和本地抽样夹具。将源码sdist、该数据包及本机单独配置的API信息传到服务器：
+
+```bash
+tar -xzf agentgs-0.2.0.tar.gz
+cd agentgs-0.2.0
+tar -xf ../agentgs-data-final.tar
+uv sync --locked --extra visualization
+.venv/bin/python scripts/tools/install_reproduction.py --python 3.12
+cp .env.example .env
+# 在服务器填写 .env 的 LLM_BASE_URL、LLM_API_KEY、LLM_MODEL
+tools/envs/reproduction/bin/python -m agentgs config validate
+tools/envs/reproduction/bin/python -m agentgs evaluate benchmark --output outputs/evaluations/server-603
+```
+
+最后一条是真实603题模型实验，按用户决定在服务器启动。既有结果默认续跑；`--retry-failed`显式保留重试attempt，数据/代码/模型配置改变时使用新输出目录。
+
+## 抽样数据流审计
+
+审计报告为 `outputs/verification/leakage-audit.json`。10题请求未发现标准答案、标准链或评分反馈注入；22个重建用户提示全部匹配原记录SHA256。重建消息保存在 `outputs/verification/audited-prompts/`，原始HTTP请求正文未留存，审计不新增网络调用。
+
+这组抽样属于工程回归。GeoQuestions Q106经授权读取官方物化答案和参考查询，不能用作独立未知答案/RDF几何推理成绩；海洋Q347读取10行benchmark派生缓存，来源是原SOCAT数据而非私有标签，但未在运行时重算完整原网格。Q61/Q106此前用于调试，格式文件也包含上游事后诊断修订，10题满分不代表严格留出集泛化准确率。
+
+通用科学资源解析已拒绝访问评测标签/历史评分、回答格式文件及Geo回放数据目录；专用Geo快照工具保留已授权访问，真实自然灾害表保持可读。实际样题未发现访问这些私有文件，此边界仍不是完整OS沙箱。

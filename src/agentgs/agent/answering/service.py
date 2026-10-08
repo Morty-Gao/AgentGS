@@ -127,6 +127,10 @@ class AnsweringService:
                     "error_type": type(exc).__name__,
                 },
             )
-            raise FinalAnswerGenerationError(
-                f"LLM final-answer generation failed: {type(exc).__name__}"
-            ) from exc
+            status_code = getattr(exc, "status_code", None)
+            message = f"LLM final-answer generation failed: {type(exc).__name__}"
+            if status_code is not None:
+                message += f" (HTTP {status_code})"
+            failure = FinalAnswerGenerationError(message)
+            failure.status_code = status_code
+            raise failure from exc

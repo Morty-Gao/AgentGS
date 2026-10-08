@@ -1,4 +1,5 @@
-% AgentGS English manuscript translated from AgentGS-revisebycjx.docx.
+% Condensed submission draft; the complete faithful translation is full.tex.
+% Source gaps and editorial decisions are listed in TRANSLATION_NOTES.zh-CN.txt.
 \documentclass[sigconf,anonymous]{aamas}
 % For the camera-ready version: \documentclass[sigconf]{aamas}
 
@@ -6,6 +7,11 @@
 \usepackage{tabularx}
 \usepackage{algorithm}
 \usepackage{algpseudocode}
+\usepackage{placeins}
+% Disable the class's late automatic balance call; balance explicitly below.
+\makeatletter
+\setkeys{aamas.cls}{balance=false}
+\makeatother
 \graphicspath{{figures/}}
 
 % Visible draft placeholders; replace each item when the missing material is ready.
@@ -38,9 +44,18 @@ on Autonomous Agents and Multiagent Systems (AAMAS 2027)}{3--7 May 2027}{Hanoi, 
 \submissionType{Research Paper Track}
 
 % DOCX paragraphs 000--001. Author names and affiliations were not supplied.
-\title[AgentGS]{AgentGS: Plan Composition and Completion over Skill Hypergraphs}
+\title[AgentGS]{AgentGS: Empowering Earth Science Agents with Plan Composition and Completion over Skill Hypergraphs}
 \author{Anonymous Author(s)}
 % TODO: supply authors, affiliations, and emails for the camera-ready version.
+
+\begin{CCSXML}
+<ccs2012>
+<concept><concept_id>10010147.10010178.10010179</concept_id><concept_desc>Computing methodologies~Intelligent agents</concept_desc><concept_significance>500</concept_significance></concept>
+<concept><concept_id>10010147.10010178.10010199</concept_id><concept_desc>Computing methodologies~Planning and scheduling</concept_desc><concept_significance>300</concept_significance></concept>
+</ccs2012>
+\end{CCSXML}
+\ccsdesc[500]{Computing methodologies~Intelligent agents}
+\ccsdesc[300]{Computing methodologies~Planning and scheduling}
 
 \input{sections/abstract}
 % DOCX paragraph 004.
@@ -49,16 +64,17 @@ on Autonomous Agents and Multiagent Systems (AAMAS 2027)}{3--7 May 2027}{Hanoi, 
 \begin{document}
 \maketitle
 
-\input{sections/introduction}
-\input{sections/related_work}
-\input{sections/representation}
-\input{sections/completion}
-\input{sections/system}
-\input{sections/benchmark}
-\input{sections/experiments}
-\input{sections/conclusion}
+\input{submission/introduction}
+\input{submission/related_work}
+\input{submission/representation}
+\input{submission/completion}
+\input{submission/benchmark}
+\input{submission/experiments}
+\input{submission/conclusion}
 
-\bibliographystyle{format}
+\FloatBarrier
+\bibliographystyle{ACM-Reference-Format}
+\balance
 \bibliography{references}
 
 \end{document}

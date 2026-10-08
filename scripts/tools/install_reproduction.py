@@ -18,9 +18,29 @@ def main():
     if not args.verify:
         if not python.exists():
             subprocess.run(["uv", "venv", "--python", args.python, str(destination)], check=True)
-        subprocess.run(["uv", "pip", "install", "--python", str(python), "--constraint", str(constraints),
-                        "-e", str(root) + "[scientific,retrieval,visualization]"], check=True)
-    code = "import importlib.metadata as m,json,sys;print(json.dumps({'python':sys.version,'packages':{p:m.version(p) for p in " + repr([line.split("==")[0] for line in constraints.read_text().splitlines() if "==" in line]) + "}}))"
+        subprocess.run(
+            [
+                "uv",
+                "pip",
+                "install",
+                "--python",
+                str(python),
+                "--constraint",
+                str(constraints),
+                "--group",
+                str(root / "pyproject.toml") + ":dev",
+                "-e",
+                str(root) + "[scientific,retrieval,visualization]",
+            ],
+            check=True,
+        )
+    code = (
+        "import importlib.metadata as m,json,sys;print(json.dumps({'python':sys.version,'packages':{p:m.version(p) for p in "
+        + repr(
+            [line.split("==")[0] for line in constraints.read_text().splitlines() if "==" in line]
+        )
+        + "}}))"
+    )
     result = subprocess.run([str(python), "-c", code], check=True, capture_output=True, text=True)
     receipt = json.loads(result.stdout)
     for line in constraints.read_text().splitlines():

@@ -30,7 +30,7 @@ line-length = 100
 select = ["E4", "E7", "E9", "F", "I"]
 
 [tool.uv.build-backend]
-source-include = ["scripts/**", "src/tests/**", "docs/algorithm_alignment.json", "llm.toml", "runtime.toml", ".env.example"]
+source-include = ["scripts/**", "src/tests/**", "docs/algorithm_alignment.json", "uv.lock", "llm.toml", "runtime.toml", "agent.toml", ".env.example"]
 source-exclude = ["**/node_modules/**", "**/__pycache__/**", "**/.pytest_cache/**"]
 wheel-exclude = ["**/node_modules/**", "**/frontend/src/**", "**/frontend/package*.json", "**/frontend/tsconfig.json", "**/frontend/vite.config.ts"]
 

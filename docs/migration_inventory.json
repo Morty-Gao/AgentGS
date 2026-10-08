@@ -6,708 +6,1136 @@
       "id": "DeepEarthQueryLITHO1",
       "category": "DeepEarthTools",
       "description": "Query nearest-node Moho or lithospheric-lid depth from the pinned LITHO1.0 sample table.",
-      "status": "pending"
+      "status": "implemented_and_executed",
+      "execution_verified": true,
+      "source_comparison": true,
+      "acceptance_fixture": "reference_parameters",
+      "broader_branch_coverage": "pending"
     },
     {
       "id": "DeepEarthQuerySEMUCB",
       "category": "DeepEarthTools",
       "description": "Query SEMUCB-WM1 dlnVs at a named location and model depth.",
-      "status": "pending"
+      "status": "implemented_and_executed",
+      "execution_verified": true,
+      "source_comparison": true,
+      "acceptance_fixture": "reference_parameters",
+      "broader_branch_coverage": "pending"
     },
     {
       "id": "DeepEarthQueryUSGSCatalog",
       "category": "DeepEarthTools",
       "description": "Filter, rank, count, or aggregate the frozen USGS M7+ earthquake catalog.",
-      "status": "partial",
-      "notes": "Initial typed filter/count/rank interface; legacy aggregation variants pending"
+      "status": "implemented_and_executed",
+      "notes": "Initial typed filter/count/rank interface; legacy aggregation variants pending",
+      "execution_verified": true,
+      "source_comparison": true,
+      "acceptance_fixture": "reference_parameters",
+      "broader_branch_coverage": "pending"
     },
     {
       "id": "DeepEarthGetUSGSEvent",
       "category": "DeepEarthTools",
       "description": "Retrieve one earthquake by event identifier from the frozen USGS catalog.",
-      "status": "migrated"
+      "status": "implemented_and_executed",
+      "execution_verified": true,
+      "source_comparison": true,
+      "acceptance_fixture": "reference_parameters",
+      "broader_branch_coverage": "pending"
     },
     {
       "id": "DeepEarthSampleEventModels",
       "category": "DeepEarthTools",
       "description": "Join a USGS event to its nearest LITHO1.0 node and SEMUCB-WM1 sample.",
-      "status": "pending"
+      "status": "implemented_and_executed",
+      "execution_verified": true,
+      "source_comparison": true,
+      "acceptance_fixture": "reference_parameters",
+      "broader_branch_coverage": "pending"
     },
     {
       "id": "GeoBigDataExecuteGeoSPARQL",
       "category": "GeoBigDataTools",
       "description": "Retrieve pinned GeoQuestions/YAGO2geo materialized results by source_id or historical SPARQL structure; offline snapshot replay.",
-      "status": "migrated",
-      "protocol": "pinned_yago2geo_snapshot"
+      "status": "implemented_and_executed",
+      "protocol": "pinned_yago2geo_snapshot",
+      "execution_verified": true,
+      "source_comparison": null,
+      "acceptance_fixture": "reference_parameters",
+      "broader_branch_coverage": "pending"
     },
     {
       "id": "MineralResourcesSearchDeposits",
       "category": "MineralResourcesTools",
       "description": "Filter USGS MRDS deposits by country and primary commodity.",
-      "status": "pending"
+      "status": "implemented_and_executed",
+      "execution_verified": true,
+      "source_comparison": true,
+      "acceptance_fixture": "reference_parameters",
+      "broader_branch_coverage": "pending"
     },
     {
       "id": "MineralResourcesGetDeposit",
       "category": "MineralResourcesTools",
       "description": "Retrieve a USGS MRDS deposit by dep_id.",
-      "status": "pending"
+      "status": "implemented_and_executed",
+      "execution_verified": true,
+      "source_comparison": true,
+      "acceptance_fixture": "reference_parameters",
+      "broader_branch_coverage": "pending"
     },
     {
       "id": "MineralResourcesCountrySummary",
       "category": "MineralResourcesTools",
       "description": "Count a country's MRDS records and rank its primary commodities.",
-      "status": "pending"
+      "status": "implemented_and_executed",
+      "execution_verified": true,
+      "source_comparison": true,
+      "acceptance_fixture": "reference_parameters",
+      "broader_branch_coverage": "pending"
     },
     {
       "id": "MineralResourcesRankCommodityCountries",
       "category": "MineralResourcesTools",
       "description": "Rank countries by records related to a critical commodity.",
-      "status": "pending"
+      "status": "implemented_and_executed",
+      "execution_verified": true,
+      "source_comparison": true,
+      "acceptance_fixture": "reference_parameters",
+      "broader_branch_coverage": "pending"
     },
     {
       "id": "ClimateQueryDeepTime",
       "category": "ClimateChangeTools",
       "description": "Select the nearest Friedrich2016 or Bintanja2005 deep-time climate observation.",
-      "status": "pending"
+      "status": "implemented_and_executed",
+      "execution_verified": true,
+      "source_comparison": true,
+      "acceptance_fixture": "reference_parameters",
+      "broader_branch_coverage": "pending"
     },
     {
       "id": "ClimateQueryPresentMean",
       "category": "ClimateChangeTools",
       "description": "Calculate a NASA GISTEMP mean over an inclusive year interval.",
-      "status": "pending"
+      "status": "implemented_and_executed",
+      "execution_verified": true,
+      "source_comparison": true,
+      "acceptance_fixture": "reference_parameters",
+      "broader_branch_coverage": "pending"
     },
     {
       "id": "ClimateQueryFutureSSP",
       "category": "ClimateChangeTools",
       "description": "Retrieve IPCC AR6 SSP warming estimates for a scenario and horizon (SSP1-1.9/1-2.6/2-4.5/3-7.0/5-8.5; default endpoint 2100).",
-      "status": "pending"
+      "status": "implemented_and_executed",
+      "execution_verified": true,
+      "source_comparison": true,
+      "acceptance_fixture": "reference_parameters",
+      "broader_branch_coverage": "pending"
     },
     {
       "id": "ClimateCompareEpochs",
       "category": "ClimateChangeTools",
       "description": "Compare numeric climate values returned by earlier climate tools; accepts values/x arrays or upstream result objects.",
-      "status": "pending"
+      "status": "implemented_and_executed",
+      "execution_verified": true,
+      "source_comparison": true,
+      "acceptance_fixture": "synthetic",
+      "broader_branch_coverage": "pending"
     },
     {
       "id": "EnergyFacilityDistance",
       "category": "EnergyResourcesTools",
       "description": "Compute great-circle distance between selected OPSD facilities.",
-      "status": "pending"
+      "status": "implemented_and_executed",
+      "execution_verified": true,
+      "source_comparison": true,
+      "acceptance_fixture": "reference_parameters",
+      "broader_branch_coverage": "pending"
     },
     {
       "id": "EnergyMineralSiteDistance",
       "category": "EnergyResourcesTools",
       "description": "Compute distance between two MRDS critical-mineral sites.",
-      "status": "pending"
+      "status": "implemented_and_executed",
+      "execution_verified": true,
+      "source_comparison": true,
+      "acceptance_fixture": "reference_parameters",
+      "broader_branch_coverage": "pending"
     },
     {
       "id": "EnergyBBoxArea",
       "category": "EnergyResourcesTools",
       "description": "Compute spherical area for an energy-resource WGS84 bounding box.",
-      "status": "pending"
+      "status": "implemented_and_executed",
+      "execution_verified": true,
+      "source_comparison": true,
+      "acceptance_fixture": "reference_parameters",
+      "broader_branch_coverage": "pending"
     },
     {
       "id": "EnergyNearestFacility",
       "category": "EnergyResourcesTools",
       "description": "Retrieve the nearest OPSD facility to a national capital.",
-      "status": "pending"
+      "status": "implemented_and_executed",
+      "execution_verified": true,
+      "source_comparison": true,
+      "acceptance_fixture": "reference_parameters",
+      "broader_branch_coverage": "pending"
     },
     {
       "id": "EnergyCapacityValue",
       "category": "EnergyResourcesTools",
       "description": "Read a year-end installed-capacity time-series value.",
-      "status": "pending"
+      "status": "implemented_and_executed",
+      "execution_verified": true,
+      "source_comparison": true,
+      "acceptance_fixture": "reference_parameters",
+      "broader_branch_coverage": "pending"
     },
     {
       "id": "EnergyNearestMineralSite",
       "category": "EnergyResourcesTools",
       "description": "Join an energy facility to its nearest critical-mineral site.",
-      "status": "pending"
+      "status": "implemented_and_executed",
+      "execution_verified": true,
+      "source_comparison": true,
+      "acceptance_fixture": "reference_parameters",
+      "broader_branch_coverage": "pending"
     },
     {
       "id": "EnergyCountryRenewableSummary",
       "category": "EnergyResourcesTools",
       "description": "Aggregate operating renewable capacity by technology.",
-      "status": "pending"
+      "status": "implemented_and_executed",
+      "execution_verified": true,
+      "source_comparison": true,
+      "acceptance_fixture": "reference_parameters",
+      "broader_branch_coverage": "pending"
     },
     {
       "id": "EnergyCapacityGrowth",
       "category": "EnergyResourcesTools",
       "description": "Calculate absolute and percentage capacity growth between two years.",
-      "status": "pending"
+      "status": "implemented_and_executed",
+      "execution_verified": true,
+      "source_comparison": true,
+      "acceptance_fixture": "reference_parameters",
+      "broader_branch_coverage": "pending"
     },
     {
       "id": "EnergyTransitionMetrics",
       "category": "EnergyResourcesTools",
       "description": "Join population, renewable capacity, and energy-consumption indicators.",
-      "status": "pending"
+      "status": "implemented_and_executed",
+      "execution_verified": true,
+      "source_comparison": true,
+      "acceptance_fixture": "reference_parameters",
+      "broader_branch_coverage": "pending"
     },
     {
       "id": "EnergyRegionalOverlaySummary",
       "category": "EnergyResourcesTools",
       "description": "Return a reproducible regional facility/mineral overlay summary.",
-      "status": "pending"
+      "status": "implemented_and_executed",
+      "execution_verified": true,
+      "source_comparison": true,
+      "acceptance_fixture": "reference_parameters",
+      "broader_branch_coverage": "pending"
     },
     {
       "id": "OceanMonthlyGridValue",
       "category": "OceanCarbonTools",
       "description": "Read a SOCAT monthly grid-cell fCO2 observation.",
-      "status": "pending"
+      "status": "implemented_and_executed",
+      "execution_verified": true,
+      "source_comparison": true,
+      "acceptance_fixture": "reference_parameters",
+      "broader_branch_coverage": "pending"
     },
     {
       "id": "OceanProfileValue",
       "category": "OceanCarbonTools",
       "description": "Read a deep GLODAP profile carbon value.",
-      "status": "pending"
+      "status": "implemented_and_executed",
+      "execution_verified": true,
+      "source_comparison": true,
+      "acceptance_fixture": "reference_parameters",
+      "broader_branch_coverage": "pending"
     },
     {
       "id": "OceanCruiseQC",
       "category": "OceanCarbonTools",
       "description": "Summarize SNAPO cruise carbon quality flags.",
-      "status": "pending"
+      "status": "implemented_and_executed",
+      "execution_verified": true,
+      "source_comparison": true,
+      "acceptance_fixture": "reference_parameters",
+      "broader_branch_coverage": "pending"
     },
     {
       "id": "OceanStationDistance",
       "category": "OceanCarbonTools",
       "description": "Compute distance between GLODAP and SNAPO stations.",
-      "status": "pending"
+      "status": "implemented_and_executed",
+      "execution_verified": true,
+      "source_comparison": true,
+      "acceptance_fixture": "reference_parameters",
+      "broader_branch_coverage": "pending"
     },
     {
       "id": "OceanBBoxArea",
       "category": "OceanCarbonTools",
       "description": "Compute spherical area of an ocean WGS84 bounding box.",
-      "status": "pending"
+      "status": "implemented_and_executed",
+      "execution_verified": true,
+      "source_comparison": true,
+      "acceptance_fixture": "reference_parameters",
+      "broader_branch_coverage": "pending"
     },
     {
       "id": "OceanAnnualCarbonSummary",
       "category": "OceanCarbonTools",
       "description": "Read a quality-controlled North Pacific annual SOCAT summary.",
-      "status": "pending"
+      "status": "implemented_and_executed",
+      "execution_verified": true,
+      "source_comparison": true,
+      "acceptance_fixture": "reference_parameters",
+      "broader_branch_coverage": "pending"
     },
     {
       "id": "OceanVerticalProfileDifference",
       "category": "OceanCarbonTools",
       "description": "Calculate surface-to-deep GLODAP carbon difference.",
-      "status": "pending"
+      "status": "implemented_and_executed",
+      "execution_verified": true,
+      "source_comparison": true,
+      "acceptance_fixture": "reference_parameters",
+      "broader_branch_coverage": "pending"
     },
     {
       "id": "OceanRegionalMapSummary",
       "category": "OceanCarbonTools",
       "description": "Read a reproducible SOCAT regional mapping summary.",
-      "status": "pending"
+      "status": "implemented_and_executed",
+      "execution_verified": true,
+      "source_comparison": true,
+      "acceptance_fixture": "reference_parameters",
+      "broader_branch_coverage": "pending"
     },
     {
       "id": "OceanSurfaceDeepMatch",
       "category": "OceanCarbonTools",
       "description": "Join nearest SOCAT surface and GLODAP deep observations.",
-      "status": "pending"
+      "status": "implemented_and_executed",
+      "execution_verified": true,
+      "source_comparison": true,
+      "acceptance_fixture": "reference_parameters",
+      "broader_branch_coverage": "pending"
     },
     {
       "id": "OceanProfileDeduplication",
       "category": "OceanCarbonTools",
       "description": "Return SNAPO profile deduplication counts.",
-      "status": "pending"
+      "status": "implemented_and_executed",
+      "execution_verified": true,
+      "source_comparison": true,
+      "acceptance_fixture": "reference_parameters",
+      "broader_branch_coverage": "pending"
     },
     {
       "id": "DeepTimeDecimalToDMS",
       "category": "DeepTimeBiosphereTools",
       "description": "Convert a deep-time site coordinate from decimal degrees to DMS.",
-      "status": "pending"
+      "status": "implemented_and_executed",
+      "execution_verified": true,
+      "source_comparison": true,
+      "acceptance_fixture": "synthetic",
+      "broader_branch_coverage": "pending"
     },
     {
       "id": "DeepTimeHaversineDistance",
       "category": "DeepTimeBiosphereTools",
       "description": "Compute WGS84 great-circle/haversine distance between deep-time sites using coordinates or BioDeepTime series IDs.",
-      "status": "pending"
+      "status": "implemented_and_executed",
+      "execution_verified": true,
+      "source_comparison": true,
+      "acceptance_fixture": "synthetic",
+      "broader_branch_coverage": "pending"
     },
     {
       "id": "DeepTimeBearing",
       "category": "DeepTimeBiosphereTools",
       "description": "Compute initial bearing between deep-time sites.",
-      "status": "pending"
+      "status": "implemented_and_executed",
+      "execution_verified": true,
+      "source_comparison": true,
+      "acceptance_fixture": "synthetic",
+      "broader_branch_coverage": "pending"
     },
     {
       "id": "DeepTimeBBoxArea",
       "category": "DeepTimeBiosphereTools",
       "description": "Compute spherical area of a deep-time study bounding box.",
-      "status": "pending"
+      "status": "implemented_and_executed",
+      "execution_verified": true,
+      "source_comparison": true,
+      "acceptance_fixture": "synthetic",
+      "broader_branch_coverage": "pending"
     },
     {
       "id": "DeepTimeStandardizeSpatialData",
       "category": "DeepTimeBiosphereTools",
       "description": "Read CSV/GeoJSON assets and emit standardized GeoJSON metadata.",
-      "status": "pending"
+      "status": "implemented_and_executed",
+      "execution_verified": true,
+      "source_comparison": true,
+      "acceptance_fixture": "synthetic",
+      "broader_branch_coverage": "pending"
     },
     {
       "id": "DeepTimeValidateSpatialData",
       "category": "DeepTimeBiosphereTools",
       "description": "Validate coordinate ranges, empty geometries, and duplicate features.",
-      "status": "pending"
+      "status": "implemented_and_executed",
+      "execution_verified": true,
+      "source_comparison": true,
+      "acceptance_fixture": "synthetic",
+      "broader_branch_coverage": "pending"
     },
     {
       "id": "DeepTimeNearestNeighbor",
       "category": "DeepTimeBiosphereTools",
       "description": "Calculate nearest neighbours for point features.",
-      "status": "pending"
+      "status": "implemented_and_executed",
+      "execution_verified": true,
+      "source_comparison": true,
+      "acceptance_fixture": "synthetic",
+      "broader_branch_coverage": "pending"
     },
     {
       "id": "DeepTimeBuffer",
       "category": "DeepTimeBiosphereTools",
       "description": "Generate reproducible point-buffer envelope features.",
-      "status": "pending"
+      "status": "implemented_and_executed",
+      "execution_verified": true,
+      "source_comparison": true,
+      "acceptance_fixture": "synthetic",
+      "broader_branch_coverage": "pending"
     },
     {
       "id": "DeepTimeOverlay",
       "category": "DeepTimeBiosphereTools",
       "description": "Perform point-in-polygon overlay for GeoJSON layers.",
-      "status": "pending"
+      "status": "implemented_and_executed",
+      "execution_verified": true,
+      "source_comparison": true,
+      "acceptance_fixture": "synthetic",
+      "broader_branch_coverage": "pending"
     },
     {
       "id": "DeepTimeBatchVector",
       "category": "DeepTimeBiosphereTools",
       "description": "Standardize and batch-copy vector layers.",
-      "status": "pending"
+      "status": "implemented_and_executed",
+      "execution_verified": true,
+      "source_comparison": true,
+      "acceptance_fixture": "synthetic",
+      "broader_branch_coverage": "pending"
     },
     {
       "id": "DeepTimeInterpolateIDW",
       "category": "DeepTimeBiosphereTools",
       "description": "Interpolate an explicit measured point field to a georeferenced GeoTIFF using bounded IDW.",
-      "status": "pending"
+      "status": "implemented_and_executed",
+      "execution_verified": true,
+      "source_comparison": true,
+      "acceptance_fixture": "synthetic",
+      "broader_branch_coverage": "pending"
     },
     {
       "id": "DeepTimeRasterAlgebra",
       "category": "DeepTimeBiosphereTools",
       "description": "Apply a mask or arithmetic expression to a raster grid.",
-      "status": "pending"
+      "status": "implemented_and_executed",
+      "execution_verified": true,
+      "source_comparison": true,
+      "acceptance_fixture": "synthetic",
+      "broader_branch_coverage": "pending"
     },
     {
       "id": "DeepTimeZonalStatistics",
       "category": "DeepTimeBiosphereTools",
       "description": "Calculate raster summary statistics by analysis zone.",
-      "status": "pending"
+      "status": "implemented_and_executed",
+      "execution_verified": true,
+      "source_comparison": true,
+      "acceptance_fixture": "synthetic",
+      "broader_branch_coverage": "pending"
     },
     {
       "id": "DeepTimeRenderMap",
       "category": "DeepTimeBiosphereTools",
       "description": "Render a PNG and HTML inspection map from geospatial outputs.",
-      "status": "pending"
+      "status": "implemented_and_executed",
+      "execution_verified": true,
+      "source_comparison": true,
+      "acceptance_fixture": "synthetic",
+      "broader_branch_coverage": "pending"
     },
     {
       "id": "CCSDecimalToDMS",
       "category": "CCSTools",
       "description": "Convert a CCS facility coordinate from decimal degrees to DMS.",
-      "status": "pending"
+      "status": "implemented_and_executed",
+      "execution_verified": true,
+      "source_comparison": true,
+      "acceptance_fixture": "synthetic",
+      "broader_branch_coverage": "pending"
     },
     {
       "id": "CCSHaversineDistance",
       "category": "CCSTools",
       "description": "Compute WGS84 great-circle/haversine distance between CCS facilities using coordinates or CCS case IDs.",
-      "status": "pending"
+      "status": "implemented_and_executed",
+      "execution_verified": true,
+      "source_comparison": true,
+      "acceptance_fixture": "synthetic",
+      "broader_branch_coverage": "pending"
     },
     {
       "id": "CCSBearing",
       "category": "CCSTools",
       "description": "Compute initial bearing between CCS facilities.",
-      "status": "pending"
+      "status": "implemented_and_executed",
+      "execution_verified": true,
+      "source_comparison": true,
+      "acceptance_fixture": "synthetic",
+      "broader_branch_coverage": "pending"
     },
     {
       "id": "CCSBBoxArea",
       "category": "CCSTools",
       "description": "Compute spherical area of a CCS study bounding box.",
-      "status": "pending"
+      "status": "implemented_and_executed",
+      "execution_verified": true,
+      "source_comparison": true,
+      "acceptance_fixture": "synthetic",
+      "broader_branch_coverage": "pending"
     },
     {
       "id": "CCSCheckCRSConsistency",
       "category": "CCSTools",
       "description": "Check whether CCS input layers use a consistent CRS.",
-      "status": "pending"
+      "status": "implemented_and_executed",
+      "execution_verified": true,
+      "source_comparison": true,
+      "acceptance_fixture": "synthetic",
+      "broader_branch_coverage": "pending"
     },
     {
       "id": "CCSStandardizeSpatialData",
       "category": "CCSTools",
       "description": "Read CCS CSV/GeoJSON assets and emit standardized GeoJSON metadata.",
-      "status": "pending"
+      "status": "implemented_and_executed",
+      "execution_verified": true,
+      "source_comparison": true,
+      "acceptance_fixture": "synthetic",
+      "broader_branch_coverage": "pending"
     },
     {
       "id": "CCSValidateSpatialData",
       "category": "CCSTools",
       "description": "Validate CCS coordinates, geometries, and identifiers.",
-      "status": "pending"
+      "status": "implemented_and_executed",
+      "execution_verified": true,
+      "source_comparison": true,
+      "acceptance_fixture": "synthetic",
+      "broader_branch_coverage": "pending"
     },
     {
       "id": "CCSNearestNeighbor",
       "category": "CCSTools",
       "description": "Calculate nearest CCS facilities.",
-      "status": "pending"
+      "status": "implemented_and_executed",
+      "execution_verified": true,
+      "source_comparison": true,
+      "acceptance_fixture": "synthetic",
+      "broader_branch_coverage": "pending"
     },
     {
       "id": "CCSBuffer",
       "category": "CCSTools",
       "description": "Generate point-buffer envelope features for CCS monitoring.",
-      "status": "pending"
+      "status": "implemented_and_executed",
+      "execution_verified": true,
+      "source_comparison": true,
+      "acceptance_fixture": "synthetic",
+      "broader_branch_coverage": "pending"
     },
     {
       "id": "CCSOverlay",
       "category": "CCSTools",
       "description": "Perform CCS facility/analysis-zone overlay.",
-      "status": "pending"
+      "status": "implemented_and_executed",
+      "execution_verified": true,
+      "source_comparison": true,
+      "acceptance_fixture": "synthetic",
+      "broader_branch_coverage": "pending"
     },
     {
       "id": "CCSBatchVector",
       "category": "CCSTools",
       "description": "Standardize and batch-copy CCS vector layers.",
-      "status": "pending"
+      "status": "implemented_and_executed",
+      "execution_verified": true,
+      "source_comparison": true,
+      "acceptance_fixture": "synthetic",
+      "broader_branch_coverage": "pending"
     },
     {
       "id": "CCSInterpolateIDW",
       "category": "CCSTools",
       "description": "Interpolate an explicit CCS measurement field to a georeferenced GeoTIFF after requested observation selection.",
-      "status": "pending"
+      "status": "implemented_and_executed",
+      "execution_verified": true,
+      "source_comparison": true,
+      "acceptance_fixture": "synthetic",
+      "broader_branch_coverage": "pending"
     },
     {
       "id": "CCSRasterAlgebra",
       "category": "CCSTools",
       "description": "Apply a mask or arithmetic expression to a CCS raster grid.",
-      "status": "pending"
+      "status": "implemented_and_executed",
+      "execution_verified": true,
+      "source_comparison": true,
+      "acceptance_fixture": "synthetic",
+      "broader_branch_coverage": "pending"
     },
     {
       "id": "CCSZonalStatistics",
       "category": "CCSTools",
       "description": "Calculate CCS raster or tabular zone statistics.",
-      "status": "pending"
+      "status": "implemented_and_executed",
+      "execution_verified": true,
+      "source_comparison": true,
+      "acceptance_fixture": "synthetic",
+      "broader_branch_coverage": "pending"
     },
     {
       "id": "CCSRenderMap",
       "category": "CCSTools",
       "description": "Render a PNG and HTML inspection map from CCS outputs.",
-      "status": "pending"
+      "status": "implemented_and_executed",
+      "execution_verified": true,
+      "source_comparison": true,
+      "acceptance_fixture": "synthetic",
+      "broader_branch_coverage": "pending"
     },
     {
       "id": "RemoteSensingListFiles",
       "category": "RemoteSensingTools",
       "description": "List files in a bundled EarthBench asset directory.",
-      "status": "pending"
+      "status": "implemented_and_executed",
+      "execution_verified": true,
+      "source_comparison": true,
+      "acceptance_fixture": "synthetic",
+      "broader_branch_coverage": "pending"
     },
     {
       "id": "RemoteSensingBatchImageMean",
       "category": "RemoteSensingTools",
       "description": "Calculate finite-pixel means for a batch of GeoTIFF/raster assets; accepts an EarthBench question directory or explicit file_list.",
-      "status": "pending"
+      "status": "implemented_and_executed",
+      "execution_verified": true,
+      "source_comparison": true,
+      "acceptance_fixture": "synthetic",
+      "broader_branch_coverage": "pending"
     },
     {
       "id": "RemoteSensingBatchHotspotPercentage",
       "category": "RemoteSensingTools",
       "description": "Calculate per-image percentage above a threshold.",
-      "status": "pending"
+      "status": "implemented_and_executed",
+      "execution_verified": true,
+      "source_comparison": true,
+      "acceptance_fixture": "synthetic",
+      "broader_branch_coverage": "pending"
     },
     {
       "id": "RemoteSensingTiffAverage",
       "category": "RemoteSensingTools",
       "description": "Create a pixelwise average GeoTIFF from an image batch.",
-      "status": "pending"
+      "status": "implemented_and_executed",
+      "execution_verified": true,
+      "source_comparison": true,
+      "acceptance_fixture": "synthetic",
+      "broader_branch_coverage": "pending"
     },
     {
       "id": "RemoteSensingBatchNDSI",
       "category": "RemoteSensingTools",
       "description": "Calculate NDSI rasters from green and SWIR bands.",
-      "status": "pending"
+      "status": "implemented_and_executed",
+      "execution_verified": true,
+      "source_comparison": true,
+      "acceptance_fixture": "synthetic",
+      "broader_branch_coverage": "pending"
     },
     {
       "id": "RemoteSensingNDWI",
       "category": "RemoteSensingTools",
       "description": "Calculate normalized-difference water index rasters from one green/NIR pair or aligned multi-date path arrays.",
-      "status": "pending"
+      "status": "implemented_and_executed",
+      "execution_verified": true,
+      "source_comparison": true,
+      "acceptance_fixture": "synthetic",
+      "broader_branch_coverage": "pending"
     },
     {
       "id": "RemoteSensingNBR",
       "category": "RemoteSensingTools",
       "description": "Calculate normalized burn ratio rasters from one NIR/SWIR pair or aligned multi-date path arrays.",
-      "status": "pending"
+      "status": "implemented_and_executed",
+      "execution_verified": true,
+      "source_comparison": true,
+      "acceptance_fixture": "synthetic",
+      "broader_branch_coverage": "pending"
     },
     {
       "id": "RemoteSensingCloudMask",
       "category": "RemoteSensingTools",
       "description": "Apply Landsat QA cloud and shadow bit masks to one raster pair or aligned multi-date path arrays.",
-      "status": "pending"
+      "status": "implemented_and_executed",
+      "execution_verified": true,
+      "source_comparison": true,
+      "acceptance_fixture": "synthetic",
+      "broader_branch_coverage": "pending"
     },
     {
       "id": "RemoteSensingBatchHotspotRaster",
       "category": "RemoteSensingTools",
       "description": "Create threshold binary rasters from input rasters.",
-      "status": "pending"
+      "status": "implemented_and_executed",
+      "execution_verified": true,
+      "source_comparison": true,
+      "acceptance_fixture": "synthetic",
+      "broader_branch_coverage": "pending"
     },
     {
       "id": "RemoteSensingNDVI",
       "category": "RemoteSensingTools",
       "description": "Calculate NDVI rasters from one NIR/red pair or aligned multi-date path arrays.",
-      "status": "pending"
+      "status": "implemented_and_executed",
+      "execution_verified": true,
+      "source_comparison": true,
+      "acceptance_fixture": "synthetic",
+      "broader_branch_coverage": "pending"
     },
     {
       "id": "RemoteSensingNDTI",
       "category": "RemoteSensingTools",
       "description": "Calculate NDTI rasters from scene/date-paired green and red band inputs.",
-      "status": "pending"
+      "status": "implemented_and_executed",
+      "execution_verified": true,
+      "source_comparison": true,
+      "acceptance_fixture": "synthetic",
+      "broader_branch_coverage": "pending"
     },
     {
       "id": "RemoteSensingCountAboveThreshold",
       "category": "RemoteSensingTools",
       "description": "Count finite raster pixels above a threshold.",
-      "status": "pending"
+      "status": "implemented_and_executed",
+      "execution_verified": true,
+      "source_comparison": true,
+      "acceptance_fixture": "synthetic",
+      "broader_branch_coverage": "pending"
     },
     {
       "id": "RemoteSensingBatchImageSum",
       "category": "RemoteSensingTools",
       "description": "Calculate finite-pixel sums for a batch of GeoTIFFs.",
-      "status": "pending"
+      "status": "implemented_and_executed",
+      "execution_verified": true,
+      "source_comparison": true,
+      "acceptance_fixture": "synthetic",
+      "broader_branch_coverage": "pending"
     },
     {
       "id": "RemoteSensingTiffDifference",
       "category": "RemoteSensingTools",
       "description": "Create one pixelwise difference GeoTIFF or a batch of aligned adjacent-date difference rasters.",
-      "status": "pending"
+      "status": "implemented_and_executed",
+      "execution_verified": true,
+      "source_comparison": true,
+      "acceptance_fixture": "synthetic",
+      "broader_branch_coverage": "pending"
     },
     {
       "id": "RemoteSensingExtremeSnowLossPercentage",
       "category": "RemoteSensingTools",
       "description": "Calculate snow-loss percentage from a binary map.",
-      "status": "pending"
+      "status": "implemented_and_executed",
+      "execution_verified": true,
+      "source_comparison": true,
+      "acceptance_fixture": "synthetic",
+      "broader_branch_coverage": "pending"
     },
     {
       "id": "RemoteSensingSubtract",
       "category": "RemoteSensingTools",
       "description": "Subtract one raster from another and write the result.",
-      "status": "pending"
+      "status": "implemented_and_executed",
+      "execution_verified": true,
+      "source_comparison": true,
+      "acceptance_fixture": "synthetic",
+      "broader_branch_coverage": "pending"
     },
     {
       "id": "RemoteSensingFireIncreaseMap",
       "category": "RemoteSensingTools",
       "description": "Create a fire-increase binary map from a change raster.",
-      "status": "pending"
+      "status": "implemented_and_executed",
+      "execution_verified": true,
+      "source_comparison": true,
+      "acceptance_fixture": "synthetic",
+      "broader_branch_coverage": "pending"
     },
     {
       "id": "RemoteSensingMean",
       "category": "RemoteSensingTools",
       "description": "Calculate an arithmetic mean.",
-      "status": "pending"
+      "status": "implemented_and_executed",
+      "execution_verified": true,
+      "source_comparison": true,
+      "acceptance_fixture": "reference_parameters",
+      "broader_branch_coverage": "pending"
     },
     {
       "id": "RemoteSensingPercentageChange",
       "category": "RemoteSensingTools",
       "description": "Calculate percentage change from a to b.",
-      "status": "pending"
+      "status": "implemented_and_executed",
+      "execution_verified": true,
+      "source_comparison": true,
+      "acceptance_fixture": "reference_parameters",
+      "broader_branch_coverage": "pending"
     },
     {
       "id": "RemoteSensingDifference",
       "category": "RemoteSensingTools",
       "description": "Subtract b from a.",
-      "status": "pending"
+      "status": "implemented_and_executed",
+      "execution_verified": true,
+      "source_comparison": true,
+      "acceptance_fixture": "reference_parameters",
+      "broader_branch_coverage": "pending"
     },
     {
       "id": "RemoteSensingDivision",
       "category": "RemoteSensingTools",
       "description": "Divide scalar a by b or calculate an aligned time-series ratio from numeric arrays.",
-      "status": "pending"
+      "status": "implemented_and_executed",
+      "execution_verified": true,
+      "source_comparison": true,
+      "acceptance_fixture": "reference_parameters",
+      "broader_branch_coverage": "pending"
     },
     {
       "id": "RemoteSensingLinearTrend",
       "category": "RemoteSensingTools",
       "description": "Fit a least-squares linear trend.",
-      "status": "pending"
+      "status": "implemented_and_executed",
+      "execution_verified": true,
+      "source_comparison": true,
+      "acceptance_fixture": "reference_parameters",
+      "broader_branch_coverage": "pending"
     },
     {
       "id": "RemoteSensingMaxValueAndIndex",
       "category": "RemoteSensingTools",
       "description": "Return the maximum value and zero-based index.",
-      "status": "pending"
+      "status": "implemented_and_executed",
+      "execution_verified": true,
+      "source_comparison": true,
+      "acceptance_fixture": "reference_parameters",
+      "broader_branch_coverage": "pending"
     },
     {
       "id": "RemoteSensingKelvinToCelsius",
       "category": "RemoteSensingTools",
       "description": "Convert kelvin to degrees Celsius.",
-      "status": "pending"
+      "status": "implemented_and_executed",
+      "execution_verified": true,
+      "source_comparison": true,
+      "acceptance_fixture": "reference_parameters",
+      "broader_branch_coverage": "pending"
     },
     {
       "id": "RemoteSensingMinValueAndIndex",
       "category": "RemoteSensingTools",
       "description": "Return the minimum value and zero-based index.",
-      "status": "pending"
+      "status": "implemented_and_executed",
+      "execution_verified": true,
+      "source_comparison": true,
+      "acceptance_fixture": "reference_parameters",
+      "broader_branch_coverage": "pending"
     },
     {
       "id": "RemoteSensingSensSlope",
       "category": "RemoteSensingTools",
       "description": "Calculate the median pairwise Sen slope.",
-      "status": "pending"
+      "status": "implemented_and_executed",
+      "execution_verified": true,
+      "source_comparison": true,
+      "acceptance_fixture": "reference_parameters",
+      "broader_branch_coverage": "pending"
     },
     {
       "id": "RemoteSensingCoefficientOfVariation",
       "category": "RemoteSensingTools",
       "description": "Calculate standard deviation divided by mean.",
-      "status": "pending"
+      "status": "implemented_and_executed",
+      "execution_verified": true,
+      "source_comparison": true,
+      "acceptance_fixture": "reference_parameters",
+      "broader_branch_coverage": "pending"
     },
     {
       "id": "RemoteSensingKurtosis",
       "category": "RemoteSensingTools",
       "description": "Calculate population Pearson kurtosis and excess kurtosis.",
-      "status": "pending"
+      "status": "implemented_and_executed",
+      "execution_verified": true,
+      "source_comparison": true,
+      "acceptance_fixture": "reference_parameters",
+      "broader_branch_coverage": "pending"
     },
     {
       "id": "RemoteSensingMannKendallTest",
       "category": "RemoteSensingTools",
       "description": "Calculate a Mann-Kendall trend statistic and p-value.",
-      "status": "pending"
+      "status": "implemented_and_executed",
+      "execution_verified": true,
+      "source_comparison": true,
+      "acceptance_fixture": "reference_parameters",
+      "broader_branch_coverage": "pending"
     },
     {
       "id": "RemoteSensingArgmax",
       "category": "RemoteSensingTools",
       "description": "Return the zero-based index of the maximum value.",
-      "status": "pending"
+      "status": "implemented_and_executed",
+      "execution_verified": true,
+      "source_comparison": true,
+      "acceptance_fixture": "reference_parameters",
+      "broader_branch_coverage": "pending"
     },
     {
       "id": "NaturalHazardLoadEventTable",
       "category": "NaturalHazardTools",
       "description": "Load and describe the EM-DAT-compatible event workbook.",
-      "status": "pending"
+      "status": "implemented_and_executed",
+      "execution_verified": true,
+      "source_comparison": true,
+      "acceptance_fixture": "reference_parameters",
+      "broader_branch_coverage": "pending"
     },
     {
       "id": "NaturalHazardFilterRecords",
       "category": "NaturalHazardTools",
       "description": "Filter natural-hazard records with exact field predicates.",
-      "status": "pending"
+      "status": "implemented_and_executed",
+      "execution_verified": true,
+      "source_comparison": true,
+      "acceptance_fixture": "reference_parameters",
+      "broader_branch_coverage": "pending"
     },
     {
       "id": "NaturalHazardCountRecords",
       "category": "NaturalHazardTools",
       "description": "Count filtered natural-hazard records.",
-      "status": "pending"
+      "status": "implemented_and_executed",
+      "execution_verified": true,
+      "source_comparison": true,
+      "acceptance_fixture": "reference_parameters",
+      "broader_branch_coverage": "pending"
     },
     {
       "id": "NaturalHazardSumField",
       "category": "NaturalHazardTools",
       "description": "Sum a numeric field over filtered records.",
-      "status": "pending"
+      "status": "implemented_and_executed",
+      "execution_verified": true,
+      "source_comparison": true,
+      "acceptance_fixture": "reference_parameters",
+      "broader_branch_coverage": "pending"
     },
     {
       "id": "NaturalHazardGroupAggregate",
       "category": "NaturalHazardTools",
       "description": "Group filtered EM-DAT-compatible disaster records and calculate count or sum rankings; group_by/grouping_fields may be a field name or one-item list.",
-      "status": "pending"
+      "status": "implemented_and_executed",
+      "execution_verified": true,
+      "source_comparison": true,
+      "acceptance_fixture": "reference_parameters",
+      "broader_branch_coverage": "pending"
     },
     {
       "id": "NaturalHazardSelectMaxRecord",
       "category": "NaturalHazardTools",
       "description": "Return the event identifier with the maximum measure.",
-      "status": "pending"
+      "status": "implemented_and_executed",
+      "execution_verified": true,
+      "source_comparison": true,
+      "acceptance_fixture": "reference_parameters",
+      "broader_branch_coverage": "pending"
     },
     {
       "id": "NaturalHazardBuildStartDate",
       "category": "NaturalHazardTools",
       "description": "Build valid ISO dates from Start Year/Month/Day fields.",
-      "status": "pending"
+      "status": "implemented_and_executed",
+      "execution_verified": true,
+      "source_comparison": true,
+      "acceptance_fixture": "reference_parameters",
+      "broader_branch_coverage": "pending"
     },
     {
       "id": "NaturalHazardSelectLatest",
       "category": "NaturalHazardTools",
       "description": "Return the latest complete start date after filtering.",
-      "status": "pending"
+      "status": "implemented_and_executed",
+      "execution_verified": true,
+      "source_comparison": true,
+      "acceptance_fixture": "reference_parameters",
+      "broader_branch_coverage": "pending"
     }
   ],
   "skills": [
     {
       "id": "deep-earth-model-query",
-      "status": "pending"
+      "status": "declared_registered_planner_verified",
+      "fixed_workflow_experiment_completed": false
     },
     {
       "id": "earthquake-catalog-analysis",
-      "status": "partial"
+      "status": "declared_registered_planner_verified",
+      "fixed_workflow_experiment_completed": false
     },
     {
       "id": "earthquake-event-model-sampling",
-      "status": "pending"
+      "status": "declared_registered_planner_verified",
+      "fixed_workflow_experiment_completed": false
     },
     {
       "id": "semantic-geospatial-query",
-      "status": "partial",
-      "protocol": "pinned_yago2geo_snapshot"
+      "status": "declared_registered_planner_verified",
+      "protocol": "pinned_yago2geo_snapshot",
+      "fixed_workflow_experiment_completed": false
     },
     {
       "id": "mineral-deposit-search",
-      "status": "pending"
+      "status": "declared_registered_planner_verified",
+      "fixed_workflow_experiment_completed": false
     },
     {
       "id": "mineral-resource-ranking",
-      "status": "pending"
+      "status": "declared_registered_planner_verified",
+      "fixed_workflow_experiment_completed": false
     },
     {
       "id": "climate-scenario-analysis",
-      "status": "pending"
+      "status": "declared_registered_planner_verified",
+      "fixed_workflow_experiment_completed": false
     },
     {
       "id": "energy-spatial-analysis",
-      "status": "pending"
+      "status": "declared_registered_planner_verified",
+      "fixed_workflow_experiment_completed": false
     },
     {
       "id": "energy-capacity-transition",
-      "status": "pending"
+      "status": "declared_registered_planner_verified",
+      "fixed_workflow_experiment_completed": false
     },
     {
       "id": "ocean-carbon-observation",
-      "status": "pending"
+      "status": "declared_registered_planner_verified",
+      "fixed_workflow_experiment_completed": false
     },
     {
       "id": "ocean-profile-qc",
-      "status": "pending"
+      "status": "declared_registered_planner_verified",
+      "fixed_workflow_experiment_completed": false
     },
     {
       "id": "ocean-spatial-analysis",
-      "status": "pending"
+      "status": "declared_registered_planner_verified",
+      "fixed_workflow_experiment_completed": false
     },
     {
       "id": "deep-time-coordinate-spatial",
-      "status": "pending"
+      "status": "declared_registered_planner_verified",
+      "fixed_workflow_experiment_completed": false
     },
     {
       "id": "deep-time-vector-workflow",
-      "status": "pending"
+      "status": "declared_registered_planner_verified",
+      "fixed_workflow_experiment_completed": false
     },
     {
       "id": "deep-time-raster-zonal",
-      "status": "pending"
+      "status": "declared_registered_planner_verified",
+      "fixed_workflow_experiment_completed": false
     },
     {
       "id": "ccs-coordinate-spatial",
-      "status": "pending"
+      "status": "declared_registered_planner_verified",
+      "fixed_workflow_experiment_completed": false
     },
     {
       "id": "ccs-mrv-workflow",
-      "status": "pending"
+      "status": "declared_registered_planner_verified",
+      "fixed_workflow_experiment_completed": false
     },
     {
       "id": "ccs-raster-zonal",
-      "status": "pending"
+      "status": "declared_registered_planner_verified",
+      "fixed_workflow_experiment_completed": false
     },
     {
       "id": "remote-sensing-data-discovery",
-      "status": "pending"
+      "status": "declared_registered_planner_verified",
+      "fixed_workflow_experiment_completed": false
     },
     {
       "id": "remote-sensing-preprocessing",
-      "status": "pending"
+      "status": "declared_registered_planner_verified",
+      "fixed_workflow_experiment_completed": false
     },
     {
       "id": "remote-sensing-raster-statistics",
-      "status": "pending"
+      "status": "declared_registered_planner_verified",
+      "fixed_workflow_experiment_completed": false
     },
     {
       "id": "remote-sensing-change-detection",
-      "status": "pending"
+      "status": "declared_registered_planner_verified",
+      "fixed_workflow_experiment_completed": false
     },
     {
       "id": "remote-sensing-trend-distribution",
-      "status": "pending"
+      "status": "declared_registered_planner_verified",
+      "fixed_workflow_experiment_completed": false
     },
     {
       "id": "natural-hazard-table-analytics",
-      "status": "pending"
+      "status": "declared_registered_planner_verified",
+      "fixed_workflow_experiment_completed": false
     }
   ],
   "scope": "geotooleval-101",
@@ -776,5 +1204,23 @@
       "id": "extension-earthquake-catalog-preparation",
       "status": "excluded_by_user"
     }
-  ]
+  ],
+  "implementation_summary": {
+    "tools_implemented_and_executed": 101,
+    "scientific_source_comparisons": 100,
+    "scientific_differences": 0,
+    "skills_registered": 24,
+    "capabilities": 31,
+    "production_engine": "staged",
+    "runtime_equivalent": false,
+    "scope_note": "执行成功和抽样源码一致不代表所有分支、所有Skill组合或完整603题实验验收完成。",
+    "coverage_report": "outputs/verification/tools-final-code/coverage.json"
+  },
+  "release_acceptance": {
+    "criterion": "101 executable tools plus real Agent samples in all ten domains; 603 local end-to-end experiment excluded by user",
+    "passed": true,
+    "report": "outputs/verification/delivery.json",
+    "ten_domains_passed": true,
+    "leakage_audit": "outputs/verification/leakage-audit.json"
+  }
 }

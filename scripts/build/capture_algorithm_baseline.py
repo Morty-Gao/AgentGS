@@ -266,7 +266,13 @@ def main():
             [],
             ["DeepEarthQueryUSGSCatalog"] * 2,
         ),
-        ("cross-skill-tools", "Query earthquake events.", available, [], ["DeepTimeHaversineDistance"]),
+        (
+            "cross-skill-tools",
+            "Query earthquake events.",
+            available,
+            [],
+            ["DeepTimeHaversineDistance"],
+        ),
         ("unknown-name", "Query earthquake events.", available, [], ["NotRegistered"]),
         (
             "partial-registry",

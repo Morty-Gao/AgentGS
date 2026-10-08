@@ -2379,10 +2379,12 @@
         "不得用统一原生function-calling循环替代分阶段规划/参数/最终答案调用。",
         "严格LLM模式禁止规则捷径和规划回退，但不删除资源绑定或工具参数验证。"
       ],
-      "implementation_status": "diverged",
+      "implementation_status": "ported_and_integrated",
       "current_counterparts": [
         "src/agentgs/agent/engine.py"
-      ]
+      ],
+      "integration_status": "connected_to_default_staged_agent",
+      "runtime_acceptance_status": "broader_original_harness_replay_pending"
     },
     {
       "id": "skill-retrieval",
@@ -2403,7 +2405,8 @@
       "current_counterparts": [
         "src/agentgs/agent/retrieval/scored_skills.py"
       ],
-      "integration_status": "not_connected_to_production_harness"
+      "integration_status": "connected_to_default_staged_agent",
+      "runtime_acceptance_status": "broader_original_harness_replay_pending"
     },
     {
       "id": "skill-selection",
@@ -2421,10 +2424,10 @@
       "implementation_status": "component_verified",
       "current_counterparts": [
         "src/agentgs/agent/planning/selection.py",
-        "src/agentgs/agent/planning/skills.py",
-        "src/agentgs/agent/planning/constraints.py"
+        "src/agentgs/agent/planning/skills.py"
       ],
-      "integration_status": "not_connected_to_production_harness"
+      "integration_status": "connected_to_default_staged_agent",
+      "runtime_acceptance_status": "broader_original_harness_replay_pending"
     },
     {
       "id": "capability-graph",
@@ -2445,7 +2448,8 @@
       "current_counterparts": [
         "src/agentgs/agent/planning/capabilities.py"
       ],
-      "integration_status": "not_connected_to_production_harness"
+      "integration_status": "connected_to_default_staged_agent",
+      "runtime_acceptance_status": "broader_original_harness_replay_pending"
     },
     {
       "id": "shared-bridge",
@@ -2463,8 +2467,14 @@
         "只覆盖声明绑定字段；外部参数/参考值/除数继续由模型生成并保留。",
         "桥接比较属于执行算法，不能只迁移静态图却漏掉实际comparison。"
       ],
-      "implementation_status": "pending",
-      "current_counterparts": []
+      "implementation_status": "ported_and_integrated",
+      "current_counterparts": [
+        "src/agentgs/agent/planning/bridge.py",
+        "src/agentgs/agent/planning/bridging.py",
+        "src/agentgs/agent/planning/bridge_comparison.py"
+      ],
+      "integration_status": "connected_to_default_staged_agent",
+      "runtime_acceptance_status": "broader_original_harness_replay_pending"
     },
     {
       "id": "kg-retrieval",
@@ -2482,8 +2492,14 @@
         "图路径中的输入/输出模式过滤、重复工具权重求和、稳定权重排序和最终max_tools截断均保留。",
         "缺embedding/索引不能伪造向量分数，也不能把descriptor JSON当作KG索引。"
       ],
-      "implementation_status": "pending",
-      "current_counterparts": []
+      "implementation_status": "component_verified",
+      "current_counterparts": [
+        "src/agentgs/agent/retrieval/tools.py",
+        "src/agentgs/agent/retrieval/graph.py",
+        "src/agentgs/client/embedding.py"
+      ],
+      "integration_status": "connected_to_default_staged_agent",
+      "runtime_acceptance_status": "broader_original_harness_replay_pending"
     },
     {
       "id": "rule-routing",
@@ -2498,8 +2514,12 @@
         "只对指定单次Climate查询接口执行旧基数归一化，不全局去重。",
         "普通模式保留原规范化/规则回退；严格LLM模式仅过滤未注册工具并保留LLM提议的合法重复实例。"
       ],
-      "implementation_status": "pending",
-      "current_counterparts": []
+      "implementation_status": "ported_and_integrated",
+      "current_counterparts": [
+        "src/agentgs/agent/planning/routing/entry.py"
+      ],
+      "integration_status": "connected_to_default_staged_agent",
+      "runtime_acceptance_status": "broader_original_harness_replay_pending"
     },
     {
       "id": "planning-context",
@@ -2515,11 +2535,14 @@
         "未知参考形状完整保留，必需上下文超预算明确记录而不是静默丢弃。",
         "planner/argument/answer的prompt文本、压缩预算与先后关系纳入算法版本，修改prompt不视为纯工程修改。"
       ],
-      "implementation_status": "partial",
+      "implementation_status": "component_verified",
       "current_counterparts": [
-        "src/agentgs/agent/planning/candidate_context.py"
+        "src/agentgs/agent/planning/candidate_context.py",
+        "src/agentgs/agent/planning/model_stages.py",
+        "src/agentgs/agent/planning/prompts.py"
       ],
-      "verified_scope": "候选上下文序列化；模型prompt、压缩策略及分阶段调用尚未接入"
+      "integration_status": "connected_to_default_staged_agent",
+      "runtime_acceptance_status": "broader_original_harness_replay_pending"
     },
     {
       "id": "grounding",
@@ -2539,7 +2562,8 @@
       "current_counterparts": [
         "src/agentgs/agent/planning/grounding.py"
       ],
-      "integration_status": "not_connected_to_production_harness"
+      "integration_status": "connected_to_default_staged_agent",
+      "runtime_acceptance_status": "broader_original_harness_replay_pending"
     },
     {
       "id": "parameter-binding",
@@ -2555,8 +2579,12 @@
         "Typed ResourceRef可替代字符串搜索，但必须保留原输入身份、顺序、版本和科学选择；不能增加默认数据源。",
         "不把一个通用JSON参数模型当成全部领域绑定算法的替代实现。"
       ],
-      "implementation_status": "pending",
-      "current_counterparts": []
+      "implementation_status": "component_verified",
+      "current_counterparts": [
+        "src/agentgs/agent/execution/bindings/__init__.py"
+      ],
+      "integration_status": "connected_to_default_staged_agent",
+      "runtime_acceptance_status": "broader_original_harness_replay_pending"
     },
     {
       "id": "scientific-arguments",
@@ -2572,8 +2600,13 @@
         "科学或bridge参数生成失败必须传播；不能以{}和模糊上游数值拼接替代。",
         "只允许声明的projection覆盖字段，不以任意first_number替代科学参数。"
       ],
-      "implementation_status": "pending",
-      "current_counterparts": []
+      "implementation_status": "ported_and_integrated",
+      "current_counterparts": [
+        "src/agentgs/agent/execution/scientific.py",
+        "src/agentgs/agent/execution/service.py"
+      ],
+      "integration_status": "connected_to_default_staged_agent",
+      "runtime_acceptance_status": "broader_original_harness_replay_pending"
     },
     {
       "id": "rs-contracts",
@@ -2591,8 +2624,14 @@
         "显式引用绑定到成功生产者、request/call/attempt及原顺序，失败产物不能引用。",
         "不混合显式参考绑定与尚未支持的shared-bridge上下文。"
       ],
-      "implementation_status": "pending",
-      "current_counterparts": []
+      "implementation_status": "ported_and_integrated",
+      "current_counterparts": [
+        "src/agentgs/contracts/remote_sensing.py",
+        "src/agentgs/agent/execution/scope.py",
+        "src/agentgs/agent/execution/references.py"
+      ],
+      "integration_status": "connected_to_default_staged_agent",
+      "runtime_acceptance_status": "broader_original_harness_replay_pending"
     },
     {
       "id": "tool-feedback",
@@ -2608,11 +2647,13 @@
         "保留所有物理尝试，成功不因辅助产物登记错误再次执行。",
         "耗尽工具修复后跳过剩余链并请求原重规划策略。"
       ],
-      "implementation_status": "partial",
+      "implementation_status": "ported_and_integrated",
       "current_counterparts": [
-        "src/agentgs/agent/execution/feedback.py"
+        "src/agentgs/agent/execution/feedback.py",
+        "src/agentgs/agent/execution/service.py"
       ],
-      "verified_scope": "输出分类；真实尝试循环、模型修复、scope/产物登记与重规划尚未接入"
+      "integration_status": "connected_to_default_staged_agent",
+      "runtime_acceptance_status": "broader_original_harness_replay_pending"
     },
     {
       "id": "prefix-recovery",
@@ -2627,8 +2668,12 @@
         "完整工具链成功后退出执行循环；答案失败不触发规则答案替代或工具重跑。",
         "旧前缀判断仅比较工具名是已知局限；更强的参数身份策略应另立算法变更，不偷偷加入。"
       ],
-      "implementation_status": "pending",
-      "current_counterparts": []
+      "implementation_status": "ported_and_integrated",
+      "current_counterparts": [
+        "src/agentgs/agent/engine.py"
+      ],
+      "integration_status": "connected_to_default_staged_agent",
+      "runtime_acceptance_status": "broader_original_harness_replay_pending"
     },
     {
       "id": "final-answer",
@@ -2645,10 +2690,13 @@
         "未完成路线包含成功结果与失败尝试，不得冒称失败/跳过计算发生过。",
         "最终模型异常保持失败与已有trace，不能重跑成功工具链。"
       ],
-      "implementation_status": "diverged",
+      "implementation_status": "ported_and_integrated",
       "current_counterparts": [
-        "src/agentgs/agent/engine.py"
-      ]
+        "src/agentgs/agent/answering/service.py",
+        "src/agentgs/agent/planning/model_stages.py"
+      ],
+      "integration_status": "connected_to_default_staged_agent",
+      "runtime_acceptance_status": "broader_original_harness_replay_pending"
     },
     {
       "id": "answer-validation",
@@ -2666,8 +2714,14 @@
         "公开固定输出合同允许计算和推断时，raw-number匹配仅诊断；格式无效/unknown仍Not Completed。",
         "题目精确匹配合同可重构为显式OutputContract输入，但内容与适用协议保持一致，gold继续留在评测端。"
       ],
-      "implementation_status": "pending",
-      "current_counterparts": []
+      "implementation_status": "component_verified",
+      "current_counterparts": [
+        "src/agentgs/agent/answering/validation.py",
+        "src/agentgs/agent/answering/evidence/legacy_validation.py",
+        "src/agentgs/agent/answering/formats.py"
+      ],
+      "integration_status": "connected_to_default_staged_agent",
+      "runtime_acceptance_status": "broader_original_harness_replay_pending"
     },
     {
       "id": "usage-provenance",
@@ -2683,11 +2737,14 @@
         "成功/失败/拒绝/重试、资源来源、版本、hash与执行身份独立可追溯。",
         "并发/worker/SQLite/事件传输可以改变，但不能改变决策输入或让辅助日志错误重放工具。"
       ],
-      "implementation_status": "partial",
+      "implementation_status": "ported_and_integrated",
       "current_counterparts": [
-        "src/agentgs/runtime/worker.py",
+        "src/agentgs/agent/state.py",
+        "src/agentgs/client/openai_compatible.py",
         "src/agentgs/runtime/tools/executor.py"
-      ]
+      ],
+      "integration_status": "connected_to_default_staged_agent",
+      "runtime_acceptance_status": "broader_original_harness_replay_pending"
     },
     {
       "id": "usgs-tools",
@@ -2702,10 +2759,12 @@
         "输出event_ids、event对象、event_count/total_energy_j等对应原合同。",
         "当前start_year/end_year/min_magnitude/limit的接口只是子集，不能标记全部算法迁移完成。"
       ],
-      "implementation_status": "partial",
+      "implementation_status": "component_verified",
       "current_counterparts": [
-        "src/agentgs/runtime/tools/domains/earthquake.py"
-      ]
+        "src/agentgs/runtime/tools/domains/deep_earth.py"
+      ],
+      "integration_status": "connected_to_default_staged_agent",
+      "runtime_acceptance_status": "broader_original_harness_replay_pending"
     },
     {
       "id": "domain-tools-data",
@@ -2723,11 +2782,16 @@
         "GeoSPARQL按用户2026-10-08授权恢复source_id/查询结构匹配40条物化结果快照；明确derived_lookup，未匹配失败，不请求后端。",
         "101项GeoToolEval工具与24项关联Skill声明独立管理；尚未迁入的工具继续pending，排除的9项工具不计入进度。"
       ],
-      "implementation_status": "pending",
+      "implementation_status": "component_verified",
       "current_counterparts": [
-        "src/agentgs/runtime/tools/domains/geosparql.py",
-        "src/agentgs/datasets/geoquestions.py"
-      ]
+        "src/agentgs/runtime/tools/dispatch.py",
+        "src/agentgs/runtime/tools/domains",
+        "src/agentgs/runtime/tools/scientific",
+        "src/agentgs/datasets/parsers",
+        "scripts/prepare/import_reference_data.py"
+      ],
+      "integration_status": "connected_to_default_staged_agent",
+      "runtime_acceptance_status": "broader_original_harness_replay_pending"
     },
     {
       "id": "evaluation",
@@ -2744,10 +2808,15 @@
         "未知usage使成本/综合分不可得；失败题保留，attempt选择及续跑规则保持。",
         "不能在重构中顺便修正评分器对tool_call/tool_retry计数的历史口径；另列协议变更。"
       ],
-      "implementation_status": "pending",
+      "implementation_status": "component_verified",
       "current_counterparts": [
-        "src/agentgs/evaluation/runner.py"
-      ]
+        "src/agentgs/evaluation/benchmark.py",
+        "src/agentgs/evaluation/metrics/answers.py",
+        "src/agentgs/evaluation/metrics/tools.py",
+        "src/agentgs/evaluation/metrics/compatibility.py"
+      ],
+      "integration_status": "connected_to_default_staged_agent",
+      "runtime_acceptance_status": "broader_original_harness_replay_pending"
     }
   ],
   "permitted_engineering_changes": [
@@ -2777,8 +2846,8 @@
       "19个基础测试通过即新旧算法等价。",
       "模型自由生成两次相似答案即算法一致。"
     ],
-    "current_engine_policy": "现有AgentEngine仍为prototype function-calling实现，不能作为旧算法等价版本对外报告。",
-    "production_algorithm": "prototype_function_calling",
+    "current_engine_policy": "默认AgentEngine为已接入runtime的分阶段实现；prototype仅显式algorithm=prototype。组件、工具与代表性worker流程已验收，尚未完成旧harness所有路线和配置组合的同响应回放，runtime_equivalent不能置true。",
+    "production_algorithm": "geotoolagent-geotooleval-101-snapshot-20261008",
     "snapshot": {
       "path": "src/tests/fixtures/alignment/baseline.json",
       "sha256": "ca58d156fb73b7a8b405e9300db7795bd623b554b0a02af4af6ec9a294a8d4da",
@@ -2787,9 +2856,73 @@
       "grounding_cases": 8,
       "feedback_cases": 24,
       "context_cases": 4,
-      "validation_cases_frozen_only": 16,
-      "note": "裁剪声明后由原源码重新执行生成；validator仅冻结，未计入通过项；不包含benchmark gold。",
-      "library_startup_profiles": 2
+      "note": "裁剪声明后由旧源码生成；包含16项非修改性validator对照；不包含benchmark gold。",
+      "library_startup_profiles": 2,
+      "validation_cases_verified": 16
+    },
+    "evidence": {
+      "deterministic_component_comparisons": 341,
+      "kg_source_sdk_cases": {
+        "path": "src/tests/fixtures/alignment/kg.json",
+        "cases": 16
+      },
+      "binding_source_cases": {
+        "path": "src/tests/fixtures/bindings/oracle.json",
+        "cases": 298
+      },
+      "scientific_source_cases": {
+        "paths": [
+          "src/tests/fixtures/scientific/oracle.json",
+          "src/tests/fixtures/scientific/synthetic.json"
+        ],
+        "cases": 65
+      },
+      "tool_runtime_source_acceptance": {
+        "report": "outputs/verification/tools-final-code/coverage.json",
+        "executed": 101,
+        "source_compared": 100,
+        "differences": 0,
+        "exception": "GeoQuestions授权快照协议另125项oracle"
+      },
+      "fas_source_cases": {
+        "path": "src/tests/fixtures/evaluation/fas.json",
+        "cases": 2412
+      },
+      "saved_original_and_compatibility_scores": {
+        "report": "outputs/verification/reference_scores.json",
+        "cases": 28
+      },
+      "worker_flows": {
+        "report": "outputs/verification/workers-final/report.json",
+        "profiles": [
+          "recovery",
+          "spatial",
+          "cross_domain"
+        ]
+      },
+      "live_validation": {
+        "reports": [
+          "outputs/verification/live.json",
+          "outputs/verification/live-latest-contracts.json",
+          "outputs/verification/live-geo-repaired.json",
+          "outputs/verification/live-geo-ontology.json"
+        ],
+        "note": "包含失败尝试，不覆盖、不只选择成功；最新Geo ontology复验Q106/Q111均FAS=1。Q86保持0.75。"
+      }
+    },
+    "release_criterion": "用户2026-10-08最新要求：101工具可用，流程可跑通，10领域各做对应抽样；603题Agent端到端实验在服务器运行。",
+    "release_evidence": {
+      "report": "outputs/verification/delivery.json",
+      "domain_samples": 10,
+      "successful": 10,
+      "fas_full_score": 10,
+      "test_passed": 714,
+      "model_stages": 22,
+      "full_603_agent_run": false
+    },
+    "leakage_audit": {
+      "report": "outputs/verification/leakage-audit.json",
+      "interpretation": "Development regression; Geo official answer/reference-query replay and benchmark-supporting caches explicitly documented; no accidental private input found in 22 matched prompts."
     }
   },
   "authorized_algorithm_changes": [
@@ -2812,7 +2945,9 @@
         "typed入口不接受endpoint/gold字段，固定离线协议。",
         "query_match在source_id命中时明确标source_id；不沿用旧版semantic_equivalent的误导标签。",
         "声明描述按新协议更新，词法语料由原planner重新生成验收oracle。",
-        "仅此工具允许物化结果回放；其余工具算法/数据策略保持原契约。"
+        "仅此工具允许物化结果回放；其余工具算法/数据策略保持原契约。",
+        "参数只投影source_id/query/dataset；资源topic不充当ID/查询；保留原Geo专用compact提示的RDF词汇与公开模式。",
+        "KG排名保留冻结向量，只在交给规划模型的Geo工具关系文本中覆盖已授权的快照接口描述。"
       ],
       "acceptance": {
         "oracle": "src/tests/fixtures/geoquestions/replay.json",
@@ -2820,5 +2955,21 @@
         "cases": 125
       }
     }
-  ]
+  ],
+  "supplemental_sources": {
+    "compatibility_scoring": {
+      "source": "outputs/answer_format_compat_v11_20261004_side_01a10487/compat_scoring.py",
+      "sha256": "f6f38b0e43ed1047df4ebe4a199ad327b2665e7092bc06f61431cca05ceb9ff4",
+      "policy": "另列original与normalized，不改变冻结原FAS"
+    },
+    "latest_public_contracts": {
+      "source": "AgentGS_主项目_20261006/data/answer_formats/geotooleval_v1_2.source.jsonl",
+      "sha256": "a9cdf8fef4f82021cd6b5f5afa55ef9a262ea7ca1def3e2dcaeae0c0bdb60c25",
+      "changed_question_ids": [
+        106,
+        111
+      ],
+      "authorization": "用户2026-10-08要求采用实际最新GeoToolEval及公开格式；不切换核心算法源码。"
+    }
+  }
 }

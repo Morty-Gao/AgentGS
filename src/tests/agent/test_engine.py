@@ -58,5 +58,6 @@ async def test_llm_tool_loop_without_live_provider(project):
     assert any(kind == "skill.selected" for kind, _ in events.rows)
     schemas = tools.specs()
     from agentgs.skills.definitions import load_tool_scope
+
     assert {s.id for s in schemas} == set(load_tool_scope()["tool_ids"])
     assert not tools.internal

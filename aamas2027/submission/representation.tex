@@ -1,0 +1,30 @@
+\section{Hierarchical Representation}
+\label{sec:representation}
+Given a natural-language goal $q$, resources $X$, and registered sets of Skills $S$, Capabilities $C$, and Tools $T$, AgentGS first constructs a capability plan and then selects concrete implementations. Shared capability identifiers connect strategies and tools, while instances retain strategy provenance, input roles, and candidate-tool scopes.
+
+\subsection{Skills, Capabilities, and Tools}
+A \emph{Skill} describes a reusable task strategy: its objective, applicable inputs, expected artifacts, capability steps, constraints, validation requirements, and recovery policies. Each step specifies a Capability identifier, mandatory predecessors, mandatory or optional status, and candidate tools. Planning selects the required steps rather than importing every optional operation.
+
+A \emph{Capability} defines an operation shared across strategies, including its function, input/output types, preconditions, postconditions, and candidate tools. Capability--Tool mappings additionally record concrete operations and parameter constraints. Multiple Skills may reference one Capability, and multiple Tools may implement it. A Tool may implement several capabilities, such as returning both an extreme value and its index. Shared capabilities do not make tools arbitrarily interchangeable: deep-time and carbon-storage strategies may both reference raster analysis while permitting different implementations.
+
+A \emph{Tool} is a callable interface with an identifier, parameter schema, input/output definitions, and runtime information. Concrete files, values, and upstream artifacts are bound during execution. Skill--Capability membership and Capability--Tool implementation relationships are both many-to-many.
+
+The task-specific capability plan is
+\begin{equation}
+P = (V,D_d,D_c,\beta), \qquad v_i=(c_i,s_i,r_i).
+\label{eq:plan}
+\end{equation}
+Here, $V$ contains capability instances; $c_i$, $s_i$, and $r_i$ identify the operation, source strategy, and step/input role, respectively. $D_d$ and $D_c$ record data and control dependencies, and $\beta$ binds resources or upstream artifacts. Operations on different input objects remain distinct instances, even when they use the same tool. The current implementation does not fully support dynamically creating repeated capability instances for multiple objects.
+
+\subsection{Skill Hypergraphs and Provenance}
+The skill hypergraph uses Capabilities as nodes and the capability set of each Skill as a hyperedge:
+\begin{equation}
+H=(C,E), \qquad E=\{e_s:s\in S\}, \qquad e_s\subseteq C.
+\label{eq:hypergraph}
+\end{equation}
+For example, Skills containing $\{a,b\}$ and $\{b,c\}$ share node $b$, providing a connection for composition. Membership alone does not impose execution order. Direction is represented separately by $d=(s,U,c)$: within Skill $s$, operation $c$ requires \emph{all} predecessors in $U$. Retaining the source Skill prevents sharing from automatically importing another strategy's prerequisites. Conditional ordering applies only when both steps are selected and adds no prerequisite steps.
+
+Composition expands selected capabilities and their declared prerequisites. Completion retrieves connecting branches and inserts those satisfying constraints. Explicit Skill-compatibility relations delimit compatibility-based search; directed bridging separately searches inactive Skills for branches between current plan endpoints.
+
+\subsection{Constrained Implementations}
+GeoToolKG records tool domains, functions, inputs, outputs, provenance, and recommended transitions. These associations guide retrieval; executable workflows additionally require parameter, artifact, prerequisite, and scientific-applicability checks. ToolGraph records bidirectional Capability--Tool mappings and their operation/parameter constraints. After capability completion, AgentGS filters mapped tools by availability and instance scope, then evaluates their schemas and declared semantic types. Actual artifacts are bound and validated during execution. Execution dependencies follow explicit Skill declarations and completion results.

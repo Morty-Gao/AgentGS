@@ -1,0 +1,59 @@
+\section{Experiments}
+\label{sec:experiments}
+\subsection{Setup and Main Results}
+The main experiment covers all 603 GeoToolEval records; ablations use a fixed 57-record subset. Results use mean FAS with failures and partial-credit cases retained. AgentGS uses GPT-5.6 Terra, and main results are computed from its first complete run. GeoAgent and Earth-Agent use the same backbone. Language-model baselines answer directly: DeepSeek V4 Pro, GPT-5.6 Terra, GPT-5.4, Qwen-Plus, and GeoGPT.
+
+\input{tables/main_results}
+
+Table~\ref{tab:main-results} reports mean FAS of 0.8731 for AgentGS, compared with 0.7804 for GeoAgent and 0.3137 for direct answers from the same GPT-5.6 Terra backbone. AgentGS also outperforms the other evaluated language-model baselines. Its single-step, two- to three-step, and at-least-four-step scores are 0.9425, 0.7557, and 0.6167, respectively. Figure~\ref{fig:performance} shows overall and domain results. Longer chains are concentrated in remote sensing, so domain and chain-length effects overlap and should be interpreted jointly.
+
+\input{figures/performance}
+
+\subsection{External Evaluation on GeoBenchX}
+\label{sec:external-evaluation}
+We evaluate AgentGS on GeoBenchX~\cite{krechetova2025geobenchx} using its official tools and dedicated Skills and Capabilities. These definitions organize operations, input/output requirements, strategy dependencies, and tool mappings for the new environment.
+
+The evaluation uses \drafttodo{task count} tasks and compares AgentGS with \drafttodo{baseline name}. The respective backbones are \drafttodo{AgentGS model/version} and \drafttodo{baseline model/version}, with \drafttodo{matched experimental conditions}. The judge is \drafttodo{judge model and aggregation}. Scores of 0, 1, and 2 indicate mismatch, partial match, and match against reference solutions. We report mean score and full-match rate separately from GeoToolEval FAS.
+
+\input{tables/external_results}
+
+AgentGS obtains a mean score of \drafttodo{AgentGS score}, versus \drafttodo{baseline score}, and full-match rates of \drafttodo{AgentGS percentage} and \drafttodo{baseline percentage}, respectively (Table~\ref{tab:external-results}). \drafttodo{Add the differences and principal conclusion supported by the completed results.}
+
+\subsection{Ablation Study}
+\label{sec:ablations}
+The fixed subset covers all ten domains and comprises 22 single-step, 20 two- to three-step, and 15 at-least-four-step records; multistep tasks account for 61.40\%. Each configuration changes one mechanism and is compared with the full method on this same subset.
+
+\paragraph{Planning and predecessor expansion.}
+A1 plans directly at the tool level while retaining the same strategy, dependency, and tool information. A2 retains initial capability selection and dependency declarations but disables automatic expansion of mandatory predecessors. Subsequent completion may restore omitted predecessors, so analysis also records plan changes and compensatory insertions.
+
+\paragraph{Capability completion.}
+A3 retains gap diagnosis but disables automatic insertion of supporting capabilities, including bridging. A4 disables only directed bridging, retaining other completion mechanisms. Both examine required-operation coverage, dependency satisfaction, and actual use of upstream artifacts.
+
+\paragraph{Selection and recovery.}
+A5 retains capability requirements, candidate scopes, and execution validation but selects the first legal tool in a predefined order. A6 disables local recovery after execution failure, retaining planning, grounding, and input binding before the first attempt.
+
+\input{tables/ablation}
+
+Table~\ref{tab:ablation} shows that direct tool-level planning (A1) reduces overall and multistep FAS by 25.82 and 24.74 percentage points, respectively. Disabling predecessor expansion (A2) or independent completion (A3) reduces overall FAS by 24.43 or 23.94 points and multistep FAS by 27.43 or 26.88 points. The larger multistep declines support explicitly organizing prerequisites and completing missing operations before implementation selection.
+
+Disabling bridging alone (A4) reduces overall and multistep FAS by 2.27 and 4.20 points, indicating an incremental benefit beyond other completion mechanisms. Disabling recovery (A6) reduces these scores by 4.15 and 7.20 points, showing the value of retaining successful prefixes and recovering failed steps. In contrast, removing selection optimization (A5) slightly increases overall FAS from 0.6387 to 0.6415 while reducing multistep FAS from 0.5333 to 0.5184. This supports a multistep benefit but does not establish a consistent overall improvement.
+
+\subsection{Illustrative Case Study}
+\label{sec:case-study}
+Consider several rasters of the same region and variable, with aligned grids and a reference value in the same units. The task requires a pixel-wise mean composite, its valid-pixel mean, the difference from the reference, and the comparison relation.
+
+Skill Retrieval returns RasterCompose ($A$) and ReferenceCompare ($B$). Planning selects InputCheck ($w$) and RasterMean ($u$) from $A$, and ScalarDiff ($v$) and SignCheck ($z$) from $B$, yielding $w\to u$ and $v\to z$. Composition expands required predecessors while retaining provenance and tool scopes. The fragments remain disconnected: $u$ produces a raster file, whereas $v$ requires a numerical value.
+
+\begin{figure*}[t]
+\centering
+\includegraphics[width=0.64\textwidth]{case_study.png}
+\caption{Illustrative cross-Skill completion. Selected fragments $w\to u$ and $v\to z$ are connected through inactive Skill $C$'s $u\to m\to v$ branch. The resulting five-step workflow is grounded in tools with explicit artifact propagation.}
+\label{fig:case-study}
+\Description{A mean-composite task is planned using two Skills, completed using valid-pixel mean statistics from a third Skill, and executed as input validation, compositing, statistics, differencing, and sign comparison.}
+\end{figure*}
+
+Completion retrieves $u\to m\to v$ from inactive RasterDiff ($C$), where ValidMean ($m$) computes the composite's valid-pixel mean. The query explicitly requires this statistic. Under the example's assumptions, this is the unique branch satisfying prerequisites, types, availability, and acyclicity. Insertion retains $u$'s constraints, adds $m$, updates $v$'s dependencies, tools, and bindings, and preserves $w\to u$ and $v\to z$, forming $w\to u\to m\to v\to z$ (Figure~\ref{fig:case-study}).
+
+Grounding selects permitted validation, compositing, statistics, differencing, and comparison tools. Bridge grounding requires unique endpoint instances with the correct order. Execution passes the validated raster list to compositing, then passes a list containing only the composite path to statistics. The returned mean and task reference bind to $a$ and $b$ for $d=a-b$; sign comparison evaluates $d$ against zero. Thus, each output concerns the same composite and reference.
+
+If statistics fails, local recovery retains validation and compositing and reuses the artifact. Uncertain calls are not replayed, and recovery requiring another capability suspends execution. Successful results yield the raster, mean, difference, and relation. After verification, the workflow can form candidate CompositeCompare ($D$), with rebindable image-list/reference inputs, artifact dependencies, and usage constraints. Its applicability and reuse benefit on other tasks require further validation.

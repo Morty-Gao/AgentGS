@@ -1,0 +1,23 @@
+\section{GeoToolEval}
+\label{sec:benchmark}
+GeoToolEval evaluates tool use and multistep orchestration through records containing a natural-language question, input resources, a reference answer and answer type, and reference tool calls. Single-step tasks assess data location, parameter determination, and basic invocation; multistep tasks examine operation composition, dependencies, and use of intermediate results. Tasks span ten research themes, with theme sizes determined by available resources and screening outcomes.
+
+\subsection{Sources and Construction}
+Tasks are either selected from existing question-answer resources or derived from scientific data. Geoscientific big-data analysis includes 40 selected GeoQuestions1089 tasks involving physical geographic objects and spatial operations. Remote sensing includes 49 of Earth-Bench's 248 tasks, retaining source questions, choices, and answers while adapting calls to our interfaces. Critical-mineral and climate-change tasks are selected from \nolinkurl{habitable_earth_dataset}; underlying resources include MRDS, paleoclimate reconstructions, GISTEMP, and SSP warming summaries. Data-derived tasks specify identifiable objects, variables, and computational relationships, with answers determined through processing and calculation. Table~\ref{tab:benchmark} lists the data sources.
+
+Reference calls map source operational requirements to registered tools and record parameters and input/output information. Existing tasks retain source identifiers or resource locators; derived tasks retain data-location fields, derivation records, and computational scripts. Quality control checks traceability, record completeness, consistency of reference invocations, and sample execution. Sample validation is recorded separately from full-benchmark answer evaluation.
+
+\input{tables/benchmark}
+
+\subsection{Composition and Evaluation}
+\label{sec:metrics}
+The benchmark contains 603 evaluation records: 424 have one reference call, 119 have two or three, and 60 have at least four. Its 179 multistep records constitute 29.68\% of the benchmark. Nine cross-theme questions occur in both critical minerals and climate change, so 603 does not denote 603 distinct questions.
+
+A step denotes one reference tool invocation, rather than one scientific operation or a direct measure of scientific difficulty. Energy-resource and ocean-carbon task wrappers, for example, can perform several operations internally. Chain-length strata therefore describe orchestration demands under the current interfaces. A reference chain is one valid implementation; a different valid order is not automatically incorrect. Domain and chain-length groups describe task backgrounds and interface-level workflow composition, respectively.
+
+Final Answer Score (FAS) lies in $[0,1]$ and retains partial credit. Scoring normalizes multiple-choice answers, matches dates and identifiers, applies numerical tolerances to scalars, scores matches among multiple values or text items, and compares structured fields. Empty answers receive zero. For $N$ records,
+\begin{equation}
+\overline{FAS} = \frac{1}{N}\sum_{i = 1}^{N}{FAS}_{i}
+\label{eq:fas}
+\end{equation}
+The main experiment uses $N=603$; group scores average their respective records with failures retained. This task-level micro-average differs from domain-balanced macro-averages and full-credit rates. FAS assesses agreement with reference answers. Process analysis additionally requires actual parameters, outputs, and traces to assess operation selection, bindings, and artifact consumption.

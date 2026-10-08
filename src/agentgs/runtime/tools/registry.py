@@ -1,10 +1,11 @@
 from dataclasses import dataclass
+from functools import partial
 from typing import Callable
 
 from pydantic import Field
 
 from agentgs.contracts.models import Model, ToolSpec
-from agentgs.runtime.tools.domains.geosparql import SnapshotQuery
+from agentgs.runtime.tools.domains.geosparql import SnapshotQuery, replay_query
 from agentgs.skills.definitions import load_tool_scope
 
 
@@ -26,6 +27,7 @@ def builtin_tools():
     from pydantic import RootModel
 
     from agentgs.contracts.catalog import load_catalog
+    from agentgs.runtime.tools.dispatch import execute_domain
 
     class Arguments(RootModel[dict[str, Any]]):
         pass
@@ -38,12 +40,21 @@ def builtin_tools():
             continue
         schema = SnapshotQuery if name == "GeoBigDataExecuteGeoSPARQL" else Arguments
         lookup = name.startswith(
-            ("DeepEarthQueryLITHO", "DeepEarthQuerySEMUCB", "DeepEarthSample", "Ocean")
+            ("DeepEarthQueryLITHO", "DeepEarthQuerySEMUCB", "DeepEarthSample")
         ) or name in {
             "EnergyCapacityValue",
             "EnergyNearestFacility",
+            "EnergyNearestMineralSite",
             "EnergyCountryRenewableSummary",
             "EnergyTransitionMetrics",
+            "OceanMonthlyGridValue",
+            "OceanProfileValue",
+            "OceanCruiseQC",
+            "OceanAnnualCarbonSummary",
+            "OceanVerticalProfileDifference",
+            "OceanRegionalMapSummary",
+            "OceanSurfaceDeepMatch",
+            "OceanProfileDeduplication",
         }
         result[name] = RegisteredTool(
             ToolSpec(
@@ -55,7 +66,7 @@ def builtin_tools():
                 legacy_output=row["Output"],
             ),
             schema,
-            None,
+            replay_query if name == "GeoBigDataExecuteGeoSPARQL" else partial(execute_domain, name),
             source_type="derived_lookup"
             if lookup or name == "GeoBigDataExecuteGeoSPARQL"
             else "raw_compute",

@@ -151,6 +151,6 @@ class ExecutionService:
             max_attempts=3,
             trace_list=self.state.trace,
             producer_step=f"tool_step_{execution_context['execution_index']:02d}"
-            if execution_context
+            if execution_context and isinstance(execution_context.get("execution_index"), int)
             else "",
         )

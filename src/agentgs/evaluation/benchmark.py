@@ -50,12 +50,21 @@ def public_input(task, *, planning_mode="skill_guided", require_llm=True, output
 
 def usage_summary(calls):
     usages = [call.get("usage") for call in calls or []]
-    complete = bool(usages) and all(
-        isinstance(usage, dict) and usage.get("total_tokens") is not None for usage in usages
+    complete = (
+        bool(usages)
+        and all(
+            isinstance(usage, dict) and usage.get("total_tokens") is not None for usage in usages
+        )
+        and all(call.get("attempts", 1) == 1 for call in calls or [])
     )
     return {
         "usage_complete": complete,
         "total_tokens": sum(
+            int(usage.get("total_tokens") or 0) for usage in usages if isinstance(usage, dict)
+        )
+        if complete
+        else None,
+        "reported_tokens": sum(
             int(usage.get("total_tokens") or 0) for usage in usages if isinstance(usage, dict)
         ),
     }
@@ -136,6 +145,39 @@ def score_predictions(workbook, predictions, output, *, allow_partial=False):
     if not allow_partial and seen != set(tasks):
         raise ValueError("Complete benchmark scoring requires every frozen task ID")
     report = summarize(rows, len(tasks))
+    manifest = workbook.parent / "version_manifest.json"
+    if manifest.exists():
+        metadata = json.loads(manifest.read_text())
+        root = workbook.parent.parent.parent
+        path = root / metadata["compatibility_contracts"]
+        formats = {
+            row["question_id"]: row["answer_format"]
+            for row in (json.loads(line) for line in path.read_text().splitlines() if line.strip())
+        }
+        from agentgs.evaluation.metrics.compatibility import VERSION, score_compatible
+
+        records = [
+            json.loads(line)
+            for line in predictions.read_text("utf-8-sig").splitlines()
+            if line.strip()
+        ]
+        compatibility = [
+            {
+                "question_id": int(record.get("question_id", record.get("case_id"))),
+                "result": score_compatible(
+                    tasks[int(record.get("question_id", record.get("case_id")))],
+                    record.get("final_answer", record.get("answer", "")),
+                    formats[int(record.get("question_id", record.get("case_id")))],
+                ),
+            }
+            for record in records
+        ]
+        report["compatibility"] = {
+            "protocol": VERSION,
+            "format_version": "1.1",
+            "results": compatibility,
+            "note": "Separate historical compatibility scores; frozen FAS and composite metrics above are unchanged.",
+        }
     write_json(output, report)
     return report
 
@@ -223,9 +265,8 @@ async def run_benchmark(
             write_json(attempt / "task_record.json", result.model_dump(mode="json"))
             answer = result.result.answer if result.result else ""
             trace = result.result.trace if result.result else []
-            scored = score_prediction(
-                task, answer, trace, usage_summary(result.result.usage if result.result else [])
-            )
+            tokens = usage_summary(result.result.usage if result.result else [])
+            scored = score_prediction(task, answer, trace, tokens)
             row = {
                 **scored,
                 "status": result.status.value,
@@ -233,6 +274,8 @@ async def run_benchmark(
                 "final_answer": answer,
                 "attempt": number,
                 "error": result.error.model_dump() if result.error else None,
+                "trace": trace,
+                "token_usage": tokens,
             }
             write_json(attempt / "score.json", row)
             write_json(current, row)
@@ -255,6 +298,8 @@ async def run_benchmark(
                             "question_id": row["question_id"],
                             "final_answer": row["final_answer"],
                             "status": row["status"],
+                            "trace": row.get("trace", []),
+                            "token_usage": row.get("token_usage"),
                         },
                         ensure_ascii=False,
                     )

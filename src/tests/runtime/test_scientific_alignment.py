@@ -21,3 +21,30 @@ def test_actual_scientific_results_match_original_source(case, tmp_path):
     with tool_context(ROOT, tmp_path):
         actual = json.loads(execute_domain(case["tool"], case["arguments"]))
     assert actual == case["expected"]
+
+
+SYNTHETIC = json.loads((ROOT / "src/tests/fixtures/scientific/synthetic.json").read_text("utf-8"))
+
+
+@pytest.mark.parametrize("case", SYNTHETIC["cases"], ids=lambda c: c["tool"])
+def test_portable_raster_and_spatial_source_decisions(case, tmp_path):
+    if importlib.util.find_spec("rasterio") is None:
+        pytest.skip("Scientific raster extra is required")
+    from agentgs.evaluation.scientific import bind_inputs, create_inputs, observe_result
+
+    inputs = create_inputs(tmp_path)
+    outputs = tmp_path / "outputs"
+    with tool_context(tmp_path, outputs):
+        actual = json.loads(execute_domain(case["tool"], bind_inputs(case["arguments"], inputs)))
+    expected = {
+        **case["expected"],
+        "images": {
+            name: {
+                key: value
+                for key, value in image.items()
+                if key != "full_image_sha256_diagnostic_only"
+            }
+            for name, image in case["expected"]["images"].items()
+        },
+    }
+    assert observe_result(actual, inputs, outputs) == expected

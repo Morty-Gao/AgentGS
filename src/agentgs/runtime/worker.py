@@ -7,7 +7,7 @@ from agentgs.agent.base import AgentContext
 from agentgs.agent.engine import AgentEngine
 from agentgs.agent.planning.skills import builtin_planner
 from agentgs.agent.retrieval.skills import KeywordSkillRetriever
-from agentgs.agent.retrieval.tools import KGToolRetriever
+from agentgs.agent.retrieval.tools import KGToolRetriever, LazyToolRetriever
 from agentgs.agent.state import AgentExecutionError
 from agentgs.client.config import load_llm
 from agentgs.client.embedding import LocalEmbedding
@@ -48,15 +48,21 @@ async def execute(root, work, spec, settings):
         paths = ToolPaths.create(root, artifacts.root)
         contracts = AnswerContracts(root)
         retriever = None
-        if (root / options.index_path / "index_store.json").exists():
-            retriever = KGToolRetriever.from_directory(
-                root / options.index_path,
-                LocalEmbedding(
-                    root / options.model_cache,
-                    options.embedding_model,
-                    options.embedding_threads,
-                    options.embedding_batch_size,
-                ),
+        if (
+            not spec.input.calls
+            and spec.input.algorithm != "prototype"
+            and (root / options.index_path / "index_store.json").exists()
+        ):
+            retriever = LazyToolRetriever(
+                lambda: KGToolRetriever.from_directory(
+                    root / options.index_path,
+                    LocalEmbedding(
+                        root / options.model_cache,
+                        options.embedding_model,
+                        options.embedding_threads,
+                        options.embedding_batch_size,
+                    ),
+                )
             )
 
         def checkpoint(result):

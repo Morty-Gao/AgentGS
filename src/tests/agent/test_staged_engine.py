@@ -67,6 +67,17 @@ class Client:
         return ChatReply(message={"role": "assistant", "content": value})
 
 
+class StageClient:
+    async def text(self, prompt, *, stage, **kwargs):
+        if stage == "skill_tool_planning":
+            text = self.plan
+        elif stage == "tool_argument_generation":
+            text = 'Input:{"x":[1,2,3],"a":2,"b":1}'
+        else:
+            text = "IsCompleted:Completed\nFinalAnswer:2"
+        return ChatReply(message={"role": "assistant", "content": text})
+
+
 def context(tools, client, strict=True):
     return AgentContext(
         tools,
@@ -119,6 +130,23 @@ async def test_final_answer_failure_never_replays_successful_tools():
     assert caught.value.result.tool_chain_completed is True
     assert caught.value.result.answer_generation_status == "failed"
     assert caught.value.result.tool_results[0].succeeded
+    assert caught.value.result.usage[-1]["usage"] is None
+    assert caught.value.result.usage[-1]["status"] == "failed"
+
+
+async def test_final_authentication_error_preserves_status_for_benchmark_abort():
+    from agentgs.client.errors import ProviderError
+
+    tools = Tools()
+    client = Client(
+        ["Plan Chain:\n['RemoteSensingMean']", 'Input:{"x":[1,2,3]}', ProviderError(401)]
+    )
+    with pytest.raises(AgentExecutionError) as caught:
+        await AgentEngine().run(
+            TaskInput(question="Compute the requested statistic."), context(tools, client)
+        )
+    assert caught.value.status_code == 401 and "HTTP 401" in str(caught.value)
+    assert len(tools.calls) == 1
 
 
 async def test_exhausted_repairs_still_generate_an_explicit_incomplete_answer():
@@ -156,3 +184,38 @@ async def test_unsupported_numeric_answer_is_preserved_and_marked_incomplete():
     )
     assert result.answer == "999" and result.completion_status == "Not Completed"
     assert result.tool_chain_completed
+
+
+async def test_replanning_reuses_successful_name_prefix_after_three_atomic_failures():
+    class RepairTools(Tools):
+        async def execute(self, call):
+            self.fail = (
+                call.tool == "RemoteSensingDifference"
+                and sum(row.tool == call.tool for row in self.calls) < 3
+            )
+            return await super().execute(call)
+
+    tools = RepairTools()
+    plan = "Plan Chain:\n['RemoteSensingMean', 'RemoteSensingDifference']"
+    client = StageClient()
+    client.plan = plan
+    result = await AgentEngine().run(
+        TaskInput(question="Compute the requested statistic."), context(tools, client, False)
+    )
+    assert [row.tool for row in tools.calls] == ["RemoteSensingMean"] + [
+        "RemoteSensingDifference"
+    ] * 4
+    assert result.tool_chain_completed and result.answer == "2"
+    resumed = [row for row in result.trace if row["type"] == "plan_resume"]
+    assert resumed[0]["skipped_successful_prefix"] == ["RemoteSensingMean"]
+
+
+async def test_strict_model_plan_preserves_duplicate_tool_instances():
+    tools = Tools()
+    client = StageClient()
+    client.plan = "Plan Chain:\n['RemoteSensingMean', 'RemoteSensingMean']"
+    result = await AgentEngine().run(
+        TaskInput(question="Compute independent statistics."), context(tools, client)
+    )
+    assert len(tools.calls) == 2 and result.tool_chain_completed
+    assert tools.calls[0].id != tools.calls[1].id

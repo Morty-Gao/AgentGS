@@ -279,12 +279,15 @@ def _remote_asset_groups(resource: Any, text: str = "") -> list[list[Path]]:
     name = Path(resource.replace("\\", "/")).name
     if not name:
         return []
+    from agentgs.contracts.resources import resolve_resource_path
+
     roots = (
-        Path(resource),
-        Path("data/benchmarks/earthbench_geotoolagent/assets") / name,
-        Path("benchmark/data") / name,
+        resource,
+        str(Path("data/benchmarks/earthbench_geotoolagent/assets") / name),
+        str(Path("benchmark/data") / name),
     )
-    directory = next((root for root in roots if root.is_dir()), None)
+    resolved = [resolve_resource_path(root) for root in roots]
+    directory = next((root for root in resolved if root is not None and root.is_dir()), None)
     if directory is None:
         return []
     files = [path for path in directory.iterdir() if path.is_file()]

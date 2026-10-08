@@ -8,11 +8,7 @@ from agentgs.skills.definitions import load_tool_scope
 
 def catalog_query():
     return TaskInput(
-        calls=[
-            ToolCall(
-                tool="DeepEarthQueryUSGSCatalog", arguments={"min_magnitude": 8}
-            )
-        ]
+        calls=[ToolCall(tool="DeepEarthQueryUSGSCatalog", arguments={"min_magnitude": 8})]
     )
 
 

@@ -1,0 +1,2639 @@
+{
+  "cases": [
+    {
+      "tool": "DeepTimeDecimalToDMS",
+      "arguments": {
+        "value": -116.4,
+        "axis": "longitude"
+      },
+      "expected": {
+        "result": {
+          "axis": "longitude",
+          "decimal_degrees": -116.4,
+          "dms": "116°24'0.00\" -"
+        },
+        "rasters": {},
+        "vectors": {},
+        "images": {}
+      }
+    },
+    {
+      "tool": "DeepTimeHaversineDistance",
+      "arguments": {
+        "lat1": 0,
+        "lon1": 0,
+        "lat2": 1,
+        "lon2": 1
+      },
+      "expected": {
+        "result": {
+          "distance_km": 157.2495984740402
+        },
+        "rasters": {},
+        "vectors": {},
+        "images": {}
+      }
+    },
+    {
+      "tool": "DeepTimeBearing",
+      "arguments": {
+        "lat1": 0,
+        "lon1": 0,
+        "lat2": 1,
+        "lon2": 1
+      },
+      "expected": {
+        "result": {
+          "bearing_degrees": 44.99563645534488
+        },
+        "rasters": {},
+        "vectors": {},
+        "images": {}
+      }
+    },
+    {
+      "tool": "DeepTimeBBoxArea",
+      "arguments": {
+        "bbox": [
+          0,
+          0,
+          1,
+          1
+        ]
+      },
+      "expected": {
+        "result": {
+          "area_km2": 12363.718145180046,
+          "bbox": [
+            0,
+            0,
+            1,
+            1
+          ]
+        },
+        "rasters": {},
+        "vectors": {},
+        "images": {}
+      }
+    },
+    {
+      "tool": "CCSDecimalToDMS",
+      "arguments": {
+        "value": -116.4,
+        "axis": "longitude"
+      },
+      "expected": {
+        "result": {
+          "axis": "longitude",
+          "decimal_degrees": -116.4,
+          "dms": "116°24'0.00\" -"
+        },
+        "rasters": {},
+        "vectors": {},
+        "images": {}
+      }
+    },
+    {
+      "tool": "CCSHaversineDistance",
+      "arguments": {
+        "lat1": 0,
+        "lon1": 0,
+        "lat2": 1,
+        "lon2": 1
+      },
+      "expected": {
+        "result": {
+          "distance_km": 157.2495984740402
+        },
+        "rasters": {},
+        "vectors": {},
+        "images": {}
+      }
+    },
+    {
+      "tool": "CCSBearing",
+      "arguments": {
+        "lat1": 0,
+        "lon1": 0,
+        "lat2": 1,
+        "lon2": 1
+      },
+      "expected": {
+        "result": {
+          "bearing_degrees": 44.99563645534488
+        },
+        "rasters": {},
+        "vectors": {},
+        "images": {}
+      }
+    },
+    {
+      "tool": "CCSBBoxArea",
+      "arguments": {
+        "bbox": [
+          0,
+          0,
+          1,
+          1
+        ]
+      },
+      "expected": {
+        "result": {
+          "area_km2": 12363.718145180046,
+          "bbox": [
+            0,
+            0,
+            1,
+            1
+          ]
+        },
+        "rasters": {},
+        "vectors": {},
+        "images": {}
+      }
+    },
+    {
+      "tool": "RemoteSensingBatchImageMean",
+      "arguments": {
+        "file_list": [
+          "$DATA/first.tif",
+          "$DATA/second.tif"
+        ],
+        "threshold": 3,
+        "rs_statistic_mode": "per_scene_statistics"
+      },
+      "expected": {
+        "result": {
+          "comparison": null,
+          "empty_acquisition_policy": "error",
+          "input_interpretation": [
+            {
+              "band": 1,
+              "nodata": -9999.0,
+              "offset": 0.0,
+              "quality_mask_applied": false,
+              "range_source": "nodata and finite observations only",
+              "scale": 1.0,
+              "scale_source": "GDAL band scale/offset",
+              "source": "$DATA/first.tif",
+              "valid_raw_range_inclusive": null
+            },
+            {
+              "band": 1,
+              "nodata": -9999.0,
+              "offset": 0.0,
+              "quality_mask_applied": false,
+              "range_source": "nodata and finite observations only",
+              "scale": 1.0,
+              "scale_source": "GDAL band scale/offset",
+              "source": "$DATA/second.tif",
+              "valid_raw_range_inclusive": null
+            }
+          ],
+          "rs_statistic_mode": "per_scene_statistics",
+          "skipped_acquisitions": [],
+          "statistic": "mean",
+          "threshold": null,
+          "thresholds": null,
+          "values": [
+            {
+              "finite_pixels": 5,
+              "path": "$DATA/first.tif",
+              "value": 6.0
+            },
+            {
+              "finite_pixels": 5,
+              "path": "$DATA/second.tif",
+              "value": 3.2
+            }
+          ]
+        },
+        "rasters": {},
+        "vectors": {},
+        "images": {}
+      }
+    },
+    {
+      "tool": "RemoteSensingBatchImageSum",
+      "arguments": {
+        "file_list": [
+          "$DATA/first.tif",
+          "$DATA/second.tif"
+        ],
+        "threshold": 3,
+        "rs_statistic_mode": "per_scene_statistics"
+      },
+      "expected": {
+        "result": {
+          "comparison": null,
+          "empty_acquisition_policy": "error",
+          "input_interpretation": [
+            {
+              "band": 1,
+              "nodata": -9999.0,
+              "offset": 0.0,
+              "quality_mask_applied": false,
+              "range_source": "nodata and finite observations only",
+              "scale": 1.0,
+              "scale_source": "GDAL band scale/offset",
+              "source": "$DATA/first.tif",
+              "valid_raw_range_inclusive": null
+            },
+            {
+              "band": 1,
+              "nodata": -9999.0,
+              "offset": 0.0,
+              "quality_mask_applied": false,
+              "range_source": "nodata and finite observations only",
+              "scale": 1.0,
+              "scale_source": "GDAL band scale/offset",
+              "source": "$DATA/second.tif",
+              "valid_raw_range_inclusive": null
+            }
+          ],
+          "skipped_acquisitions": [],
+          "statistic": "sum",
+          "threshold": null,
+          "thresholds": null,
+          "values": [
+            {
+              "finite_pixels": 5,
+              "path": "$DATA/first.tif",
+              "value": 30.0
+            },
+            {
+              "finite_pixels": 5,
+              "path": "$DATA/second.tif",
+              "value": 16.0
+            }
+          ]
+        },
+        "rasters": {},
+        "vectors": {},
+        "images": {}
+      }
+    },
+    {
+      "tool": "RemoteSensingBatchHotspotPercentage",
+      "arguments": {
+        "file_list": [
+          "$DATA/first.tif",
+          "$DATA/second.tif"
+        ],
+        "threshold": 3,
+        "rs_statistic_mode": "per_scene_statistics"
+      },
+      "expected": {
+        "result": {
+          "comparison": "above",
+          "empty_acquisition_policy": "error",
+          "input_interpretation": [
+            {
+              "band": 1,
+              "nodata": -9999.0,
+              "offset": 0.0,
+              "quality_mask_applied": false,
+              "range_source": "nodata and finite observations only",
+              "scale": 1.0,
+              "scale_source": "GDAL band scale/offset",
+              "source": "$DATA/first.tif",
+              "valid_raw_range_inclusive": null
+            },
+            {
+              "band": 1,
+              "nodata": -9999.0,
+              "offset": 0.0,
+              "quality_mask_applied": false,
+              "range_source": "nodata and finite observations only",
+              "scale": 1.0,
+              "scale_source": "GDAL band scale/offset",
+              "source": "$DATA/second.tif",
+              "valid_raw_range_inclusive": null
+            }
+          ],
+          "skipped_acquisitions": [],
+          "statistic": "hotspot_percentage",
+          "threshold": 3.0,
+          "thresholds": null,
+          "values": [
+            {
+              "finite_pixels": 5,
+              "path": "$DATA/first.tif",
+              "value": 80.0
+            },
+            {
+              "finite_pixels": 5,
+              "path": "$DATA/second.tif",
+              "value": 40.0
+            }
+          ]
+        },
+        "rasters": {},
+        "vectors": {},
+        "images": {}
+      }
+    },
+    {
+      "tool": "RemoteSensingBatchImageMean",
+      "arguments": {
+        "file_list": [
+          "$DATA/first.tif",
+          "$DATA/second.tif"
+        ],
+        "rs_statistic_mode": "pixelwise_composite",
+        "output_path": "composite.tif"
+      },
+      "expected": {
+        "result": {
+          "average_raster": "$OUTPUT/0.tif",
+          "comparison": null,
+          "empty_acquisition_policy": "error",
+          "input_interpretation": [
+            {
+              "band": 1,
+              "nodata": -9999.0,
+              "offset": 0.0,
+              "quality_mask_applied": false,
+              "range_source": "nodata and finite observations only",
+              "scale": 1.0,
+              "scale_source": "GDAL band scale/offset",
+              "source": "$DATA/first.tif",
+              "valid_raw_range_inclusive": null
+            },
+            {
+              "band": 1,
+              "nodata": -9999.0,
+              "offset": 0.0,
+              "quality_mask_applied": false,
+              "range_source": "nodata and finite observations only",
+              "scale": 1.0,
+              "scale_source": "GDAL band scale/offset",
+              "source": "$DATA/second.tif",
+              "valid_raw_range_inclusive": null
+            }
+          ],
+          "rs_statistic_mode": "pixelwise_composite",
+          "skipped_acquisitions": [],
+          "statistic": "mean",
+          "threshold": null,
+          "thresholds": null,
+          "values": [
+            {
+              "finite_pixels": 5,
+              "path": "$DATA/first.tif",
+              "value": 6.0
+            },
+            {
+              "finite_pixels": 5,
+              "path": "$DATA/second.tif",
+              "value": 3.2
+            }
+          ]
+        },
+        "rasters": {
+          "$OUTPUT/0.tif": {
+            "values": [
+              [
+                1.5,
+                3.0,
+                3.0
+              ],
+              [
+                5.0,
+                8.0,
+                8.0
+              ]
+            ],
+            "crs": "EPSG:4326",
+            "transform": [
+              1.0,
+              0.0,
+              0.0,
+              0.0,
+              -1.0,
+              2.0,
+              0.0,
+              0.0,
+              1.0
+            ],
+            "scales": [
+              1.0
+            ],
+            "offsets": [
+              0.0
+            ]
+          }
+        },
+        "vectors": {},
+        "images": {}
+      }
+    },
+    {
+      "tool": "RemoteSensingBatchImageMean",
+      "arguments": {
+        "file_list": [
+          "$DATA/scaled.tif"
+        ],
+        "rs_statistic_mode": "per_scene_statistics"
+      },
+      "expected": {
+        "result": {
+          "comparison": null,
+          "empty_acquisition_policy": "error",
+          "input_interpretation": [
+            {
+              "band": 1,
+              "nodata": -9999.0,
+              "offset": 1.0,
+              "quality_mask_applied": false,
+              "range_source": "explicit band valid_range",
+              "scale": 0.5,
+              "scale_source": "GDAL band scale/offset",
+              "source": "$DATA/scaled.tif",
+              "valid_raw_range_inclusive": [
+                0.0,
+                6.0
+              ]
+            }
+          ],
+          "rs_statistic_mode": "per_scene_statistics",
+          "skipped_acquisitions": [],
+          "statistic": "mean",
+          "threshold": null,
+          "thresholds": null,
+          "values": [
+            {
+              "finite_pixels": 4,
+              "path": "$DATA/scaled.tif",
+              "value": 2.5
+            }
+          ]
+        },
+        "rasters": {},
+        "vectors": {},
+        "images": {}
+      }
+    },
+    {
+      "tool": "RemoteSensingBatchImageMean",
+      "arguments": {
+        "file_list": [
+          "$DATA/first.tif",
+          "$DATA/shifted.tif"
+        ]
+      },
+      "expected": {
+        "result": {
+          "error": "Raster arithmetic requires matching dimensions, CRS and affine grid; reproject explicitly first",
+          "error_type": "UnsupportedOperation",
+          "status": "error",
+          "tool": "RemoteSensingBatchImageMean"
+        },
+        "rasters": {},
+        "vectors": {},
+        "images": {}
+      }
+    },
+    {
+      "tool": "RemoteSensingBatchNDSI",
+      "arguments": {
+        "green_file_list": [
+          "$DATA/first.tif"
+        ],
+        "swir_file_list": [
+          "$DATA/second.tif"
+        ],
+        "output_path_list": [
+          "ndsi.tif"
+        ]
+      },
+      "expected": {
+        "result": {
+          "outputs": [
+            {
+              "finite_pixels": 4,
+              "formula": "(first - second) / (first + second)",
+              "input_interpretation": [
+                {
+                  "band": 1,
+                  "nodata": -9999.0,
+                  "offset": 0.0,
+                  "quality_mask_applied": false,
+                  "range_source": "nodata and finite observations only",
+                  "scale": 1.0,
+                  "scale_source": "GDAL band scale/offset",
+                  "source": "$DATA/first.tif",
+                  "valid_raw_range_inclusive": null
+                },
+                {
+                  "band": 1,
+                  "nodata": -9999.0,
+                  "offset": 0.0,
+                  "quality_mask_applied": false,
+                  "range_source": "nodata and finite observations only",
+                  "scale": 1.0,
+                  "scale_source": "GDAL band scale/offset",
+                  "source": "$DATA/second.tif",
+                  "valid_raw_range_inclusive": null
+                }
+              ],
+              "mean": 0.2791666666666667,
+              "output_path": "$OUTPUT/0.tif"
+            }
+          ]
+        },
+        "rasters": {
+          "$OUTPUT/0.tif": {
+            "values": [
+              [
+                0.3333333333333333,
+                0.3333333333333333,
+                null
+              ],
+              [
+                0.2,
+                null,
+                0.25
+              ]
+            ],
+            "crs": "EPSG:4326",
+            "transform": [
+              1.0,
+              0.0,
+              0.0,
+              0.0,
+              -1.0,
+              2.0,
+              0.0,
+              0.0,
+              1.0
+            ],
+            "scales": [
+              1.0
+            ],
+            "offsets": [
+              0.0
+            ]
+          }
+        },
+        "vectors": {},
+        "images": {}
+      }
+    },
+    {
+      "tool": "RemoteSensingNDVI",
+      "arguments": {
+        "input_nir_path": "$DATA/first.tif",
+        "input_red_path": "$DATA/second.tif",
+        "output_path": "ndvi.tif"
+      },
+      "expected": {
+        "result": {
+          "finite_pixels": 4,
+          "formula": "(first - second) / (first + second)",
+          "input_interpretation": [
+            {
+              "band": 1,
+              "nodata": -9999.0,
+              "offset": 0.0,
+              "quality_mask_applied": false,
+              "range_source": "nodata and finite observations only",
+              "scale": 1.0,
+              "scale_source": "GDAL band scale/offset",
+              "source": "$DATA/first.tif",
+              "valid_raw_range_inclusive": null
+            },
+            {
+              "band": 1,
+              "nodata": -9999.0,
+              "offset": 0.0,
+              "quality_mask_applied": false,
+              "range_source": "nodata and finite observations only",
+              "scale": 1.0,
+              "scale_source": "GDAL band scale/offset",
+              "source": "$DATA/second.tif",
+              "valid_raw_range_inclusive": null
+            }
+          ],
+          "mean": 0.2791666666666667,
+          "output_path": "$OUTPUT/0.tif"
+        },
+        "rasters": {
+          "$OUTPUT/0.tif": {
+            "values": [
+              [
+                0.3333333333333333,
+                0.3333333333333333,
+                null
+              ],
+              [
+                0.2,
+                null,
+                0.25
+              ]
+            ],
+            "crs": "EPSG:4326",
+            "transform": [
+              1.0,
+              0.0,
+              0.0,
+              0.0,
+              -1.0,
+              2.0,
+              0.0,
+              0.0,
+              1.0
+            ],
+            "scales": [
+              1.0
+            ],
+            "offsets": [
+              0.0
+            ]
+          }
+        },
+        "vectors": {},
+        "images": {}
+      }
+    },
+    {
+      "tool": "RemoteSensingNBR",
+      "arguments": {
+        "input_nir_path": "$DATA/first.tif",
+        "input_swir_path": "$DATA/second.tif",
+        "output_path": "nbr.tif"
+      },
+      "expected": {
+        "result": {
+          "finite_pixels": 4,
+          "formula": "(first - second) / (first + second)",
+          "input_interpretation": [
+            {
+              "band": 1,
+              "nodata": -9999.0,
+              "offset": 0.0,
+              "quality_mask_applied": false,
+              "range_source": "nodata and finite observations only",
+              "scale": 1.0,
+              "scale_source": "GDAL band scale/offset",
+              "source": "$DATA/first.tif",
+              "valid_raw_range_inclusive": null
+            },
+            {
+              "band": 1,
+              "nodata": -9999.0,
+              "offset": 0.0,
+              "quality_mask_applied": false,
+              "range_source": "nodata and finite observations only",
+              "scale": 1.0,
+              "scale_source": "GDAL band scale/offset",
+              "source": "$DATA/second.tif",
+              "valid_raw_range_inclusive": null
+            }
+          ],
+          "mean": 0.2791666666666667,
+          "output_path": "$OUTPUT/0.tif"
+        },
+        "rasters": {
+          "$OUTPUT/0.tif": {
+            "values": [
+              [
+                0.3333333333333333,
+                0.3333333333333333,
+                null
+              ],
+              [
+                0.2,
+                null,
+                0.25
+              ]
+            ],
+            "crs": "EPSG:4326",
+            "transform": [
+              1.0,
+              0.0,
+              0.0,
+              0.0,
+              -1.0,
+              2.0,
+              0.0,
+              0.0,
+              1.0
+            ],
+            "scales": [
+              1.0
+            ],
+            "offsets": [
+              0.0
+            ]
+          }
+        },
+        "vectors": {},
+        "images": {}
+      }
+    },
+    {
+      "tool": "RemoteSensingNDWI",
+      "arguments": {
+        "input_swir_path": "$DATA/first.tif",
+        "input_nir_path": "$DATA/second.tif",
+        "output_path": "ndwi.tif"
+      },
+      "expected": {
+        "result": {
+          "finite_pixels": 4,
+          "formula": "(first - second) / (first + second)",
+          "input_interpretation": [
+            {
+              "band": 1,
+              "nodata": -9999.0,
+              "offset": 0.0,
+              "quality_mask_applied": false,
+              "range_source": "nodata and finite observations only",
+              "scale": 1.0,
+              "scale_source": "GDAL band scale/offset",
+              "source": "$DATA/first.tif",
+              "valid_raw_range_inclusive": null
+            },
+            {
+              "band": 1,
+              "nodata": -9999.0,
+              "offset": 0.0,
+              "quality_mask_applied": false,
+              "range_source": "nodata and finite observations only",
+              "scale": 1.0,
+              "scale_source": "GDAL band scale/offset",
+              "source": "$DATA/second.tif",
+              "valid_raw_range_inclusive": null
+            }
+          ],
+          "mean": 0.2791666666666667,
+          "output_path": "$OUTPUT/0.tif"
+        },
+        "rasters": {
+          "$OUTPUT/0.tif": {
+            "values": [
+              [
+                0.3333333333333333,
+                0.3333333333333333,
+                null
+              ],
+              [
+                0.2,
+                null,
+                0.25
+              ]
+            ],
+            "crs": "EPSG:4326",
+            "transform": [
+              1.0,
+              0.0,
+              0.0,
+              0.0,
+              -1.0,
+              2.0,
+              0.0,
+              0.0,
+              1.0
+            ],
+            "scales": [
+              1.0
+            ],
+            "offsets": [
+              0.0
+            ]
+          }
+        },
+        "vectors": {},
+        "images": {}
+      }
+    },
+    {
+      "tool": "RemoteSensingNDTI",
+      "arguments": {
+        "input_pairs": [
+          {
+            "input_green_path": "$DATA/first.tif",
+            "input_red_path": "$DATA/second.tif",
+            "output_filename": "ndti.tif"
+          }
+        ]
+      },
+      "expected": {
+        "result": {
+          "outputs": [
+            {
+              "finite_pixels": 4,
+              "formula": "(first - second) / (first + second)",
+              "input_interpretation": [
+                {
+                  "band": 1,
+                  "nodata": -9999.0,
+                  "offset": 0.0,
+                  "quality_mask_applied": false,
+                  "range_source": "nodata and finite observations only",
+                  "scale": 1.0,
+                  "scale_source": "GDAL band scale/offset",
+                  "source": "$DATA/first.tif",
+                  "valid_raw_range_inclusive": null
+                },
+                {
+                  "band": 1,
+                  "nodata": -9999.0,
+                  "offset": 0.0,
+                  "quality_mask_applied": false,
+                  "range_source": "nodata and finite observations only",
+                  "scale": 1.0,
+                  "scale_source": "GDAL band scale/offset",
+                  "source": "$DATA/second.tif",
+                  "valid_raw_range_inclusive": null
+                }
+              ],
+              "mean": 0.2791666666666667,
+              "output_path": "$OUTPUT/0.tif"
+            }
+          ]
+        },
+        "rasters": {
+          "$OUTPUT/0.tif": {
+            "values": [
+              [
+                0.3333333333333333,
+                0.3333333333333333,
+                null
+              ],
+              [
+                0.2,
+                null,
+                0.25
+              ]
+            ],
+            "crs": "EPSG:4326",
+            "transform": [
+              1.0,
+              0.0,
+              0.0,
+              0.0,
+              -1.0,
+              2.0,
+              0.0,
+              0.0,
+              1.0
+            ],
+            "scales": [
+              1.0
+            ],
+            "offsets": [
+              0.0
+            ]
+          }
+        },
+        "vectors": {},
+        "images": {}
+      }
+    },
+    {
+      "tool": "RemoteSensingCountAboveThreshold",
+      "arguments": {
+        "threshold": 4,
+        "file_path": "$DATA/first.tif"
+      },
+      "expected": {
+        "result": {
+          "count": 4,
+          "finite_pixels": 5,
+          "percentage": 80.0
+        },
+        "rasters": {},
+        "vectors": {},
+        "images": {}
+      }
+    },
+    {
+      "tool": "RemoteSensingBatchHotspotRaster",
+      "arguments": {
+        "file_list": [
+          "$DATA/first.tif",
+          "$DATA/second.tif"
+        ],
+        "threshold": 4,
+        "output_path_list": [
+          "hotspot-a.tif",
+          "hotspot-b.tif"
+        ]
+      },
+      "expected": {
+        "result": {
+          "outputs": [
+            "$OUTPUT/0.tif",
+            "$OUTPUT/1.tif"
+          ],
+          "threshold": 4.0
+        },
+        "rasters": {
+          "$OUTPUT/0.tif": {
+            "values": [
+              [
+                1.0,
+                0.0,
+                null
+              ],
+              [
+                0.0,
+                0.0,
+                0.0
+              ]
+            ],
+            "crs": "EPSG:4326",
+            "transform": [
+              1.0,
+              0.0,
+              0.0,
+              0.0,
+              -1.0,
+              2.0,
+              0.0,
+              0.0,
+              1.0
+            ],
+            "scales": [
+              1.0
+            ],
+            "offsets": [
+              0.0
+            ]
+          },
+          "$OUTPUT/1.tif": {
+            "values": [
+              [
+                1.0,
+                1.0,
+                1.0
+              ],
+              [
+                0.0,
+                null,
+                0.0
+              ]
+            ],
+            "crs": "EPSG:4326",
+            "transform": [
+              1.0,
+              0.0,
+              0.0,
+              0.0,
+              -1.0,
+              2.0,
+              0.0,
+              0.0,
+              1.0
+            ],
+            "scales": [
+              1.0
+            ],
+            "offsets": [
+              0.0
+            ]
+          }
+        },
+        "vectors": {},
+        "images": {}
+      }
+    },
+    {
+      "tool": "RemoteSensingTiffDifference",
+      "arguments": {
+        "image_a_path": "$DATA/first.tif",
+        "image_b_path": "$DATA/second.tif",
+        "output_path": "difference.tif"
+      },
+      "expected": {
+        "result": {
+          "mean": 2.25,
+          "output_path": "$OUTPUT/0.tif"
+        },
+        "rasters": {
+          "$OUTPUT/0.tif": {
+            "values": [
+              [
+                1.0,
+                2.0,
+                null
+              ],
+              [
+                2.0,
+                null,
+                4.0
+              ]
+            ],
+            "crs": "EPSG:4326",
+            "transform": [
+              1.0,
+              0.0,
+              0.0,
+              0.0,
+              -1.0,
+              2.0,
+              0.0,
+              0.0,
+              1.0
+            ],
+            "scales": [
+              1.0
+            ],
+            "offsets": [
+              0.0
+            ]
+          }
+        },
+        "vectors": {},
+        "images": {}
+      }
+    },
+    {
+      "tool": "RemoteSensingSubtract",
+      "arguments": {
+        "img1_path": "$DATA/first.tif",
+        "img2_path": "$DATA/second.tif",
+        "output_path": "subtract.tif",
+        "nodata_as_zero": true
+      },
+      "expected": {
+        "result": {
+          "mean": 2.3333333333333335,
+          "output_path": "$OUTPUT/0.tif"
+        },
+        "rasters": {
+          "$OUTPUT/0.tif": {
+            "values": [
+              [
+                1.0,
+                2.0,
+                -3.0
+              ],
+              [
+                2.0,
+                8.0,
+                4.0
+              ]
+            ],
+            "crs": "EPSG:4326",
+            "transform": [
+              1.0,
+              0.0,
+              0.0,
+              0.0,
+              -1.0,
+              2.0,
+              0.0,
+              0.0,
+              1.0
+            ],
+            "scales": [
+              1.0
+            ],
+            "offsets": [
+              0.0
+            ]
+          }
+        },
+        "vectors": {},
+        "images": {}
+      }
+    },
+    {
+      "tool": "RemoteSensingTiffAverage",
+      "arguments": {
+        "file_list": [
+          "$DATA/first.tif",
+          "$DATA/second.tif"
+        ],
+        "output_path": "average.tif"
+      },
+      "expected": {
+        "result": {
+          "finite_pixels": 6,
+          "input_count": 2,
+          "output_path": "$OUTPUT/0.tif"
+        },
+        "rasters": {
+          "$OUTPUT/0.tif": {
+            "values": [
+              [
+                1.5,
+                3.0,
+                3.0
+              ],
+              [
+                5.0,
+                8.0,
+                8.0
+              ]
+            ],
+            "crs": "EPSG:4326",
+            "transform": [
+              1.0,
+              0.0,
+              0.0,
+              0.0,
+              -1.0,
+              2.0,
+              0.0,
+              0.0,
+              1.0
+            ],
+            "scales": [
+              1.0
+            ],
+            "offsets": [
+              0.0
+            ]
+          }
+        },
+        "vectors": {},
+        "images": {}
+      }
+    },
+    {
+      "tool": "RemoteSensingNDVI",
+      "arguments": {
+        "input_nir_path": "$DATA/first.tif",
+        "input_red_path": "$DATA/shifted.tif",
+        "output_path": "invalid.tif"
+      },
+      "expected": {
+        "result": {
+          "error": "Raster arithmetic requires matching dimensions, CRS and affine grid; reproject explicitly first",
+          "error_type": "UnsupportedOperation",
+          "status": "error",
+          "tool": "RemoteSensingNDVI"
+        },
+        "rasters": {},
+        "vectors": {},
+        "images": {}
+      }
+    },
+    {
+      "tool": "DeepTimeCheckCRSConsistency",
+      "arguments": {
+        "crs_values": [
+          "EPSG:4326",
+          "EPSG:3857"
+        ]
+      },
+      "expected": {
+        "result": {
+          "error": "'No executable implementation registered for DeepTimeCheckCRSConsistency'",
+          "error_type": "KeyError",
+          "status": "error",
+          "tool": "DeepTimeCheckCRSConsistency"
+        },
+        "rasters": {},
+        "vectors": {},
+        "images": {}
+      }
+    },
+    {
+      "tool": "CCSCheckCRSConsistency",
+      "arguments": {
+        "crs_values": [
+          "EPSG:4326",
+          "EPSG:3857"
+        ]
+      },
+      "expected": {
+        "result": {
+          "consistent": false,
+          "values": [
+            "EPSG:4326",
+            "EPSG:3857"
+          ]
+        },
+        "rasters": {},
+        "vectors": {},
+        "images": {}
+      }
+    },
+    {
+      "tool": "DeepTimeStandardizeSpatialData",
+      "arguments": {
+        "input_path": "$DATA/points.geojson"
+      },
+      "expected": {
+        "result": {
+          "skipped_layers": [],
+          "standardized_layers": [
+            {
+              "crs": "EPSG:4326",
+              "feature_count": 3,
+              "output": "$OUTPUT/0.geojson",
+              "source": "$DATA/points.geojson"
+            }
+          ]
+        },
+        "rasters": {},
+        "vectors": {
+          "$OUTPUT/0.geojson": {
+            "type": "FeatureCollection",
+            "crs": {
+              "type": "name",
+              "properties": {
+                "name": "EPSG:4326"
+              }
+            },
+            "features": [
+              {
+                "type": "Feature",
+                "geometry": {
+                  "type": "Point",
+                  "coordinates": [
+                    0.5,
+                    1.5
+                  ]
+                },
+                "properties": {
+                  "value": 1,
+                  "age": 1,
+                  "case_id": "0"
+                }
+              },
+              {
+                "type": "Feature",
+                "geometry": {
+                  "type": "Point",
+                  "coordinates": [
+                    1.5,
+                    0.5
+                  ]
+                },
+                "properties": {
+                  "value": 3,
+                  "age": 3,
+                  "case_id": "1"
+                }
+              },
+              {
+                "type": "Feature",
+                "geometry": {
+                  "type": "Point",
+                  "coordinates": [
+                    2.5,
+                    1.5
+                  ]
+                },
+                "properties": {
+                  "value": 5,
+                  "age": 5,
+                  "case_id": "2"
+                }
+              }
+            ]
+          }
+        },
+        "images": {}
+      }
+    },
+    {
+      "tool": "DeepTimeValidateSpatialData",
+      "arguments": {
+        "input_path": "$DATA/points.geojson"
+      },
+      "expected": {
+        "result": {
+          "skipped_layers": [],
+          "validation_reports": [
+            {
+              "clean_output": "$OUTPUT/0.geojson",
+              "duplicates_removed": 0,
+              "invalid": 0,
+              "source": "$DATA/points.geojson",
+              "valid": 3
+            }
+          ]
+        },
+        "rasters": {},
+        "vectors": {
+          "$OUTPUT/0.geojson": {
+            "type": "FeatureCollection",
+            "features": [
+              {
+                "type": "Feature",
+                "geometry": {
+                  "type": "Point",
+                  "coordinates": [
+                    0.5,
+                    1.5
+                  ]
+                },
+                "properties": {
+                  "value": 1,
+                  "age": 1,
+                  "case_id": "0"
+                }
+              },
+              {
+                "type": "Feature",
+                "geometry": {
+                  "type": "Point",
+                  "coordinates": [
+                    1.5,
+                    0.5
+                  ]
+                },
+                "properties": {
+                  "value": 3,
+                  "age": 3,
+                  "case_id": "1"
+                }
+              },
+              {
+                "type": "Feature",
+                "geometry": {
+                  "type": "Point",
+                  "coordinates": [
+                    2.5,
+                    1.5
+                  ]
+                },
+                "properties": {
+                  "value": 5,
+                  "age": 5,
+                  "case_id": "2"
+                }
+              }
+            ]
+          }
+        },
+        "images": {}
+      }
+    },
+    {
+      "tool": "DeepTimeNearestNeighbor",
+      "arguments": {
+        "input_path": "$DATA/points.geojson"
+      },
+      "expected": {
+        "result": {
+          "nearest_neighbours": [
+            {
+              "distance_km": 157.2406167863059,
+              "neighbor_index": 1,
+              "neighbor_rank": 1,
+              "source_index": 0
+            },
+            {
+              "distance_km": 157.2406167863059,
+              "neighbor_index": 0,
+              "neighbor_rank": 1,
+              "source_index": 1
+            },
+            {
+              "distance_km": 157.2406167863059,
+              "neighbor_index": 1,
+              "neighbor_rank": 1,
+              "source_index": 2
+            }
+          ],
+          "neighbor_count": 1
+        },
+        "rasters": {},
+        "vectors": {},
+        "images": {}
+      }
+    },
+    {
+      "tool": "DeepTimeBuffer",
+      "arguments": {
+        "input_path": "$DATA/points.geojson"
+      },
+      "expected": {
+        "result": {
+          "buffer_distances_km": [
+            50.0
+          ],
+          "buffer_output": "$OUTPUT/0.geojson",
+          "feature_count": 3,
+          "method": "spherical point-buffer envelope"
+        },
+        "rasters": {},
+        "vectors": {
+          "$OUTPUT/0.geojson": {
+            "type": "FeatureCollection",
+            "features": [
+              {
+                "type": "Feature",
+                "geometry": {
+                  "type": "Polygon",
+                  "coordinates": [
+                    [
+                      [
+                        0.05069044534186673,
+                        1.0508444125044916
+                      ],
+                      [
+                        0.9493095546581333,
+                        1.0508444125044916
+                      ],
+                      [
+                        0.9493095546581333,
+                        1.9491555874955084
+                      ],
+                      [
+                        0.05069044534186673,
+                        1.9491555874955084
+                      ],
+                      [
+                        0.05069044534186673,
+                        1.0508444125044916
+                      ]
+                    ]
+                  ]
+                },
+                "properties": {
+                  "value": 1,
+                  "age": 1,
+                  "case_id": "0",
+                  "buffer_km": 50.0
+                }
+              },
+              {
+                "type": "Feature",
+                "geometry": {
+                  "type": "Polygon",
+                  "coordinates": [
+                    [
+                      [
+                        1.050827309384775,
+                        0.05084441250449151
+                      ],
+                      [
+                        1.949172690615225,
+                        0.05084441250449151
+                      ],
+                      [
+                        1.949172690615225,
+                        0.9491555874955084
+                      ],
+                      [
+                        1.050827309384775,
+                        0.9491555874955084
+                      ],
+                      [
+                        1.050827309384775,
+                        0.05084441250449151
+                      ]
+                    ]
+                  ]
+                },
+                "properties": {
+                  "value": 3,
+                  "age": 3,
+                  "case_id": "1",
+                  "buffer_km": 50.0
+                }
+              },
+              {
+                "type": "Feature",
+                "geometry": {
+                  "type": "Polygon",
+                  "coordinates": [
+                    [
+                      [
+                        2.050690445341867,
+                        1.0508444125044916
+                      ],
+                      [
+                        2.949309554658133,
+                        1.0508444125044916
+                      ],
+                      [
+                        2.949309554658133,
+                        1.9491555874955084
+                      ],
+                      [
+                        2.050690445341867,
+                        1.9491555874955084
+                      ],
+                      [
+                        2.050690445341867,
+                        1.0508444125044916
+                      ]
+                    ]
+                  ]
+                },
+                "properties": {
+                  "value": 5,
+                  "age": 5,
+                  "case_id": "2",
+                  "buffer_km": 50.0
+                }
+              }
+            ]
+          }
+        },
+        "images": {}
+      }
+    },
+    {
+      "tool": "DeepTimeBatchVector",
+      "arguments": {
+        "input_path": "$DATA/points.geojson"
+      },
+      "expected": {
+        "result": {
+          "skipped_layers": [],
+          "standardized_layers": [
+            {
+              "crs": "EPSG:4326",
+              "feature_count": 3,
+              "output": "$OUTPUT/0.geojson",
+              "source": "$DATA/points.geojson"
+            }
+          ]
+        },
+        "rasters": {},
+        "vectors": {
+          "$OUTPUT/0.geojson": {
+            "type": "FeatureCollection",
+            "crs": {
+              "type": "name",
+              "properties": {
+                "name": "EPSG:4326"
+              }
+            },
+            "features": [
+              {
+                "type": "Feature",
+                "geometry": {
+                  "type": "Point",
+                  "coordinates": [
+                    0.5,
+                    1.5
+                  ]
+                },
+                "properties": {
+                  "value": 1,
+                  "age": 1,
+                  "case_id": "0"
+                }
+              },
+              {
+                "type": "Feature",
+                "geometry": {
+                  "type": "Point",
+                  "coordinates": [
+                    1.5,
+                    0.5
+                  ]
+                },
+                "properties": {
+                  "value": 3,
+                  "age": 3,
+                  "case_id": "1"
+                }
+              },
+              {
+                "type": "Feature",
+                "geometry": {
+                  "type": "Point",
+                  "coordinates": [
+                    2.5,
+                    1.5
+                  ]
+                },
+                "properties": {
+                  "value": 5,
+                  "age": 5,
+                  "case_id": "2"
+                }
+              }
+            ]
+          }
+        },
+        "images": {}
+      }
+    },
+    {
+      "tool": "DeepTimeOverlay",
+      "arguments": {
+        "paths": [
+          "$DATA/points.geojson",
+          "$DATA/zones.geojson"
+        ]
+      },
+      "expected": {
+        "result": {
+          "joined_count": 3,
+          "overlay_output": "$OUTPUT/0.json"
+        },
+        "rasters": {},
+        "vectors": {
+          "$OUTPUT/0.json": [
+            {
+              "value": 1,
+              "age": 1,
+              "case_id": "0",
+              "zone_id": "A",
+              "longitude": 0.5,
+              "latitude": 1.5
+            },
+            {
+              "value": 3,
+              "age": 3,
+              "case_id": "1",
+              "zone_id": "A",
+              "longitude": 1.5,
+              "latitude": 0.5
+            },
+            {
+              "value": 5,
+              "age": 5,
+              "case_id": "2",
+              "zone_id": "A",
+              "longitude": 2.5,
+              "latitude": 1.5
+            }
+          ]
+        },
+        "images": {}
+      }
+    },
+    {
+      "tool": "DeepTimeInterpolateIDW",
+      "arguments": {
+        "points_path": "$DATA/points.geojson",
+        "value_field": "value",
+        "grid_size": 5,
+        "bbox": [
+          0,
+          0,
+          3,
+          2
+        ]
+      },
+      "expected": {
+        "result": {
+          "bbox": [
+            0.0,
+            0.0,
+            3.0,
+            2.0
+          ],
+          "crs": "EPSG:4326",
+          "distinct_locations": 3,
+          "duplicate_location_rule": "arithmetic mean",
+          "finite_pixels": 25,
+          "method": "inverse spherical-distance weighting at pixel centers",
+          "observation_count": 3,
+          "power": 2.0,
+          "raster_output": "$OUTPUT/0.tif",
+          "shape": [
+            5,
+            5
+          ],
+          "value_field": "value"
+        },
+        "rasters": {
+          "$OUTPUT/0.tif": {
+            "values": [
+              [
+                1.1766045496532826,
+                1.5107888660383713,
+                3.0,
+                4.4892111339616285,
+                4.823395450346717
+              ],
+              [
+                1.082973649330018,
+                1.458198567499822,
+                3.0,
+                4.541801432500178,
+                4.917026350669983
+              ],
+              [
+                1.464925486260483,
+                2.060454555408864,
+                2.9999999999999996,
+                3.9395454445911366,
+                4.535074513739517
+              ],
+              [
+                2.0217123100200807,
+                2.6357143943193755,
+                2.9999999999999996,
+                3.364285605680625,
+                3.97828768997992
+              ],
+              [
+                2.386393940383202,
+                2.7963953091645233,
+                3.0000000000000004,
+                3.2036046908354767,
+                3.613606059616798
+              ]
+            ],
+            "crs": "EPSG:4326",
+            "transform": [
+              0.6,
+              0.0,
+              0.0,
+              0.0,
+              -0.4,
+              2.0,
+              0.0,
+              0.0,
+              1.0
+            ],
+            "scales": [
+              1.0
+            ],
+            "offsets": [
+              0.0
+            ]
+          }
+        },
+        "vectors": {},
+        "images": {}
+      }
+    },
+    {
+      "tool": "DeepTimeRasterAlgebra",
+      "arguments": {
+        "raster_path": "$DATA/first.tif",
+        "operation": "mask",
+        "minimum": 3
+      },
+      "expected": {
+        "result": {
+          "crs": "EPSG:4326",
+          "finite_pixels": 4,
+          "georeferenced": true,
+          "operation": "mask",
+          "raster_output": "$OUTPUT/0.tif"
+        },
+        "rasters": {
+          "$OUTPUT/0.tif": {
+            "values": [
+              [
+                null,
+                4.0,
+                null
+              ],
+              [
+                6.0,
+                8.0,
+                10.0
+              ]
+            ],
+            "crs": "EPSG:4326",
+            "transform": [
+              1.0,
+              0.0,
+              0.0,
+              0.0,
+              -1.0,
+              2.0,
+              0.0,
+              0.0,
+              1.0
+            ],
+            "scales": [
+              1.0
+            ],
+            "offsets": [
+              0.0
+            ]
+          }
+        },
+        "vectors": {},
+        "images": {}
+      }
+    },
+    {
+      "tool": "DeepTimeZonalStatistics",
+      "arguments": {
+        "raster_path": "$DATA/first.tif",
+        "zones_path": "$DATA/zones.geojson",
+        "zone_field": "zone_id",
+        "operation": "mean"
+      },
+      "expected": {
+        "result": {
+          "area_weighted": false,
+          "band": 1,
+          "input_interpretation": {
+            "band": 1,
+            "nodata": -9999.0,
+            "offset": 0.0,
+            "quality_mask_applied": false,
+            "range_source": "nodata and finite observations only",
+            "scale": 1.0,
+            "scale_source": "GDAL band scale/offset",
+            "source": "$DATA/first.tif",
+            "valid_raw_range_inclusive": null
+          },
+          "method": "pixel-center polygon mask",
+          "operation": "mean",
+          "raster_crs": "EPSG:4326",
+          "selected_metadata": {
+            "AREA_OR_POINT": "Area"
+          },
+          "source": "$DATA/first.tif",
+          "zone_count": 1,
+          "zone_field": "zone_id",
+          "zone_statistics": [
+            {
+              "count": 5,
+              "maximum": 10.0,
+              "mean": 6.0,
+              "minimum": 2.0,
+              "statistic": "mean",
+              "sum": 30.0,
+              "value": 6.0,
+              "zone_id": "A"
+            }
+          ],
+          "zones_crs": "EPSG:4326",
+          "zones_source": "$DATA/zones.geojson"
+        },
+        "rasters": {},
+        "vectors": {},
+        "images": {}
+      }
+    },
+    {
+      "tool": "DeepTimeRenderMap",
+      "arguments": {
+        "raster_path": "$DATA/first.tif"
+      },
+      "expected": {
+        "result": {
+          "band": 1,
+          "crs": "EPSG:4326",
+          "extent": [
+            0.0,
+            0.0,
+            3.0,
+            2.0
+          ],
+          "finite_pixels": 5,
+          "input_interpretation": {
+            "band": 1,
+            "nodata": -9999.0,
+            "offset": 0.0,
+            "quality_mask_applied": false,
+            "range_source": "nodata and finite observations only",
+            "scale": 1.0,
+            "scale_source": "GDAL band scale/offset",
+            "source": "$DATA/first.tif",
+            "valid_raw_range_inclusive": null
+          },
+          "map_html": "$OUTPUT/0.html",
+          "map_png": "$OUTPUT/1.png",
+          "method": "static spatial data rendering",
+          "north_arrow": "map/grid north",
+          "scale_bar_basis": "great-circle distance at latitude 1",
+          "scale_bar_km": 333.53442244471154,
+          "sources": [
+            "$DATA/first.tif"
+          ],
+          "title": "Spatial data map",
+          "value_range": [
+            2.0,
+            10.0
+          ]
+        },
+        "rasters": {},
+        "vectors": {},
+        "images": {
+          "$OUTPUT/1.png": {
+            "size": [
+              1000,
+              700
+            ],
+            "mode": "RGB",
+            "pixels_sha256": "731d8c6c19b0119dac3aa30792eb6b2530196bf0305c1e05f62c6dbde4cf42eb",
+            "full_image_sha256_diagnostic_only": "f4a41418851b67dcb565cde0e0393b321d39af029bebb57ea4652da0016f496f",
+            "compared_pixel_bounds": [
+              0,
+              0,
+              1000,
+              650
+            ]
+          }
+        }
+      }
+    },
+    {
+      "tool": "CCSStandardizeSpatialData",
+      "arguments": {
+        "input_path": "$DATA/points.geojson"
+      },
+      "expected": {
+        "result": {
+          "skipped_layers": [],
+          "standardized_layers": [
+            {
+              "crs": "EPSG:4326",
+              "feature_count": 3,
+              "output": "$OUTPUT/0.geojson",
+              "source": "$DATA/points.geojson"
+            }
+          ]
+        },
+        "rasters": {},
+        "vectors": {
+          "$OUTPUT/0.geojson": {
+            "type": "FeatureCollection",
+            "crs": {
+              "type": "name",
+              "properties": {
+                "name": "EPSG:4326"
+              }
+            },
+            "features": [
+              {
+                "type": "Feature",
+                "geometry": {
+                  "type": "Point",
+                  "coordinates": [
+                    0.5,
+                    1.5
+                  ]
+                },
+                "properties": {
+                  "value": 1,
+                  "age": 1,
+                  "case_id": "0"
+                }
+              },
+              {
+                "type": "Feature",
+                "geometry": {
+                  "type": "Point",
+                  "coordinates": [
+                    1.5,
+                    0.5
+                  ]
+                },
+                "properties": {
+                  "value": 3,
+                  "age": 3,
+                  "case_id": "1"
+                }
+              },
+              {
+                "type": "Feature",
+                "geometry": {
+                  "type": "Point",
+                  "coordinates": [
+                    2.5,
+                    1.5
+                  ]
+                },
+                "properties": {
+                  "value": 5,
+                  "age": 5,
+                  "case_id": "2"
+                }
+              }
+            ]
+          }
+        },
+        "images": {}
+      }
+    },
+    {
+      "tool": "CCSValidateSpatialData",
+      "arguments": {
+        "input_path": "$DATA/points.geojson"
+      },
+      "expected": {
+        "result": {
+          "skipped_layers": [],
+          "validation_reports": [
+            {
+              "clean_output": "$OUTPUT/0.geojson",
+              "duplicates_removed": 0,
+              "invalid": 0,
+              "source": "$DATA/points.geojson",
+              "valid": 3
+            }
+          ]
+        },
+        "rasters": {},
+        "vectors": {
+          "$OUTPUT/0.geojson": {
+            "type": "FeatureCollection",
+            "features": [
+              {
+                "type": "Feature",
+                "geometry": {
+                  "type": "Point",
+                  "coordinates": [
+                    0.5,
+                    1.5
+                  ]
+                },
+                "properties": {
+                  "value": 1,
+                  "age": 1,
+                  "case_id": "0"
+                }
+              },
+              {
+                "type": "Feature",
+                "geometry": {
+                  "type": "Point",
+                  "coordinates": [
+                    1.5,
+                    0.5
+                  ]
+                },
+                "properties": {
+                  "value": 3,
+                  "age": 3,
+                  "case_id": "1"
+                }
+              },
+              {
+                "type": "Feature",
+                "geometry": {
+                  "type": "Point",
+                  "coordinates": [
+                    2.5,
+                    1.5
+                  ]
+                },
+                "properties": {
+                  "value": 5,
+                  "age": 5,
+                  "case_id": "2"
+                }
+              }
+            ]
+          }
+        },
+        "images": {}
+      }
+    },
+    {
+      "tool": "CCSNearestNeighbor",
+      "arguments": {
+        "input_path": "$DATA/points.geojson"
+      },
+      "expected": {
+        "result": {
+          "nearest_neighbours": [
+            {
+              "distance_km": 157.2406167863059,
+              "neighbor_index": 1,
+              "neighbor_rank": 1,
+              "source_index": 0
+            },
+            {
+              "distance_km": 157.2406167863059,
+              "neighbor_index": 0,
+              "neighbor_rank": 1,
+              "source_index": 1
+            },
+            {
+              "distance_km": 157.2406167863059,
+              "neighbor_index": 1,
+              "neighbor_rank": 1,
+              "source_index": 2
+            }
+          ],
+          "neighbor_count": 1
+        },
+        "rasters": {},
+        "vectors": {},
+        "images": {}
+      }
+    },
+    {
+      "tool": "CCSBuffer",
+      "arguments": {
+        "input_path": "$DATA/points.geojson"
+      },
+      "expected": {
+        "result": {
+          "buffer_distances_km": [
+            50.0
+          ],
+          "buffer_output": "$OUTPUT/0.geojson",
+          "feature_count": 3,
+          "method": "spherical point-buffer envelope"
+        },
+        "rasters": {},
+        "vectors": {
+          "$OUTPUT/0.geojson": {
+            "type": "FeatureCollection",
+            "features": [
+              {
+                "type": "Feature",
+                "geometry": {
+                  "type": "Polygon",
+                  "coordinates": [
+                    [
+                      [
+                        0.05069044534186673,
+                        1.0508444125044916
+                      ],
+                      [
+                        0.9493095546581333,
+                        1.0508444125044916
+                      ],
+                      [
+                        0.9493095546581333,
+                        1.9491555874955084
+                      ],
+                      [
+                        0.05069044534186673,
+                        1.9491555874955084
+                      ],
+                      [
+                        0.05069044534186673,
+                        1.0508444125044916
+                      ]
+                    ]
+                  ]
+                },
+                "properties": {
+                  "value": 1,
+                  "age": 1,
+                  "case_id": "0",
+                  "buffer_km": 50.0
+                }
+              },
+              {
+                "type": "Feature",
+                "geometry": {
+                  "type": "Polygon",
+                  "coordinates": [
+                    [
+                      [
+                        1.050827309384775,
+                        0.05084441250449151
+                      ],
+                      [
+                        1.949172690615225,
+                        0.05084441250449151
+                      ],
+                      [
+                        1.949172690615225,
+                        0.9491555874955084
+                      ],
+                      [
+                        1.050827309384775,
+                        0.9491555874955084
+                      ],
+                      [
+                        1.050827309384775,
+                        0.05084441250449151
+                      ]
+                    ]
+                  ]
+                },
+                "properties": {
+                  "value": 3,
+                  "age": 3,
+                  "case_id": "1",
+                  "buffer_km": 50.0
+                }
+              },
+              {
+                "type": "Feature",
+                "geometry": {
+                  "type": "Polygon",
+                  "coordinates": [
+                    [
+                      [
+                        2.050690445341867,
+                        1.0508444125044916
+                      ],
+                      [
+                        2.949309554658133,
+                        1.0508444125044916
+                      ],
+                      [
+                        2.949309554658133,
+                        1.9491555874955084
+                      ],
+                      [
+                        2.050690445341867,
+                        1.9491555874955084
+                      ],
+                      [
+                        2.050690445341867,
+                        1.0508444125044916
+                      ]
+                    ]
+                  ]
+                },
+                "properties": {
+                  "value": 5,
+                  "age": 5,
+                  "case_id": "2",
+                  "buffer_km": 50.0
+                }
+              }
+            ]
+          }
+        },
+        "images": {}
+      }
+    },
+    {
+      "tool": "CCSBatchVector",
+      "arguments": {
+        "input_path": "$DATA/points.geojson"
+      },
+      "expected": {
+        "result": {
+          "skipped_layers": [],
+          "standardized_layers": [
+            {
+              "crs": "EPSG:4326",
+              "feature_count": 3,
+              "output": "$OUTPUT/0.geojson",
+              "source": "$DATA/points.geojson"
+            }
+          ]
+        },
+        "rasters": {},
+        "vectors": {
+          "$OUTPUT/0.geojson": {
+            "type": "FeatureCollection",
+            "crs": {
+              "type": "name",
+              "properties": {
+                "name": "EPSG:4326"
+              }
+            },
+            "features": [
+              {
+                "type": "Feature",
+                "geometry": {
+                  "type": "Point",
+                  "coordinates": [
+                    0.5,
+                    1.5
+                  ]
+                },
+                "properties": {
+                  "value": 1,
+                  "age": 1,
+                  "case_id": "0"
+                }
+              },
+              {
+                "type": "Feature",
+                "geometry": {
+                  "type": "Point",
+                  "coordinates": [
+                    1.5,
+                    0.5
+                  ]
+                },
+                "properties": {
+                  "value": 3,
+                  "age": 3,
+                  "case_id": "1"
+                }
+              },
+              {
+                "type": "Feature",
+                "geometry": {
+                  "type": "Point",
+                  "coordinates": [
+                    2.5,
+                    1.5
+                  ]
+                },
+                "properties": {
+                  "value": 5,
+                  "age": 5,
+                  "case_id": "2"
+                }
+              }
+            ]
+          }
+        },
+        "images": {}
+      }
+    },
+    {
+      "tool": "CCSOverlay",
+      "arguments": {
+        "paths": [
+          "$DATA/points.geojson",
+          "$DATA/zones.geojson"
+        ]
+      },
+      "expected": {
+        "result": {
+          "joined_count": 3,
+          "overlay_output": "$OUTPUT/0.json"
+        },
+        "rasters": {},
+        "vectors": {
+          "$OUTPUT/0.json": [
+            {
+              "value": 1,
+              "age": 1,
+              "case_id": "0",
+              "zone_id": "A",
+              "longitude": 0.5,
+              "latitude": 1.5
+            },
+            {
+              "value": 3,
+              "age": 3,
+              "case_id": "1",
+              "zone_id": "A",
+              "longitude": 1.5,
+              "latitude": 0.5
+            },
+            {
+              "value": 5,
+              "age": 5,
+              "case_id": "2",
+              "zone_id": "A",
+              "longitude": 2.5,
+              "latitude": 1.5
+            }
+          ]
+        },
+        "images": {}
+      }
+    },
+    {
+      "tool": "CCSInterpolateIDW",
+      "arguments": {
+        "points_path": "$DATA/points.geojson",
+        "value_field": "value",
+        "grid_size": 5,
+        "bbox": [
+          0,
+          0,
+          3,
+          2
+        ]
+      },
+      "expected": {
+        "result": {
+          "bbox": [
+            0.0,
+            0.0,
+            3.0,
+            2.0
+          ],
+          "crs": "EPSG:4326",
+          "distinct_locations": 3,
+          "duplicate_location_rule": "arithmetic mean",
+          "finite_pixels": 25,
+          "method": "inverse spherical-distance weighting at pixel centers",
+          "observation_count": 3,
+          "power": 2.0,
+          "raster_output": "$OUTPUT/0.tif",
+          "shape": [
+            5,
+            5
+          ],
+          "value_field": "value"
+        },
+        "rasters": {
+          "$OUTPUT/0.tif": {
+            "values": [
+              [
+                1.1766045496532826,
+                1.5107888660383713,
+                3.0,
+                4.4892111339616285,
+                4.823395450346717
+              ],
+              [
+                1.082973649330018,
+                1.458198567499822,
+                3.0,
+                4.541801432500178,
+                4.917026350669983
+              ],
+              [
+                1.464925486260483,
+                2.060454555408864,
+                2.9999999999999996,
+                3.9395454445911366,
+                4.535074513739517
+              ],
+              [
+                2.0217123100200807,
+                2.6357143943193755,
+                2.9999999999999996,
+                3.364285605680625,
+                3.97828768997992
+              ],
+              [
+                2.386393940383202,
+                2.7963953091645233,
+                3.0000000000000004,
+                3.2036046908354767,
+                3.613606059616798
+              ]
+            ],
+            "crs": "EPSG:4326",
+            "transform": [
+              0.6,
+              0.0,
+              0.0,
+              0.0,
+              -0.4,
+              2.0,
+              0.0,
+              0.0,
+              1.0
+            ],
+            "scales": [
+              1.0
+            ],
+            "offsets": [
+              0.0
+            ]
+          }
+        },
+        "vectors": {},
+        "images": {}
+      }
+    },
+    {
+      "tool": "CCSRasterAlgebra",
+      "arguments": {
+        "raster_path": "$DATA/first.tif",
+        "operation": "mask",
+        "minimum": 3
+      },
+      "expected": {
+        "result": {
+          "crs": "EPSG:4326",
+          "finite_pixels": 4,
+          "georeferenced": true,
+          "operation": "mask",
+          "raster_output": "$OUTPUT/0.tif"
+        },
+        "rasters": {
+          "$OUTPUT/0.tif": {
+            "values": [
+              [
+                null,
+                4.0,
+                null
+              ],
+              [
+                6.0,
+                8.0,
+                10.0
+              ]
+            ],
+            "crs": "EPSG:4326",
+            "transform": [
+              1.0,
+              0.0,
+              0.0,
+              0.0,
+              -1.0,
+              2.0,
+              0.0,
+              0.0,
+              1.0
+            ],
+            "scales": [
+              1.0
+            ],
+            "offsets": [
+              0.0
+            ]
+          }
+        },
+        "vectors": {},
+        "images": {}
+      }
+    },
+    {
+      "tool": "CCSZonalStatistics",
+      "arguments": {
+        "raster_path": "$DATA/first.tif",
+        "zones_path": "$DATA/zones.geojson",
+        "zone_field": "zone_id",
+        "operation": "mean"
+      },
+      "expected": {
+        "result": {
+          "area_weighted": false,
+          "band": 1,
+          "input_interpretation": {
+            "band": 1,
+            "nodata": -9999.0,
+            "offset": 0.0,
+            "quality_mask_applied": false,
+            "range_source": "nodata and finite observations only",
+            "scale": 1.0,
+            "scale_source": "GDAL band scale/offset",
+            "source": "$DATA/first.tif",
+            "valid_raw_range_inclusive": null
+          },
+          "method": "pixel-center polygon mask",
+          "operation": "mean",
+          "raster_crs": "EPSG:4326",
+          "selected_metadata": {
+            "AREA_OR_POINT": "Area"
+          },
+          "source": "$DATA/first.tif",
+          "zone_count": 1,
+          "zone_field": "zone_id",
+          "zone_statistics": [
+            {
+              "count": 5,
+              "maximum": 10.0,
+              "mean": 6.0,
+              "minimum": 2.0,
+              "statistic": "mean",
+              "sum": 30.0,
+              "value": 6.0,
+              "zone_id": "A"
+            }
+          ],
+          "zones_crs": "EPSG:4326",
+          "zones_source": "$DATA/zones.geojson"
+        },
+        "rasters": {},
+        "vectors": {},
+        "images": {}
+      }
+    },
+    {
+      "tool": "CCSRenderMap",
+      "arguments": {
+        "raster_path": "$DATA/first.tif"
+      },
+      "expected": {
+        "result": {
+          "band": 1,
+          "crs": "EPSG:4326",
+          "extent": [
+            0.0,
+            0.0,
+            3.0,
+            2.0
+          ],
+          "finite_pixels": 5,
+          "input_interpretation": {
+            "band": 1,
+            "nodata": -9999.0,
+            "offset": 0.0,
+            "quality_mask_applied": false,
+            "range_source": "nodata and finite observations only",
+            "scale": 1.0,
+            "scale_source": "GDAL band scale/offset",
+            "source": "$DATA/first.tif",
+            "valid_raw_range_inclusive": null
+          },
+          "map_html": "$OUTPUT/0.html",
+          "map_png": "$OUTPUT/1.png",
+          "method": "static spatial data rendering",
+          "north_arrow": "map/grid north",
+          "scale_bar_basis": "great-circle distance at latitude 1",
+          "scale_bar_km": 333.53442244471154,
+          "sources": [
+            "$DATA/first.tif"
+          ],
+          "title": "Spatial data map",
+          "value_range": [
+            2.0,
+            10.0
+          ]
+        },
+        "rasters": {},
+        "vectors": {},
+        "images": {
+          "$OUTPUT/1.png": {
+            "size": [
+              1000,
+              700
+            ],
+            "mode": "RGB",
+            "pixels_sha256": "731d8c6c19b0119dac3aa30792eb6b2530196bf0305c1e05f62c6dbde4cf42eb",
+            "full_image_sha256_diagnostic_only": "f4a41418851b67dcb565cde0e0393b321d39af029bebb57ea4652da0016f496f",
+            "compared_pixel_bounds": [
+              0,
+              0,
+              1000,
+              650
+            ]
+          }
+        }
+      }
+    }
+  ],
+  "source_tree_sha256": "2dbc0ed997026b6636d5a65820c67f9846d3227f16d5df6868176e12329aa582"
+}

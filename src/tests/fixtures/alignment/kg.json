@@ -1,0 +1,4075 @@
+{
+  "source_files": {
+    "scripts/custom_kg_retrievers.py": "37d247e0668fd0a3c262e27c123fc67abfc538e679e41cb2319a13b93dd918e4",
+    "app/llms/planning/tool_routing.py": "fbd0e53bc6db3c1ecb4f14bf16e56059f1033d6489af6d5bf389814ed3be06d4",
+    "app/tools/tool_input_contracts.py": "8a5e1c29166afb12d4515c246a94a9bf0e92c345707a02be99f5a0b77c357c8d",
+    ".venv/Lib/site-packages/llama_index/core/base/embeddings/base.py": "2ced688b0e4c4dd4e6d032fcdb8f0d20b1d6817edb5afa0f08dc1c53617f6797",
+    ".venv/Lib/site-packages/llama_index/core/indices/query/embedding_utils.py": "592cde308ac5fce9b2990c90b0e7234bcca58dd0799d98a9705d85dc1ae4ccba",
+    ".venv/Lib/site-packages/llama_index/core/graph_stores/simple.py": "58d00a4d4d079f6d6e38e47dc05bbed56f23eeb20007904fe8d6988fccbf3359"
+  },
+  "cases": [
+    {
+      "query": "Compute the requested statistic.",
+      "dimension": 2,
+      "graph": {
+        "RemoteSensingBatchImageMean": [
+          [
+            "has the functionality that",
+            "Calculate RemoteSensingBatchImageMean statistic"
+          ],
+          [
+            "inputs",
+            "JSON object"
+          ],
+          [
+            "outputs",
+            "Numeric result"
+          ]
+        ],
+        "RemoteSensingMean": [
+          [
+            "has the functionality that",
+            "Calculate RemoteSensingMean statistic"
+          ],
+          [
+            "inputs",
+            "JSON object"
+          ],
+          [
+            "outputs",
+            "Numeric result"
+          ]
+        ],
+        "RemoteSensingDifference": [
+          [
+            "has the functionality that",
+            "Calculate RemoteSensingDifference statistic"
+          ],
+          [
+            "inputs",
+            "JSON object"
+          ],
+          [
+            "outputs",
+            "Numeric result"
+          ]
+        ],
+        "RemoteSensingDivision": [
+          [
+            "has the functionality that",
+            "Calculate RemoteSensingDivision statistic"
+          ],
+          [
+            "inputs",
+            "JSON object"
+          ],
+          [
+            "outputs",
+            "Numeric result"
+          ]
+        ],
+        "DeepEarthQueryUSGSCatalog": [
+          [
+            "has the functionality that",
+            "Calculate DeepEarthQueryUSGSCatalog statistic"
+          ],
+          [
+            "inputs",
+            "JSON object"
+          ],
+          [
+            "outputs",
+            "Numeric result"
+          ]
+        ],
+        "NaturalHazardLoadEventTable": [
+          [
+            "has the functionality that",
+            "Calculate NaturalHazardLoadEventTable statistic"
+          ],
+          [
+            "inputs",
+            "JSON object"
+          ],
+          [
+            "outputs",
+            "Numeric result"
+          ]
+        ],
+        "NaturalHazardCountRecords": [
+          [
+            "has the functionality that",
+            "Calculate NaturalHazardCountRecords statistic"
+          ],
+          [
+            "inputs",
+            "JSON object"
+          ],
+          [
+            "outputs",
+            "Numeric result"
+          ]
+        ]
+      },
+      "vectors": {
+        "('RemoteSensingBatchImageMean', 'has the functionality that', 'Calculate RemoteSensingBatchImageMean statistic')": [
+          1,
+          8
+        ],
+        "('RemoteSensingMean', 'has the functionality that', 'Calculate RemoteSensingMean statistic')": [
+          2,
+          7
+        ],
+        "('RemoteSensingDifference', 'has the functionality that', 'Calculate RemoteSensingDifference statistic')": [
+          3,
+          6
+        ],
+        "('RemoteSensingDivision', 'has the functionality that', 'Calculate RemoteSensingDivision statistic')": [
+          4,
+          5
+        ],
+        "('DeepEarthQueryUSGSCatalog', 'has the functionality that', 'Calculate DeepEarthQueryUSGSCatalog statistic')": [
+          5,
+          4
+        ],
+        "('NaturalHazardLoadEventTable', 'has the functionality that', 'Calculate NaturalHazardLoadEventTable statistic')": [
+          6,
+          3
+        ],
+        "('NaturalHazardCountRecords', 'has the functionality that', 'Calculate NaturalHazardCountRecords statistic')": [
+          7,
+          2
+        ]
+      },
+      "expected": [
+        [
+          "RemoteSensingDifference",
+          "has the functionality that",
+          "Calculate RemoteSensingDifference statistic"
+        ],
+        [
+          "RemoteSensingDifference",
+          "inputs",
+          "JSON object"
+        ],
+        [
+          "RemoteSensingDifference",
+          "outputs",
+          "Numeric result"
+        ],
+        [
+          "RemoteSensingMean",
+          "has the functionality that",
+          "Calculate RemoteSensingMean statistic"
+        ],
+        [
+          "RemoteSensingMean",
+          "inputs",
+          "JSON object"
+        ],
+        [
+          "RemoteSensingMean",
+          "outputs",
+          "Numeric result"
+        ],
+        [
+          "RemoteSensingDivision",
+          "has the functionality that",
+          "Calculate RemoteSensingDivision statistic"
+        ],
+        [
+          "RemoteSensingDivision",
+          "inputs",
+          "JSON object"
+        ],
+        [
+          "RemoteSensingDivision",
+          "outputs",
+          "Numeric result"
+        ],
+        [
+          "RemoteSensingBatchImageMean",
+          "has the functionality that",
+          "Calculate RemoteSensingBatchImageMean statistic"
+        ],
+        [
+          "RemoteSensingBatchImageMean",
+          "inputs",
+          "JSON object"
+        ],
+        [
+          "RemoteSensingBatchImageMean",
+          "outputs",
+          "Numeric result"
+        ],
+        [
+          "DeepEarthQueryUSGSCatalog",
+          "has the functionality that",
+          "Calculate DeepEarthQueryUSGSCatalog statistic"
+        ],
+        [
+          "DeepEarthQueryUSGSCatalog",
+          "inputs",
+          "JSON object"
+        ],
+        [
+          "DeepEarthQueryUSGSCatalog",
+          "outputs",
+          "Numeric result"
+        ]
+      ]
+    },
+    {
+      "query": "Count USGS earthquake events in 2011.",
+      "dimension": 2,
+      "graph": {
+        "RemoteSensingBatchImageMean": [
+          [
+            "has the functionality that",
+            "Calculate RemoteSensingBatchImageMean statistic"
+          ],
+          [
+            "inputs",
+            "JSON object"
+          ],
+          [
+            "outputs",
+            "Numeric result"
+          ]
+        ],
+        "RemoteSensingMean": [
+          [
+            "has the functionality that",
+            "Calculate RemoteSensingMean statistic"
+          ],
+          [
+            "inputs",
+            "JSON object"
+          ],
+          [
+            "outputs",
+            "Numeric result"
+          ]
+        ],
+        "RemoteSensingDifference": [
+          [
+            "has the functionality that",
+            "Calculate RemoteSensingDifference statistic"
+          ],
+          [
+            "inputs",
+            "JSON object"
+          ],
+          [
+            "outputs",
+            "Numeric result"
+          ]
+        ],
+        "RemoteSensingDivision": [
+          [
+            "has the functionality that",
+            "Calculate RemoteSensingDivision statistic"
+          ],
+          [
+            "inputs",
+            "JSON object"
+          ],
+          [
+            "outputs",
+            "Numeric result"
+          ]
+        ],
+        "DeepEarthQueryUSGSCatalog": [
+          [
+            "has the functionality that",
+            "Calculate DeepEarthQueryUSGSCatalog statistic"
+          ],
+          [
+            "inputs",
+            "JSON object"
+          ],
+          [
+            "outputs",
+            "Numeric result"
+          ]
+        ],
+        "NaturalHazardLoadEventTable": [
+          [
+            "has the functionality that",
+            "Calculate NaturalHazardLoadEventTable statistic"
+          ],
+          [
+            "inputs",
+            "JSON object"
+          ],
+          [
+            "outputs",
+            "Numeric result"
+          ]
+        ],
+        "NaturalHazardCountRecords": [
+          [
+            "has the functionality that",
+            "Calculate NaturalHazardCountRecords statistic"
+          ],
+          [
+            "inputs",
+            "JSON object"
+          ],
+          [
+            "outputs",
+            "Numeric result"
+          ]
+        ]
+      },
+      "vectors": {
+        "('RemoteSensingBatchImageMean', 'has the functionality that', 'Calculate RemoteSensingBatchImageMean statistic')": [
+          1,
+          8
+        ],
+        "('RemoteSensingMean', 'has the functionality that', 'Calculate RemoteSensingMean statistic')": [
+          2,
+          7
+        ],
+        "('RemoteSensingDifference', 'has the functionality that', 'Calculate RemoteSensingDifference statistic')": [
+          3,
+          6
+        ],
+        "('RemoteSensingDivision', 'has the functionality that', 'Calculate RemoteSensingDivision statistic')": [
+          4,
+          5
+        ],
+        "('DeepEarthQueryUSGSCatalog', 'has the functionality that', 'Calculate DeepEarthQueryUSGSCatalog statistic')": [
+          5,
+          4
+        ],
+        "('NaturalHazardLoadEventTable', 'has the functionality that', 'Calculate NaturalHazardLoadEventTable statistic')": [
+          6,
+          3
+        ],
+        "('NaturalHazardCountRecords', 'has the functionality that', 'Calculate NaturalHazardCountRecords statistic')": [
+          7,
+          2
+        ]
+      },
+      "expected": [
+        [
+          "RemoteSensingDifference",
+          "has the functionality that",
+          "Calculate RemoteSensingDifference statistic"
+        ],
+        [
+          "RemoteSensingDifference",
+          "inputs",
+          "JSON object"
+        ],
+        [
+          "RemoteSensingDifference",
+          "outputs",
+          "Numeric result"
+        ],
+        [
+          "RemoteSensingMean",
+          "has the functionality that",
+          "Calculate RemoteSensingMean statistic"
+        ],
+        [
+          "RemoteSensingMean",
+          "inputs",
+          "JSON object"
+        ],
+        [
+          "RemoteSensingMean",
+          "outputs",
+          "Numeric result"
+        ],
+        [
+          "RemoteSensingDivision",
+          "has the functionality that",
+          "Calculate RemoteSensingDivision statistic"
+        ],
+        [
+          "RemoteSensingDivision",
+          "inputs",
+          "JSON object"
+        ],
+        [
+          "RemoteSensingDivision",
+          "outputs",
+          "Numeric result"
+        ],
+        [
+          "RemoteSensingBatchImageMean",
+          "has the functionality that",
+          "Calculate RemoteSensingBatchImageMean statistic"
+        ],
+        [
+          "RemoteSensingBatchImageMean",
+          "inputs",
+          "JSON object"
+        ],
+        [
+          "RemoteSensingBatchImageMean",
+          "outputs",
+          "Numeric result"
+        ],
+        [
+          "DeepEarthQueryUSGSCatalog",
+          "has the functionality that",
+          "Calculate DeepEarthQueryUSGSCatalog statistic"
+        ],
+        [
+          "DeepEarthQueryUSGSCatalog",
+          "inputs",
+          "JSON object"
+        ],
+        [
+          "DeepEarthQueryUSGSCatalog",
+          "outputs",
+          "Numeric result"
+        ]
+      ]
+    },
+    {
+      "query": "Calculate remote sensing raster means.",
+      "dimension": 2,
+      "graph": {
+        "RemoteSensingBatchImageMean": [
+          [
+            "has the functionality that",
+            "Calculate RemoteSensingBatchImageMean statistic"
+          ],
+          [
+            "inputs",
+            "JSON object"
+          ],
+          [
+            "outputs",
+            "Numeric result"
+          ]
+        ],
+        "RemoteSensingMean": [
+          [
+            "has the functionality that",
+            "Calculate RemoteSensingMean statistic"
+          ],
+          [
+            "inputs",
+            "JSON object"
+          ],
+          [
+            "outputs",
+            "Numeric result"
+          ]
+        ],
+        "RemoteSensingDifference": [
+          [
+            "has the functionality that",
+            "Calculate RemoteSensingDifference statistic"
+          ],
+          [
+            "inputs",
+            "JSON object"
+          ],
+          [
+            "outputs",
+            "Numeric result"
+          ]
+        ],
+        "RemoteSensingDivision": [
+          [
+            "has the functionality that",
+            "Calculate RemoteSensingDivision statistic"
+          ],
+          [
+            "inputs",
+            "JSON object"
+          ],
+          [
+            "outputs",
+            "Numeric result"
+          ]
+        ],
+        "DeepEarthQueryUSGSCatalog": [
+          [
+            "has the functionality that",
+            "Calculate DeepEarthQueryUSGSCatalog statistic"
+          ],
+          [
+            "inputs",
+            "JSON object"
+          ],
+          [
+            "outputs",
+            "Numeric result"
+          ]
+        ],
+        "NaturalHazardLoadEventTable": [
+          [
+            "has the functionality that",
+            "Calculate NaturalHazardLoadEventTable statistic"
+          ],
+          [
+            "inputs",
+            "JSON object"
+          ],
+          [
+            "outputs",
+            "Numeric result"
+          ]
+        ],
+        "NaturalHazardCountRecords": [
+          [
+            "has the functionality that",
+            "Calculate NaturalHazardCountRecords statistic"
+          ],
+          [
+            "inputs",
+            "JSON object"
+          ],
+          [
+            "outputs",
+            "Numeric result"
+          ]
+        ]
+      },
+      "vectors": {
+        "('RemoteSensingBatchImageMean', 'has the functionality that', 'Calculate RemoteSensingBatchImageMean statistic')": [
+          1,
+          8
+        ],
+        "('RemoteSensingMean', 'has the functionality that', 'Calculate RemoteSensingMean statistic')": [
+          2,
+          7
+        ],
+        "('RemoteSensingDifference', 'has the functionality that', 'Calculate RemoteSensingDifference statistic')": [
+          3,
+          6
+        ],
+        "('RemoteSensingDivision', 'has the functionality that', 'Calculate RemoteSensingDivision statistic')": [
+          4,
+          5
+        ],
+        "('DeepEarthQueryUSGSCatalog', 'has the functionality that', 'Calculate DeepEarthQueryUSGSCatalog statistic')": [
+          5,
+          4
+        ],
+        "('NaturalHazardLoadEventTable', 'has the functionality that', 'Calculate NaturalHazardLoadEventTable statistic')": [
+          6,
+          3
+        ],
+        "('NaturalHazardCountRecords', 'has the functionality that', 'Calculate NaturalHazardCountRecords statistic')": [
+          7,
+          2
+        ]
+      },
+      "expected": [
+        [
+          "RemoteSensingBatchImageMean",
+          "has the functionality that",
+          "Calculate RemoteSensingBatchImageMean statistic"
+        ],
+        [
+          "RemoteSensingBatchImageMean",
+          "inputs",
+          "JSON object"
+        ],
+        [
+          "RemoteSensingBatchImageMean",
+          "outputs",
+          "Numeric result"
+        ],
+        [
+          "RemoteSensingDifference",
+          "has the functionality that",
+          "Calculate RemoteSensingDifference statistic"
+        ],
+        [
+          "RemoteSensingDifference",
+          "inputs",
+          "JSON object"
+        ],
+        [
+          "RemoteSensingDifference",
+          "outputs",
+          "Numeric result"
+        ],
+        [
+          "RemoteSensingMean",
+          "has the functionality that",
+          "Calculate RemoteSensingMean statistic"
+        ],
+        [
+          "RemoteSensingMean",
+          "inputs",
+          "JSON object"
+        ],
+        [
+          "RemoteSensingMean",
+          "outputs",
+          "Numeric result"
+        ],
+        [
+          "RemoteSensingDivision",
+          "has the functionality that",
+          "Calculate RemoteSensingDivision statistic"
+        ],
+        [
+          "RemoteSensingDivision",
+          "inputs",
+          "JSON object"
+        ],
+        [
+          "RemoteSensingDivision",
+          "outputs",
+          "Numeric result"
+        ],
+        [
+          "DeepEarthQueryUSGSCatalog",
+          "has the functionality that",
+          "Calculate DeepEarthQueryUSGSCatalog statistic"
+        ],
+        [
+          "DeepEarthQueryUSGSCatalog",
+          "inputs",
+          "JSON object"
+        ],
+        [
+          "DeepEarthQueryUSGSCatalog",
+          "outputs",
+          "Numeric result"
+        ]
+      ]
+    },
+    {
+      "query": "Count natural disaster event table records.",
+      "dimension": 2,
+      "graph": {
+        "RemoteSensingBatchImageMean": [
+          [
+            "has the functionality that",
+            "Calculate RemoteSensingBatchImageMean statistic"
+          ],
+          [
+            "inputs",
+            "JSON object"
+          ],
+          [
+            "outputs",
+            "Numeric result"
+          ]
+        ],
+        "RemoteSensingMean": [
+          [
+            "has the functionality that",
+            "Calculate RemoteSensingMean statistic"
+          ],
+          [
+            "inputs",
+            "JSON object"
+          ],
+          [
+            "outputs",
+            "Numeric result"
+          ]
+        ],
+        "RemoteSensingDifference": [
+          [
+            "has the functionality that",
+            "Calculate RemoteSensingDifference statistic"
+          ],
+          [
+            "inputs",
+            "JSON object"
+          ],
+          [
+            "outputs",
+            "Numeric result"
+          ]
+        ],
+        "RemoteSensingDivision": [
+          [
+            "has the functionality that",
+            "Calculate RemoteSensingDivision statistic"
+          ],
+          [
+            "inputs",
+            "JSON object"
+          ],
+          [
+            "outputs",
+            "Numeric result"
+          ]
+        ],
+        "DeepEarthQueryUSGSCatalog": [
+          [
+            "has the functionality that",
+            "Calculate DeepEarthQueryUSGSCatalog statistic"
+          ],
+          [
+            "inputs",
+            "JSON object"
+          ],
+          [
+            "outputs",
+            "Numeric result"
+          ]
+        ],
+        "NaturalHazardLoadEventTable": [
+          [
+            "has the functionality that",
+            "Calculate NaturalHazardLoadEventTable statistic"
+          ],
+          [
+            "inputs",
+            "JSON object"
+          ],
+          [
+            "outputs",
+            "Numeric result"
+          ]
+        ],
+        "NaturalHazardCountRecords": [
+          [
+            "has the functionality that",
+            "Calculate NaturalHazardCountRecords statistic"
+          ],
+          [
+            "inputs",
+            "JSON object"
+          ],
+          [
+            "outputs",
+            "Numeric result"
+          ]
+        ]
+      },
+      "vectors": {
+        "('RemoteSensingBatchImageMean', 'has the functionality that', 'Calculate RemoteSensingBatchImageMean statistic')": [
+          1,
+          8
+        ],
+        "('RemoteSensingMean', 'has the functionality that', 'Calculate RemoteSensingMean statistic')": [
+          2,
+          7
+        ],
+        "('RemoteSensingDifference', 'has the functionality that', 'Calculate RemoteSensingDifference statistic')": [
+          3,
+          6
+        ],
+        "('RemoteSensingDivision', 'has the functionality that', 'Calculate RemoteSensingDivision statistic')": [
+          4,
+          5
+        ],
+        "('DeepEarthQueryUSGSCatalog', 'has the functionality that', 'Calculate DeepEarthQueryUSGSCatalog statistic')": [
+          5,
+          4
+        ],
+        "('NaturalHazardLoadEventTable', 'has the functionality that', 'Calculate NaturalHazardLoadEventTable statistic')": [
+          6,
+          3
+        ],
+        "('NaturalHazardCountRecords', 'has the functionality that', 'Calculate NaturalHazardCountRecords statistic')": [
+          7,
+          2
+        ]
+      },
+      "expected": [
+        [
+          "NaturalHazardLoadEventTable",
+          "has the functionality that",
+          "Calculate NaturalHazardLoadEventTable statistic"
+        ],
+        [
+          "NaturalHazardLoadEventTable",
+          "inputs",
+          "JSON object"
+        ],
+        [
+          "NaturalHazardLoadEventTable",
+          "outputs",
+          "Numeric result"
+        ],
+        [
+          "RemoteSensingDifference",
+          "has the functionality that",
+          "Calculate RemoteSensingDifference statistic"
+        ],
+        [
+          "RemoteSensingDifference",
+          "inputs",
+          "JSON object"
+        ],
+        [
+          "RemoteSensingDifference",
+          "outputs",
+          "Numeric result"
+        ],
+        [
+          "RemoteSensingMean",
+          "has the functionality that",
+          "Calculate RemoteSensingMean statistic"
+        ],
+        [
+          "RemoteSensingMean",
+          "inputs",
+          "JSON object"
+        ],
+        [
+          "RemoteSensingMean",
+          "outputs",
+          "Numeric result"
+        ],
+        [
+          "RemoteSensingDivision",
+          "has the functionality that",
+          "Calculate RemoteSensingDivision statistic"
+        ],
+        [
+          "RemoteSensingDivision",
+          "inputs",
+          "JSON object"
+        ],
+        [
+          "RemoteSensingDivision",
+          "outputs",
+          "Numeric result"
+        ],
+        [
+          "RemoteSensingBatchImageMean",
+          "has the functionality that",
+          "Calculate RemoteSensingBatchImageMean statistic"
+        ],
+        [
+          "RemoteSensingBatchImageMean",
+          "inputs",
+          "JSON object"
+        ],
+        [
+          "RemoteSensingBatchImageMean",
+          "outputs",
+          "Numeric result"
+        ],
+        [
+          "DeepEarthQueryUSGSCatalog",
+          "has the functionality that",
+          "Calculate DeepEarthQueryUSGSCatalog statistic"
+        ],
+        [
+          "DeepEarthQueryUSGSCatalog",
+          "inputs",
+          "JSON object"
+        ],
+        [
+          "DeepEarthQueryUSGSCatalog",
+          "outputs",
+          "Numeric result"
+        ]
+      ]
+    },
+    {
+      "query": "Compute the requested statistic.",
+      "dimension": 3,
+      "graph": {
+        "RemoteSensingBatchImageMean": [
+          [
+            "has the functionality that",
+            "Calculate RemoteSensingBatchImageMean statistic"
+          ],
+          [
+            "inputs",
+            "JSON object"
+          ],
+          [
+            "outputs",
+            "Numeric result"
+          ]
+        ],
+        "RemoteSensingMean": [
+          [
+            "has the functionality that",
+            "Calculate RemoteSensingMean statistic"
+          ],
+          [
+            "inputs",
+            "JSON object"
+          ],
+          [
+            "outputs",
+            "Numeric result"
+          ]
+        ],
+        "RemoteSensingDifference": [
+          [
+            "has the functionality that",
+            "Calculate RemoteSensingDifference statistic"
+          ],
+          [
+            "inputs",
+            "JSON object"
+          ],
+          [
+            "outputs",
+            "Numeric result"
+          ]
+        ],
+        "RemoteSensingDivision": [
+          [
+            "has the functionality that",
+            "Calculate RemoteSensingDivision statistic"
+          ],
+          [
+            "inputs",
+            "JSON object"
+          ],
+          [
+            "outputs",
+            "Numeric result"
+          ]
+        ],
+        "DeepEarthQueryUSGSCatalog": [
+          [
+            "has the functionality that",
+            "Calculate DeepEarthQueryUSGSCatalog statistic"
+          ],
+          [
+            "inputs",
+            "JSON object"
+          ],
+          [
+            "outputs",
+            "Numeric result"
+          ]
+        ],
+        "NaturalHazardLoadEventTable": [
+          [
+            "has the functionality that",
+            "Calculate NaturalHazardLoadEventTable statistic"
+          ],
+          [
+            "inputs",
+            "JSON object"
+          ],
+          [
+            "outputs",
+            "Numeric result"
+          ]
+        ],
+        "NaturalHazardCountRecords": [
+          [
+            "has the functionality that",
+            "Calculate NaturalHazardCountRecords statistic"
+          ],
+          [
+            "inputs",
+            "JSON object"
+          ],
+          [
+            "outputs",
+            "Numeric result"
+          ]
+        ]
+      },
+      "vectors": {
+        "('RemoteSensingBatchImageMean', 'has the functionality that', 'Calculate RemoteSensingBatchImageMean statistic')": [
+          1,
+          8
+        ],
+        "('RemoteSensingMean', 'has the functionality that', 'Calculate RemoteSensingMean statistic')": [
+          2,
+          7
+        ],
+        "('RemoteSensingDifference', 'has the functionality that', 'Calculate RemoteSensingDifference statistic')": [
+          3,
+          6
+        ],
+        "('RemoteSensingDivision', 'has the functionality that', 'Calculate RemoteSensingDivision statistic')": [
+          4,
+          5
+        ],
+        "('DeepEarthQueryUSGSCatalog', 'has the functionality that', 'Calculate DeepEarthQueryUSGSCatalog statistic')": [
+          5,
+          4
+        ],
+        "('NaturalHazardLoadEventTable', 'has the functionality that', 'Calculate NaturalHazardLoadEventTable statistic')": [
+          6,
+          3
+        ],
+        "('NaturalHazardCountRecords', 'has the functionality that', 'Calculate NaturalHazardCountRecords statistic')": [
+          7,
+          2
+        ]
+      },
+      "expected": [
+        [
+          "DeepEarthQueryUSGSCatalog",
+          "has the functionality that",
+          "Calculate DeepEarthQueryUSGSCatalog statistic"
+        ],
+        [
+          "DeepEarthQueryUSGSCatalog",
+          "inputs",
+          "JSON object"
+        ],
+        [
+          "DeepEarthQueryUSGSCatalog",
+          "outputs",
+          "Numeric result"
+        ],
+        [
+          "NaturalHazardCountRecords",
+          "has the functionality that",
+          "Calculate NaturalHazardCountRecords statistic"
+        ],
+        [
+          "NaturalHazardCountRecords",
+          "inputs",
+          "JSON object"
+        ],
+        [
+          "NaturalHazardCountRecords",
+          "outputs",
+          "Numeric result"
+        ],
+        [
+          "NaturalHazardLoadEventTable",
+          "has the functionality that",
+          "Calculate NaturalHazardLoadEventTable statistic"
+        ],
+        [
+          "NaturalHazardLoadEventTable",
+          "inputs",
+          "JSON object"
+        ],
+        [
+          "NaturalHazardLoadEventTable",
+          "outputs",
+          "Numeric result"
+        ],
+        [
+          "RemoteSensingBatchImageMean",
+          "has the functionality that",
+          "Calculate RemoteSensingBatchImageMean statistic"
+        ],
+        [
+          "RemoteSensingBatchImageMean",
+          "inputs",
+          "JSON object"
+        ],
+        [
+          "RemoteSensingBatchImageMean",
+          "outputs",
+          "Numeric result"
+        ],
+        [
+          "RemoteSensingDifference",
+          "has the functionality that",
+          "Calculate RemoteSensingDifference statistic"
+        ],
+        [
+          "RemoteSensingDifference",
+          "inputs",
+          "JSON object"
+        ],
+        [
+          "RemoteSensingDifference",
+          "outputs",
+          "Numeric result"
+        ]
+      ]
+    },
+    {
+      "query": "Count USGS earthquake events in 2011.",
+      "dimension": 3,
+      "graph": {
+        "RemoteSensingBatchImageMean": [
+          [
+            "has the functionality that",
+            "Calculate RemoteSensingBatchImageMean statistic"
+          ],
+          [
+            "inputs",
+            "JSON object"
+          ],
+          [
+            "outputs",
+            "Numeric result"
+          ]
+        ],
+        "RemoteSensingMean": [
+          [
+            "has the functionality that",
+            "Calculate RemoteSensingMean statistic"
+          ],
+          [
+            "inputs",
+            "JSON object"
+          ],
+          [
+            "outputs",
+            "Numeric result"
+          ]
+        ],
+        "RemoteSensingDifference": [
+          [
+            "has the functionality that",
+            "Calculate RemoteSensingDifference statistic"
+          ],
+          [
+            "inputs",
+            "JSON object"
+          ],
+          [
+            "outputs",
+            "Numeric result"
+          ]
+        ],
+        "RemoteSensingDivision": [
+          [
+            "has the functionality that",
+            "Calculate RemoteSensingDivision statistic"
+          ],
+          [
+            "inputs",
+            "JSON object"
+          ],
+          [
+            "outputs",
+            "Numeric result"
+          ]
+        ],
+        "DeepEarthQueryUSGSCatalog": [
+          [
+            "has the functionality that",
+            "Calculate DeepEarthQueryUSGSCatalog statistic"
+          ],
+          [
+            "inputs",
+            "JSON object"
+          ],
+          [
+            "outputs",
+            "Numeric result"
+          ]
+        ],
+        "NaturalHazardLoadEventTable": [
+          [
+            "has the functionality that",
+            "Calculate NaturalHazardLoadEventTable statistic"
+          ],
+          [
+            "inputs",
+            "JSON object"
+          ],
+          [
+            "outputs",
+            "Numeric result"
+          ]
+        ],
+        "NaturalHazardCountRecords": [
+          [
+            "has the functionality that",
+            "Calculate NaturalHazardCountRecords statistic"
+          ],
+          [
+            "inputs",
+            "JSON object"
+          ],
+          [
+            "outputs",
+            "Numeric result"
+          ]
+        ]
+      },
+      "vectors": {
+        "('RemoteSensingBatchImageMean', 'has the functionality that', 'Calculate RemoteSensingBatchImageMean statistic')": [
+          1,
+          8
+        ],
+        "('RemoteSensingMean', 'has the functionality that', 'Calculate RemoteSensingMean statistic')": [
+          2,
+          7
+        ],
+        "('RemoteSensingDifference', 'has the functionality that', 'Calculate RemoteSensingDifference statistic')": [
+          3,
+          6
+        ],
+        "('RemoteSensingDivision', 'has the functionality that', 'Calculate RemoteSensingDivision statistic')": [
+          4,
+          5
+        ],
+        "('DeepEarthQueryUSGSCatalog', 'has the functionality that', 'Calculate DeepEarthQueryUSGSCatalog statistic')": [
+          5,
+          4
+        ],
+        "('NaturalHazardLoadEventTable', 'has the functionality that', 'Calculate NaturalHazardLoadEventTable statistic')": [
+          6,
+          3
+        ],
+        "('NaturalHazardCountRecords', 'has the functionality that', 'Calculate NaturalHazardCountRecords statistic')": [
+          7,
+          2
+        ]
+      },
+      "expected": [
+        [
+          "DeepEarthQueryUSGSCatalog",
+          "has the functionality that",
+          "Calculate DeepEarthQueryUSGSCatalog statistic"
+        ],
+        [
+          "DeepEarthQueryUSGSCatalog",
+          "inputs",
+          "JSON object"
+        ],
+        [
+          "DeepEarthQueryUSGSCatalog",
+          "outputs",
+          "Numeric result"
+        ],
+        [
+          "NaturalHazardCountRecords",
+          "has the functionality that",
+          "Calculate NaturalHazardCountRecords statistic"
+        ],
+        [
+          "NaturalHazardCountRecords",
+          "inputs",
+          "JSON object"
+        ],
+        [
+          "NaturalHazardCountRecords",
+          "outputs",
+          "Numeric result"
+        ],
+        [
+          "NaturalHazardLoadEventTable",
+          "has the functionality that",
+          "Calculate NaturalHazardLoadEventTable statistic"
+        ],
+        [
+          "NaturalHazardLoadEventTable",
+          "inputs",
+          "JSON object"
+        ],
+        [
+          "NaturalHazardLoadEventTable",
+          "outputs",
+          "Numeric result"
+        ],
+        [
+          "RemoteSensingBatchImageMean",
+          "has the functionality that",
+          "Calculate RemoteSensingBatchImageMean statistic"
+        ],
+        [
+          "RemoteSensingBatchImageMean",
+          "inputs",
+          "JSON object"
+        ],
+        [
+          "RemoteSensingBatchImageMean",
+          "outputs",
+          "Numeric result"
+        ],
+        [
+          "RemoteSensingDifference",
+          "has the functionality that",
+          "Calculate RemoteSensingDifference statistic"
+        ],
+        [
+          "RemoteSensingDifference",
+          "inputs",
+          "JSON object"
+        ],
+        [
+          "RemoteSensingDifference",
+          "outputs",
+          "Numeric result"
+        ]
+      ]
+    },
+    {
+      "query": "Calculate remote sensing raster means.",
+      "dimension": 3,
+      "graph": {
+        "RemoteSensingBatchImageMean": [
+          [
+            "has the functionality that",
+            "Calculate RemoteSensingBatchImageMean statistic"
+          ],
+          [
+            "inputs",
+            "JSON object"
+          ],
+          [
+            "outputs",
+            "Numeric result"
+          ]
+        ],
+        "RemoteSensingMean": [
+          [
+            "has the functionality that",
+            "Calculate RemoteSensingMean statistic"
+          ],
+          [
+            "inputs",
+            "JSON object"
+          ],
+          [
+            "outputs",
+            "Numeric result"
+          ]
+        ],
+        "RemoteSensingDifference": [
+          [
+            "has the functionality that",
+            "Calculate RemoteSensingDifference statistic"
+          ],
+          [
+            "inputs",
+            "JSON object"
+          ],
+          [
+            "outputs",
+            "Numeric result"
+          ]
+        ],
+        "RemoteSensingDivision": [
+          [
+            "has the functionality that",
+            "Calculate RemoteSensingDivision statistic"
+          ],
+          [
+            "inputs",
+            "JSON object"
+          ],
+          [
+            "outputs",
+            "Numeric result"
+          ]
+        ],
+        "DeepEarthQueryUSGSCatalog": [
+          [
+            "has the functionality that",
+            "Calculate DeepEarthQueryUSGSCatalog statistic"
+          ],
+          [
+            "inputs",
+            "JSON object"
+          ],
+          [
+            "outputs",
+            "Numeric result"
+          ]
+        ],
+        "NaturalHazardLoadEventTable": [
+          [
+            "has the functionality that",
+            "Calculate NaturalHazardLoadEventTable statistic"
+          ],
+          [
+            "inputs",
+            "JSON object"
+          ],
+          [
+            "outputs",
+            "Numeric result"
+          ]
+        ],
+        "NaturalHazardCountRecords": [
+          [
+            "has the functionality that",
+            "Calculate NaturalHazardCountRecords statistic"
+          ],
+          [
+            "inputs",
+            "JSON object"
+          ],
+          [
+            "outputs",
+            "Numeric result"
+          ]
+        ]
+      },
+      "vectors": {
+        "('RemoteSensingBatchImageMean', 'has the functionality that', 'Calculate RemoteSensingBatchImageMean statistic')": [
+          1,
+          8
+        ],
+        "('RemoteSensingMean', 'has the functionality that', 'Calculate RemoteSensingMean statistic')": [
+          2,
+          7
+        ],
+        "('RemoteSensingDifference', 'has the functionality that', 'Calculate RemoteSensingDifference statistic')": [
+          3,
+          6
+        ],
+        "('RemoteSensingDivision', 'has the functionality that', 'Calculate RemoteSensingDivision statistic')": [
+          4,
+          5
+        ],
+        "('DeepEarthQueryUSGSCatalog', 'has the functionality that', 'Calculate DeepEarthQueryUSGSCatalog statistic')": [
+          5,
+          4
+        ],
+        "('NaturalHazardLoadEventTable', 'has the functionality that', 'Calculate NaturalHazardLoadEventTable statistic')": [
+          6,
+          3
+        ],
+        "('NaturalHazardCountRecords', 'has the functionality that', 'Calculate NaturalHazardCountRecords statistic')": [
+          7,
+          2
+        ]
+      },
+      "expected": [
+        [
+          "RemoteSensingBatchImageMean",
+          "has the functionality that",
+          "Calculate RemoteSensingBatchImageMean statistic"
+        ],
+        [
+          "RemoteSensingBatchImageMean",
+          "inputs",
+          "JSON object"
+        ],
+        [
+          "RemoteSensingBatchImageMean",
+          "outputs",
+          "Numeric result"
+        ],
+        [
+          "DeepEarthQueryUSGSCatalog",
+          "has the functionality that",
+          "Calculate DeepEarthQueryUSGSCatalog statistic"
+        ],
+        [
+          "DeepEarthQueryUSGSCatalog",
+          "inputs",
+          "JSON object"
+        ],
+        [
+          "DeepEarthQueryUSGSCatalog",
+          "outputs",
+          "Numeric result"
+        ],
+        [
+          "NaturalHazardCountRecords",
+          "has the functionality that",
+          "Calculate NaturalHazardCountRecords statistic"
+        ],
+        [
+          "NaturalHazardCountRecords",
+          "inputs",
+          "JSON object"
+        ],
+        [
+          "NaturalHazardCountRecords",
+          "outputs",
+          "Numeric result"
+        ],
+        [
+          "NaturalHazardLoadEventTable",
+          "has the functionality that",
+          "Calculate NaturalHazardLoadEventTable statistic"
+        ],
+        [
+          "NaturalHazardLoadEventTable",
+          "inputs",
+          "JSON object"
+        ],
+        [
+          "NaturalHazardLoadEventTable",
+          "outputs",
+          "Numeric result"
+        ],
+        [
+          "RemoteSensingDifference",
+          "has the functionality that",
+          "Calculate RemoteSensingDifference statistic"
+        ],
+        [
+          "RemoteSensingDifference",
+          "inputs",
+          "JSON object"
+        ],
+        [
+          "RemoteSensingDifference",
+          "outputs",
+          "Numeric result"
+        ]
+      ]
+    },
+    {
+      "query": "Count natural disaster event table records.",
+      "dimension": 3,
+      "graph": {
+        "RemoteSensingBatchImageMean": [
+          [
+            "has the functionality that",
+            "Calculate RemoteSensingBatchImageMean statistic"
+          ],
+          [
+            "inputs",
+            "JSON object"
+          ],
+          [
+            "outputs",
+            "Numeric result"
+          ]
+        ],
+        "RemoteSensingMean": [
+          [
+            "has the functionality that",
+            "Calculate RemoteSensingMean statistic"
+          ],
+          [
+            "inputs",
+            "JSON object"
+          ],
+          [
+            "outputs",
+            "Numeric result"
+          ]
+        ],
+        "RemoteSensingDifference": [
+          [
+            "has the functionality that",
+            "Calculate RemoteSensingDifference statistic"
+          ],
+          [
+            "inputs",
+            "JSON object"
+          ],
+          [
+            "outputs",
+            "Numeric result"
+          ]
+        ],
+        "RemoteSensingDivision": [
+          [
+            "has the functionality that",
+            "Calculate RemoteSensingDivision statistic"
+          ],
+          [
+            "inputs",
+            "JSON object"
+          ],
+          [
+            "outputs",
+            "Numeric result"
+          ]
+        ],
+        "DeepEarthQueryUSGSCatalog": [
+          [
+            "has the functionality that",
+            "Calculate DeepEarthQueryUSGSCatalog statistic"
+          ],
+          [
+            "inputs",
+            "JSON object"
+          ],
+          [
+            "outputs",
+            "Numeric result"
+          ]
+        ],
+        "NaturalHazardLoadEventTable": [
+          [
+            "has the functionality that",
+            "Calculate NaturalHazardLoadEventTable statistic"
+          ],
+          [
+            "inputs",
+            "JSON object"
+          ],
+          [
+            "outputs",
+            "Numeric result"
+          ]
+        ],
+        "NaturalHazardCountRecords": [
+          [
+            "has the functionality that",
+            "Calculate NaturalHazardCountRecords statistic"
+          ],
+          [
+            "inputs",
+            "JSON object"
+          ],
+          [
+            "outputs",
+            "Numeric result"
+          ]
+        ]
+      },
+      "vectors": {
+        "('RemoteSensingBatchImageMean', 'has the functionality that', 'Calculate RemoteSensingBatchImageMean statistic')": [
+          1,
+          8
+        ],
+        "('RemoteSensingMean', 'has the functionality that', 'Calculate RemoteSensingMean statistic')": [
+          2,
+          7
+        ],
+        "('RemoteSensingDifference', 'has the functionality that', 'Calculate RemoteSensingDifference statistic')": [
+          3,
+          6
+        ],
+        "('RemoteSensingDivision', 'has the functionality that', 'Calculate RemoteSensingDivision statistic')": [
+          4,
+          5
+        ],
+        "('DeepEarthQueryUSGSCatalog', 'has the functionality that', 'Calculate DeepEarthQueryUSGSCatalog statistic')": [
+          5,
+          4
+        ],
+        "('NaturalHazardLoadEventTable', 'has the functionality that', 'Calculate NaturalHazardLoadEventTable statistic')": [
+          6,
+          3
+        ],
+        "('NaturalHazardCountRecords', 'has the functionality that', 'Calculate NaturalHazardCountRecords statistic')": [
+          7,
+          2
+        ]
+      },
+      "expected": [
+        [
+          "NaturalHazardLoadEventTable",
+          "has the functionality that",
+          "Calculate NaturalHazardLoadEventTable statistic"
+        ],
+        [
+          "NaturalHazardLoadEventTable",
+          "inputs",
+          "JSON object"
+        ],
+        [
+          "NaturalHazardLoadEventTable",
+          "outputs",
+          "Numeric result"
+        ],
+        [
+          "DeepEarthQueryUSGSCatalog",
+          "has the functionality that",
+          "Calculate DeepEarthQueryUSGSCatalog statistic"
+        ],
+        [
+          "DeepEarthQueryUSGSCatalog",
+          "inputs",
+          "JSON object"
+        ],
+        [
+          "DeepEarthQueryUSGSCatalog",
+          "outputs",
+          "Numeric result"
+        ],
+        [
+          "NaturalHazardCountRecords",
+          "has the functionality that",
+          "Calculate NaturalHazardCountRecords statistic"
+        ],
+        [
+          "NaturalHazardCountRecords",
+          "inputs",
+          "JSON object"
+        ],
+        [
+          "NaturalHazardCountRecords",
+          "outputs",
+          "Numeric result"
+        ],
+        [
+          "RemoteSensingBatchImageMean",
+          "has the functionality that",
+          "Calculate RemoteSensingBatchImageMean statistic"
+        ],
+        [
+          "RemoteSensingBatchImageMean",
+          "inputs",
+          "JSON object"
+        ],
+        [
+          "RemoteSensingBatchImageMean",
+          "outputs",
+          "Numeric result"
+        ],
+        [
+          "RemoteSensingDifference",
+          "has the functionality that",
+          "Calculate RemoteSensingDifference statistic"
+        ],
+        [
+          "RemoteSensingDifference",
+          "inputs",
+          "JSON object"
+        ],
+        [
+          "RemoteSensingDifference",
+          "outputs",
+          "Numeric result"
+        ]
+      ]
+    },
+    {
+      "query": "Compute the requested statistic.",
+      "dimension": 2,
+      "graph": {
+        "RemoteSensingBatchImageMean": [
+          [
+            "has the functionality that",
+            "Calculate RemoteSensingBatchImageMean statistic"
+          ],
+          [
+            "inputs",
+            "JSON object"
+          ],
+          [
+            "outputs",
+            "Numeric result"
+          ],
+          [
+            "recommended next tool",
+            "RemoteSensingMean"
+          ]
+        ],
+        "RemoteSensingMean": [
+          [
+            "has the functionality that",
+            "Calculate RemoteSensingMean statistic"
+          ],
+          [
+            "inputs",
+            "JSON object"
+          ],
+          [
+            "outputs",
+            "Numeric result"
+          ],
+          [
+            "recommended next tool",
+            "RemoteSensingDifference"
+          ]
+        ],
+        "RemoteSensingDifference": [
+          [
+            "has the functionality that",
+            "Calculate RemoteSensingDifference statistic"
+          ],
+          [
+            "inputs",
+            "JSON object"
+          ],
+          [
+            "outputs",
+            "Numeric result"
+          ],
+          [
+            "recommended next tool",
+            "RemoteSensingDivision"
+          ]
+        ],
+        "RemoteSensingDivision": [
+          [
+            "has the functionality that",
+            "Calculate RemoteSensingDivision statistic"
+          ],
+          [
+            "inputs",
+            "JSON object"
+          ],
+          [
+            "outputs",
+            "Numeric result"
+          ],
+          [
+            "recommended next tool",
+            "DeepEarthQueryUSGSCatalog"
+          ]
+        ],
+        "DeepEarthQueryUSGSCatalog": [
+          [
+            "has the functionality that",
+            "Calculate DeepEarthQueryUSGSCatalog statistic"
+          ],
+          [
+            "inputs",
+            "JSON object"
+          ],
+          [
+            "outputs",
+            "Numeric result"
+          ],
+          [
+            "recommended next tool",
+            "NaturalHazardLoadEventTable"
+          ]
+        ],
+        "NaturalHazardLoadEventTable": [
+          [
+            "has the functionality that",
+            "Calculate NaturalHazardLoadEventTable statistic"
+          ],
+          [
+            "inputs",
+            "JSON object"
+          ],
+          [
+            "outputs",
+            "Numeric result"
+          ],
+          [
+            "recommended next tool",
+            "NaturalHazardCountRecords"
+          ]
+        ],
+        "NaturalHazardCountRecords": [
+          [
+            "has the functionality that",
+            "Calculate NaturalHazardCountRecords statistic"
+          ],
+          [
+            "inputs",
+            "JSON object"
+          ],
+          [
+            "outputs",
+            "Numeric result"
+          ]
+        ]
+      },
+      "vectors": {
+        "('RemoteSensingBatchImageMean', 'has the functionality that', 'Calculate RemoteSensingBatchImageMean statistic')": [
+          1,
+          8
+        ],
+        "('RemoteSensingMean', 'has the functionality that', 'Calculate RemoteSensingMean statistic')": [
+          2,
+          7
+        ],
+        "('RemoteSensingDifference', 'has the functionality that', 'Calculate RemoteSensingDifference statistic')": [
+          3,
+          6
+        ],
+        "('RemoteSensingDivision', 'has the functionality that', 'Calculate RemoteSensingDivision statistic')": [
+          4,
+          5
+        ],
+        "('DeepEarthQueryUSGSCatalog', 'has the functionality that', 'Calculate DeepEarthQueryUSGSCatalog statistic')": [
+          5,
+          4
+        ],
+        "('NaturalHazardLoadEventTable', 'has the functionality that', 'Calculate NaturalHazardLoadEventTable statistic')": [
+          6,
+          3
+        ],
+        "('NaturalHazardCountRecords', 'has the functionality that', 'Calculate NaturalHazardCountRecords statistic')": [
+          7,
+          2
+        ]
+      },
+      "expected": [
+        [
+          "RemoteSensingDifference",
+          "has the functionality that",
+          "Calculate RemoteSensingDifference statistic"
+        ],
+        [
+          "RemoteSensingDifference",
+          "inputs",
+          "JSON object"
+        ],
+        [
+          "RemoteSensingDifference",
+          "outputs",
+          "Numeric result"
+        ],
+        [
+          "RemoteSensingDifference",
+          "recommended next tool",
+          "RemoteSensingDivision"
+        ],
+        [
+          "RemoteSensingDivision",
+          "has the functionality that",
+          "Calculate RemoteSensingDivision statistic"
+        ],
+        [
+          "RemoteSensingDivision",
+          "inputs",
+          "JSON object"
+        ],
+        [
+          "RemoteSensingDivision",
+          "outputs",
+          "Numeric result"
+        ],
+        [
+          "RemoteSensingDivision",
+          "recommended next tool",
+          "DeepEarthQueryUSGSCatalog"
+        ],
+        [
+          "RemoteSensingMean",
+          "has the functionality that",
+          "Calculate RemoteSensingMean statistic"
+        ],
+        [
+          "RemoteSensingMean",
+          "inputs",
+          "JSON object"
+        ],
+        [
+          "RemoteSensingMean",
+          "outputs",
+          "Numeric result"
+        ],
+        [
+          "RemoteSensingMean",
+          "recommended next tool",
+          "RemoteSensingDifference"
+        ],
+        [
+          "DeepEarthQueryUSGSCatalog",
+          "has the functionality that",
+          "Calculate DeepEarthQueryUSGSCatalog statistic"
+        ],
+        [
+          "DeepEarthQueryUSGSCatalog",
+          "inputs",
+          "JSON object"
+        ],
+        [
+          "DeepEarthQueryUSGSCatalog",
+          "outputs",
+          "Numeric result"
+        ],
+        [
+          "DeepEarthQueryUSGSCatalog",
+          "recommended next tool",
+          "NaturalHazardLoadEventTable"
+        ],
+        [
+          "RemoteSensingBatchImageMean",
+          "has the functionality that",
+          "Calculate RemoteSensingBatchImageMean statistic"
+        ],
+        [
+          "RemoteSensingBatchImageMean",
+          "inputs",
+          "JSON object"
+        ],
+        [
+          "RemoteSensingBatchImageMean",
+          "outputs",
+          "Numeric result"
+        ],
+        [
+          "RemoteSensingBatchImageMean",
+          "recommended next tool",
+          "RemoteSensingMean"
+        ],
+        [
+          "NaturalHazardLoadEventTable",
+          "has the functionality that",
+          "Calculate NaturalHazardLoadEventTable statistic"
+        ],
+        [
+          "NaturalHazardLoadEventTable",
+          "inputs",
+          "JSON object"
+        ],
+        [
+          "NaturalHazardLoadEventTable",
+          "outputs",
+          "Numeric result"
+        ],
+        [
+          "NaturalHazardLoadEventTable",
+          "recommended next tool",
+          "NaturalHazardCountRecords"
+        ],
+        [
+          "NaturalHazardCountRecords",
+          "has the functionality that",
+          "Calculate NaturalHazardCountRecords statistic"
+        ],
+        [
+          "NaturalHazardCountRecords",
+          "inputs",
+          "JSON object"
+        ],
+        [
+          "NaturalHazardCountRecords",
+          "outputs",
+          "Numeric result"
+        ]
+      ]
+    },
+    {
+      "query": "Count USGS earthquake events in 2011.",
+      "dimension": 2,
+      "graph": {
+        "RemoteSensingBatchImageMean": [
+          [
+            "has the functionality that",
+            "Calculate RemoteSensingBatchImageMean statistic"
+          ],
+          [
+            "inputs",
+            "JSON object"
+          ],
+          [
+            "outputs",
+            "Numeric result"
+          ],
+          [
+            "recommended next tool",
+            "RemoteSensingMean"
+          ]
+        ],
+        "RemoteSensingMean": [
+          [
+            "has the functionality that",
+            "Calculate RemoteSensingMean statistic"
+          ],
+          [
+            "inputs",
+            "JSON object"
+          ],
+          [
+            "outputs",
+            "Numeric result"
+          ],
+          [
+            "recommended next tool",
+            "RemoteSensingDifference"
+          ]
+        ],
+        "RemoteSensingDifference": [
+          [
+            "has the functionality that",
+            "Calculate RemoteSensingDifference statistic"
+          ],
+          [
+            "inputs",
+            "JSON object"
+          ],
+          [
+            "outputs",
+            "Numeric result"
+          ],
+          [
+            "recommended next tool",
+            "RemoteSensingDivision"
+          ]
+        ],
+        "RemoteSensingDivision": [
+          [
+            "has the functionality that",
+            "Calculate RemoteSensingDivision statistic"
+          ],
+          [
+            "inputs",
+            "JSON object"
+          ],
+          [
+            "outputs",
+            "Numeric result"
+          ],
+          [
+            "recommended next tool",
+            "DeepEarthQueryUSGSCatalog"
+          ]
+        ],
+        "DeepEarthQueryUSGSCatalog": [
+          [
+            "has the functionality that",
+            "Calculate DeepEarthQueryUSGSCatalog statistic"
+          ],
+          [
+            "inputs",
+            "JSON object"
+          ],
+          [
+            "outputs",
+            "Numeric result"
+          ],
+          [
+            "recommended next tool",
+            "NaturalHazardLoadEventTable"
+          ]
+        ],
+        "NaturalHazardLoadEventTable": [
+          [
+            "has the functionality that",
+            "Calculate NaturalHazardLoadEventTable statistic"
+          ],
+          [
+            "inputs",
+            "JSON object"
+          ],
+          [
+            "outputs",
+            "Numeric result"
+          ],
+          [
+            "recommended next tool",
+            "NaturalHazardCountRecords"
+          ]
+        ],
+        "NaturalHazardCountRecords": [
+          [
+            "has the functionality that",
+            "Calculate NaturalHazardCountRecords statistic"
+          ],
+          [
+            "inputs",
+            "JSON object"
+          ],
+          [
+            "outputs",
+            "Numeric result"
+          ]
+        ]
+      },
+      "vectors": {
+        "('RemoteSensingBatchImageMean', 'has the functionality that', 'Calculate RemoteSensingBatchImageMean statistic')": [
+          1,
+          8
+        ],
+        "('RemoteSensingMean', 'has the functionality that', 'Calculate RemoteSensingMean statistic')": [
+          2,
+          7
+        ],
+        "('RemoteSensingDifference', 'has the functionality that', 'Calculate RemoteSensingDifference statistic')": [
+          3,
+          6
+        ],
+        "('RemoteSensingDivision', 'has the functionality that', 'Calculate RemoteSensingDivision statistic')": [
+          4,
+          5
+        ],
+        "('DeepEarthQueryUSGSCatalog', 'has the functionality that', 'Calculate DeepEarthQueryUSGSCatalog statistic')": [
+          5,
+          4
+        ],
+        "('NaturalHazardLoadEventTable', 'has the functionality that', 'Calculate NaturalHazardLoadEventTable statistic')": [
+          6,
+          3
+        ],
+        "('NaturalHazardCountRecords', 'has the functionality that', 'Calculate NaturalHazardCountRecords statistic')": [
+          7,
+          2
+        ]
+      },
+      "expected": [
+        [
+          "RemoteSensingDifference",
+          "has the functionality that",
+          "Calculate RemoteSensingDifference statistic"
+        ],
+        [
+          "RemoteSensingDifference",
+          "inputs",
+          "JSON object"
+        ],
+        [
+          "RemoteSensingDifference",
+          "outputs",
+          "Numeric result"
+        ],
+        [
+          "RemoteSensingDifference",
+          "recommended next tool",
+          "RemoteSensingDivision"
+        ],
+        [
+          "RemoteSensingDivision",
+          "has the functionality that",
+          "Calculate RemoteSensingDivision statistic"
+        ],
+        [
+          "RemoteSensingDivision",
+          "inputs",
+          "JSON object"
+        ],
+        [
+          "RemoteSensingDivision",
+          "outputs",
+          "Numeric result"
+        ],
+        [
+          "RemoteSensingDivision",
+          "recommended next tool",
+          "DeepEarthQueryUSGSCatalog"
+        ],
+        [
+          "RemoteSensingMean",
+          "has the functionality that",
+          "Calculate RemoteSensingMean statistic"
+        ],
+        [
+          "RemoteSensingMean",
+          "inputs",
+          "JSON object"
+        ],
+        [
+          "RemoteSensingMean",
+          "outputs",
+          "Numeric result"
+        ],
+        [
+          "RemoteSensingMean",
+          "recommended next tool",
+          "RemoteSensingDifference"
+        ],
+        [
+          "DeepEarthQueryUSGSCatalog",
+          "has the functionality that",
+          "Calculate DeepEarthQueryUSGSCatalog statistic"
+        ],
+        [
+          "DeepEarthQueryUSGSCatalog",
+          "inputs",
+          "JSON object"
+        ],
+        [
+          "DeepEarthQueryUSGSCatalog",
+          "outputs",
+          "Numeric result"
+        ],
+        [
+          "DeepEarthQueryUSGSCatalog",
+          "recommended next tool",
+          "NaturalHazardLoadEventTable"
+        ],
+        [
+          "RemoteSensingBatchImageMean",
+          "has the functionality that",
+          "Calculate RemoteSensingBatchImageMean statistic"
+        ],
+        [
+          "RemoteSensingBatchImageMean",
+          "inputs",
+          "JSON object"
+        ],
+        [
+          "RemoteSensingBatchImageMean",
+          "outputs",
+          "Numeric result"
+        ],
+        [
+          "RemoteSensingBatchImageMean",
+          "recommended next tool",
+          "RemoteSensingMean"
+        ],
+        [
+          "NaturalHazardLoadEventTable",
+          "has the functionality that",
+          "Calculate NaturalHazardLoadEventTable statistic"
+        ],
+        [
+          "NaturalHazardLoadEventTable",
+          "inputs",
+          "JSON object"
+        ],
+        [
+          "NaturalHazardLoadEventTable",
+          "outputs",
+          "Numeric result"
+        ],
+        [
+          "NaturalHazardLoadEventTable",
+          "recommended next tool",
+          "NaturalHazardCountRecords"
+        ],
+        [
+          "NaturalHazardCountRecords",
+          "has the functionality that",
+          "Calculate NaturalHazardCountRecords statistic"
+        ],
+        [
+          "NaturalHazardCountRecords",
+          "inputs",
+          "JSON object"
+        ],
+        [
+          "NaturalHazardCountRecords",
+          "outputs",
+          "Numeric result"
+        ]
+      ]
+    },
+    {
+      "query": "Calculate remote sensing raster means.",
+      "dimension": 2,
+      "graph": {
+        "RemoteSensingBatchImageMean": [
+          [
+            "has the functionality that",
+            "Calculate RemoteSensingBatchImageMean statistic"
+          ],
+          [
+            "inputs",
+            "JSON object"
+          ],
+          [
+            "outputs",
+            "Numeric result"
+          ],
+          [
+            "recommended next tool",
+            "RemoteSensingMean"
+          ]
+        ],
+        "RemoteSensingMean": [
+          [
+            "has the functionality that",
+            "Calculate RemoteSensingMean statistic"
+          ],
+          [
+            "inputs",
+            "JSON object"
+          ],
+          [
+            "outputs",
+            "Numeric result"
+          ],
+          [
+            "recommended next tool",
+            "RemoteSensingDifference"
+          ]
+        ],
+        "RemoteSensingDifference": [
+          [
+            "has the functionality that",
+            "Calculate RemoteSensingDifference statistic"
+          ],
+          [
+            "inputs",
+            "JSON object"
+          ],
+          [
+            "outputs",
+            "Numeric result"
+          ],
+          [
+            "recommended next tool",
+            "RemoteSensingDivision"
+          ]
+        ],
+        "RemoteSensingDivision": [
+          [
+            "has the functionality that",
+            "Calculate RemoteSensingDivision statistic"
+          ],
+          [
+            "inputs",
+            "JSON object"
+          ],
+          [
+            "outputs",
+            "Numeric result"
+          ],
+          [
+            "recommended next tool",
+            "DeepEarthQueryUSGSCatalog"
+          ]
+        ],
+        "DeepEarthQueryUSGSCatalog": [
+          [
+            "has the functionality that",
+            "Calculate DeepEarthQueryUSGSCatalog statistic"
+          ],
+          [
+            "inputs",
+            "JSON object"
+          ],
+          [
+            "outputs",
+            "Numeric result"
+          ],
+          [
+            "recommended next tool",
+            "NaturalHazardLoadEventTable"
+          ]
+        ],
+        "NaturalHazardLoadEventTable": [
+          [
+            "has the functionality that",
+            "Calculate NaturalHazardLoadEventTable statistic"
+          ],
+          [
+            "inputs",
+            "JSON object"
+          ],
+          [
+            "outputs",
+            "Numeric result"
+          ],
+          [
+            "recommended next tool",
+            "NaturalHazardCountRecords"
+          ]
+        ],
+        "NaturalHazardCountRecords": [
+          [
+            "has the functionality that",
+            "Calculate NaturalHazardCountRecords statistic"
+          ],
+          [
+            "inputs",
+            "JSON object"
+          ],
+          [
+            "outputs",
+            "Numeric result"
+          ]
+        ]
+      },
+      "vectors": {
+        "('RemoteSensingBatchImageMean', 'has the functionality that', 'Calculate RemoteSensingBatchImageMean statistic')": [
+          1,
+          8
+        ],
+        "('RemoteSensingMean', 'has the functionality that', 'Calculate RemoteSensingMean statistic')": [
+          2,
+          7
+        ],
+        "('RemoteSensingDifference', 'has the functionality that', 'Calculate RemoteSensingDifference statistic')": [
+          3,
+          6
+        ],
+        "('RemoteSensingDivision', 'has the functionality that', 'Calculate RemoteSensingDivision statistic')": [
+          4,
+          5
+        ],
+        "('DeepEarthQueryUSGSCatalog', 'has the functionality that', 'Calculate DeepEarthQueryUSGSCatalog statistic')": [
+          5,
+          4
+        ],
+        "('NaturalHazardLoadEventTable', 'has the functionality that', 'Calculate NaturalHazardLoadEventTable statistic')": [
+          6,
+          3
+        ],
+        "('NaturalHazardCountRecords', 'has the functionality that', 'Calculate NaturalHazardCountRecords statistic')": [
+          7,
+          2
+        ]
+      },
+      "expected": [
+        [
+          "RemoteSensingMean",
+          "has the functionality that",
+          "Calculate RemoteSensingMean statistic"
+        ],
+        [
+          "RemoteSensingMean",
+          "inputs",
+          "JSON object"
+        ],
+        [
+          "RemoteSensingMean",
+          "outputs",
+          "Numeric result"
+        ],
+        [
+          "RemoteSensingMean",
+          "recommended next tool",
+          "RemoteSensingDifference"
+        ],
+        [
+          "RemoteSensingBatchImageMean",
+          "has the functionality that",
+          "Calculate RemoteSensingBatchImageMean statistic"
+        ],
+        [
+          "RemoteSensingBatchImageMean",
+          "inputs",
+          "JSON object"
+        ],
+        [
+          "RemoteSensingBatchImageMean",
+          "outputs",
+          "Numeric result"
+        ],
+        [
+          "RemoteSensingBatchImageMean",
+          "recommended next tool",
+          "RemoteSensingMean"
+        ],
+        [
+          "RemoteSensingDifference",
+          "has the functionality that",
+          "Calculate RemoteSensingDifference statistic"
+        ],
+        [
+          "RemoteSensingDifference",
+          "inputs",
+          "JSON object"
+        ],
+        [
+          "RemoteSensingDifference",
+          "outputs",
+          "Numeric result"
+        ],
+        [
+          "RemoteSensingDifference",
+          "recommended next tool",
+          "RemoteSensingDivision"
+        ],
+        [
+          "RemoteSensingDivision",
+          "has the functionality that",
+          "Calculate RemoteSensingDivision statistic"
+        ],
+        [
+          "RemoteSensingDivision",
+          "inputs",
+          "JSON object"
+        ],
+        [
+          "RemoteSensingDivision",
+          "outputs",
+          "Numeric result"
+        ],
+        [
+          "RemoteSensingDivision",
+          "recommended next tool",
+          "DeepEarthQueryUSGSCatalog"
+        ],
+        [
+          "DeepEarthQueryUSGSCatalog",
+          "has the functionality that",
+          "Calculate DeepEarthQueryUSGSCatalog statistic"
+        ],
+        [
+          "DeepEarthQueryUSGSCatalog",
+          "inputs",
+          "JSON object"
+        ],
+        [
+          "DeepEarthQueryUSGSCatalog",
+          "outputs",
+          "Numeric result"
+        ],
+        [
+          "DeepEarthQueryUSGSCatalog",
+          "recommended next tool",
+          "NaturalHazardLoadEventTable"
+        ],
+        [
+          "NaturalHazardLoadEventTable",
+          "has the functionality that",
+          "Calculate NaturalHazardLoadEventTable statistic"
+        ],
+        [
+          "NaturalHazardLoadEventTable",
+          "inputs",
+          "JSON object"
+        ],
+        [
+          "NaturalHazardLoadEventTable",
+          "outputs",
+          "Numeric result"
+        ],
+        [
+          "NaturalHazardLoadEventTable",
+          "recommended next tool",
+          "NaturalHazardCountRecords"
+        ],
+        [
+          "NaturalHazardCountRecords",
+          "has the functionality that",
+          "Calculate NaturalHazardCountRecords statistic"
+        ],
+        [
+          "NaturalHazardCountRecords",
+          "inputs",
+          "JSON object"
+        ],
+        [
+          "NaturalHazardCountRecords",
+          "outputs",
+          "Numeric result"
+        ]
+      ]
+    },
+    {
+      "query": "Count natural disaster event table records.",
+      "dimension": 2,
+      "graph": {
+        "RemoteSensingBatchImageMean": [
+          [
+            "has the functionality that",
+            "Calculate RemoteSensingBatchImageMean statistic"
+          ],
+          [
+            "inputs",
+            "JSON object"
+          ],
+          [
+            "outputs",
+            "Numeric result"
+          ],
+          [
+            "recommended next tool",
+            "RemoteSensingMean"
+          ]
+        ],
+        "RemoteSensingMean": [
+          [
+            "has the functionality that",
+            "Calculate RemoteSensingMean statistic"
+          ],
+          [
+            "inputs",
+            "JSON object"
+          ],
+          [
+            "outputs",
+            "Numeric result"
+          ],
+          [
+            "recommended next tool",
+            "RemoteSensingDifference"
+          ]
+        ],
+        "RemoteSensingDifference": [
+          [
+            "has the functionality that",
+            "Calculate RemoteSensingDifference statistic"
+          ],
+          [
+            "inputs",
+            "JSON object"
+          ],
+          [
+            "outputs",
+            "Numeric result"
+          ],
+          [
+            "recommended next tool",
+            "RemoteSensingDivision"
+          ]
+        ],
+        "RemoteSensingDivision": [
+          [
+            "has the functionality that",
+            "Calculate RemoteSensingDivision statistic"
+          ],
+          [
+            "inputs",
+            "JSON object"
+          ],
+          [
+            "outputs",
+            "Numeric result"
+          ],
+          [
+            "recommended next tool",
+            "DeepEarthQueryUSGSCatalog"
+          ]
+        ],
+        "DeepEarthQueryUSGSCatalog": [
+          [
+            "has the functionality that",
+            "Calculate DeepEarthQueryUSGSCatalog statistic"
+          ],
+          [
+            "inputs",
+            "JSON object"
+          ],
+          [
+            "outputs",
+            "Numeric result"
+          ],
+          [
+            "recommended next tool",
+            "NaturalHazardLoadEventTable"
+          ]
+        ],
+        "NaturalHazardLoadEventTable": [
+          [
+            "has the functionality that",
+            "Calculate NaturalHazardLoadEventTable statistic"
+          ],
+          [
+            "inputs",
+            "JSON object"
+          ],
+          [
+            "outputs",
+            "Numeric result"
+          ],
+          [
+            "recommended next tool",
+            "NaturalHazardCountRecords"
+          ]
+        ],
+        "NaturalHazardCountRecords": [
+          [
+            "has the functionality that",
+            "Calculate NaturalHazardCountRecords statistic"
+          ],
+          [
+            "inputs",
+            "JSON object"
+          ],
+          [
+            "outputs",
+            "Numeric result"
+          ]
+        ]
+      },
+      "vectors": {
+        "('RemoteSensingBatchImageMean', 'has the functionality that', 'Calculate RemoteSensingBatchImageMean statistic')": [
+          1,
+          8
+        ],
+        "('RemoteSensingMean', 'has the functionality that', 'Calculate RemoteSensingMean statistic')": [
+          2,
+          7
+        ],
+        "('RemoteSensingDifference', 'has the functionality that', 'Calculate RemoteSensingDifference statistic')": [
+          3,
+          6
+        ],
+        "('RemoteSensingDivision', 'has the functionality that', 'Calculate RemoteSensingDivision statistic')": [
+          4,
+          5
+        ],
+        "('DeepEarthQueryUSGSCatalog', 'has the functionality that', 'Calculate DeepEarthQueryUSGSCatalog statistic')": [
+          5,
+          4
+        ],
+        "('NaturalHazardLoadEventTable', 'has the functionality that', 'Calculate NaturalHazardLoadEventTable statistic')": [
+          6,
+          3
+        ],
+        "('NaturalHazardCountRecords', 'has the functionality that', 'Calculate NaturalHazardCountRecords statistic')": [
+          7,
+          2
+        ]
+      },
+      "expected": [
+        [
+          "NaturalHazardLoadEventTable",
+          "has the functionality that",
+          "Calculate NaturalHazardLoadEventTable statistic"
+        ],
+        [
+          "NaturalHazardLoadEventTable",
+          "inputs",
+          "JSON object"
+        ],
+        [
+          "NaturalHazardLoadEventTable",
+          "outputs",
+          "Numeric result"
+        ],
+        [
+          "NaturalHazardLoadEventTable",
+          "recommended next tool",
+          "NaturalHazardCountRecords"
+        ],
+        [
+          "RemoteSensingDifference",
+          "has the functionality that",
+          "Calculate RemoteSensingDifference statistic"
+        ],
+        [
+          "RemoteSensingDifference",
+          "inputs",
+          "JSON object"
+        ],
+        [
+          "RemoteSensingDifference",
+          "outputs",
+          "Numeric result"
+        ],
+        [
+          "RemoteSensingDifference",
+          "recommended next tool",
+          "RemoteSensingDivision"
+        ],
+        [
+          "RemoteSensingDivision",
+          "has the functionality that",
+          "Calculate RemoteSensingDivision statistic"
+        ],
+        [
+          "RemoteSensingDivision",
+          "inputs",
+          "JSON object"
+        ],
+        [
+          "RemoteSensingDivision",
+          "outputs",
+          "Numeric result"
+        ],
+        [
+          "RemoteSensingDivision",
+          "recommended next tool",
+          "DeepEarthQueryUSGSCatalog"
+        ],
+        [
+          "RemoteSensingMean",
+          "has the functionality that",
+          "Calculate RemoteSensingMean statistic"
+        ],
+        [
+          "RemoteSensingMean",
+          "inputs",
+          "JSON object"
+        ],
+        [
+          "RemoteSensingMean",
+          "outputs",
+          "Numeric result"
+        ],
+        [
+          "RemoteSensingMean",
+          "recommended next tool",
+          "RemoteSensingDifference"
+        ],
+        [
+          "DeepEarthQueryUSGSCatalog",
+          "has the functionality that",
+          "Calculate DeepEarthQueryUSGSCatalog statistic"
+        ],
+        [
+          "DeepEarthQueryUSGSCatalog",
+          "inputs",
+          "JSON object"
+        ],
+        [
+          "DeepEarthQueryUSGSCatalog",
+          "outputs",
+          "Numeric result"
+        ],
+        [
+          "DeepEarthQueryUSGSCatalog",
+          "recommended next tool",
+          "NaturalHazardLoadEventTable"
+        ],
+        [
+          "NaturalHazardCountRecords",
+          "has the functionality that",
+          "Calculate NaturalHazardCountRecords statistic"
+        ],
+        [
+          "NaturalHazardCountRecords",
+          "inputs",
+          "JSON object"
+        ],
+        [
+          "NaturalHazardCountRecords",
+          "outputs",
+          "Numeric result"
+        ],
+        [
+          "RemoteSensingBatchImageMean",
+          "has the functionality that",
+          "Calculate RemoteSensingBatchImageMean statistic"
+        ],
+        [
+          "RemoteSensingBatchImageMean",
+          "inputs",
+          "JSON object"
+        ],
+        [
+          "RemoteSensingBatchImageMean",
+          "outputs",
+          "Numeric result"
+        ],
+        [
+          "RemoteSensingBatchImageMean",
+          "recommended next tool",
+          "RemoteSensingMean"
+        ]
+      ]
+    },
+    {
+      "query": "Compute the requested statistic.",
+      "dimension": 3,
+      "graph": {
+        "RemoteSensingBatchImageMean": [
+          [
+            "has the functionality that",
+            "Calculate RemoteSensingBatchImageMean statistic"
+          ],
+          [
+            "inputs",
+            "JSON object"
+          ],
+          [
+            "outputs",
+            "Numeric result"
+          ],
+          [
+            "recommended next tool",
+            "RemoteSensingMean"
+          ]
+        ],
+        "RemoteSensingMean": [
+          [
+            "has the functionality that",
+            "Calculate RemoteSensingMean statistic"
+          ],
+          [
+            "inputs",
+            "JSON object"
+          ],
+          [
+            "outputs",
+            "Numeric result"
+          ],
+          [
+            "recommended next tool",
+            "RemoteSensingDifference"
+          ]
+        ],
+        "RemoteSensingDifference": [
+          [
+            "has the functionality that",
+            "Calculate RemoteSensingDifference statistic"
+          ],
+          [
+            "inputs",
+            "JSON object"
+          ],
+          [
+            "outputs",
+            "Numeric result"
+          ],
+          [
+            "recommended next tool",
+            "RemoteSensingDivision"
+          ]
+        ],
+        "RemoteSensingDivision": [
+          [
+            "has the functionality that",
+            "Calculate RemoteSensingDivision statistic"
+          ],
+          [
+            "inputs",
+            "JSON object"
+          ],
+          [
+            "outputs",
+            "Numeric result"
+          ],
+          [
+            "recommended next tool",
+            "DeepEarthQueryUSGSCatalog"
+          ]
+        ],
+        "DeepEarthQueryUSGSCatalog": [
+          [
+            "has the functionality that",
+            "Calculate DeepEarthQueryUSGSCatalog statistic"
+          ],
+          [
+            "inputs",
+            "JSON object"
+          ],
+          [
+            "outputs",
+            "Numeric result"
+          ],
+          [
+            "recommended next tool",
+            "NaturalHazardLoadEventTable"
+          ]
+        ],
+        "NaturalHazardLoadEventTable": [
+          [
+            "has the functionality that",
+            "Calculate NaturalHazardLoadEventTable statistic"
+          ],
+          [
+            "inputs",
+            "JSON object"
+          ],
+          [
+            "outputs",
+            "Numeric result"
+          ],
+          [
+            "recommended next tool",
+            "NaturalHazardCountRecords"
+          ]
+        ],
+        "NaturalHazardCountRecords": [
+          [
+            "has the functionality that",
+            "Calculate NaturalHazardCountRecords statistic"
+          ],
+          [
+            "inputs",
+            "JSON object"
+          ],
+          [
+            "outputs",
+            "Numeric result"
+          ]
+        ]
+      },
+      "vectors": {
+        "('RemoteSensingBatchImageMean', 'has the functionality that', 'Calculate RemoteSensingBatchImageMean statistic')": [
+          1,
+          8
+        ],
+        "('RemoteSensingMean', 'has the functionality that', 'Calculate RemoteSensingMean statistic')": [
+          2,
+          7
+        ],
+        "('RemoteSensingDifference', 'has the functionality that', 'Calculate RemoteSensingDifference statistic')": [
+          3,
+          6
+        ],
+        "('RemoteSensingDivision', 'has the functionality that', 'Calculate RemoteSensingDivision statistic')": [
+          4,
+          5
+        ],
+        "('DeepEarthQueryUSGSCatalog', 'has the functionality that', 'Calculate DeepEarthQueryUSGSCatalog statistic')": [
+          5,
+          4
+        ],
+        "('NaturalHazardLoadEventTable', 'has the functionality that', 'Calculate NaturalHazardLoadEventTable statistic')": [
+          6,
+          3
+        ],
+        "('NaturalHazardCountRecords', 'has the functionality that', 'Calculate NaturalHazardCountRecords statistic')": [
+          7,
+          2
+        ]
+      },
+      "expected": [
+        [
+          "NaturalHazardCountRecords",
+          "has the functionality that",
+          "Calculate NaturalHazardCountRecords statistic"
+        ],
+        [
+          "NaturalHazardCountRecords",
+          "inputs",
+          "JSON object"
+        ],
+        [
+          "NaturalHazardCountRecords",
+          "outputs",
+          "Numeric result"
+        ],
+        [
+          "NaturalHazardLoadEventTable",
+          "has the functionality that",
+          "Calculate NaturalHazardLoadEventTable statistic"
+        ],
+        [
+          "NaturalHazardLoadEventTable",
+          "inputs",
+          "JSON object"
+        ],
+        [
+          "NaturalHazardLoadEventTable",
+          "outputs",
+          "Numeric result"
+        ],
+        [
+          "NaturalHazardLoadEventTable",
+          "recommended next tool",
+          "NaturalHazardCountRecords"
+        ],
+        [
+          "DeepEarthQueryUSGSCatalog",
+          "has the functionality that",
+          "Calculate DeepEarthQueryUSGSCatalog statistic"
+        ],
+        [
+          "DeepEarthQueryUSGSCatalog",
+          "inputs",
+          "JSON object"
+        ],
+        [
+          "DeepEarthQueryUSGSCatalog",
+          "outputs",
+          "Numeric result"
+        ],
+        [
+          "DeepEarthQueryUSGSCatalog",
+          "recommended next tool",
+          "NaturalHazardLoadEventTable"
+        ],
+        [
+          "RemoteSensingDifference",
+          "has the functionality that",
+          "Calculate RemoteSensingDifference statistic"
+        ],
+        [
+          "RemoteSensingDifference",
+          "inputs",
+          "JSON object"
+        ],
+        [
+          "RemoteSensingDifference",
+          "outputs",
+          "Numeric result"
+        ],
+        [
+          "RemoteSensingDifference",
+          "recommended next tool",
+          "RemoteSensingDivision"
+        ],
+        [
+          "RemoteSensingBatchImageMean",
+          "has the functionality that",
+          "Calculate RemoteSensingBatchImageMean statistic"
+        ],
+        [
+          "RemoteSensingBatchImageMean",
+          "inputs",
+          "JSON object"
+        ],
+        [
+          "RemoteSensingBatchImageMean",
+          "outputs",
+          "Numeric result"
+        ],
+        [
+          "RemoteSensingBatchImageMean",
+          "recommended next tool",
+          "RemoteSensingMean"
+        ],
+        [
+          "RemoteSensingMean",
+          "has the functionality that",
+          "Calculate RemoteSensingMean statistic"
+        ],
+        [
+          "RemoteSensingMean",
+          "inputs",
+          "JSON object"
+        ],
+        [
+          "RemoteSensingMean",
+          "outputs",
+          "Numeric result"
+        ],
+        [
+          "RemoteSensingMean",
+          "recommended next tool",
+          "RemoteSensingDifference"
+        ],
+        [
+          "RemoteSensingDivision",
+          "has the functionality that",
+          "Calculate RemoteSensingDivision statistic"
+        ],
+        [
+          "RemoteSensingDivision",
+          "inputs",
+          "JSON object"
+        ],
+        [
+          "RemoteSensingDivision",
+          "outputs",
+          "Numeric result"
+        ],
+        [
+          "RemoteSensingDivision",
+          "recommended next tool",
+          "DeepEarthQueryUSGSCatalog"
+        ]
+      ]
+    },
+    {
+      "query": "Count USGS earthquake events in 2011.",
+      "dimension": 3,
+      "graph": {
+        "RemoteSensingBatchImageMean": [
+          [
+            "has the functionality that",
+            "Calculate RemoteSensingBatchImageMean statistic"
+          ],
+          [
+            "inputs",
+            "JSON object"
+          ],
+          [
+            "outputs",
+            "Numeric result"
+          ],
+          [
+            "recommended next tool",
+            "RemoteSensingMean"
+          ]
+        ],
+        "RemoteSensingMean": [
+          [
+            "has the functionality that",
+            "Calculate RemoteSensingMean statistic"
+          ],
+          [
+            "inputs",
+            "JSON object"
+          ],
+          [
+            "outputs",
+            "Numeric result"
+          ],
+          [
+            "recommended next tool",
+            "RemoteSensingDifference"
+          ]
+        ],
+        "RemoteSensingDifference": [
+          [
+            "has the functionality that",
+            "Calculate RemoteSensingDifference statistic"
+          ],
+          [
+            "inputs",
+            "JSON object"
+          ],
+          [
+            "outputs",
+            "Numeric result"
+          ],
+          [
+            "recommended next tool",
+            "RemoteSensingDivision"
+          ]
+        ],
+        "RemoteSensingDivision": [
+          [
+            "has the functionality that",
+            "Calculate RemoteSensingDivision statistic"
+          ],
+          [
+            "inputs",
+            "JSON object"
+          ],
+          [
+            "outputs",
+            "Numeric result"
+          ],
+          [
+            "recommended next tool",
+            "DeepEarthQueryUSGSCatalog"
+          ]
+        ],
+        "DeepEarthQueryUSGSCatalog": [
+          [
+            "has the functionality that",
+            "Calculate DeepEarthQueryUSGSCatalog statistic"
+          ],
+          [
+            "inputs",
+            "JSON object"
+          ],
+          [
+            "outputs",
+            "Numeric result"
+          ],
+          [
+            "recommended next tool",
+            "NaturalHazardLoadEventTable"
+          ]
+        ],
+        "NaturalHazardLoadEventTable": [
+          [
+            "has the functionality that",
+            "Calculate NaturalHazardLoadEventTable statistic"
+          ],
+          [
+            "inputs",
+            "JSON object"
+          ],
+          [
+            "outputs",
+            "Numeric result"
+          ],
+          [
+            "recommended next tool",
+            "NaturalHazardCountRecords"
+          ]
+        ],
+        "NaturalHazardCountRecords": [
+          [
+            "has the functionality that",
+            "Calculate NaturalHazardCountRecords statistic"
+          ],
+          [
+            "inputs",
+            "JSON object"
+          ],
+          [
+            "outputs",
+            "Numeric result"
+          ]
+        ]
+      },
+      "vectors": {
+        "('RemoteSensingBatchImageMean', 'has the functionality that', 'Calculate RemoteSensingBatchImageMean statistic')": [
+          1,
+          8
+        ],
+        "('RemoteSensingMean', 'has the functionality that', 'Calculate RemoteSensingMean statistic')": [
+          2,
+          7
+        ],
+        "('RemoteSensingDifference', 'has the functionality that', 'Calculate RemoteSensingDifference statistic')": [
+          3,
+          6
+        ],
+        "('RemoteSensingDivision', 'has the functionality that', 'Calculate RemoteSensingDivision statistic')": [
+          4,
+          5
+        ],
+        "('DeepEarthQueryUSGSCatalog', 'has the functionality that', 'Calculate DeepEarthQueryUSGSCatalog statistic')": [
+          5,
+          4
+        ],
+        "('NaturalHazardLoadEventTable', 'has the functionality that', 'Calculate NaturalHazardLoadEventTable statistic')": [
+          6,
+          3
+        ],
+        "('NaturalHazardCountRecords', 'has the functionality that', 'Calculate NaturalHazardCountRecords statistic')": [
+          7,
+          2
+        ]
+      },
+      "expected": [
+        [
+          "DeepEarthQueryUSGSCatalog",
+          "has the functionality that",
+          "Calculate DeepEarthQueryUSGSCatalog statistic"
+        ],
+        [
+          "DeepEarthQueryUSGSCatalog",
+          "inputs",
+          "JSON object"
+        ],
+        [
+          "DeepEarthQueryUSGSCatalog",
+          "outputs",
+          "Numeric result"
+        ],
+        [
+          "DeepEarthQueryUSGSCatalog",
+          "recommended next tool",
+          "NaturalHazardLoadEventTable"
+        ],
+        [
+          "NaturalHazardCountRecords",
+          "has the functionality that",
+          "Calculate NaturalHazardCountRecords statistic"
+        ],
+        [
+          "NaturalHazardCountRecords",
+          "inputs",
+          "JSON object"
+        ],
+        [
+          "NaturalHazardCountRecords",
+          "outputs",
+          "Numeric result"
+        ],
+        [
+          "NaturalHazardLoadEventTable",
+          "has the functionality that",
+          "Calculate NaturalHazardLoadEventTable statistic"
+        ],
+        [
+          "NaturalHazardLoadEventTable",
+          "inputs",
+          "JSON object"
+        ],
+        [
+          "NaturalHazardLoadEventTable",
+          "outputs",
+          "Numeric result"
+        ],
+        [
+          "NaturalHazardLoadEventTable",
+          "recommended next tool",
+          "NaturalHazardCountRecords"
+        ],
+        [
+          "RemoteSensingBatchImageMean",
+          "has the functionality that",
+          "Calculate RemoteSensingBatchImageMean statistic"
+        ],
+        [
+          "RemoteSensingBatchImageMean",
+          "inputs",
+          "JSON object"
+        ],
+        [
+          "RemoteSensingBatchImageMean",
+          "outputs",
+          "Numeric result"
+        ],
+        [
+          "RemoteSensingBatchImageMean",
+          "recommended next tool",
+          "RemoteSensingMean"
+        ],
+        [
+          "RemoteSensingDifference",
+          "has the functionality that",
+          "Calculate RemoteSensingDifference statistic"
+        ],
+        [
+          "RemoteSensingDifference",
+          "inputs",
+          "JSON object"
+        ],
+        [
+          "RemoteSensingDifference",
+          "outputs",
+          "Numeric result"
+        ],
+        [
+          "RemoteSensingDifference",
+          "recommended next tool",
+          "RemoteSensingDivision"
+        ],
+        [
+          "RemoteSensingMean",
+          "has the functionality that",
+          "Calculate RemoteSensingMean statistic"
+        ],
+        [
+          "RemoteSensingMean",
+          "inputs",
+          "JSON object"
+        ],
+        [
+          "RemoteSensingMean",
+          "outputs",
+          "Numeric result"
+        ],
+        [
+          "RemoteSensingMean",
+          "recommended next tool",
+          "RemoteSensingDifference"
+        ],
+        [
+          "RemoteSensingDivision",
+          "has the functionality that",
+          "Calculate RemoteSensingDivision statistic"
+        ],
+        [
+          "RemoteSensingDivision",
+          "inputs",
+          "JSON object"
+        ],
+        [
+          "RemoteSensingDivision",
+          "outputs",
+          "Numeric result"
+        ],
+        [
+          "RemoteSensingDivision",
+          "recommended next tool",
+          "DeepEarthQueryUSGSCatalog"
+        ]
+      ]
+    },
+    {
+      "query": "Calculate remote sensing raster means.",
+      "dimension": 3,
+      "graph": {
+        "RemoteSensingBatchImageMean": [
+          [
+            "has the functionality that",
+            "Calculate RemoteSensingBatchImageMean statistic"
+          ],
+          [
+            "inputs",
+            "JSON object"
+          ],
+          [
+            "outputs",
+            "Numeric result"
+          ],
+          [
+            "recommended next tool",
+            "RemoteSensingMean"
+          ]
+        ],
+        "RemoteSensingMean": [
+          [
+            "has the functionality that",
+            "Calculate RemoteSensingMean statistic"
+          ],
+          [
+            "inputs",
+            "JSON object"
+          ],
+          [
+            "outputs",
+            "Numeric result"
+          ],
+          [
+            "recommended next tool",
+            "RemoteSensingDifference"
+          ]
+        ],
+        "RemoteSensingDifference": [
+          [
+            "has the functionality that",
+            "Calculate RemoteSensingDifference statistic"
+          ],
+          [
+            "inputs",
+            "JSON object"
+          ],
+          [
+            "outputs",
+            "Numeric result"
+          ],
+          [
+            "recommended next tool",
+            "RemoteSensingDivision"
+          ]
+        ],
+        "RemoteSensingDivision": [
+          [
+            "has the functionality that",
+            "Calculate RemoteSensingDivision statistic"
+          ],
+          [
+            "inputs",
+            "JSON object"
+          ],
+          [
+            "outputs",
+            "Numeric result"
+          ],
+          [
+            "recommended next tool",
+            "DeepEarthQueryUSGSCatalog"
+          ]
+        ],
+        "DeepEarthQueryUSGSCatalog": [
+          [
+            "has the functionality that",
+            "Calculate DeepEarthQueryUSGSCatalog statistic"
+          ],
+          [
+            "inputs",
+            "JSON object"
+          ],
+          [
+            "outputs",
+            "Numeric result"
+          ],
+          [
+            "recommended next tool",
+            "NaturalHazardLoadEventTable"
+          ]
+        ],
+        "NaturalHazardLoadEventTable": [
+          [
+            "has the functionality that",
+            "Calculate NaturalHazardLoadEventTable statistic"
+          ],
+          [
+            "inputs",
+            "JSON object"
+          ],
+          [
+            "outputs",
+            "Numeric result"
+          ],
+          [
+            "recommended next tool",
+            "NaturalHazardCountRecords"
+          ]
+        ],
+        "NaturalHazardCountRecords": [
+          [
+            "has the functionality that",
+            "Calculate NaturalHazardCountRecords statistic"
+          ],
+          [
+            "inputs",
+            "JSON object"
+          ],
+          [
+            "outputs",
+            "Numeric result"
+          ]
+        ]
+      },
+      "vectors": {
+        "('RemoteSensingBatchImageMean', 'has the functionality that', 'Calculate RemoteSensingBatchImageMean statistic')": [
+          1,
+          8
+        ],
+        "('RemoteSensingMean', 'has the functionality that', 'Calculate RemoteSensingMean statistic')": [
+          2,
+          7
+        ],
+        "('RemoteSensingDifference', 'has the functionality that', 'Calculate RemoteSensingDifference statistic')": [
+          3,
+          6
+        ],
+        "('RemoteSensingDivision', 'has the functionality that', 'Calculate RemoteSensingDivision statistic')": [
+          4,
+          5
+        ],
+        "('DeepEarthQueryUSGSCatalog', 'has the functionality that', 'Calculate DeepEarthQueryUSGSCatalog statistic')": [
+          5,
+          4
+        ],
+        "('NaturalHazardLoadEventTable', 'has the functionality that', 'Calculate NaturalHazardLoadEventTable statistic')": [
+          6,
+          3
+        ],
+        "('NaturalHazardCountRecords', 'has the functionality that', 'Calculate NaturalHazardCountRecords statistic')": [
+          7,
+          2
+        ]
+      },
+      "expected": [
+        [
+          "RemoteSensingDifference",
+          "has the functionality that",
+          "Calculate RemoteSensingDifference statistic"
+        ],
+        [
+          "RemoteSensingDifference",
+          "inputs",
+          "JSON object"
+        ],
+        [
+          "RemoteSensingDifference",
+          "outputs",
+          "Numeric result"
+        ],
+        [
+          "RemoteSensingDifference",
+          "recommended next tool",
+          "RemoteSensingDivision"
+        ],
+        [
+          "RemoteSensingBatchImageMean",
+          "has the functionality that",
+          "Calculate RemoteSensingBatchImageMean statistic"
+        ],
+        [
+          "RemoteSensingBatchImageMean",
+          "inputs",
+          "JSON object"
+        ],
+        [
+          "RemoteSensingBatchImageMean",
+          "outputs",
+          "Numeric result"
+        ],
+        [
+          "RemoteSensingBatchImageMean",
+          "recommended next tool",
+          "RemoteSensingMean"
+        ],
+        [
+          "NaturalHazardCountRecords",
+          "has the functionality that",
+          "Calculate NaturalHazardCountRecords statistic"
+        ],
+        [
+          "NaturalHazardCountRecords",
+          "inputs",
+          "JSON object"
+        ],
+        [
+          "NaturalHazardCountRecords",
+          "outputs",
+          "Numeric result"
+        ],
+        [
+          "NaturalHazardLoadEventTable",
+          "has the functionality that",
+          "Calculate NaturalHazardLoadEventTable statistic"
+        ],
+        [
+          "NaturalHazardLoadEventTable",
+          "inputs",
+          "JSON object"
+        ],
+        [
+          "NaturalHazardLoadEventTable",
+          "outputs",
+          "Numeric result"
+        ],
+        [
+          "NaturalHazardLoadEventTable",
+          "recommended next tool",
+          "NaturalHazardCountRecords"
+        ],
+        [
+          "RemoteSensingMean",
+          "has the functionality that",
+          "Calculate RemoteSensingMean statistic"
+        ],
+        [
+          "RemoteSensingMean",
+          "inputs",
+          "JSON object"
+        ],
+        [
+          "RemoteSensingMean",
+          "outputs",
+          "Numeric result"
+        ],
+        [
+          "RemoteSensingMean",
+          "recommended next tool",
+          "RemoteSensingDifference"
+        ],
+        [
+          "DeepEarthQueryUSGSCatalog",
+          "has the functionality that",
+          "Calculate DeepEarthQueryUSGSCatalog statistic"
+        ],
+        [
+          "DeepEarthQueryUSGSCatalog",
+          "inputs",
+          "JSON object"
+        ],
+        [
+          "DeepEarthQueryUSGSCatalog",
+          "outputs",
+          "Numeric result"
+        ],
+        [
+          "DeepEarthQueryUSGSCatalog",
+          "recommended next tool",
+          "NaturalHazardLoadEventTable"
+        ],
+        [
+          "RemoteSensingDivision",
+          "has the functionality that",
+          "Calculate RemoteSensingDivision statistic"
+        ],
+        [
+          "RemoteSensingDivision",
+          "inputs",
+          "JSON object"
+        ],
+        [
+          "RemoteSensingDivision",
+          "outputs",
+          "Numeric result"
+        ],
+        [
+          "RemoteSensingDivision",
+          "recommended next tool",
+          "DeepEarthQueryUSGSCatalog"
+        ]
+      ]
+    },
+    {
+      "query": "Count natural disaster event table records.",
+      "dimension": 3,
+      "graph": {
+        "RemoteSensingBatchImageMean": [
+          [
+            "has the functionality that",
+            "Calculate RemoteSensingBatchImageMean statistic"
+          ],
+          [
+            "inputs",
+            "JSON object"
+          ],
+          [
+            "outputs",
+            "Numeric result"
+          ],
+          [
+            "recommended next tool",
+            "RemoteSensingMean"
+          ]
+        ],
+        "RemoteSensingMean": [
+          [
+            "has the functionality that",
+            "Calculate RemoteSensingMean statistic"
+          ],
+          [
+            "inputs",
+            "JSON object"
+          ],
+          [
+            "outputs",
+            "Numeric result"
+          ],
+          [
+            "recommended next tool",
+            "RemoteSensingDifference"
+          ]
+        ],
+        "RemoteSensingDifference": [
+          [
+            "has the functionality that",
+            "Calculate RemoteSensingDifference statistic"
+          ],
+          [
+            "inputs",
+            "JSON object"
+          ],
+          [
+            "outputs",
+            "Numeric result"
+          ],
+          [
+            "recommended next tool",
+            "RemoteSensingDivision"
+          ]
+        ],
+        "RemoteSensingDivision": [
+          [
+            "has the functionality that",
+            "Calculate RemoteSensingDivision statistic"
+          ],
+          [
+            "inputs",
+            "JSON object"
+          ],
+          [
+            "outputs",
+            "Numeric result"
+          ],
+          [
+            "recommended next tool",
+            "DeepEarthQueryUSGSCatalog"
+          ]
+        ],
+        "DeepEarthQueryUSGSCatalog": [
+          [
+            "has the functionality that",
+            "Calculate DeepEarthQueryUSGSCatalog statistic"
+          ],
+          [
+            "inputs",
+            "JSON object"
+          ],
+          [
+            "outputs",
+            "Numeric result"
+          ],
+          [
+            "recommended next tool",
+            "NaturalHazardLoadEventTable"
+          ]
+        ],
+        "NaturalHazardLoadEventTable": [
+          [
+            "has the functionality that",
+            "Calculate NaturalHazardLoadEventTable statistic"
+          ],
+          [
+            "inputs",
+            "JSON object"
+          ],
+          [
+            "outputs",
+            "Numeric result"
+          ],
+          [
+            "recommended next tool",
+            "NaturalHazardCountRecords"
+          ]
+        ],
+        "NaturalHazardCountRecords": [
+          [
+            "has the functionality that",
+            "Calculate NaturalHazardCountRecords statistic"
+          ],
+          [
+            "inputs",
+            "JSON object"
+          ],
+          [
+            "outputs",
+            "Numeric result"
+          ]
+        ]
+      },
+      "vectors": {
+        "('RemoteSensingBatchImageMean', 'has the functionality that', 'Calculate RemoteSensingBatchImageMean statistic')": [
+          1,
+          8
+        ],
+        "('RemoteSensingMean', 'has the functionality that', 'Calculate RemoteSensingMean statistic')": [
+          2,
+          7
+        ],
+        "('RemoteSensingDifference', 'has the functionality that', 'Calculate RemoteSensingDifference statistic')": [
+          3,
+          6
+        ],
+        "('RemoteSensingDivision', 'has the functionality that', 'Calculate RemoteSensingDivision statistic')": [
+          4,
+          5
+        ],
+        "('DeepEarthQueryUSGSCatalog', 'has the functionality that', 'Calculate DeepEarthQueryUSGSCatalog statistic')": [
+          5,
+          4
+        ],
+        "('NaturalHazardLoadEventTable', 'has the functionality that', 'Calculate NaturalHazardLoadEventTable statistic')": [
+          6,
+          3
+        ],
+        "('NaturalHazardCountRecords', 'has the functionality that', 'Calculate NaturalHazardCountRecords statistic')": [
+          7,
+          2
+        ]
+      },
+      "expected": [
+        [
+          "NaturalHazardLoadEventTable",
+          "has the functionality that",
+          "Calculate NaturalHazardLoadEventTable statistic"
+        ],
+        [
+          "NaturalHazardLoadEventTable",
+          "inputs",
+          "JSON object"
+        ],
+        [
+          "NaturalHazardLoadEventTable",
+          "outputs",
+          "Numeric result"
+        ],
+        [
+          "NaturalHazardLoadEventTable",
+          "recommended next tool",
+          "NaturalHazardCountRecords"
+        ],
+        [
+          "NaturalHazardCountRecords",
+          "has the functionality that",
+          "Calculate NaturalHazardCountRecords statistic"
+        ],
+        [
+          "NaturalHazardCountRecords",
+          "inputs",
+          "JSON object"
+        ],
+        [
+          "NaturalHazardCountRecords",
+          "outputs",
+          "Numeric result"
+        ],
+        [
+          "DeepEarthQueryUSGSCatalog",
+          "has the functionality that",
+          "Calculate DeepEarthQueryUSGSCatalog statistic"
+        ],
+        [
+          "DeepEarthQueryUSGSCatalog",
+          "inputs",
+          "JSON object"
+        ],
+        [
+          "DeepEarthQueryUSGSCatalog",
+          "outputs",
+          "Numeric result"
+        ],
+        [
+          "DeepEarthQueryUSGSCatalog",
+          "recommended next tool",
+          "NaturalHazardLoadEventTable"
+        ],
+        [
+          "RemoteSensingBatchImageMean",
+          "has the functionality that",
+          "Calculate RemoteSensingBatchImageMean statistic"
+        ],
+        [
+          "RemoteSensingBatchImageMean",
+          "inputs",
+          "JSON object"
+        ],
+        [
+          "RemoteSensingBatchImageMean",
+          "outputs",
+          "Numeric result"
+        ],
+        [
+          "RemoteSensingBatchImageMean",
+          "recommended next tool",
+          "RemoteSensingMean"
+        ],
+        [
+          "RemoteSensingDifference",
+          "has the functionality that",
+          "Calculate RemoteSensingDifference statistic"
+        ],
+        [
+          "RemoteSensingDifference",
+          "inputs",
+          "JSON object"
+        ],
+        [
+          "RemoteSensingDifference",
+          "outputs",
+          "Numeric result"
+        ],
+        [
+          "RemoteSensingDifference",
+          "recommended next tool",
+          "RemoteSensingDivision"
+        ],
+        [
+          "RemoteSensingMean",
+          "has the functionality that",
+          "Calculate RemoteSensingMean statistic"
+        ],
+        [
+          "RemoteSensingMean",
+          "inputs",
+          "JSON object"
+        ],
+        [
+          "RemoteSensingMean",
+          "outputs",
+          "Numeric result"
+        ],
+        [
+          "RemoteSensingMean",
+          "recommended next tool",
+          "RemoteSensingDifference"
+        ],
+        [
+          "RemoteSensingDivision",
+          "has the functionality that",
+          "Calculate RemoteSensingDivision statistic"
+        ],
+        [
+          "RemoteSensingDivision",
+          "inputs",
+          "JSON object"
+        ],
+        [
+          "RemoteSensingDivision",
+          "outputs",
+          "Numeric result"
+        ],
+        [
+          "RemoteSensingDivision",
+          "recommended next tool",
+          "DeepEarthQueryUSGSCatalog"
+        ]
+      ]
+    }
+  ]
+}

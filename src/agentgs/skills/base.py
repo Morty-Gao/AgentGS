@@ -19,6 +19,7 @@ class SkillSpec(Model):
     description: str
     keywords: list[str] = Field(default_factory=list)
     tools: list[str] = Field(default_factory=list)
+    definition: dict = Field(default_factory=dict)
 
 
 @dataclass

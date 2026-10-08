@@ -82,3 +82,56 @@ async def test_provider_token_parameter(config):
         assert (await client.chat([])).message["content"] == "ok"
     finally:
         await client.aclose()
+
+
+@pytest.mark.parametrize("status", [409, 425, 429, 599])
+async def test_staged_transport_uses_original_retry_codes_and_payload(config, status):
+    from agentgs.config.algorithm import AlgorithmSettings
+
+    requests = []
+
+    def handler(request):
+        requests.append(json.loads(request.content))
+        if len(requests) == 1:
+            return httpx.Response(status)
+        return httpx.Response(200, json={"choices": [{"message": {"content": "ok"}}]})
+
+    client = OpenAICompatibleClient(config, httpx.MockTransport(handler))
+    try:
+        reply = await client.text(
+            "original prompt",
+            stage="tool_argument_generation",
+            settings=AlgorithmSettings(retry_base_seconds=0, retry_jitter_seconds=0),
+        )
+        assert reply.attempts == 2 and requests[0] == requests[1]
+        assert requests[0] == {
+            "model": "remote",
+            "temperature": 0.2,
+            "messages": [
+                {
+                    "role": "system",
+                    "content": "You are ChatGPT, a large language model trained by OpenAI.\n",
+                },
+                {"role": "user", "content": "original prompt"},
+            ],
+        }
+    finally:
+        await client.aclose()
+
+
+async def test_invalid_successful_model_reply_is_not_reissued(config):
+    from agentgs.config.algorithm import AlgorithmSettings
+
+    requests = []
+
+    def handler(request):
+        requests.append(request)
+        return httpx.Response(200, json={"choices": [{"message": "malformed"}]})
+
+    client = OpenAICompatibleClient(config, httpx.MockTransport(handler))
+    try:
+        with pytest.raises(ValueError):
+            await client.text("q", stage="final_answer_generation", settings=AlgorithmSettings())
+        assert len(requests) == 1
+    finally:
+        await client.aclose()

@@ -62,6 +62,46 @@ def explicit_chain(question, names):
     return steps if len(steps) >= 2 else []
 
 
+def available_tool_names(relations, allowed):
+    return list(
+        dict.fromkeys(
+            row[0]
+            for row in relations or []
+            if len(row) >= 2 and row[1] == "has the functionality that" and row[0] in allowed
+        )
+    )
+
+
+def grounding_schemas(retriever, names):
+    schemas = {}
+    for name in dict.fromkeys(names):
+        try:
+            info = retriever.get_tool_info(retriever.get_tool_subgraph(name, depth=1, limit=1000))
+            if isinstance(info, dict):
+                schemas[name] = dict(info)
+        except Exception:
+            schemas[name] = {}
+    return {name: overlay_scientific_tool_schema(name, info) for name, info in schemas.items()}
+
+
+def snapshot_relations(relations):
+    """Expose the authorized Geo protocol while retaining frozen KG ranking."""
+    row = next(
+        row for row in load_catalog()["specs"] if row["Name"] == "GeoBigDataExecuteGeoSPARQL"
+    )
+    replacements = {
+        "has the functionality that": row["Function"],
+        "inputs": row["Input"],
+        "outputs": row["Output"],
+    }
+    return [
+        [relation[0], relation[1], replacements[relation[1]]]
+        if len(relation) >= 3 and relation[0] == row["Name"] and relation[1] in replacements
+        else relation
+        for relation in relations
+    ]
+
+
 class AgentEngine:
     async def run(self, task, context):
         if task.algorithm == "prototype":
@@ -144,6 +184,22 @@ class AgentEngine:
         scope.set_registry(registry)
         explicit = explicit_chain(question, names) if not options.require_llm else []
         if explicit:
+            if options.planning_mode == "skill_guided":
+                explicit_plan, _ = self._skill_layer(
+                    question, [name for name, _ in explicit], names, planner, state
+                )
+                state.emit(
+                    "tool_grounding",
+                    {
+                        "content": ground_plan(
+                            planner.graph,
+                            explicit_plan.as_dict(),
+                            names,
+                            [name for name, _ in explicit],
+                            tool_next=load_catalog()["next"],
+                        )
+                    },
+                )
             state.emit("plan", {"content": "Explicit Tool Chain:\n" + str(explicit)})
             outputs = []
             for name, arguments in explicit:
@@ -169,15 +225,31 @@ class AgentEngine:
         skill_guided = options.planning_mode == "skill_guided"
         plan = None
         bridge_report = None
-        if skill_guided:
-            plan = MutablePlan(**planner.plan(question, []))
-            bridge_report = complete_shared_capability_bridges(
-                plan, list(planner.skills.values()), names
-            )
-            self._record_skill(state, plan)
-            state.emit("shared_capability_bridge_search", {"content": bridge_report})
         # Authorized offline GeoQuestions route retains the original early-route position.
         if "GeoBigDataExecuteGeoSPARQL" in inferred and not options.require_llm:
+            if skill_guided:
+                plan, bridge_report = self._skill_layer(
+                    question, ["GeoBigDataExecuteGeoSPARQL"], names, planner, state
+                )
+                state.emit(
+                    "tool_grounding",
+                    {
+                        "content": ground_plan(
+                            planner.graph,
+                            plan.as_dict(),
+                            names,
+                            ["GeoBigDataExecuteGeoSPARQL"],
+                            tool_next=load_catalog()["next"],
+                        )
+                    },
+                )
+            state.emit(
+                "schema_route",
+                {
+                    "source": "compact_geosparql_query_planner",
+                    "selected_tools": ["GeoBigDataExecuteGeoSPARQL"],
+                },
+            )
             prepared, event = prepare_tool_input(
                 "GeoBigDataExecuteGeoSPARQL", "{}", question, artifact_registry=registry
             )
@@ -210,26 +282,26 @@ class AgentEngine:
                 prepared, event = prepare_tool_input(
                     "GeoBigDataExecuteGeoSPARQL", generated, question, artifact_registry=registry
                 )
-            if tool_input_is_ready("GeoBigDataExecuteGeoSPARQL", prepared):
 
-                async def fixed(_attempt, _history):
-                    return prepared
+            async def fixed(_attempt, _history):
+                return prepared
 
-                state.trace.append(event)
-                result = await run_tool_with_feedback(
-                    tool_name="GeoBigDataExecuteGeoSPARQL",
-                    file_path_list=task.file_path_list,
-                    input_provider=fixed,
-                    tool_runner=execution.physical,
-                    max_attempts=3,
-                    trace_list=state.trace,
-                )
-                return await answering.generate(
-                    question,
-                    result.render_for_agent(),
-                    completed=result.succeeded,
-                    tool_attempts_exhausted=not result.succeeded,
-                )
+            state.trace.append(event)
+            state.emit("plan", {"content": "Plan Chain:\n['GeoBigDataExecuteGeoSPARQL']"})
+            result = await run_tool_with_feedback(
+                tool_name="GeoBigDataExecuteGeoSPARQL",
+                file_path_list=task.file_path_list,
+                input_provider=fixed,
+                tool_runner=execution.physical,
+                max_attempts=3,
+                trace_list=state.trace,
+            )
+            return await answering.generate(
+                question,
+                result.render_for_agent(),
+                completed=result.succeeded,
+                tool_attempts_exhausted=not result.succeeded,
+            )
         if context.tool_retriever is None:
             raise FileNotFoundError(
                 "Frozen tool KG and embedding backend must be prepared for the staged agent"
@@ -241,16 +313,15 @@ class AgentEngine:
         previous_bridge = None
         for attempt in range(attempts):
             try:
+                if skill_guided:
+                    if plan is None:
+                        plan, bridge_report = self._skill_layer(question, [], names, planner, state)
+                    state.emit("artifact_registry_init", {"content": registry.compact_context()})
                 retrieved = await context.tool_retriever.retrieve(
                     SimpleNamespace(query_str=question)
                 )
-                available = list(
-                    dict.fromkeys(
-                        row[0]
-                        for row in retrieved
-                        if isinstance(row, (tuple, list)) and row and row[0] in allowed
-                    )
-                )
+                retrieved = snapshot_relations(retrieved)
+                available = available_tool_names(retrieved, allowed)
                 state.emit(
                     "tool_retrieval",
                     {
@@ -275,11 +346,13 @@ class AgentEngine:
                         )
                     )
                     expanded += inferred
+                    additions = []
                     for name in expanded:
                         if not any(row[0] == name for row in retrieved):
-                            retrieved += context.tool_retriever.get_tool_subgraph(
+                            additions += context.tool_retriever.get_tool_subgraph(
                                 name, depth=1, limit=1000
                             )
+                    retrieved = list(retrieved) + snapshot_relations(additions)
                     available = list(dict.fromkeys(available + expanded))
                     state.emit(
                         "tool_graph_retrieval",
@@ -370,14 +443,7 @@ class AgentEngine:
                             bridge_state[key] = previous_bridge[key]
                     previous_bridge = bridge_state
                 if skill_guided:
-                    schemas = {
-                        name: overlay_scientific_tool_schema(
-                            name, {"input_format": row["Input"], "output_format": row["Output"]}
-                        )
-                        for row in load_catalog()["specs"]
-                        for name in [row["Name"]]
-                        if name in chain
-                    }
+                    schemas = grounding_schemas(context.tool_retriever, chain)
                     grounded = ground_plan(
                         planner.graph,
                         plan.as_dict(),
@@ -487,3 +553,11 @@ class AgentEngine:
             },
         )
         state.emit("geo_constraint_check", {"constraints": plan.constraints})
+
+    def _skill_layer(self, question, inferred, names, planner, state):
+        plan = MutablePlan(**planner.plan(question, inferred))
+        report = complete_shared_capability_bridges(plan, list(planner.skills.values()), names)
+        if report["enabled"]:
+            state.emit("shared_capability_bridge_search", {"content": report})
+        self._record_skill(state, plan)
+        return plan, report
