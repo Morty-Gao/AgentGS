@@ -7,10 +7,10 @@
 从 Git 获取 GEM 数据后，可以仅使用 Python 标准库解压，无需安装项目依赖：
 
 ```bash
-python3 scripts/prepare/decompress_gem.py
+python3 scripts/prepare/prepare_gem.py
 ```
 
-默认读取 `data/gem.jsonl.gz`，展开为被 Git 忽略的 `data/gem.jsonl`。可通过 `--source` 和 `--output` 指定路径；成功校验 gzip 后才替换输出文件，解压失败会保留已有文件。
+默认读取 `data/gem.jsonl.gz`，展开为被 Git 忽略的 `data/gem.jsonl`，并记录准备清单。可通过 `--source-root` 指定包含压缩文件的数据目录，通过 `--output-root` 指定接收 `data/` 的项目根目录；成功校验 gzip 和 JSONL 后才替换输出文件，解压失败会保留已有文件。
 
 在仓库根目录、安装 scientific extra 的环境中执行：
 

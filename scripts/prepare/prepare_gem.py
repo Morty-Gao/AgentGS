@@ -1,4 +1,4 @@
-"""Convert a supplied GEM workbook to retained JSONL, or prepare that JSONL."""
+"""Expand retained GEM gzip JSONL, or import a supplied GEM workbook."""
 
 from _common import main
 
