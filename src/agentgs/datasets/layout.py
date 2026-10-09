@@ -118,7 +118,6 @@ RETAINED_FILES = {
             "graph_store.json",
             "image__vector_store.json",
             "import_manifest.json",
-            "index_store.json",
         ]
     ],
 }

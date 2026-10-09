@@ -47,7 +47,12 @@ class Events:
 
 def native(name, arguments, call_id=None, **reasoning):
     if name == "submit_tool_plan" and isinstance(arguments, dict) and set(arguments) == {"tools"}:
-        arguments = {"steps": [{"id": f"s{i}", "tool": tool, "purpose": f"Compute {tool}"} for i, tool in enumerate(arguments["tools"], 1)]}
+        arguments = {
+            "steps": [
+                {"id": f"s{i}", "tool": tool, "purpose": f"Compute {tool}"}
+                for i, tool in enumerate(arguments["tools"], 1)
+            ]
+        }
     return {
         "role": "assistant",
         "content": None,
@@ -191,7 +196,8 @@ async def test_invalid_arguments_are_answered_and_repaired_without_text_fallback
         )
     finally:
         await client.aclose()
-    assert result.succeeded and len(result.attempts) == 2
+    assert result.succeeded
+    assert len(result.attempts) == (2 if bad == {"x": ["wrong"]} else 1)
     assert next(m for m in payloads[1]["messages"] if m.get("tool_calls")) == rejected
     feedback = next(m for m in payloads[1]["messages"] if m.get("tool_call_id") == "bad")
     assert (
@@ -238,6 +244,32 @@ async def test_provider_protocol_errors_do_not_execute_unplanned_tools(project, 
     assert [
         m.to_openai() for m in state.conversation.messages if m.role == "assistant" and m.tool_calls
     ] == ([bad, good] if unexpected != "text_only" else [good])
+
+
+async def test_unknown_planned_argument_is_rejected_before_execution(project):
+    step = {
+        "id": "mean",
+        "tool": "RemoteSensingMean",
+        "purpose": "Mean",
+        "arguments": {"typo": [1, 3]},
+    }
+    bad = native("submit_tool_plan", {"steps": [step]})
+    good = native("submit_tool_plan", {"steps": [{**step, "arguments": {"x": [1, 3]}}]})
+    context, client, payloads, _ = setup(
+        project,
+        [
+            bad,
+            good,
+            native("RemoteSensingMean", {"x": [1, 3]}),
+            {"role": "assistant", "content": "IsCompleted:Completed\nFinalAnswer:2"},
+        ],
+    )
+    try:
+        result = await AgentEngine().run(TaskInput(question="Compute the mean."), context)
+    finally:
+        await client.aclose()
+    assert result.tool_chain_completed and len(result.tool_results) == 1
+    assert "Unknown planned input fields" in json.dumps(payloads[1])
 
 
 async def test_invalid_native_plan_is_repaired_and_not_scored_as_domain_execution(project):

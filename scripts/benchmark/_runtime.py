@@ -217,6 +217,7 @@ def environment(args):
             env[key] = value
     env["max_output_tokens"] = args.max_output_tokens
     env["output_token_parameter"] = args.output_token_parameter
+    env["reasoning_effort"] = getattr(args, "reasoning_effort", None)
     if not env.get("LLM_BASE_URL") or not env.get("LLM_MODEL"):
         raise ValueError("LLM_BASE_URL and LLM_MODEL are required")
     return env
@@ -248,6 +249,9 @@ def chat(
         "temperature": temperature,
         env.get("output_token_parameter", "max_tokens"): int(env.get("max_output_tokens", 8192)),
     }
+    effort = os.environ.get("AGENTGS_REASONING_EFFORT", "").strip() or env.get("reasoning_effort")
+    if effort:
+        payload["reasoning_effort"] = effort
     if tools is not None:
         payload.update(tools=tools, tool_choice="auto")
     if logprobs:
@@ -257,6 +261,9 @@ def chat(
             "type": "json_schema",
             "json_schema": {"name": stage, "strict": True, "schema": response_schema},
         }
+    from agentgs.client.openai_compatible import request_extras
+
+    payload.update(request_extras())
     # A ReAct caller appends to its dialogue after each reply. Freeze the exact
     # wire input before that mutation so earlier requests remain reproducible.
     payload = deepcopy(payload)
@@ -296,11 +303,47 @@ def chat(
         checkpoint(events)
 
 
+_STOP_TOKENS = {"<｜end▁of▁sentence｜>", "<|endoftext|>", "<|im_end|>"}
+
+
+def _token_bytes(token):
+    if token.get("bytes") is not None:
+        return bytes(token["bytes"])
+    return (token.get("token") or "").encode()
+
+
+def _message_tokens(tokens, content):
+    """Use the token suffix that is the message body.
+
+    Thinking text and the chat stop token stay in the logprob list, but they
+    are not part of message.content.
+    """
+    body = content.encode()
+    kept = [token for token in tokens if token.get("token") not in _STOP_TOKENS]
+    if not body:
+        return []
+    chosen = []
+    total = 0
+    for token in reversed(kept):
+        width = len(_token_bytes(token))
+        chosen.append(token)
+        total += width
+        if total == len(body):
+            ordered = list(reversed(chosen))
+            if b"".join(_token_bytes(item) for item in ordered) == body:
+                return ordered
+            break
+        if total > len(body):
+            break
+    raise ValueError("API token logprobs do not align with the returned content")
+
+
 def average_logprob(event, field_name=None, index=None):
     tokens = (event.get("logprobs") or {}).get("content") or []
     if not tokens:
         raise RuntimeError("GeoAgent requires API token logprobs; this model response has none")
     content = event.get("response", {}).get("content") or ""
+    tokens = _message_tokens(tokens, content)
     bounds = None
     if field_name:
         import re
@@ -324,13 +367,7 @@ def average_logprob(event, field_name=None, index=None):
         bounds = (len(content[:start].encode()), len(content[:end].encode()))
     offset, values = 0, []
     for token in tokens:
-        if token.get("token") in {"<｜end▁of▁sentence｜>", "<|endoftext|>"}:
-            continue
-        width = (
-            len(bytes(token["bytes"]))
-            if token.get("bytes") is not None
-            else len(token.get("token", "").encode())
-        )
+        width = len(_token_bytes(token))
         if bounds is None or offset < bounds[1] and offset + width > bounds[0]:
             values.append(token.get("logprob"))
         offset += width
@@ -405,6 +442,7 @@ def add_arguments(parser):
     parser.add_argument("--api-key")
     parser.add_argument("--request-timeout", type=float, default=180)
     parser.add_argument("--max-output-tokens", type=int, default=8192)
+    parser.add_argument("--reasoning-effort")
     parser.add_argument(
         "--output-token-parameter",
         choices=["max_tokens", "max_completion_tokens"],

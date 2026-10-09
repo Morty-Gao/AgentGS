@@ -121,7 +121,7 @@ class WeightedSkillRetriever:
         eligible = [
             skill
             for skill in self.definitions
-            if extension_eligible(
+            if not skill.get("planning", {}).get("bridge_only") and extension_eligible(
                 skill, features["body"], requested, mapping_extensions=self.mapping_extensions
             )
         ]

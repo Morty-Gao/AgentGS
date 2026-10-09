@@ -1,6 +1,7 @@
 """Bind a proposed capability plan to executable tools, preserving instances."""
 
 from agentgs.agent.planning.capabilities import capability_id, workflow_steps
+from agentgs.agent.planning.scopes import required_instances, scope_tools
 
 
 def ground_plan(
@@ -15,6 +16,7 @@ def ground_plan(
     artifact_types=None,
     execution_plan=None,
     tool_selection="model",
+    tool_specs=None,
 ):
     available = set(available_tools)
     inferred = list(dict.fromkeys(inferred_tools or plan.get("inferred_tools", [])))
@@ -26,6 +28,14 @@ def ground_plan(
         for name in skill.get("tool_candidates", []):
             tool_skills.setdefault(name, sid)
     ids = [str(row["capability_id"]) for row in plan["capabilities"] if row.get("capability_id")]
+    ids = list(
+        dict.fromkeys(
+            [
+                *ids,
+                *(row["capability_id"] for row in required_instances(graph, plan, execution_plan)),
+            ]
+        )
+    )
     if not ids:
         for step in plan["steps"]:
             if step.get("capability"):
@@ -50,16 +60,16 @@ def ground_plan(
             if selected:
                 chain.append(selected)
     if tool_selection == "first_valid":
-        for i, name in enumerate(chain):
-            cid = execution_plan.steps[i].capability_id if execution_plan else None
-            matched = [key for key, rows in candidates.items() if any(r["tool_name"] == name for r in rows)]
-            cid = cid or (matched[0] if len(matched) == 1 else None)
-            if cid is None:
-                unavailable.append(f"Ambiguous capability for tool-selection control: {name}")
-                continue
-            eligible = sorted(row["tool_name"] for row in candidates.get(cid, []) if row["available"])
-            if eligible:
-                chain[i] = eligible[0]
+        from agentgs.agent.planning.module_selection import select_first_valid
+
+        if execution_plan is None or tool_specs is None:
+            raise ValueError("first_valid requires execution instances and registered tool schemas")
+        execution_plan, _ = select_first_valid(graph, plan, execution_plan, available, tool_specs)
+        chain = list(execution_plan)
+    elif tool_selection != "model":
+        raise ValueError(f"Unknown tool selection policy: {tool_selection}")
+    if execution_plan is not None and list(execution_plan) != chain:
+        raise ValueError("Grounding requires execution instances aligned with the proposed chain")
     bindings, recovery = [], []
     for step in plan["steps"]:
         sid = step["skill_id"]
@@ -132,30 +142,81 @@ def ground_plan(
         )
         previous = name
     errors = list(unavailable)
-    scope_constraints = plan.get("capability_expansion", {}).get("instances", [])
+    scope_constraints = required_instances(graph, plan, execution_plan)
+    ancestors = {}
+    if execution_plan is not None:
+        for step in execution_plan.steps:
+            ancestors[step.id] = set(step.depends_on)
+            for dep in step.depends_on:
+                ancestors[step.id].update(ancestors.get(dep, ()))
+
+    def matches_scope(index, sid, cid):
+        if chain[index] not in scope_tools(graph, sid, cid):
+            return False
+        if execution_plan is None:
+            return True
+        step = execution_plan.steps[index]
+        return (step.capability_id in (None, cid)) and (sid is None or step.skill_id in (None, sid))
+
+    ambiguous = set()
+    if execution_plan is not None:
+        for i, step in enumerate(execution_plan.steps):
+            matching = {
+                node["id"]
+                for node in scope_constraints
+                if matches_scope(i, node["skill_id"], node["capability_id"])
+            }
+            if len(matching) > 1:
+                errors.append(f"Ambiguous capability or strategy assignment: {step.id}")
+                ambiguous.add(i)
     positions = {}
     for node in scope_constraints:
         cid = node["capability_id"]
-        choices = graph.capability_tools.get(cid, [])
-        matches = [i for i, name in enumerate(chain) if name in choices]
+        matches = [
+            i
+            for i in range(len(chain))
+            if i not in ambiguous and matches_scope(i, node["skill_id"], cid)
+        ]
         if matches:
             positions[node["id"]] = matches
     for node in scope_constraints:
         if node["id"] not in positions:
             errors.append(f"Missing required capability: {node['id']}")
         for dep in node["depends_on"]:
-            if dep not in positions or not any(
-                before < after for before in positions[dep] for after in positions.get(node["id"], [])
+            targets = positions.get(node["id"], [])
+
+            def linked(before, after):
+                if before >= after:
+                    return False
+                if execution_plan is None:
+                    return True
+                producer, consumer = execution_plan.steps[before], execution_plan.steps[after]
+                return producer.id in ancestors[consumer.id]
+
+            if dep not in positions or any(
+                not any(linked(before, after) for before in positions.get(dep, []))
+                for after in targets
             ):
                 errors.append(f"Unsatisfied capability dependency: {dep} -> {node['id']}")
     for missing in plan.get("missing_capabilities", []):
-        cid = missing.split("::")[-1]
-        if not any(name in graph.capability_tools.get(cid, []) for name in chain):
+        sid, separator, cid = missing.partition("::")
+        if not separator:
+            sid, cid = None, missing
+        if not any(matches_scope(i, sid, cid) for i in range(len(chain))):
             errors.append(f"Unresolved capability: {missing}")
     if execution_plan:
         by_id = {step.id: i for i, step in enumerate(execution_plan.steps)}
         for i, step in enumerate(execution_plan.steps):
+            if step.capability_id is not None:
+                if step.capability_id not in graph.capabilities:
+                    errors.append(f"Unknown capability on {step.id}: {step.capability_id}")
+                elif step.tool not in scope_tools(graph, step.skill_id, step.capability_id):
+                    errors.append(f"Tool outside declared capability scope: {step.id}")
+            if step.skill_id is not None and step.skill_id not in graph.skills:
+                errors.append(f"Unknown Skill on {step.id}: {step.skill_id}")
             executions[i]["instance_id"] = step.id
+            executions[i]["skill_id"] = step.skill_id or executions[i]["skill_id"]
+            executions[i]["capability_id"] = step.capability_id or executions[i]["capability_id"]
             executions[i]["depends_on_tools"] = list(step.depends_on)
             for dep in step.depends_on:
                 if dep not in by_id or by_id[dep] >= i:
@@ -186,5 +247,6 @@ def ground_plan(
             "missing_capabilities": list(plan.get("missing_capabilities", [])),
         },
         "capability_candidates": candidates,
+        "required_instances": scope_constraints,
         "tool_graph": graph.tool_mapping(),
     }

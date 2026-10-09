@@ -24,7 +24,8 @@ def load_llm(root: Path, path: Path | None = None) -> LLMConfig:
             raise ValueError(f"Invalid default effort for model {name}")
         if model.max_output_tokens >= model.context_window:
             raise ValueError(f"Output budget must be smaller than context for {name}")
-    if len(config.models) != 1:
-        raise ValueError("llm.toml must define exactly one model")
-    config.configured_model()
+        if not model.model.strip():
+            raise ValueError(f"Model id for {name} is empty")
+    if not config.models:
+        raise ValueError("llm.toml must define at least one model")
     return config

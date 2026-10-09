@@ -12,6 +12,8 @@ def declaration_digest(declarations):
 
 
 def planning_context(plan, structure):
+    from .capabilities import capability_id
+
     declarations = deepcopy(plan.get("declarations", plan.get("steps", [])))
     expansion = deepcopy(plan.get("capability_expansion", {}))
     common = {
@@ -19,6 +21,7 @@ def planning_context(plan, structure):
         "constraints": deepcopy(plan.get("constraints", [])),
         "missing_capabilities": deepcopy(plan.get("missing_capabilities", [])),
         "query_profile": deepcopy(plan.get("query_profile", {})),
+        "selected_requirements": deepcopy(plan.get("selected_requirements")),
     }
     if structure == "flat_tools":
         # The same declarations remain visible, but no ordered capability plan is supplied.
@@ -37,6 +40,7 @@ def planning_context(plan, structure):
         }
     if structure == "bipartite":
         nodes, edges = [], []
+        capabilities = {row["capability_id"]: deepcopy(row) for row in plan.get("capabilities", [])}
         for declaration in declarations:
             node = dict(declaration)
             workflow = node.pop("workflow", {})
@@ -46,15 +50,30 @@ def planning_context(plan, structure):
             sid = node.get("id", node.get("skill_id"))
             nodes.append(node)
             for index, operation in enumerate(workflow.get("steps", [])):
-                edges.append({"strategy_id": sid, "position": index, "operation": operation})
+                cid = capability_id(
+                    operation.get("capability_id")
+                    or operation.get("capability")
+                    or operation.get("operation")
+                )
+                capabilities.setdefault(cid, {"capability_id": cid})
+                edges.append(
+                    {
+                        "strategy_id": sid,
+                        "capability_id": cid,
+                        "position": index,
+                        "operation": operation,
+                    }
+                )
         return {
             **common,
             "representation": "bipartite",
             "strategy_nodes": nodes,
-            "capability_nodes": deepcopy(plan.get("capabilities", [])),
+            "capability_nodes": list(capabilities.values()),
             "incidence_edges": edges,
             "requirements": expansion,
         }
+    if structure != "hierarchical":
+        raise ValueError(f"Unknown planning structure: {structure}")
     return {
         **common,
         "representation": "hierarchical",
@@ -72,7 +91,7 @@ def module_guidance(modules):
         "bipartite": "Plan using the supplied strategy and capability nodes and incidence edges. Edge positions and operation attributes preserve declaration order and dependency scope; membership alone is not a data dependency.",
     }[modules.planning_structure]
     selection = (
-        "For each execution instance provide capability_id and skill_id to identify its declared candidate scope. The controller selects the first eligible tool in ascending tool-ID order, without model preference or candidate scores. Preserve the operation, dependencies and separate instances."
+        "For each execution instance provide capability_id and skill_id to identify its declared candidate scope, including necessary predecessors you explicitly restore. The controller selects the first eligible tool in ascending tool-ID order, without model preference or candidate scores. Your tool field is a candidate proposal, not the final selection. Preserve the operation, dependencies and separate instances."
         if modules.tool_selection == "first_valid"
         else "Select a suitable tool for each execution instance within its declared capability and strategy scope."
     )
@@ -85,18 +104,19 @@ def module_guidance(modules):
         [
             structure,
             selection,
+            "For a declared operation, use its strategy's skill_id and capability_id; do not substitute an execution step ID. Declare depends_on for every execution instance that needs a producer, and input_bindings for values it consumes. Listing a producer earlier or calling the same tool in another strategy does not satisfy that dependency. Independent cohorts require separate producer/consumer instances.",
             recovery,
             "Automatic predecessor expansion is "
             + (
                 "enabled."
                 if modules.predecessor_expansion
-                else "disabled; dependency declarations still apply and explicit model planning may include prerequisites."
+                else "disabled in both predecessor and support phases; dependency declarations still apply and you must explicitly plan required prerequisites."
             ),
             "Automatic support insertion is "
             + (
                 "enabled."
                 if modules.capability_completion
-                else "disabled; reported gaps are diagnostics, not evidence of completed operations."
+                else "disabled; reported gaps are diagnostics, not evidence of completed operations. You may explicitly plan a necessary declared operation; the controller will not automatically insert it."
             ),
             "Directed bridge insertion is "
             + (

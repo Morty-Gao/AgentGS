@@ -9,9 +9,16 @@ from agentgs.evaluation.datasets.version import compatibility_contracts
 from agentgs.evaluation.metrics.report import score_prediction, summarize
 
 
-def score_predictions(dataset, predictions, output, *, allow_partial=False, project=None):
+def score_predictions(
+    dataset, predictions, output, *, allow_partial=False, project=None, benchmark_scope="full"
+):
     source = resolve_dataset(dataset)
-    tasks = {task.question_id: task for task in source.load()}
+    from agentgs.benchmark.scope import select_scope
+
+    population, access_policy = select_scope(
+        source.load(), benchmark_scope, planning_mode="tool_only"
+    )
+    tasks = {task.question_id: task for task in population}
     rows = []
     seen = set()
     records = []
@@ -41,7 +48,13 @@ def score_predictions(dataset, predictions, output, *, allow_partial=False, proj
         )
     if not allow_partial and seen != set(tasks):
         raise ValueError("Complete benchmark scoring requires every frozen task ID")
-    report = summarize(rows, len(tasks), domain_count=source.domain_count)
+    domains = (
+        len({task.category_id for task in population})
+        if benchmark_scope == "common_data"
+        else source.domain_count
+    )
+    report = summarize(rows, len(tasks), domain_count=domains)
+    report["data_access_policy"] = access_policy
     path = compatibility_contracts(source.source, project=project)
     if path is not None:
         formats = {

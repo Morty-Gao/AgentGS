@@ -1,77 +1,24 @@
-\subsection{Strategy Retrieval and Initial Capability Planning}
-\label{sec:initial-selection}
-Initial capability planning determines which strategies apply to the task and which of their operations should be executed. It outputs plan $P$ for subsequent completion and tool selection, retaining the selected capabilities' provenance and usage constraints.
-
-The system retrieves candidate Skills using the task description, domain, and input types, then selects strategies by applicability and requirement coverage. It includes only operations needed by the task, rather than all optional steps. An LLM assists selection within the candidate Skills. Retrieval supplies workflow knowledge, and capability selection turns it into a task-specific operation set.
-
-Selecting target operations alone does not establish a complete plan, because some require preceding results. Hypergraph Composition expands mandatory predecessors using the selected Skills' dependency declarations and organizes them into $P$. This supplies prerequisites explicitly declared within the selected strategies; remaining gaps after composition across strategies are handled in the next stage.
-
-\subsection{Missing-Capability Completion and Directed Bridging}
+\subsection{Plan Completion over the Skill Hypergraph}
 \label{sec:completion}
-Even after predecessor expansion, a plan may omit task requirements or fail to connect local workflows from different strategies. Completion searches registered strategy knowledge for supporting operations and connecting branches while retaining the original constraints, providing the operations and dependencies required for tool selection.
+Completion examines whether the composed plan contains the required operations, whether their inputs are supplied, and whether admissible implementations are available. These are different failure modes: an omitted statistic requires another operation, an unresolved artifact reference requires a valid producer, and a missing implementation cannot be repaired merely by ordering the existing steps.
 
-Missing Capability Completion checks for omitted operations, required inputs, and available implementations. On finding a gap, it adds supporting capabilities and rechecks mandatory predecessors and conflicts with existing dependencies. Completion therefore considers both task requirements and whether an inserted operation can connect to the current workflow.
+\paragraph{Supporting-capability completion.}
+The system searches registered knowledge for operations supporting an identified gap. Activated and directly compatible Skills can supply missing task operations, while explicit compatibility relations guide the search for unsatisfied dependencies. Insertions are followed by prerequisite expansion and conflict checks. Retrieval cues help identify candidates, but keyword overlap alone is not evidence that an operation is scientifically necessary.
 
-Search scope depends on the gap. For uncovered task operations, the system searches activated Skills and directly compatible Skills. For unsatisfied input dependencies of existing operations, it can search multiple hops along explicit Skill-compatibility relations. When connecting steps between selected local workflows are missing, directed bridging searches inactive Skills for reusable directed branches.
-
-\paragraph{Directed bridging with a fixed active boundary.}
-Bridging connects two selected workflows. For example, one fragment may produce a composite raster while another needs a numerical value for reference comparison, requiring an intervening operation that extracts a raster statistic. If Skills $A$ and $B$ are selected and inactive Skill $C$ declares the connection, the system can reuse $C$'s local steps without importing its entire workflow.
-
-Let $u$ be an output-boundary capability of activated Skill $A$ and $v$ an input-boundary capability of activated Skill $B$, relative to their activated local dependencies: $u$ has no activated successor in $A$, and $v$ has no activated predecessor in $B$. A directed path $u\to m\to v$ declared by inactive Skill $C$ is a candidate bridge, where $m$ represents the intermediate capability to insert.
-
-Each candidate path must come from one inactive Skill and contain at least one inactive intermediate capability. Hypergraph membership first locates Skills containing both endpoints; explicit dependencies or applicable conditional-ordering relations then determine directed simple paths. Co-occurrence and step-list order do not establish direction. An existing indirect data path from $u$ to $v$ excludes a candidate; a direct connection alone does not. Candidates must additionally pass the following checks before insertion is attempted.
-
-A candidate branch must satisfy the following checks before the system attempts to add it:
-\begin{enumerate}
-  \item \textbf{Explicit execution direction.} The order of each pair of adjacent capabilities must be supported by an explicit dependency or an applicable conditional-ordering relation.
-  \item \textbf{Complete prerequisites.} All predecessors required by each operation must already belong to the fixed active capability set at search start or to the candidate branch.
-  \item \textbf{Compatible input/output types.} After excluding generic labels such as \texttt{Any} and \texttt{Parameter}, each connection must share at least one concrete type between the upstream outputs and downstream inputs.
-  \item \textbf{Available implementations.} Operations in the branch and their required predecessors must have available tools within their permitted scopes. The entry and active predecessors outside the branch retain their original candidate scopes; other nodes within the branch are checked against the Skill providing it.
-  \item \textbf{Acyclic dependencies.} Adding a branch must not introduce a cycle, and the joint insertion of multiple candidate branches must also preserve acyclicity.
-\end{enumerate}
-
-For an ordered endpoint pair, automatic insertion is allowed only when exactly one valid candidate branch exists. Multiple candidates trigger an ambiguity report and stop automatic completion for that pair. On insertion, the system preserves the entry instance's original dependencies and candidate tools, and updates the exit instance's dependencies, tool scope, and input bindings according to the branch. It then recomposes the plan. A branch is rejected if recomposition introduces a new capability outside the branch or leaves a mandatory dependency unsatisfied. Algorithm~\ref{alg:bridging} summarizes this procedure.
-
-% The source refers to equation (3), but supplies no equation. Missing-source placeholder; no eligibility formula is supplied.
+\paragraph{Directed bridging.}
+Bridging connects active fragments using a directed branch from an inactive Skill. Let $u$ be an output-boundary capability of active Skill $A$ and $v$ an input-boundary capability of active Skill $B$: $u$ has no successor in $A$'s active local dependencies, and $v$ has no predecessor in $B$'s active local dependencies. An inactive provider Skill can declare
 \begin{equation}
-  \boxed{\text{TODO: bridge eligibility conditions}}
-  \label{eq:bridge}
+\pi=(u,m_1,\ldots,m_k,v),\qquad k\geq1,
+\label{eq:bridge}
 \end{equation}
+where at least one intermediate capability is inactive. The provider supplies both the intermediate operations and their declared connection to the endpoints. Figure~\ref{fig:overview}(c) illustrates this reuse of a local branch.
 
-\begin{algorithm}[t]
-\caption{Directed Bridging from a Single Provider}
-\label{alg:bridging}
-\begin{algorithmic}[1]
-\Require Plan $P$ after compatibility completion; registered knowledge; available tools
-\Ensure Updated $P$ and acceptance/rejection records
-\State \textbf{return} if bridging is disabled, execution recovery is active, or this plan has already been searched
-\State Fix the active capability set and mark the plan as searched
-\State Enumerate active boundary endpoint pairs from different Skills; skip pairs with an existing indirect data path
-\State Search inactive Skills for connecting branches satisfying Equation~\ref{eq:bridge} and path-validity conditions
-\State Deduplicate by provider and path; reject ambiguous candidates within a pair; check joint acyclicity
-\State Attempt each insertion: retain entry constraints and update exit dependencies, tool scope, and input bindings
-\State Recompose; reject insertions introducing capabilities outside the branch or leaving mandatory dependencies unsatisfied
-\end{algorithmic}
-\end{algorithm}
+Search fixes the active capability set at its start. Hypergraph membership identifies inactive Skills containing the two endpoints; explicit dependencies and applicable conditional order determine directed simple paths within each provider. Co-occurrence and list position do not establish direction. Candidates for an endpoint pair are skipped when an indirect data path already connects that pair. Newly inserted operations do not recursively extend this search.
 
+\paragraph{Branch validity.}
+A candidate branch must satisfy five conditions. Its direction must be declared; all mandatory predecessors must belong to the active set or the candidate branch; adjacent operations must share compatible concrete input/output types; every required operation must have an available tool within its permitted scope; and both individual and joint insertions must preserve acyclicity. Generic types alone do not establish compatibility. External active predecessors retain their original constraints rather than inheriting the provider's scope.
 
-\subsection{Tool Grounding, Execution, and Failure Recovery}
-\label{sec:execution}
-The completed plan specifies operations and dependencies but is not directly executable. Tool grounding maps operations to callable interfaces; execution binds concrete inputs and propagates intermediate results. If a call fails, recovery handles the current step according to its failure state.
+\paragraph{Acceptance and recomposition.}
+For an ordered endpoint pair, only a unique valid branch is inserted automatically. Multiple valid candidates produce an ambiguity report. Insertion preserves the entry instance's dependencies and implementation constraints, adds the intermediate operations, and updates the exit's dependencies, tool scope, and bindings according to the accepted provider. Recomposition then checks for unmet prerequisites or additional operations outside the accepted branch. A candidate that fails these checks is rejected.
 
-Tool selection uses two kinds of knowledge. GeoToolKG records domains, functions, inputs, outputs, provenance, and recommended transitions among tools. These associations guide retrieval and possible combinations; actual executability additionally depends on parameter requirements and artifact compatibility. ToolGraph records bidirectional Capability--Tool mappings with concrete operations and parameter constraints. It identifies implementations of each capability, whereas Tool--Tool relationships in GeoToolKG recommend transitions. The system filters tools by instance scope and availability, then evaluates their parameter schemas and declared semantic input/output types.
-
-\paragraph{Parameter binding and recovery.}
-Tool Grounding filters implementations by capability requirements, instance provenance, and retry constraints, with LLM assistance within the candidate scope when necessary. Once a tool is selected, Tool Execution preferentially binds task resources, parameter values, and upstream artifacts through rules. Inputs must have matching types, and artifacts must originate from successful preceding steps. Binding failure blocks the call to avoid using unsuitable data.
-
-Failure Recovery locally handles the failed capability instance while retaining successful preceding steps and results. Defaults permit at most three attempts per tool and one local substitution. A substitute must implement the same capability, lie within the instance's permitted scope, and pass fresh parameter and upstream-artifact checks. Calls with uncertain outcomes, partial execution, or schema-invalid outputs are not automatically replayed.
-
-\subsection{Result Verification and Skill Writeback}
-\label{sec:skill-packaging}
-Verification determines whether the results address the task and whether the answer is supported by execution evidence. Skill writeback stores verified capability compositions for later reuse. These stages respectively support completion of the current task and strategy reuse in subsequent tasks.
-
-The final answer is generated from structured execution results, with an LLM organizing its wording. The system separately records tool execution status, answer generation, and task completion, checking task requirements against results and artifacts from successful calls. Satisfied requirements yield an answer; failures or unmet requirements return to the Planner for adjustment under the recovery rules. If execution is incomplete, the LLM must identify obtained results and unfinished operations.
-
-After successful execution and verification, a new capability workflow can be organized as a candidate Skill recording the objective, applicable inputs, expected artifacts, steps, dependencies, permitted tools, and necessary constraints. Steps are based on capability instances and their dependencies: operations on different input objects remain distinct, and operations drawn from different original Skills retain their provenance and usage constraints. Packaging the combination does not make its operations arbitrarily interchangeable.
-
-After consistency checks, the candidate is registered in SkillSet and its hyperedge is added to GeoSkillKG. Subsequent tasks can retrieve it, but reuse still requires checking applicability, selecting steps, binding new resources, and determining implementations.
+This procedure makes bridge insertion explicit and inspectable. It establishes compatibility with declared workflow knowledge, rather than a guarantee that every inserted operation is required by the task's scientific meaning. Appendix~\ref{app:method-details} provides the detailed algorithm and acceptance conditions; Appendix~\ref{sec:case-study} works through a complete example.

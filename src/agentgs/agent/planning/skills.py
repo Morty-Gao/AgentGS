@@ -119,7 +119,7 @@ class SkillPlanner:
             self.skills.values(), extension_capabilities=extension_capabilities
         )
 
-    def plan(self, query, inferred_tools=()):
+    def retrieve(self, query, inferred_tools=()):
         inferred = list(dict.fromkeys(inferred_tools))
         matches = WeightedSkillRetriever(
             self.skills.values(), mapping_extensions=self.mapping_extensions
@@ -127,11 +127,74 @@ class SkillPlanner:
         selected = select_skill_ids(
             self.skills.values(), query, inferred, mapping_extensions=self.mapping_extensions
         )
-        expansion = expand_requirements(
-            self.graph, selected, query,
+        return {
+            "candidates": [match.as_dict() for match in matches],
+            "declarations": [deepcopy(self.skills[sid]) for sid in selected],
+        }
+
+    def plan(self, query, inferred_tools=(), *, requirements=None, support_requirements=None):
+        inferred = list(dict.fromkeys(inferred_tools))
+        retrieval = self.retrieve(query, inferred)
+        selected = [skill["id"] for skill in retrieval["declarations"]]
+        if requirements is not None:
+            if set(requirements) - set(selected):
+                raise ValueError("Selected strategy is outside the retrieved candidate scope")
+            selected = list(requirements)
+        proposed_expansion = expand_requirements(
+            self.graph,
+            selected,
+            query,
             predecessor_expansion=self.predecessor_expansion,
             capability_completion=self.capability_completion,
+            requirements=requirements,
         )
+        support_candidates = [
+            row
+            for row in proposed_expansion["instances"]
+            if row["id"] in proposed_expansion["support_added"]
+        ]
+        expansion = proposed_expansion
+        if requirements is not None:
+            expansion = expand_requirements(
+                self.graph,
+                selected,
+                query,
+                predecessor_expansion=self.predecessor_expansion,
+                capability_completion=False,
+                requirements=requirements,
+            )
+            approved = support_requirements or {}
+            allowed_support = {
+                (row["skill_id"], row["capability_id"]) for row in support_candidates
+            }
+            if any(
+                (sid, cid) not in allowed_support for sid, ids in approved.items() for cid in ids
+            ):
+                raise ValueError("Support operation is outside the diagnosed candidate scope")
+            if approved and not self.capability_completion:
+                raise ValueError("Support insertion is disabled")
+            if approved:
+                combined = deepcopy(requirements)
+                for sid, ids in approved.items():
+                    combined[sid] = list(dict.fromkeys([*combined.get(sid, []), *ids]))
+                final = self.graph.expand(
+                    list(combined),
+                    query,
+                    expand_predecessors=self.predecessor_expansion,
+                    complete_missing=False,
+                    requirements=combined,
+                )
+                existing = {row["id"] for row in expansion["instances"]}
+                added = [row for row in final["instances"] if row["id"] not in existing]
+                expansion = {
+                    **expansion,
+                    **final,
+                    "support_added": [row["id"] for row in added],
+                    "completed_capabilities": list(
+                        dict.fromkeys(row["capability_id"] for row in added)
+                    ),
+                }
+                selected = list(combined)
         steps, constraints, produced = [], [], []
         for index, sid in enumerate(selected, 1):
             skill = self.skills[sid]
@@ -184,8 +247,15 @@ class SkillPlanner:
             {
                 "query": query,
                 "mode": "skill_guided",
-                "declarations": [deepcopy(self.skills[sid]) for sid in dict.fromkeys([*selected, *expansion["skill_ids"]])],
-                "candidates": [match.as_dict() for match in matches],
+                "declarations": [
+                    deepcopy(self.skills[sid])
+                    for sid in dict.fromkeys([*selected, *expansion["skill_ids"]])
+                ],
+                "candidates": retrieval["candidates"],
+                "selected_requirements": deepcopy(requirements),
+                "selection_source": "model" if requirements is not None else "retrieval",
+                "support_candidates": support_candidates,
+                "approved_support": deepcopy(support_requirements or {}),
                 "steps": steps,
                 "inferred_tools": inferred,
                 "constraints": constraints,
@@ -213,8 +283,13 @@ class SkillPlanner:
         )
 
 
-def builtin_planner(*, mapping_extensions=True, rs_local_contracts=True,
-                    predecessor_expansion=True, capability_completion=True):
+def builtin_planner(
+    *,
+    mapping_extensions=True,
+    rs_local_contracts=True,
+    predecessor_expansion=True,
+    capability_completion=True,
+):
     """Assemble the frozen declaration profile without process-global flags."""
     from agentgs.skills.definitions import load_capability_extensions, load_skill_definitions
 

@@ -1,15 +1,19 @@
 """Fixed tool selection within each execution instance's declared scope."""
 
-from .capabilities import capability_id, workflow_steps
 from .instances import ExecutionPlan
+from .scopes import required_instances, scope_tools
 
 
 def select_first_valid(graph, plan, execution_plan, available_tools, specs, *, fixed_tools=None):
     available = set(available_tools)
     fixed_tools = fixed_tools or {}
     active = {row["capability_id"] for row in plan["capabilities"]}
+    requirements = required_instances(graph, plan, execution_plan)
+    allowed_scopes = {(row["skill_id"], row["capability_id"]) for row in requirements}
+    active.update(row["capability_id"] for row in requirements)
     selected_skills = {row["skill_id"] for row in plan["steps"]}
     selected_skills.update(plan.get("capability_expansion", {}).get("skill_ids", []))
+    selected_skills.update(row["skill_id"] for row in requirements)
     steps, decisions = [], []
     for index, step in enumerate(execution_plan.steps, 1):
         cid = step.capability_id
@@ -22,21 +26,14 @@ def select_first_valid(graph, plan, execution_plan, available_tools, specs, *, f
             raise ValueError(f"Capability is outside the active requirements: {cid}")
         scopes = {}
         for sid in selected_skills:
+            if allowed_scopes and (sid, cid) not in allowed_scopes:
+                continue
             if step.skill_id is not None and sid != step.skill_id:
                 continue
-            skill = graph.skills[sid]
-            for operation in workflow_steps(skill):
-                identity = capability_id(
-                    operation.get("capability_id")
-                    or operation.get("capability")
-                    or operation.get("operation")
-                )
-                if identity == cid:
-                    choices = (operation.get("tool_selection") or {}).get(
-                        "candidates"
-                    ) or skill.get("tool_candidates", [])
-                    scopes[sid] = tuple(sorted(set(choices)))
-        if not scopes or len(set(scopes.values())) != 1:
+            choices = scope_tools(graph, sid, cid)
+            if choices:
+                scopes[sid] = tuple(sorted(set(choices)))
+        if len(scopes) != 1:
             raise ValueError(f"A5 requires an unambiguous skill_id candidate scope for {step.id}")
         candidates = next(iter(scopes.values()))
         if step.tool not in candidates:
@@ -62,7 +59,12 @@ def select_first_valid(graph, plan, execution_plan, available_tools, specs, *, f
                 break
         if chosen is None:
             raise ValueError(f"No legal tool candidate for {step.id}: {rejected}")
-        steps.append(step.model_copy(update={"tool": chosen, "capability_id": cid}, deep=True))
+        steps.append(
+            step.model_copy(
+                update={"tool": chosen, "capability_id": cid, "skill_id": next(iter(scopes))},
+                deep=True,
+            )
+        )
         decisions.append(
             {
                 "instance_id": step.id,

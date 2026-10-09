@@ -211,7 +211,9 @@ def _qualified_route(graph, expansion, route, available):
                     raise ValueError("invalid_bridge_input_binding")
                 if any(
                     (
-                        not isinstance(item, (str, int)) or isinstance(item, bool)
+                        not isinstance(item, (str, int))
+                        or isinstance(item, bool)
+                        or (isinstance(item, int) and item < 0)
                         for item in binding["path"]
                     )
                 ):
@@ -221,7 +223,18 @@ def _qualified_route(graph, expansion, route, available):
                 bound.add(binding["source"])
             if bound != incoming:
                 raise ValueError("bridge_data_dependency_without_argument_binding")
-        contract[cid] = {"tool_name": next(iter(options)), "input_bindings": bindings}
+        owner = (
+            route["source_skill_id"]
+            if cid == path[0]
+            else route["target_skill_id"]
+            if cid == path[-1]
+            else route["skill_id"]
+        )
+        contract[cid] = {
+            "tool_name": next(iter(options)),
+            "input_bindings": bindings,
+            "skill_id": owner,
+        }
     for edge in route["data_edges"]:
         cid = edge["source"]
         if cid in contract:
@@ -230,7 +243,13 @@ def _qualified_route(graph, expansion, route, available):
         options = set(node.candidate_tools) & available if node else set()
         if len(options) != 1:
             raise ValueError("off_branch_bridge_input_requires_unique_available_tool")
-        contract[cid] = {"tool_name": next(iter(options)), "input_bindings": {}}
+        if len(node.source_skills) != 1:
+            raise ValueError("off_branch_bridge_input_requires_unique_active_scope")
+        contract[cid] = {
+            "tool_name": next(iter(options)),
+            "input_bindings": {},
+            "skill_id": node.source_skills[0],
+        }
     tool_names = [row["tool_name"] for row in contract.values()]
     if len(set(tool_names)) != len(tool_names):
         raise ValueError("shared_physical_tool_requires_instance_disambiguation")
@@ -519,9 +538,10 @@ def ground_or_reject_shared_bridge_chain(chain, plan, report):
 
 
 def _project(output, binding):
+    from agentgs.contracts.projections import project_json
+
     value = json.loads(output) if isinstance(output, str) else deepcopy(output)
-    for part in binding["path"]:
-        value = value[part]
+    value = project_json(value, binding["path"])
     if binding.get("transform") == "list":
         value = [value]
     return deepcopy(value)

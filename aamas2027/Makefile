@@ -9,15 +9,11 @@ MAIN := main.tex
 OUTDIR := build
 LATEXFLAGS := -pdf -interaction=nonstopmode -halt-on-error -file-line-error -synctex=1 -outdir=$(OUTDIR)
 
-.PHONY: all pdf full supplement figures compile watch clean distclean rebuild check-tools help
+.PHONY: all pdf supplement figures compile watch clean distclean rebuild check-tools help
 
-all: pdf full supplement
+all: pdf supplement
 
 compile: pdf
-
-full: check-tools
-	$(LATEXMK) $(LATEXFLAGS) full.tex
-	@printf 'Full translation: $(OUTDIR)/full.pdf\n'
 
 supplement: check-tools
 	$(LATEXMK) $(LATEXFLAGS) supplement.tex
@@ -60,9 +56,8 @@ check-tools:
 help:
 	@printf '%s\n' \
 	  'make / make pdf / make compile  Compile build/main.pdf and copy to main.pdf (incremental)' \
-	  'make full                      Compile the complete Word translation' \
 	  'make supplement                Compile the anonymous supplementary figures' \
-	  'make all                       Compile all three documents' \
+	  'make all                       Compile the main paper and supplement' \
 	  'make watch                     Recompile automatically on changes' \
 	  'make clean                     Remove auxiliary files; keep PDF' \
 	  'make distclean                 Remove generated files, including PDF' \

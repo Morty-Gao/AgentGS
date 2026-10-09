@@ -36,14 +36,17 @@ def test_loader_rejects_empty_model_id(project):
         load_llm(project)
 
 
-def test_loader_requires_exactly_one_model(project):
+def test_loader_accepts_multiple_models(project):
     (project / ".env").write_text("TEST_LLM_URL=https://fixture/v1\nTEST_LLM_KEY=local-secret\n")
     (project / "llm.toml").write_text(
         CONFIG
         + '[models.n]\nprovider="p"\nmodel="other"\ncontext_window=100\nmax_output_tokens=10\n'
     )
-    with pytest.raises(ValueError, match="exactly one model"):
-        load_llm(project)
+    config = load_llm(project)
+    assert set(config.models) == {"m", "n"}
+    with pytest.raises(ValueError, match="Exactly one configured model"):
+        config.configured_model()
+    assert config.configured_model("n")[1].model == "other"
 
 
 def test_missing_env_and_root_discovery(project):

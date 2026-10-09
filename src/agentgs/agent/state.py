@@ -53,6 +53,8 @@ class RunState:
         self._protocol_remaining = None
         self._token_charge = 0
         self._http_attempts = 0
+        self.physical_tool_calls = 0
+        self.diagnostic_tool_calls = 0
         options = getattr(self.context, "options", None) or AlgorithmSettings()
         self.context.options = options
         expected_system = system_prompt(options.planning_mode, self.task.dataset_instructions)
@@ -142,9 +144,16 @@ class RunState:
             algorithm_id="geotoolagent-native-function-calling-v1",
             provenance={
                 "conversation_schema": 2,
-                "budget": {"http_attempts": self._http_attempts,
-                           "token_charge": self._token_charge,
-                           "token_accounting": "reported_usage_or_reserved_upper_bound"},
+                "execution_cost": {
+                    "tool_executor_requests": self.physical_tool_calls,
+                    "diagnostic_tool_executor_requests": self.diagnostic_tool_calls,
+                    "model_requests": self.model_calls,
+                },
+                "budget": {
+                    "http_attempts": self._http_attempts,
+                    "token_charge": self._token_charge,
+                    "token_accounting": "reported_usage_or_reserved_upper_bound",
+                },
                 "effective_algorithm": options.model_dump(mode="json")
                 if options is not None
                 else {},
@@ -175,6 +184,7 @@ class RunState:
             )
         await self.save()
         try:
+            self.physical_tool_calls += 1
             result = await self.context.tools.execute(call)
         except asyncio.CancelledError:
             self.conversation.finish_tool(
@@ -215,6 +225,7 @@ class RunState:
             await self.save()
 
         try:
+            self.physical_tool_calls += len(calls)
             results = await self.context.tools.execute_many(calls, on_result=record_result)
         except (Exception, asyncio.CancelledError) as exc:
             status = "cancelled" if isinstance(exc, asyncio.CancelledError) else "failed"
@@ -341,6 +352,7 @@ class RunState:
         """Persist every request and original reply without dropping reasoning."""
         if self.model_calls >= (self.task.max_model_calls or self.context.options.max_model_calls):
             from agentgs.client.errors import BudgetExceeded
+
             raise BudgetExceeded("Explicit model call budget exhausted")
         self.model_calls += 1
         request_id = uuid4().hex
@@ -375,7 +387,9 @@ class RunState:
 
                 if kind == "request":
                     request = payload["payload"]
-                    reserve = token_bound(request) + request.get("max_tokens", request.get("max_completion_tokens", 0))
+                    reserve = token_bound(request) + request.get(
+                        "max_tokens", request.get("max_completion_tokens", 0)
+                    )
                     if self._token_charge + reserve > self.context.options.max_total_tokens:
                         raise BudgetExceeded("Task token budget exhausted")
                     self._token_charge += reserve

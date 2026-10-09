@@ -25,11 +25,16 @@ def fit_context(payload, context_window):
             break
         if message["role"] == "tool":
             text = message.get("content") or ""
-            message["content"] = json.dumps({
-                "context_omitted": True, "tool_call_id": message["tool_call_id"],
-                "original_chars": len(text),
-                "note": "Earlier result omitted for context budget. Do not infer its values.",
-            })
+            message["content"] = json.dumps(
+                {
+                    "context_omitted": True,
+                    "tool_call_id": message["tool_call_id"],
+                    "original_chars": len(text),
+                    "note": "Earlier result omitted for context budget. Do not infer its values.",
+                }
+            )
     if token_bound(request) > limit:
-        raise BudgetExceeded("Required system, task, schemas and current feedback exceed context budget")
+        raise BudgetExceeded(
+            "Required system, task, schemas and current feedback exceed context budget"
+        )
     return request, True

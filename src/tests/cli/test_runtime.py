@@ -422,7 +422,11 @@ def test_score_forwards_dataset_and_partial_flag(project, monkeypatch):
     assert received["dataset"] == project / "dataset.jsonl"
     assert received["predictions"] == predictions
     assert received["output"] == project / "outputs" / "evaluations" / "scored.json"
-    assert received["kwargs"] == {"allow_partial": True, "project": project}
+    assert received["kwargs"] == {
+        "allow_partial": True,
+        "project": project,
+        "benchmark_scope": "full",
+    }
 
 
 def test_config_report_uses_library_defaults_without_secrets(project):
@@ -449,7 +453,11 @@ def test_config_report_uses_library_defaults_without_secrets(project):
     assert report["models"] == ["default"]
     assert report["llm"]["models"][0]["model"] == "demo-model"
     assert report["agent"]["planning_mode"] == "data_only"
-    assert report["agent"]["command_attempts"] == 12
+    assert report["agent"]["command_attempts"] == 20
+    assert report["agent"]["max_total_tokens"] == 262144
+    assert report["runtime"]["max_concurrent_model_calls"] == 16
+    assert report["runtime"]["max_concurrent_tool_calls"] == 64
+    assert report["runtime"]["max_concurrent_sandbox_calls"] == 16
     assert report["agent"]["plan_attempts"] == 3
     assert report["runtime"]["max_concurrent_tasks"] == 2
     assert report["runtime"]["tool_backend"] == "thread"

@@ -26,6 +26,9 @@ def main(
     llm: Path | None = typer.Option(
         None, "--llm", help="llm.toml path. Omit to use the project file"
     ),
+    model: str | None = typer.Option(
+        None, "--model", help="llm.toml model key; omit to use the only configured model"
+    ),
     ids: str = typer.Option("", "--ids", help="Comma-separated question ids. Omit to run all"),
     concurrency: int | None = typer.Option(
         None,
@@ -35,7 +38,7 @@ def main(
         help="Parallel questions. Omit to use llm.toml max_concurrent_requests, otherwise 4",
     ),
     max_steps: int = typer.Option(
-        12, "--max-steps", min=1, help="Tool-call turns for one question"
+        200, "--max-steps", min=1, help="Tool-call turns for one question"
     ),
     retry_failed: bool = typer.Option(
         False, "--retry-failed", help="Retry failed questions and retain prior attempts"
@@ -57,6 +60,7 @@ def main(
         output=output,
         dataset=dataset,
         llm=llm,
+        model=model,
         ids=ids,
         concurrency=concurrency,
         extra=[

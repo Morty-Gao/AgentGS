@@ -71,6 +71,18 @@ def test_module_overrides_are_not_silently_ignored_in_baselines(mode):
         resolve_algorithm(AlgorithmSettings(planning_mode=mode), TaskInput(ablations=["A4"]))
 
 
+@pytest.mark.parametrize("mode", ["tool_only", "data_only"])
+def test_baselines_do_not_inherit_project_module_interventions(mode):
+    options = AlgorithmSettings(
+        planning_mode="skill_guided",
+        modules={"execution_recovery": False, "tool_selection": "first_valid"},
+    )
+    resolved = resolve_algorithm(options, TaskInput(planning_mode=mode))
+    assert resolved.execution_recovery and resolved.tool_selection == "model"
+    assert not resolved.shared_bridge and not resolved.module_resolution["active"]
+    assert resolved.module_resolution["requested"]["execution_recovery"] is False
+
+
 def test_aliases_and_conflicts():
     options = AlgorithmSettings(planning_mode="skill_guided", shared_bridge=False)
     assert not resolve_algorithm(options, TaskInput()).modules.directed_bridging
@@ -109,7 +121,7 @@ def test_every_a1_a6_combination_resolves(bits):
 @pytest.mark.parametrize(
     "expand,complete", [(True, True), (False, True), (True, False), (False, False)]
 )
-def test_predecessor_insertion_and_completion_compensation(expand, complete):
+def test_predecessor_insertion_is_independent_of_support_completion(expand, complete):
     graph = CapabilityGraph(
         [
             declaration(
@@ -135,15 +147,13 @@ def test_predecessor_insertion_and_completion_compensation(expand, complete):
     )
     assert result["initial_instances"] == ["statistics::mean"]
     assert result["predecessor_added"] == (["statistics::load"] if expand else [])
-    if expand or complete:
+    if expand:
         assert result["capability_ids"] == ["load", "mean"]
         assert not result["unresolved_capabilities"]
     else:
         assert result["capability_ids"] == ["mean"]
         assert result["unresolved_capabilities"] == ["statistics::load"]
-    assert result["compensated_predecessors"] == (
-        ["statistics::load"] if complete and not expand else []
-    )
+    assert not result["support_added"]
 
 
 def test_information_controls_retain_declarations_without_flat_order():
@@ -178,12 +188,30 @@ def test_information_controls_retain_declarations_without_flat_order():
 
 def test_disabled_completion_keeps_semantic_support_diagnostics():
     primary = declaration()
-    support = declaration("calibration", [{"id": "calibrate", "capability": "calibrate", "operation": "calibration", "depends_on": []}])
+    support = declaration(
+        "calibration",
+        [
+            {
+                "id": "calibrate",
+                "capability": "calibrate",
+                "operation": "calibration",
+                "depends_on": [],
+            }
+        ],
+    )
     support["description"] = "calibration"
     primary["planning"]["compatible_skills"] = ["calibration"]
     graph = CapabilityGraph([primary, support])
-    disabled = expand_requirements(graph, ["statistics"], "calibration", predecessor_expansion=True, capability_completion=False)
-    enabled = expand_requirements(graph, ["statistics"], "calibration", predecessor_expansion=True, capability_completion=True)
+    disabled = expand_requirements(
+        graph,
+        ["statistics"],
+        "calibration",
+        predecessor_expansion=True,
+        capability_completion=False,
+    )
+    enabled = expand_requirements(
+        graph, ["statistics"], "calibration", predecessor_expansion=True, capability_completion=True
+    )
     assert disabled["capability_ids"] == ["mean"]
     assert "calibration::calibrate" in disabled["unresolved_support_candidates"]
     assert "calibrate" in enabled["capability_ids"]
@@ -237,7 +265,8 @@ def test_fixed_tool_order_preserves_instance_inputs_and_checks_scope():
                 purpose="second cohort",
                 capability_id="mean",
                 skill_id="statistics",
-                arguments={"x": [2, 4]},
+                depends_on=["a"],
+                input_bindings={"x": {"step_id": "a", "path": ["values"]}},
             ),
         ]
     )
@@ -245,6 +274,8 @@ def test_fixed_tool_order_preserves_instance_inputs_and_checks_scope():
     assert list(chosen) == ["BTool", "BTool"]
     assert [step.arguments for step in chosen.steps] == [step.arguments for step in original.steps]
     assert [step.id for step in chosen.steps] == ["a", "b"]
+    assert chosen.steps[1].depends_on == ["a"]
+    assert chosen.steps[1].input_bindings == original.steps[1].input_bindings
     assert decisions[0]["rejected"] == [
         {"tool": "ATool", "reason": "fixed_input_fields_outside_schema"}
     ]
@@ -273,7 +304,12 @@ class Client:
 
     async def chat(self, messages, **kwargs):
         self.requests.append((deepcopy(messages), kwargs))
-        if kwargs["stage"] in {"tool_planning", "skill_tool_planning"}:
+        if kwargs["stage"] == "capability_selection":
+            message = native(
+                "select_capabilities",
+                {"requirements": [{"skill_id": "statistics", "capability_id": "mean"}]},
+            )
+        elif kwargs["stage"] in {"tool_planning", "skill_tool_planning"}:
             self.plans += 1
             steps = [
                 {
@@ -371,7 +407,13 @@ async def test_presets_reach_real_engine_and_prompt(presets):
     assert effective["module_resolution"]["ablations"] == presets
     events = result.execution_events()
     assert any(row["type"] == "module_policy" for row in events)
-    serialized = json.dumps(client.requests[0][0])
+    serialized = json.dumps(
+        next(
+            messages
+            for messages, kwargs in client.requests
+            if kwargs["stage"] == "skill_tool_planning"
+        )
+    )
     if "A1" in presets:
         assert "Plan directly over tool execution instances" in serialized
         assert "flat_tools" in serialized
@@ -381,6 +423,14 @@ async def test_presets_reach_real_engine_and_prompt(presets):
         assert any(row["type"] == "tool_selection" for row in events)
     if "A3" in presets or "A4" in presets:
         assert not any(row["type"] == "shared_capability_bridge_search" for row in events)
+    if "A6" in presets:
+        arguments = next(
+            messages
+            for messages, kwargs in client.requests
+            if kwargs["stage"] == "tool_argument_generation"
+        )
+        assert "no repair call follows execution failure" in json.dumps(arguments)
+        assert "On recovery you may correct literal arguments" not in json.dumps(arguments)
 
 
 @pytest.mark.parametrize("tool_attempts", [1, 2])
@@ -390,6 +440,12 @@ async def test_recovery_switch_blocks_both_tool_repair_and_replanning(tool_attem
     disabled, tools, client = await run(["A6"], fail_first=True, tool_attempts=tool_attempts)
     assert not disabled.tool_chain_completed and len(tools.calls) == 1
     assert client.plans == 1
+    final_messages = client.requests[-1][0]
+    final_text = json.dumps(final_messages)
+    assert "Execution is incomplete" in final_text
+    assert "<system-reminder>" in final_text
+    assert "tool execution budget is exhausted" in final_text
+    assert "Give the final answer now" in final_text
     assert any(
         row["type"] == "execution_feedback" and row["status"] == "recovery_disabled"
         for row in disabled.execution_events()

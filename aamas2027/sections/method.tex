@@ -1,17 +1,15 @@
-\section{Overview of AgentGS}
+\section{AgentGS}
 \label{sec:method}
-\subsection{Overall Workflow}
-AgentGS uses a Skill--Capability--Tool hierarchy. It first selects reusable Skills for the task, identifies the required operations and dependencies, and then chooses concrete tools. Figure~\ref{fig:overview}(a) shows Skill retrieval, capability planning and completion, tool grounding and execution, result verification, and Skill writeback.
+AgentGS organizes scientific tool use around reusable operations and their dependencies. Given a scientific question and available resources, the agent retrieves relevant strategies, composes their local operations into a task-specific plan, completes missing connections, and grounds the result in concrete tool calls. Figure~\ref{fig:overview} summarizes this workflow. Its central design choice is to preserve the strategy-specific conditions under which an operation can be reused while allowing that operation to participate in a new composition.
 
-Given a question $q$ and task resources $X$, the system retrieves relevant Skills from GeoSkillKG. If an applicable Skill is found, the Yes branch leads to the Planner, which constructs a capability chain. Otherwise, the No branch retrieves relevant tools directly from GeoToolKG. Both routes lead to a common execution and verification process.
+\subsection{Task Formulation and Design}
+\label{sec:task-formulation}
+Let $q$ be a natural-language task, $X$ its available input resources, and $\mathcal{T}$ the registered tool collection. A task can request both computed quantities and output artifacts: for example, a composite raster, a statistic calculated from that raster, and a comparison with a supplied reference. Solving the task requires determining the necessary operations, their data dependencies, admissible implementations, and concrete arguments.
 
-With applicable Skills, the Planner selects the capabilities needed for the task and expands their mandatory predecessors to form capability plan $P$. Missing Capability Completion checks whether these operations cover the task requirements and whether consecutive steps can be connected. If necessary operations are missing, the system searches other Skills for connecting branches and inserts those satisfying the constraints.
+A useful plan must meet three conditions. First, it must cover the requested operations and their prerequisites. Second, each operation must have an available implementation whose inputs can be supplied by $X$ or by successful preceding operations. Third, the produced quantities and artifacts must support the requested answer. The first two conditions constrain workflow construction; the third requires checking the meaning of the actual results. A structurally valid plan alone does not establish scientific correctness.
 
-Only after the capability plan is established does Tool Grounding select implementations through Capability--Tool mappings. GeoToolKG supplies tool functions, interfaces, and associations, and an LLM assists in determining the invocation chain. The Executor prepares parameters, executes tools, and passes task resources and intermediate artifacts from successful preceding steps to later operations.
+AgentGS separates this problem into capability planning and tool execution. Capability planning determines what operations are needed and how they connect. Tool grounding chooses implementations under the resulting constraints, and execution resolves their arguments from observed data. This allows alternative implementations of an operation without discarding its role in the workflow. It also makes a missing intermediate operation distinguishable from a failed invocation of an already selected operation.
 
-The Judge checks whether the Result satisfies the task requirements. If so, the system summarizes the computed results and artifacts into the Answer. Failed invocations or unmet requirements are returned to the Planner, which adjusts unfinished steps under the recovery rules.
-
-If a task produces a new capability chain, the verified workflow can be packaged as a candidate Skill. After checking and registration, it is written to SkillSet, and its hyperedge is added to GeoSkillKG, supporting retrieval and reuse in subsequent tasks. The following subsections describe the representation, capability planning and completion, execution, and verification mechanisms.
-\input{figures/fig_main}
 \input{sections/representation}
 \input{sections/completion}
+\input{sections/execution}

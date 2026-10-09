@@ -22,7 +22,12 @@ from agentgs.contracts.models import TaskInput, TaskSpec, ToolError, ToolResult,
 
 def native(name, arguments):
     if name == "submit_tool_plan" and isinstance(arguments, dict) and set(arguments) == {"tools"}:
-        arguments = {"steps": [{"id": f"s{i}", "tool": tool, "purpose": f"Compute {tool}"} for i, tool in enumerate(arguments["tools"], 1)]}
+        arguments = {
+            "steps": [
+                {"id": f"s{i}", "tool": tool, "purpose": f"Compute {tool}"}
+                for i, tool in enumerate(arguments["tools"], 1)
+            ]
+        }
     return {
         "role": "assistant",
         "content": None,
@@ -82,9 +87,8 @@ async def test_worker_resolves_mode_before_loading_declarations(project, monkeyp
     # The opposite project default must not determine task-specific initialization.
     configured = "skill_guided" if mode == "tool_only" else "tool_only"
     (project / "config.toml").write_text(f'[agent]\nplanning_mode="{configured}"\n')
-    folder = project / "data/geotoolkg"
-    folder.mkdir(parents=True)
-    (folder / "index_store.json").write_text("{}")
+    (project / "embedding").mkdir(parents=True)
+    (project / "embedding" / "tools.npz").write_bytes(b"")
     loads = []
     if mode == "tool_only":
 
@@ -128,6 +132,10 @@ async def test_worker_resolves_mode_before_loading_declarations(project, monkeyp
     events = {event["type"] for event in result.execution_events()}
     if mode == "tool_only":
         assert not loads
+        properties = client.requests[0][1]["tools"][0]["function"]["parameters"]["properties"][
+            "steps"
+        ]["items"]["properties"]
+        assert "skill_id" not in properties and "capability_id" not in properties
         assert result.provenance["effective_algorithm"]["shared_bridge"] is False
         assert not events & {
             "skill_retrieval",

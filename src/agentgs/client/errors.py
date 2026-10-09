@@ -6,3 +6,7 @@ class ProviderError(RuntimeError):
 
 class BudgetExceeded(RuntimeError):
     """The request cannot be sent within the declared resource budget."""
+
+
+class TransportFailure(RuntimeError):
+    """Transport exhaustion must not trigger scientific replanning or execution replay."""

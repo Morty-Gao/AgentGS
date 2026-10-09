@@ -9,6 +9,7 @@ import time
 from datetime import datetime, timezone
 from pathlib import Path
 
+from agentgs.benchmark.identity import model_request_controls, planning_resource_hashes
 from agentgs.benchmark.inputs import public_input
 from agentgs.benchmark.io import write_json
 from agentgs.benchmark.selection import id_from_dirname, resolve_dataset, task_dirname
@@ -32,6 +33,7 @@ def _benchmark_identity(
     contract_provider,
     modules=None,
     ablations=(),
+    model=None,
 ):
     input_hash = hashlib.sha256(dataset.source.read_bytes()).hexdigest()
     identity = {
@@ -47,6 +49,8 @@ def _benchmark_identity(
         "effective_runtime": service.settings.model_dump(mode="json"),
         "selected_question_ids": [task.question_id for task in selected],
     }
+    if model:
+        identity["model"] = model
     code_files = sorted((service.root / "src/agentgs").rglob("*.py"))
     identity["code_sha256"] = hashlib.sha256(
         b"".join(path.read_bytes() for path in code_files)
@@ -83,22 +87,8 @@ def _benchmark_identity(
             command_attempts=command_attempts,
         ),
     ).model_dump(mode="json")
-    from importlib.resources import files
-
-    resources = {
-        "tool_catalog": files("agentgs.contracts").joinpath("catalog.json"),
-        "tool_scope": files("agentgs.contracts").joinpath("tool_scope.json"),
-    }
-    if planning_mode == "skill_guided":
-        declarations = files("agentgs.skills.resources")
-        resources.update(
-            skill_definitions=declarations.joinpath("definitions.json"),
-            capability_extensions=declarations.joinpath("capability_extensions.json"),
-        )
-    identity["planning_resources_sha256"] = {
-        name: hashlib.sha256(resource.read_bytes()).hexdigest()
-        for name, resource in resources.items()
-    }
+    identity["planning_resources_sha256"] = planning_resource_hashes(service.root, planning_mode)
+    identity["model_request_controls"] = model_request_controls()
     if planning_mode == "data_only":
         from agentgs.runtime.sandbox.mounts import mount_manifest
 
@@ -156,6 +146,7 @@ async def run_benchmark(
     benchmark_scope=None,
     modules=None,
     ablations=(),
+    model=None,
 ):
     if planning_mode == "data_only":
         allow_rule_planning = False
@@ -164,14 +155,24 @@ async def run_benchmark(
     selected = [task for task in tasks if ids is None or task.question_id in ids]
     if ids is not None and (missing := set(ids) - {task.question_id for task in tasks}):
         raise ValueError(f"Unknown benchmark question IDs: {sorted(missing)}")
-    from agentgs.config.algorithm import load_algorithm
     from agentgs.benchmark.scope import select_scope
+    from agentgs.config.algorithm import load_algorithm
 
     selected, access_policy = select_scope(
-        selected, benchmark_scope or load_algorithm(service.root).benchmark_scope, planning_mode=planning_mode
+        selected,
+        benchmark_scope or load_algorithm(service.root).benchmark_scope,
+        planning_mode=planning_mode,
     )
     if not selected:
         raise ValueError("The declared benchmark scope contains no selected tasks")
+    population = tasks
+    if access_policy["scope"] == "common_data":
+        population, _ = select_scope(tasks, "common_data", planning_mode=planning_mode)
+    expected_domains = (
+        len({task.category_id for task in population})
+        if access_policy["scope"] == "common_data"
+        else source.domain_count
+    )
     identity, configuration = await invoke(
         _benchmark_identity,
         service,
@@ -185,6 +186,7 @@ async def run_benchmark(
         contract_provider,
         modules,
         ablations,
+        model,
     )
     await invoke(output.mkdir, parents=True, exist_ok=True)
     identity["data_access_policy"] = access_policy
@@ -288,6 +290,7 @@ async def run_benchmark(
                 if contract_provider
                 else None,
                 dataset_instructions=getattr(contract_provider, "system_prompt", None),
+                model=model,
             )
             await invoke(write_json, attempt / "public_input.json", request.model_dump(mode="json"))
             record = await service.submit(request)
@@ -403,7 +406,8 @@ async def run_benchmark(
                 for path in sorted((output / "tasks").glob("*/result.json"))
                 if id_from_dirname(path.parent.name, selected_ids) in selected_ids
             ]
-            report = summarize(rows, len(tasks), domain_count=source.domain_count)
+            report = summarize(rows, len(population), domain_count=expected_domains)
+            report["data_access_policy"] = access_policy
             report["execution"] = progress()
             if planning_mode == "data_only":
                 report["primary_metric"] = "fas"

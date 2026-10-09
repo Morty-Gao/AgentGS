@@ -19,10 +19,12 @@ from agentgs.config.paths import project_root
 from agentgs.evaluation.datasets.version import benchmark_dataset
 
 
-def endpoint(root: Path, config: Path | None) -> dict[str, str | float | int | None]:
-    """Read the single configured model. The API key is not included in reports."""
+def endpoint(
+    root: Path, config: Path | None, model_key: str | None = None
+) -> dict[str, str | float | int | None]:
+    """Read one configured model. The API key is not included in reports."""
     loaded = load_llm(root, config)
-    name, model = loaded.configured_model()
+    name, model = loaded.configured_model(model_key)
     provider = loaded.providers[model.provider]
     return {
         "model_key": name,
@@ -33,6 +35,7 @@ def endpoint(root: Path, config: Path | None) -> dict[str, str | float | int | N
         "concurrency": provider.max_concurrent_requests,
         "max_output_tokens": model.max_output_tokens,
         "output_token_parameter": provider.output_token_parameter,
+        "reasoning_effort": model.default_effort,
     }
 
 
@@ -67,12 +70,13 @@ def launch(
     output: Path,
     dataset: Path | None,
     llm: Path | None,
+    model: str | None,
     ids: str,
     concurrency: int | None,
     extra: list[str],
 ) -> None:
     root = project_root(project)
-    settings = endpoint(root, under_project(root, llm) if llm else None)
+    settings = endpoint(root, under_project(root, llm) if llm else None, model)
     questions = benchmark_dataset(root) if dataset is None else under_project(root, dataset)
     destination = under_project(root, output)
     destination.parent.mkdir(parents=True, exist_ok=True)
@@ -98,6 +102,8 @@ def launch(
         str(settings["output_token_parameter"]),
         *extra,
     ]
+    if settings["reasoning_effort"]:
+        argv.extend(["--reasoning-effort", str(settings["reasoning_effort"])])
     selected = parse_ids(ids)
     if selected:
         argv.append("--ids")

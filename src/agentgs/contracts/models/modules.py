@@ -39,9 +39,13 @@ ABLATIONS: dict[str, dict] = {
 
 
 def resolve_modules(base, ablations=(), overrides=None):
+    if not isinstance(ablations, (list, tuple)):
+        raise ValueError("ablations must be a list of preset names")
     values = base.model_dump()
     interventions = {}
     for name in ablations:
+        if not isinstance(name, str) or name not in ABLATIONS:
+            raise ValueError(f"Unknown ablation: {name}")
         for key, value in ABLATIONS[name].items():
             if key in interventions and interventions[key] != value:
                 raise ValueError(f"Conflicting ablations for {key}")
@@ -58,7 +62,7 @@ def resolve_modules(base, ablations=(), overrides=None):
         values["directed_bridging"] = False
         suppressed["directed_bridging"] = "capability_completion_disabled"
     return ModuleSettings.model_validate(values), {
-        "ablations": list(dict.fromkeys(ablations)),
+        "ablations": sorted(set(ablations)),
         "requested": requested,
         "suppressed": suppressed,
     }

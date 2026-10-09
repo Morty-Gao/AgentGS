@@ -26,6 +26,9 @@ def main(
     llm: Path | None = typer.Option(
         None, "--llm", help="llm.toml path. Omit to use the project file"
     ),
+    model: str | None = typer.Option(
+        None, "--model", help="llm.toml model key; omit to use the only configured model"
+    ),
     ids: str = typer.Option("", "--ids", help="Comma-separated question ids. Omit to run all"),
     concurrency: int | None = typer.Option(
         None,
@@ -34,7 +37,9 @@ def main(
         max=128,
         help="Parallel questions. Omit to use llm.toml max_concurrent_requests, otherwise 4",
     ),
-    rollouts: int = typer.Option(8, "--rollouts", min=1),
+    rollouts: int = typer.Option(
+        200, "--rollouts", min=1, help="Program attempts for one question"
+    ),
     top_k: int = typer.Option(2, "--top-k", min=1),
     repairs: int = typer.Option(2, "--repairs", min=0),
     timeout: float = typer.Option(
@@ -60,6 +65,7 @@ def main(
         output=output,
         dataset=dataset,
         llm=llm,
+        model=model,
         ids=ids,
         concurrency=concurrency,
         extra=[

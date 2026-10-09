@@ -29,7 +29,7 @@ def bridge_context(value):
     }
 
 
-async def execute(project, name, upstream, generated, context, question):
+async def execute(project, name, upstream, generated, context, question, initial_arguments=None):
     class Events:
         def emit(self, *args):
             pass
@@ -94,8 +94,48 @@ async def execute(project, name, upstream, generated, context, question):
         json.dumps({"value": upstream}) + "\n" + json.dumps({"value": upstream}),
         json.dumps({"value": upstream}),
         context,
+        initial_arguments=initial_arguments,
     )
     return result, state, stages.calls
+
+
+async def test_recovery_can_correct_planned_literals_but_keeps_observed_bindings(project):
+    result, state, feedback = await execute(
+        project,
+        "RemoteSensingDivision",
+        6,
+        ['{"a":999,"b":100}', '{"a":999,"b":3}'],
+        {"instance": {"input_bindings": {"a": {"step_id": "producer", "path": ["value"]}}}},
+        "Divide the upstream value by the corrected divisor.",
+        initial_arguments={"a": 6, "b": 0},
+    )
+    assert result.succeeded and len(feedback) == 2
+    assert state.results[0].succeeded is False
+    assert json.loads(result.final_input) == {"a": 6, "b": 3}
+
+
+async def test_later_retries_keep_the_latest_literal_correction(project, monkeypatch):
+    inputs = []
+
+    async def physical(self, name, text, files, *, call_id=None):
+        params = json.loads(text)
+        inputs.append(params)
+        if params["b"] == 0 or len(inputs) == 2:
+            return '{"status":"error","error":"try again"}'
+        return '{"value":2}'
+
+    monkeypatch.setattr(ExecutionService, "physical", physical)
+    result, _, _ = await execute(
+        project,
+        "RemoteSensingDivision",
+        6,
+        ['{"a":6,"b":0}', '{"a":6,"b":3}', '{"a":6}'],
+        {"instance": {"input_bindings": {"a": {"step_id": "producer", "path": ["value"]}}}},
+        "Divide the observed value.",
+        initial_arguments={"a": 6, "b": 0},
+    )
+    assert result.succeeded
+    assert [row["b"] for row in inputs] == [0, 3, 3]
 
 
 @pytest.mark.parametrize("measured,reference", [(5.0, 2.0), (9.5, -1.25)])

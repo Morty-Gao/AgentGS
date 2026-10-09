@@ -513,7 +513,7 @@ def search(env, row, workdir, rollouts, top_k, repairs, timeout, client, events=
 def main(argv=None):
     parser = argparse.ArgumentParser(description="GeoAgent MCTS over 603 GeoToolEval questions")
     add_arguments(parser)
-    parser.add_argument("--rollouts", type=int, default=8)
+    parser.add_argument("--rollouts", type=int, default=200)
     parser.add_argument("--top-k", type=int, default=2)
     parser.add_argument("--repairs", type=int, default=2)
     parser.add_argument("--timeout", type=float, default=120)

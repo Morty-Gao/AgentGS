@@ -27,6 +27,9 @@ or mode instructions requires a separate conversation.
 
 ## Stage feedback
 
+Scientific planning uses explicit execution instances and independent experiment
+controls described in [Execution and experimental controls](experiment-controls.md).
+
 Before the next model request, the controller attaches its instruction to the
 last unsent tool result:
 
@@ -48,15 +51,23 @@ described in the system prompt, not a new API role. Raw output is retained in
 Sent feedback is never edited to introduce another stage. Every real tool call
 must receive exactly one result before another model request is allowed.
 
+`select_capabilities` adopts task-relevant scoped operations from retrieved
+strategy candidates. When completion proposes additional support, the same
+control call approves or rejects those suggestions in a separate stage.
+Neither call executes scientific tools. The next stage expands only adopted
+requirements and their declared prerequisites under the effective policy.
+
 `submit_tool_plan` is a control call; its response reports syntactic validation
 and pending execution validation. The next reminder supplies the grounded action.
 Control calls do not count as scientific tool invocations.
 
 Bash exploration uses the same protocol with `tool_choice="auto"`. Its textual
-answer is validated and returned directly. Exhausting the Bash budget returns
-the last tool result with final-answer instructions, followed by one request
-without tools. There is no additional answer-generation request after an
-accepted answer, including when its format validation fails.
+answer is validated and returned directly. Exhausting the Bash budget, or the
+per-tool execution budget, returns the last tool result with a
+`system-reminder` that the budget is exhausted and the model must answer now.
+That is followed by one request without tools. There is no additional
+answer-generation request after an accepted answer, including when its format
+validation fails.
 
 ## Errors and evidence
 

@@ -145,7 +145,9 @@ class Conversation(BaseModel):
                 status = message.metadata.get("status", "success")
                 events.append(
                     {
-                        "type": "planning_call"
+                        "type": "protocol_call"
+                        if message.metadata.get("operation") == "protocol"
+                        else "planning_call"
                         if message.metadata.get("operation") == "planning"
                         else "tool_call"
                         if status == "success"
@@ -166,7 +168,11 @@ class Conversation(BaseModel):
     def request_messages(self, request_id: str) -> list[dict[str, Any]]:
         """Reconstruct the exact input messages for a recorded model request."""
         for entry in reversed(self.messages):
-            if entry.role == "event" and entry.metadata.get("request_id") == request_id and entry.metadata.get("type") == "model.transport_request":
+            if (
+                entry.role == "event"
+                and entry.metadata.get("request_id") == request_id
+                and entry.metadata.get("type") == "model.transport_request"
+            ):
                 return deepcopy(entry.metadata["payload"]["messages"])
         request = next(
             (

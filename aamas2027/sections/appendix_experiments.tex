@@ -1,0 +1,31 @@
+\section{Experimental Provenance and Control Details}
+\label{app:experimental-details}
+\subsection{Sources of the Reported Aggregates}
+The main FAS table retains the answer scores supplied by the source experiment, with AgentGS identified as its first complete 603-record run. AgentGS's main TSF1/TOS are supplied by the recorded end-to-end evaluation on that population. Combining these aggregates in one table does not establish paired answer/process outcomes for every task.
+
+The 57-record configuration study has a separate Full reference. Full's process scores are taken from the supplementary experiment, while A1--A6 use per-task records in the formal worksheet. A1's partial control, A2's inactive intervention, and A5's partial ranking change apply to those reported runs. Current implementation of a corresponding switch does not validate the identity or behavior of a past run.
+
+GeoBenchX supplies two 202-task aggregates and uses GPT-5.6 Terra as both backbone and single reference-answer judge. The exact paired task identities and matched execution settings are not established by the aggregate table. Its 0--2 scoring scale must remain separate from GeoToolEval's answer-type-specific FAS.
+
+The available manuscript evidence does not provide a complete set of immutable model snapshots, prompts, sampling settings, per-task budgets, source revisions, and run identifiers for all comparisons. Those values are not inferred from the current runtime defaults. The present tables report available measurements without substituting newly implemented controls for unverified historical conditions.
+
+\subsection{Interventions in the Current Runtime}
+Module interventions operate within Skill-guided planning. A1 preserves access to strategy declarations and admitted capabilities while requesting tool-instance planning without an ordered capability plan. This differs from a tool-only baseline that removes the Skill/Capability layer altogether.
+
+A2 suppresses automatic mandatory-predecessor closure. A3 suppresses supporting-capability insertion and bridging, while retaining gap diagnosis. With A2 alone, completion can restore a predecessor; with A2 and A3 together, neither automatic insertion phase supplies it. The model may still explicitly include declared requirements. Effective intervention therefore needs to be evaluated through changes in preparation and planning, not assumed from a configuration flag.
+
+A4 suppresses only directed bridging. A5 selects the first eligible implementation in a fixed tool-identifier order, preserving instance identities, constraints, and argument checks. A6 suppresses execution-driven repair and replanning after a scientific failure. These definitions specify intended controlled comparisons; the reported A1, A2, and A5 measurements retain the limitations stated above.
+
+Effective settings, requested interventions, and suppressed controls are recorded with execution provenance. A resume operation must preserve the same experiment identity. These records support checking whether a run applies its requested intervention but do not establish a nonzero effect on a task with no relevant dependency, alternative tool, or recoverable failure.
+
+\subsection{Candidate Access, Budgets, and Additional Baselines}
+A comparison of planning representations should specify whether all systems receive the same tool candidates or retain their own retrieval policies. The runtime supports exposing all registered candidates, while the retrieved setting preserves system-specific candidate selection. Routing hints and binding assistance are separate controls and can remain active even when heuristic plan generation is disabled.
+
+A Bash-based data-only baseline changes the execution interface more substantially. A comparable data-access scope excludes materialized-query lookup tasks whose snapshot service is unavailable in that environment. A comparison that uses the full tool population for one system and a restricted accessible population for another must not interpret the difference as a planning effect. No new Bash-baseline score is asserted here.
+
+Budgets should distinguish model requests, transport attempts, plan attempts, scientific executions, and diagnostic calls. The runtime records separate counters, but the supplied result tables do not include matched latency, token usage, or execution-cost measurements. Consequently, they establish no quantitative cost advantage.
+
+\subsection{Trace-Level Analyses Not Established by Aggregates}
+To relate composition to outcomes, a trace must show the selected requirements, inserted predecessors, supporting operations, and remaining gaps. To relate bridging to outcomes, it must show the provider, endpoints, accepted path, and resolved data bindings. To relate recovery to outcomes, it must distinguish failed attempts, repaired arguments, changed plans, and verified reuse.
+
+The illustrative case provides a concrete explanation of these relationships. It is not a sampled failure distribution or a measured estimate of component utilization. Repeated matched runs and per-task alignment are needed before reporting uncertainty, significance, or causal component effects.

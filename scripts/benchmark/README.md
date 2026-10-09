@@ -1,12 +1,27 @@
 # Fork benchmark adapters
 
-Run these commands on a CPU worker from the AgentGS project root. They use the
-project's `llm.toml`; `--llm` selects another provider/model configuration.
+Run these commands on a CPU worker from the AgentGS project root. All three read
+the project's `llm.toml`. `--llm` on the Earth-Agent and GeoAgent commands
+selects another provider/model configuration. `agentgs/run.py` uses the project
+file directly.
 
 ```sh
 uv run scripts/benchmark/earthagent/run.py --concurrency 4 --output outputs/evaluations/earth-new/predictions.jsonl
 uv run scripts/benchmark/geoagent/run.py --concurrency 4 --output outputs/evaluations/geo-new/predictions.jsonl
+uv run scripts/benchmark/agentgs/run.py --concurrency 4 --output outputs/evaluations/agentgs/predictions.jsonl
 ```
+
+`agentgs/run.py` runs the project agent in `src/agentgs`. Earth-Agent and GeoAgent
+keep their own loops. AgentGS reads `llm.toml` and `config.toml`. `--planning-mode`
+accepts `skill_guided` (the default), `tool_only`, or `data_only`. `data_only`
+forces rule planning off. Omitted runtime flags keep `RuntimeSettings`, including
+concurrency 2 when `--concurrency` is omitted. `--plan-attempts`, `--tool-attempts`,
+and `--command-attempts` stay unset unless passed, so `config.toml` supplies them.
+`--answer-contracts` is on by default. Gold stays out of the runtime request.
+
+A non-empty answer from a finished run is `status=succeeded`, including a
+Not Completed result that still returned an answer. Timeouts, worker crashes,
+and empty answers retry. Answer scores do not. Generation does not calculate FAS.
 
 Omitting `--ids` selects all 603 unique GeoToolEval questions in ten domains.
 `--ids 61,106` selects a sample. Labels and gold chains are unavailable to the
@@ -20,8 +35,9 @@ remaining work from a verified prefix. Every code-generation stage receives
 actual tool schemas and result descriptions. Prefix observations are passed to
 continuation and repair requests. GeoAgent requires API `logprobs` and JSON
 schema output support and fails explicitly if the provider cannot supply them.
-Search budgets can be set with `--rollouts`, `--top-k`, `--repairs`, and
-`--timeout`. Earth-Agent's `--max-steps` counts model turns.
+Search budgets can be set with `--rollouts` (default 200), `--top-k`,
+`--repairs`, and `--timeout`. Earth-Agent's `--max-steps` counts model turns
+and defaults to 200.
 
 ## Evidence and scoring
 
@@ -46,13 +62,17 @@ unmarked output when the program completes the final planned step successfully:
 only the newly printed suffix after the verified prefix is used. Intermediate
 prints, failed executions, and inconsistent prefix output cannot trigger this
 fallback. It does not consult reference answers or pick values out of logs.
+AgentGS stores the answer returned by its own answering stage and does not scan
+the trace for a marker.
 
-Predictions contain `conversation`, so the normal scorer can read
-them directly. Generation does not calculate FAS; run this separate scoring step
-to use the shared robust answer matcher and conversation metrics:
+Predictions contain `conversation`, so generation does not calculate FAS.
+Score each method with its own evaluation entry. Those commands apply the
+method's answer and tool-call rules, then the shared metrics:
 
 ```sh
-uv run -m agentgs evaluate score outputs/evaluations/earth-new/predictions.jsonl --allow-partial --output outputs/evaluations/earth-new/scores.json
+uv run scripts/evaluation/agentgs/score.py outputs/evaluations/agentgs/predictions.jsonl --allow-partial --output outputs/evaluations/agentgs/scores.json
+uv run scripts/evaluation/earthagent/score.py outputs/evaluations/earth-new/predictions.jsonl --allow-partial --output outputs/evaluations/earth-new/scores.json
+uv run scripts/evaluation/geoagent/score.py outputs/evaluations/geo-new/predictions.jsonl --allow-partial --output outputs/evaluations/geo-new/scores.json
 ```
 
 GeoAgent scores the tool calls from the selected final execution; exploratory

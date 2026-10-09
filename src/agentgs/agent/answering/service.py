@@ -58,13 +58,23 @@ class AnsweringService:
                 ensure_ascii=False,
                 default=str,
             )
+        budget_kind = (
+            "bash"
+            if state.action_budget_exhausted
+            else "tool"
+            if tool_attempts_exhausted
+            else None
+        )
         try:
             contract = self.stages.find_contract(question)
             text = (
                 answer_text
                 if answer_text is not None
                 else await self.stages.generate_output(
-                    question, evidence, execution_incomplete=not completed
+                    question,
+                    evidence,
+                    execution_incomplete=not completed,
+                    budget_exhausted=budget_kind,
                 )
             )
             status, answer = (

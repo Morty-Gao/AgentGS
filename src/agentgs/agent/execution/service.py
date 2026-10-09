@@ -32,14 +32,18 @@ class ExecutionService:
     def split_arguments(self, name, text):
         """Keep program-injected annotations out of the public function schema."""
         params = normalize_arguments(object_arguments(text))
-        properties = self.specs[name].input_schema.get("properties")
-        public = {
-            key: value for key, value in params.items() if properties is None or key in properties
-        }
+        schema = self.specs[name].input_schema
+        properties = schema.get("properties", {})
         internal = {
             key: value
             for key, value in params.items()
             if key == "_output_keys" or key.startswith("_rs_")
+        }
+        public = {
+            key: value
+            for key, value in params.items()
+            if key not in internal
+            and (key in properties or schema.get("additionalProperties") is not False)
         }
         return public, internal
 
@@ -59,6 +63,7 @@ class ExecutionService:
         arguments, internal = self.split_arguments(name, text)
         call = ToolCall(id=call_id, tool=name, arguments=arguments)
         call._runtime_arguments = internal
+        self.state.physical_tool_calls += 1
         result = await self.state.context.tools.execute(call)
         self.state.results.append(result)
         await self.state.save()
@@ -75,6 +80,7 @@ class ExecutionService:
         arguments, internal = self.split_arguments(name, text)
         call = ToolCall(tool=name, arguments=arguments)
         call._runtime_arguments = internal
+        self.state.diagnostic_tool_calls += 1
         result = await self.state.context.tools.execute(call)
         if result.raw_output is not None:
             return result.raw_output
@@ -115,19 +121,29 @@ class ExecutionService:
         async def input_provider(attempt, history):
             # Declared bindings remain deterministic, but every question-mode
             # execution originates from a real native model call.
-            seed = json.dumps(initial_arguments or {}, ensure_ascii=False)
-            candidate, _ = await invoke(
-                prepare_tool_input,
-                name,
-                seed,
-                question,
-                current_output,
-                total_output,
-                registry,
-                execution_context,
-            )
+            bound_fields = (execution_context or {}).get("instance", {}).get("input_bindings", {})
+            attempt_defaults = dict(initial_arguments or {})
+            if history:
+                try:
+                    previous = object_arguments(history[-1].tool_input)
+                except (ValueError, TypeError):
+                    previous = {}
+                for key in attempt_defaults:
+                    if key not in bound_fields and key in previous:
+                        attempt_defaults[key] = previous[key]
+            seed = json.dumps(attempt_defaults, ensure_ascii=False)
             observed = dict(registry.compact_context() if registry else {})
             if self.state.context.options.binding_assistance:
+                candidate, _ = await invoke(
+                    prepare_tool_input,
+                    name,
+                    seed,
+                    question,
+                    current_output,
+                    total_output,
+                    registry,
+                    execution_context,
+                )
                 observed["declared_binding_candidate"] = object_arguments(candidate)
             feedback = history[-1].to_prompt_context() if history else None
             # There is no fallback to parsing model prose or manufacturing arguments.
@@ -149,7 +165,11 @@ class ExecutionService:
                     raise ValueError(f"Return exactly one native function call for {name}")
                 generated = object_arguments(calls[0].function.arguments)
                 properties = self.specs[name].input_schema.get("properties")
-                if properties is not None and set(generated) - set(properties):
+                if (
+                    properties is not None
+                    and self.specs[name].input_schema.get("additionalProperties") is False
+                    and set(generated) - set(properties)
+                ):
                     raise ValueError(
                         "Unknown function arguments: "
                         + ", ".join(sorted(set(generated) - set(properties)))
@@ -182,7 +202,18 @@ class ExecutionService:
             raw = calls[0]
             try:
                 if initial_arguments:
-                    generated = {**generated, **initial_arguments}
+                    if attempt == 1:
+                        generated = {**generated, **initial_arguments}
+                    else:
+                        generated = {
+                            **attempt_defaults,
+                            **generated,
+                            **{
+                                key: value
+                                for key, value in initial_arguments.items()
+                                if key in bound_fields
+                            },
+                        }
                 generated_text = json.dumps(generated, ensure_ascii=False)
                 reference_binding = (
                     await invoke(references.bind_parameters, name, generated, registry)
@@ -201,19 +232,30 @@ class ExecutionService:
                     event["attempt"] = attempt
                     await self.state.record(event)
                     return PreparedToolCall(raw.id, json.dumps(bound, ensure_ascii=False))
-                prepared, event = await invoke(
-                    prepare_tool_input,
-                    name,
-                    generated_text,
-                    question,
-                    current_output,
-                    total_output,
-                    registry,
-                    execution_context,
-                )
-                if not self.state.context.options.binding_assistance:
+                if self.state.context.options.binding_assistance:
+                    prepared, event = await invoke(
+                        prepare_tool_input,
+                        name,
+                        generated_text,
+                        question,
+                        current_output,
+                        total_output,
+                        registry,
+                        execution_context,
+                    )
+                else:
                     prepared = generated_text
+                    event = {
+                        "type": "tool_input_binding",
+                        "binding_assistance": False,
+                        "tool_name": name,
+                    }
                 prepared = preserve_scientific_arguments(name, generated_text, prepared)
+                if initial_arguments and not bridge:
+                    parameters = object_arguments(prepared)
+                    parameters.update({key: generated[key] for key in initial_arguments})
+                    prepared = json.dumps(parameters, ensure_ascii=False)
+                    event["explicit_plan_fields"] = list(initial_arguments)
                 if bridge:
                     prepared = apply_shared_bridge_inputs(generated_text, execution_context)
                     event["shared_bridge_binding"] = True
@@ -244,7 +286,9 @@ class ExecutionService:
             input_provider=input_provider,
             tool_runner=self.physical,
             input_format=info["input_format"],
-            max_attempts=self.state.context.options.tool_attempts if self.state.context.options.execution_recovery else 1,
+            max_attempts=self.state.context.options.tool_attempts
+            if self.state.context.options.execution_recovery
+            else 1,
             messages=self.state.conversation,
             checkpoint=self.state.save,
             producer_step=f"tool_step_{execution_context['execution_index']:02d}"

@@ -2,6 +2,7 @@
 
 import asyncio
 import json
+import os
 import random
 from contextlib import asynccontextmanager
 
@@ -9,10 +10,21 @@ import httpx
 
 from agentgs.client import audit
 from agentgs.client.context import fit_context
-from agentgs.client.errors import ProviderError
+from agentgs.client.errors import ProviderError, TransportFailure
 from agentgs.client.models import ChatReply, LLMConfig
 from agentgs.contracts.async_utils import drain, invoke
 from agentgs.messages import Conversation, Message, RuntimeEvent
+
+
+def request_extras() -> dict:
+    """Optional provider fields. Unset means the payload stays unchanged."""
+    raw = os.environ.get("AGENTGS_CHAT_TEMPLATE_KWARGS", "").strip()
+    if not raw:
+        return {}
+    value = json.loads(raw)
+    if not isinstance(value, dict):
+        raise ValueError("AGENTGS_CHAT_TEMPLATE_KWARGS must be a JSON object")
+    return {"chat_template_kwargs": value}
 
 
 class OpenAICompatibleClient:
@@ -102,7 +114,9 @@ class OpenAICompatibleClient:
         provider = self.config.providers[spec.provider]
         if provider.protocol != "openai_compatible":
             raise ValueError(f"Unsupported provider protocol: {provider.protocol}")
-        selected_effort = effort or spec.default_effort
+        selected_effort = (
+            os.environ.get("AGENTGS_REASONING_EFFORT", "").strip() or effort or spec.default_effort
+        )
         if selected_effort and selected_effort not in spec.supported_efforts:
             raise ValueError(f"Model {name} does not support effort {selected_effort}")
         if tools and not spec.capabilities.tool_calling:
@@ -120,6 +134,7 @@ class OpenAICompatibleClient:
             payload["tool_choice"] = tool_choice
         if selected_effort:
             payload["reasoning_effort"] = selected_effort
+        payload.update(request_extras())
         if settings is not None:
             minimax = spec.model.lower().startswith(("minimax", "abab"))
             temperature = settings.temperature
@@ -184,7 +199,7 @@ class OpenAICompatibleClient:
                 delay = min(float(retry_after), 30) if retry_after.isdigit() else None
             except (httpx.TransportError, json.JSONDecodeError) as exc:
                 if attempt + 1 == attempts:
-                    raise RuntimeError("LLM transport/retry budget exhausted") from exc
+                    raise TransportFailure("LLM transport/retry budget exhausted") from exc
                 delay = None
             else:
                 # Invalid successful replies are protocol errors, not network retries.

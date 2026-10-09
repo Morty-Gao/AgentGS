@@ -96,7 +96,11 @@ async def test_every_question_format_reaches_the_provider_request(incomplete):
             assert contracts.system_prompt in unescape(messages[0]["content"])
             prompt = unescape(messages[-1]["content"])
             spec = request.output_contract["answer_format"]
-            context_text = prompt.split("<task-context>\n", 1)[1].split("\n</task-context>", 1)[0].split("\n\n", 1)[1]
+            context_text = (
+                prompt.split("<task-context>\n", 1)[1]
+                .split("\n</task-context>", 1)[0]
+                .split("\n\n", 1)[1]
+            )
             assert json.loads(context_text)["output_contract"]["answer_format"] == spec
             assert "fixture tool evidence" in prompt
             assert state.usage[0]["stage"] == "final_answer_generation"

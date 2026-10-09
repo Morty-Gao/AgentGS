@@ -13,7 +13,12 @@ from agentgs.contracts.models import TaskInput, ToolError, ToolResult, ToolSpec
 
 def function_call(name, arguments, call_id=None):
     if name == "submit_tool_plan" and isinstance(arguments, dict) and set(arguments) == {"tools"}:
-        arguments = {"steps": [{"id": f"s{i}", "tool": tool, "purpose": f"Compute {tool}"} for i, tool in enumerate(arguments["tools"], 1)]}
+        arguments = {
+            "steps": [
+                {"id": f"s{i}", "tool": tool, "purpose": f"Compute {tool}"}
+                for i, tool in enumerate(arguments["tools"], 1)
+            ]
+        }
     from uuid import uuid4
 
     return {
@@ -276,7 +281,9 @@ async def test_replanning_does_not_reuse_unspecified_inputs_by_tool_name():
     result = await AgentEngine().run(
         TaskInput(question="Compute the requested statistic."), context(tools, client, False)
     )
-    assert [row.tool for row in tools.calls] == ["RemoteSensingMean"] + ["RemoteSensingDifference"] * 3 + ["RemoteSensingMean", "RemoteSensingDifference"]
+    assert [row.tool for row in tools.calls] == ["RemoteSensingMean"] + [
+        "RemoteSensingDifference"
+    ] * 3 + ["RemoteSensingMean", "RemoteSensingDifference"]
     assert result.tool_chain_completed and result.answer == "2"
     resumed = [row for row in result.execution_events() if row["type"] == "plan_resume"]
     assert not resumed

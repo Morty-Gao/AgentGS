@@ -1,0 +1,21 @@
+\subsection{Grounding, Execution, and Verification}
+\label{sec:execution}
+A completed capability plan describes operations and dependencies. Grounding converts it into execution instances with concrete tool identifiers, arguments, and references to upstream results.
+
+\paragraph{Constrained tool selection.}
+For each capability instance, the candidate set is restricted by its source Skill, operation requirements, tool availability, and interface constraints. GeoToolKG supplies tool descriptions and associations for retrieval; those associations do not override the plan's dependencies. The LLM selects implementations within the admitted scope. Required operations and scoped ordering are checked again after the concrete chain is produced.
+
+\paragraph{Explicit input propagation.}
+Each execution instance has an identity and declares its predecessors. Input bindings name a producing instance and a field in that instance's observed output. At execution time, the system resolves these references and validates the resulting arguments against the selected tool's schema. A consumer cannot substitute an unrelated earlier call merely because it used the same tool name. Unknown predecessors, unresolved references, and incompatible arguments prevent invocation.
+
+This separation is especially important for scientific artifacts. In a compositing task, the statistics call must consume the generated composite, not another raster mentioned in the question. Likewise, a comparison must use the statistic actually returned by its producer. The execution record links these inputs to their sources, making artifact use inspectable independently of the final answer.
+
+\paragraph{Failure handling.}
+Execution failures produce structured feedback for bounded argument repair or replanning when recovery is enabled. Literal arguments may be corrected, while observed upstream bindings remain authoritative. Replanning validates instance identities, dependencies, and scopes again. Reuse of a successful result requires unchanged inputs and instance semantics; it is not inferred from a common tool-name prefix. The runtime conservatively reruns file-backed and external-data computations across plan attempts, while allowing reuse of explicitly supported pure scalar computations when their complete dependencies are verified.
+
+Tool recovery, initial plan repair, and transport retries have separate roles and budgets. Disabling execution recovery terminates the scientific chain after an execution failure while retaining initial planning and input validation. Engineering details and the distinction between these budgets appear in Appendix~\ref{sec:system}.
+
+\paragraph{Verification and answer generation.}
+The answer is constructed from observed results and artifacts. Verification checks whether the requested outputs are supported and records unfinished operations when execution is incomplete. Successful invocation, evidence consistency, and agreement with a benchmark reference are distinct properties; the benchmark evaluates the last of these independently.
+
+A verified composition can also be represented as a candidate reusable Skill, preserving its input roles, dependencies, and usage constraints. This is a strategy representation over existing operations, not an expansion of the underlying tool collection. The present results do not establish a performance or cost benefit from autonomous Skill accumulation; the candidate-registration design is described in Appendix~\ref{app:skill-reuse}.

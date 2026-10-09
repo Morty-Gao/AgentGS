@@ -1,14 +1,71 @@
-# Configuration syntax follows the agreed provider/model separation.
-# Replace capabilities and budgets with verified metadata for your provider.
+# Local sglang services on 10.102.211.12. Pass --model to select a key.
+# Qwen3.8-27B accepts xhigh, medium, and low. The Qwen3.5 services accept max.
 schema_version = 1
-[providers.geogpt]
-base_url = "${GEOGPT_BASE_URL}"
-api_key = "${GEOGPT_API_KEY}"
-[models.default]
-provider = "geogpt"
-model = "${GEOGPT_MODEL}"
-context_window = 80000
-max_output_tokens = 8192
-supported_efforts = []
-[models.default.capabilities]
+
+[providers.qwen38-27b]
+base_url = "http://10.102.211.12:30000/v1"
+api_key = "none"
+timeout_seconds = 600
+max_concurrent_requests = 48
+
+[models.qwen38-27b]
+provider = "qwen38-27b"
+model = "Qwen3.8-27B"
+context_window = 262144
+max_output_tokens = 32768
+supported_efforts = ["xhigh", "medium", "low"]
+default_effort = "xhigh"
+
+[models.qwen38-27b.capabilities]
+tool_calling = true
+
+[providers.qwen35-35b-a3b]
+base_url = "http://10.102.211.12:30001/v1"
+api_key = "none"
+timeout_seconds = 600
+max_concurrent_requests = 48
+
+[models.qwen35-35b-a3b]
+provider = "qwen35-35b-a3b"
+model = "Qwen3.5-35B-A3B"
+context_window = 262144
+max_output_tokens = 32768
+supported_efforts = ["max", "xhigh", "high", "medium", "low"]
+default_effort = "max"
+
+[models.qwen35-35b-a3b.capabilities]
+tool_calling = true
+
+[providers.qwen35-4b]
+base_url = "http://10.102.211.12:30002/v1"
+api_key = "none"
+timeout_seconds = 600
+max_concurrent_requests = 48
+
+[models.qwen35-4b]
+provider = "qwen35-4b"
+model = "Qwen3.5-4B"
+context_window = 262144
+max_output_tokens = 32768
+supported_efforts = ["max", "xhigh", "high", "medium", "low"]
+default_effort = "max"
+
+[models.qwen35-4b.capabilities]
+tool_calling = true
+
+[providers.qwen35-9b]
+base_url = "http://10.102.211.12:30003/v1"
+api_key = "none"
+timeout_seconds = 600
+max_concurrent_requests = 48
+
+[models.qwen35-9b]
+provider = "qwen35-9b"
+model = "Qwen3.5-9B"
+context_window = 262144
+max_output_tokens = 32768
+supported_efforts = ["max", "xhigh", "high", "medium", "low"]
+default_effort = "max"
+
+[models.qwen35-9b.capabilities]
 tool_calling = true

@@ -41,6 +41,7 @@ def public_input(
     dataset_instructions=None,
     modules=None,
     ablations=(),
+    model=None,
 ):
     resource = task.input_resource
     if isinstance(resource, str):
@@ -65,4 +66,5 @@ def public_input(
             task.dataset_instructions if dataset_instructions is None else dataset_instructions
         ),
         input_domain="remote_sensing" if task.category == "RemoteSensingTools" else None,
+        model=model,
     )

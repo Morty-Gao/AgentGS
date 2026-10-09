@@ -1,0 +1,69 @@
+[
+  {
+    "id": "hazard-table-loading",
+    "name": "Hazard Table Loading",
+    "version": "1",
+    "description": "Inspect the authoritative natural-hazard event table before filtering and counting a requested subset of disaster records.",
+    "domain": {"primary": "natural-hazard"},
+    "keywords": ["natural hazard", "disaster", "event table", "count", "records"],
+    "mapping_extension": true,
+    "retrieval_gate": {"specific_terms": ["natural hazard", "natural-hazard", "disaster", "event table", "OFDA/BHA", "EM-DAT"], "tool_names": ["NaturalHazardLoadEventTable"]},
+    "goal": {"capability": "hazard-table-source", "description": "Identify the stored table, its sheet and column names."},
+    "inputs": [{"id": "source", "semantic_type": "HazardSource", "required": true}],
+    "outputs": [{"id": "table", "semantic_type": "HazardRecords", "required": true}],
+    "geo_constraints": {},
+    "validation": {"required": ["source and sheet refer to the supplied event table"]},
+    "failure_modes": ["table unavailable"],
+    "recovery": {},
+    "planning": {"compatible_skills": []},
+    "tool_candidates": ["NaturalHazardLoadEventTable"],
+    "workflow": {"type": "sequential", "steps": [
+      {"id": "load", "capability": "hazard-table-source", "operation": "Inspect the authoritative event table", "required": true, "depends_on": [], "input_types": ["HazardSource"], "output_types": ["HazardRecords"], "tool_selection": {"candidates": ["NaturalHazardLoadEventTable"]}}
+    ]}
+  },
+  {
+    "id": "hazard-subset-counting",
+    "name": "Hazard Subset Counting",
+    "version": "1",
+    "description": "Count a filtered subset of natural-hazard disaster records requested by country, year or event type. Select this operation only when the task requires a restricted subset, not an unfiltered total.",
+    "domain": {"primary": "natural-hazard"},
+    "keywords": ["natural hazard", "disaster", "event table", "count", "records", "country", "year"],
+    "mapping_extension": true,
+    "retrieval_gate": {"specific_terms": ["natural hazard", "natural-hazard", "disaster", "event table", "OFDA/BHA", "EM-DAT"], "tool_names": ["NaturalHazardCountRecords"]},
+    "goal": {"capability": "hazard-subset-count", "description": "Count the task-selected records using an observed filtered artifact."},
+    "inputs": [{"id": "filtered_records_path", "semantic_type": "FilteredHazardRecords", "required": true}],
+    "outputs": [{"id": "count", "semantic_type": "HazardCount", "required": true}],
+    "geo_constraints": {},
+    "validation": {"required": ["filters match the task's entities and time scope", "filtered_records_path comes from a successful producer"]},
+    "failure_modes": ["filtered artifact unavailable"],
+    "recovery": {},
+    "planning": {"compatible_skills": []},
+    "tool_candidates": ["NaturalHazardCountRecords"],
+    "workflow": {"type": "sequential", "steps": [
+      {"id": "count", "capability": "hazard-subset-count", "operation": "Count the requested filtered subset", "required": true, "depends_on": [], "input_types": ["FilteredHazardRecords"], "output_types": ["HazardCount"], "tool_selection": {"candidates": ["NaturalHazardCountRecords"]}}
+    ]}
+  },
+  {
+    "id": "hazard-filtered-count",
+    "name": "Hazard Filtered Count Composition",
+    "version": "1",
+    "mapping_extension": true,
+    "description": "Connect authoritative event-table inspection to subset counting by materializing an exact-match filtered table. Filters must come from the public task and observed column names.",
+    "domain": {"primary": "natural-hazard"},
+    "keywords": ["natural hazard", "disaster", "filter", "count"],
+    "goal": {"capability": "hazard-subset-count", "description": "Load, filter and count the requested disaster records."},
+    "inputs": [{"id": "source", "semantic_type": "HazardSource", "required": true}],
+    "outputs": [{"id": "count", "semantic_type": "HazardCount", "required": true}],
+    "geo_constraints": {},
+    "validation": {"required": ["filters are nonempty and supported by the task", "use successful upstream source and filtered artifact paths"]},
+    "failure_modes": ["unknown filter column", "missing filter value"],
+    "recovery": {},
+    "planning": {"compatible_skills": [], "bridge_only": true},
+    "tool_candidates": ["NaturalHazardLoadEventTable", "NaturalHazardFilterRecords", "NaturalHazardCountRecords"],
+    "workflow": {"type": "sequential", "steps": [
+      {"id": "load", "capability": "hazard-table-source", "operation": "Inspect the authoritative event table", "required": true, "depends_on": [], "input_types": ["HazardSource"], "output_types": ["HazardRecords"], "tool_selection": {"candidates": ["NaturalHazardLoadEventTable"]}},
+      {"id": "filter", "capability": "hazard-subset-filter", "operation": "Materialize the task's exact-match subset", "required": true, "depends_on": ["load"], "input_types": ["HazardRecords"], "output_types": ["FilteredHazardRecords"], "tool_selection": {"candidates": ["NaturalHazardFilterRecords"]}, "bridge_input_bindings": {"source": {"source": "load", "path": ["source"]}, "sheet": {"source": "load", "path": ["sheet"]}}},
+      {"id": "count", "capability": "hazard-subset-count", "operation": "Count the requested filtered subset", "required": true, "depends_on": ["filter"], "input_types": ["FilteredHazardRecords"], "output_types": ["HazardCount"], "tool_selection": {"candidates": ["NaturalHazardCountRecords"]}, "bridge_input_bindings": {"filtered_records_path": {"source": "filter", "path": ["filtered_records_path"]}}}
+    ]}
+  }
+]

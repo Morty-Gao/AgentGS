@@ -86,9 +86,8 @@ async def test_worker_data_only_skips_skills_and_tool_retrieval(project, monkeyp
     (project / "config.toml").write_text(
         '[agent]\nplanning_mode="skill_guided"\nshared_bridge=true\nallow_rule_planning=true\n'
     )
-    index = project / "data/geotoolkg"
-    index.mkdir(parents=True)
-    (index / "index_store.json").write_text("{}")
+    (project / "embedding").mkdir(parents=True)
+    (project / "embedding" / "tools.npz").write_bytes(b"")
     shells = []
     clients = []
 
@@ -173,6 +172,12 @@ async def test_command_budget_ends_exploration_before_another_model_turn(project
         "final_answer_generation",
     ]
     assert result.action_budget_exhausted
+    reminder = next(
+        message.content for message in reversed(result.messages) if message.role == "tool"
+    )
+    assert "<system-reminder>" in reminder
+    assert "bash command budget is exhausted" in reminder
+    assert "Give the final answer now" in reminder
     assert result.tool_chain_completed is True
     assert result.provenance["effective_algorithm"]["allow_rule_planning"] is False
 

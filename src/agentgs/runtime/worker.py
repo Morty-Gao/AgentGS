@@ -11,7 +11,7 @@ from agentgs.agent.engine import AgentEngine
 from agentgs.agent.retrieval.tools import KGToolRetriever, LazyToolRetriever
 from agentgs.agent.state import AgentExecutionError
 from agentgs.client.config import load_llm
-from agentgs.client.embedding import LocalEmbedding
+from agentgs.client.embedding import LocalEmbedding, load_embeddings
 from agentgs.client.openai_compatible import OpenAICompatibleClient
 from agentgs.config.algorithm import load_algorithm, resolve_algorithm
 from agentgs.config.settings import RuntimeSettings
@@ -71,10 +71,13 @@ async def execute(root, work, spec, settings):
         if options.index_path.startswith("data/"):
             index_folder = prepared_path(root, options.index_path.removeprefix("data/"))
         retriever = None
+        embedding_store = root / "embedding"
+        relation_cache = embedding_store / "tools.npz"
         if (
             not spec.input.calls
             and options.planning_mode != "data_only"
-            and await invoke((index_folder / "index_store.json").exists)
+            and await invoke(relation_cache.is_file)
+            and await invoke((index_folder / "graph_store.json").is_file)
         ):
             retriever = LazyToolRetriever(
                 lambda: KGToolRetriever.from_directory(
@@ -84,7 +87,9 @@ async def execute(root, work, spec, settings):
                         options.embedding_model,
                         options.embedding_threads,
                         options.embedding_batch_size,
+                        store=embedding_store,
                     ),
+                    load_embeddings(relation_cache),
                 )
             )
 

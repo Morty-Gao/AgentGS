@@ -172,7 +172,7 @@ def answer_question(env, tools, row, max_steps, client, attempt, events):
 def main(argv=None):
     parser = argparse.ArgumentParser(description="Earth-Agent ReAct over 603 GeoToolEval questions")
     add_arguments(parser)
-    parser.add_argument("--max-steps", type=int, default=12)
+    parser.add_argument("--max-steps", type=int, default=200)
     args = parser.parse_args(argv)
     if args.max_steps < 1:
         parser.error("--max-steps must be positive")

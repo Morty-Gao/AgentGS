@@ -1,12 +1,12 @@
 # AgentGS
 
-Standard Python geoscience agent. The current scope is **101 GeoToolEval tools, 24 Skills, and 31 Capabilities**, using the original staged execution flow by default. The core source starts from a frozen baseline of the previous project. The production package does not depend on that old source tree.
+Standard Python geoscience agent. The current scope is **101 GeoToolEval tools, 27 Skills, and 34 Capabilities**, with explicit task-requirement selection and staged execution. The production package is self-contained.
 
 ## Refactor status
 
 Every one of the 101 tools has a real handler and has run successfully in the scientific reproduction environment. One hundred scientific tools match the old source on the same inputs. GeoQuestions keeps the authorized protocol that matches 40 materialized rows by `source_id` or query structure, plus 125 independent replay checks. Energy and ocean share parsers, and spatial and raster operations use the current data layout.
 
-The default agent connects skill retrieval, KG retrieval, planning, bridging, grounding, argument binding, atomic feedback, replanning, reuse of a successful prefix, the final model answer, and non-mutating validation. Planning submits `submit_tool_plan` through a standard function call. Each scientific tool has its own JSON argument schema. The `algorithm=prototype` entry is gone. The 24 Skills are dynamic capability declarations, not 24 fixed tool chains.
+The default agent connects skill retrieval, task-requirement selection, KG retrieval, planning, bridging, grounding, argument binding, atomic feedback, replanning, reuse of successful instances, the final model answer, and non-mutating validation. Native `select_capabilities` calls adopt relevant operations and approve proposed support; `submit_tool_plan` declares execution instances. Each scientific tool has its own JSON argument schema. Skills describe operation scopes and dependencies, including a typed hazard load-filter-count bridge composition.
 
 Checked independent comparisons include 341 deterministic component decisions, 16 original KG/SDK retrievals, 298 argument bindings, 65 groups of scientific results and artifacts, and 2,412 original FAS scores. Twenty-eight saved experiment answers rescore the same under original and compatibility scoring. A real TaskService/worker has verified failure recovery, a six-step spatial chain, and cross-domain artifact passing.
 
@@ -92,9 +92,9 @@ The old `require_llm` parameter is gone. Config and task JSON use the fields bel
 | `allow_rule_planning` | `false` | Allow rules to route directly, fall back after a planning failure, or revise the tool chain. This does not control whether the model is called. |
 | `plan_attempts` | `3` | Total full-chain planning attempts, including replanning after execution failure. Independent of the rule switch. |
 | `tool_attempts` | `3` | Argument and execution repair attempts for each tool instance. |
-| `argument_attempts` | `3` | Protocol-repair budget for native planning calls, and the transport-retry cap for argument requests. |
+| `argument_attempts` | `3` | Shared protocol-repair budget within a planning stage; independent of HTTP retries. |
 | `model_attempts` | `4` | Transport-retry budget for model requests. |
-| `command_attempts` | `12` | Bash calls allowed in `data_only`. Ignored by other modes. |
+| `command_attempts` | `20` | Bash calls allowed in `data_only`. Ignored by other modes. |
 
 The old `require_llm=true` planning policy maps to `allow_rule_planning=false`. The old `require_llm=false` maps to `allow_rule_planning=true`. The current default turns rule planning off. Turn it on explicitly to keep rule assistance from an old config. Planning attempts are set on their own and are not reduced to one when rule planning is off. `shared_bridge` is fixed to `false` for `tool_only` and `data_only`. `data_only` also fixes `allow_rule_planning` to `false`.
 
@@ -107,9 +107,9 @@ The desktop demo uses `--sandbox auto`. On macOS, `sandbox-exec` uses the system
 A formal comparison changes only the mode, uses the same questions and model, and writes each run to a new directory. `data_only` can use a larger per-question timeout:
 
 ```bash
-tools/envs/reproduction/bin/python -m agentgs evaluate benchmark --planning-mode skill_guided --no-rule-planning --plan-attempts 3 --tool-attempts 3 --output outputs/evaluations/full-new
-tools/envs/reproduction/bin/python -m agentgs evaluate benchmark --planning-mode tool_only --no-rule-planning --plan-attempts 3 --tool-attempts 3 --output outputs/evaluations/tool-only-new
-tools/envs/reproduction/bin/python -m agentgs evaluate benchmark --planning-mode data_only --no-rule-planning --command-attempts 12 --timeout 900 --output outputs/evaluations/data-only-new
+uv run agentgs evaluate benchmark --benchmark-scope common_data --planning-mode skill_guided --no-rule-planning --plan-attempts 3 --tool-attempts 3 --output outputs/evaluations/full-new
+uv run agentgs evaluate benchmark --benchmark-scope common_data --planning-mode tool_only --no-rule-planning --plan-attempts 3 --tool-attempts 3 --output outputs/evaluations/tool-only-new
+uv run agentgs evaluate benchmark --benchmark-scope common_data --planning-mode data_only --no-rule-planning --command-attempts 20 --timeout 900 --output outputs/evaluations/data-only-new
 ```
 
 The logged supervisor accepts the same mode and budget arguments. The experiment protocol records the task overrides that actually applied, the resume budget, and the hashes of the tool and planning declarations. Each AgentResult stores the effective config in `provenance.effective_algorithm`. An experiment with old parameters, source, or protocol cannot resume into a new directory.
@@ -123,9 +123,9 @@ Runtime storage converts historical tasks on read. It keeps the old rule policy 
 | CLI argument | Default | Purpose |
 | --- | --- | --- |
 | `--concurrency` | 2 | Maximum concurrent tasks (1–128) |
-| `--model-concurrency` | 8 | Concurrent model HTTP requests in one project |
-| `--tool-concurrency` | 4 | Concurrent tool executions in one project |
-| `--sandbox-concurrency` | 2 | Concurrent sandbox calls, also bounded by the shared tool quota |
+| `--model-concurrency` | 16 | Concurrent model HTTP requests in one project |
+| `--tool-concurrency` | 64 | Concurrent tool executions in one project |
+| `--sandbox-concurrency` | 16 | Concurrent sandbox calls, also bounded by the shared tool quota |
 | `--sandbox-disk-limit-mb` | 2048 | Persistent work plus per-call scratch budget (MiB) |
 | `--queue-capacity` | 1024 | Accepted tasks that have not finished. The API returns 429 when full. |
 | `--model-timeout` | 180 | Deadline for one model call, including queue, retries, and backoff (seconds) |

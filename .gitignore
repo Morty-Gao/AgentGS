@@ -83,7 +83,6 @@ Desktop.ini
 !/data/geotoolkg/graph_store.json
 !/data/geotoolkg/image__vector_store.json
 !/data/geotoolkg/import_manifest.json
-!/data/geotoolkg/index_store.json
 !/data/biodeeptime/
 /data/biodeeptime/*
 !/data/biodeeptime/observations.csv

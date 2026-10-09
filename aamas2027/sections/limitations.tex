@@ -1,0 +1,17 @@
+\section{Limitations and Further Evaluation}
+\label{app:limitations}
+\subsection{Dependence on Registered Knowledge}
+Composition depends on the coverage and quality of Skill declarations, dependency relations, and implementation mappings. A hypergraph can connect known operations but cannot supply a scientific operation absent from the registry. Incomplete or inaccurate constraints can prevent useful reuse or admit an unsuitable composition. Dedicated knowledge construction for GeoBenchX is part of the evaluated deployment and should be included when considering the cost of adopting another tool environment.
+
+\subsection{Structural Validity and Scientific Meaning}
+Type compatibility and dependency closure establish declared workflow conditions. They do not prove that a selected statistic, spatial resolution, physical model, or comparison baseline is scientifically appropriate. Scientific validation also depends on data quality, units, assumptions, and the meaning of the question. The framework makes bindings and dependencies inspectable, but expert or domain-specific checks can still be necessary.
+
+\subsection{Benchmark Scope and Metric Sensitivity}
+GeoToolEval has unequal theme sizes, repeated cross-theme questions, and interface-dependent chain lengths. Its record-weighted mean therefore reflects the chosen population and wrappers. Remote sensing dominates the longest-chain group, and some single-call tools encapsulate several operations. These factors limit generalization from chain length to intrinsic task difficulty.
+
+Name-based process metrics favor agreement with the reference implementation. They may penalize a valid alternative tool or order and may miss incorrect parameters in an otherwise matching chain. Final-answer scores address a different aspect of quality and can also miss missing artifacts when the reported scalar or choice happens to agree. Complete assessment requires evaluating the requested outputs and their provenance.
+
+\subsection{Experimental Attribution and Reuse}
+The reported configuration studies contain incomplete interventions and heterogeneous result provenance. Aggregate differences cannot isolate all proposed module contributions, and no repeated-run uncertainty or matched efficiency analysis is supplied. External evaluation uses one model judge and requires verification of paired task identity and settings.
+
+Candidate Skill representation provides a way to retain a verified composition. The present experiments do not demonstrate autonomous Skill registration, improved future-task coverage, or reduced planning cost. Evaluating reuse requires separating construction tasks from later tasks and checking that applicability and scientific assumptions remain valid under new inputs.

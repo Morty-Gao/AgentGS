@@ -1,0 +1,52 @@
+\section{Results}
+\label{sec:experiments}
+We evaluate AgentGS along three dimensions: answer quality on GeoToolEval, agreement with reference tool workflows, and performance in the external GeoBenchX environment. Configuration-level analysis of the method's components is presented separately in Section~\ref{sec:ablations}.
+
+\subsection{Experimental Setup}
+\label{sec:experimental-setup}
+\paragraph{Evaluation population.}
+The main comparison includes all 603 GeoToolEval records, using the metrics in Section~\ref{sec:metrics}. Every record contributes to the relevant average, including execution failures and incomplete answers. Results are also grouped by domain and reference-chain length. The 57-record configuration study is a separate experiment and is not used as the main population.
+
+\paragraph{Backbone and baselines.}
+AgentGS uses GPT-5.6 Terra. GeoAgent~\cite{chen2024geoagent} and EarthAgent~\cite{feng2026earthagent} use the same backbone and are evaluated in the same registered tool environment. Direct-answer baselines are DeepSeek V4 Pro, GPT-5.6 Terra, GPT-5.4, Qwen-Plus, and GeoGPT. They are compared by FAS; tool-trace metrics are inapplicable to their direct answers.
+
+The shared-backbone agent comparison examines complete orchestration systems. The direct-answer comparison additionally changes access to tool execution and external computation. Neither comparison alone isolates a particular AgentGS module. The configuration study addresses narrower changes, subject to the intervention limitations described in Section~\ref{sec:ablations}.
+
+\paragraph{Result provenance.}
+AgentGS's reported main FAS is retained from its first complete evaluation. Its process metrics are calculated from the recorded 603-record end-to-end experiment. These aggregates retain their respective provenance and are not assumed to be a paired per-record analysis of the same executions. Appendix~\ref{app:experimental-details} summarizes the available result sources and the remaining reproducibility information. No repeat-run variance or significance estimates are supplied by the reported experiments.
+
+\subsection{Answer Quality on GeoToolEval}
+\label{sec:main-results}
+Table~\ref{tab:main-results} reports the baseline comparison. AgentGS achieves mean FAS of 0.8731, compared with 0.7804 for GeoAgent and 0.0862 for EarthAgent. Its absolute advantage over GeoAgent is 9.27 percentage points.
+\input{tables/main_results}
+
+Among the direct-answer models, DeepSeek V4 Pro obtains the highest reported FAS, 0.5162. Direct answers from AgentGS's GPT-5.6 Terra backbone score 0.3137. The corresponding AgentGS differences are 35.69 and 55.94 percentage points. These comparisons are consistent with the value of executing task-specific analysis in the reported tool environment, although the system-level gains combine resource access, planning, execution, and answer generation.
+
+Figure~\ref{fig:performance} presents the overall and domain-specific answer scores. The overall mean weights individual records, so larger themes contribute more to the aggregate. The domain view complements the aggregate by showing variation across the ten task backgrounds.
+\input{figures/performance}
+
+\subsection{Tool Coverage and Invocation Order}
+AgentGS obtains mean TSF1 of 0.9170 and TOS of 0.9166. GeoAgent obtains 0.8663 and 0.7911, while EarthAgent obtains 0.1182 and 0.1390. AgentGS's absolute differences from GeoAgent are 5.07 percentage points in coverage and 12.55 points in relative order.
+
+The two metrics characterize different aspects of a workflow. GeoAgent scores higher on tool selection than on order. AgentGS has similar aggregate scores for these two metrics. Because TSF1 and TOS have different denominators and sensitivities, this does not yield an exact count of ordering failures. It indicates which aspect of reference-workflow agreement should be examined in the underlying traces.
+
+AgentGS's higher answer and process scores provide complementary aggregate evidence. They do not show that every additional matched invocation improved an answer. Such an explanation requires aligning the answer and execution records, inspecting parameters, and verifying that later calls consumed the intended intermediate artifacts.
+
+\subsection{Performance across Workflow Lengths}
+Table~\ref{tab:chain-results} separates the reported AgentGS scores by reference-chain length. FAS decreases from 0.9425 on single-step records to 0.7557 on two- to three-step records and 0.6167 on records with at least four calls.
+\input{tables/chain_results}
+
+On the 119 two- to three-step records, TSF1/TOS are 0.9779/\allowbreak 0.9832. On the 60 longer records, they are 0.8013/\allowbreak 0.7785. Long workflows remain challenging for answer generation and tool orchestration. In the shorter multistep group, high process agreement coexists with lower answer scores. Call names and order therefore cannot replace answer evaluation.
+
+The strata differ in domain composition as well as length. In particular, 70\% of the longest-chain group belongs to remote sensing. The observed decline does not isolate the effect of adding one operation to an otherwise fixed task. It characterizes the current benchmark groups, motivating controlled comparisons that keep scientific inputs and task families comparable.
+
+\subsection{External Evaluation on GeoBenchX}
+\label{sec:external-evaluation}
+The GeoBenchX evaluation~\cite{krechetova2025geobenchx} changes the registered tool environment. We integrate its official tools and construct corresponding Skills, Capabilities, scoped dependencies, and implementation mappings. This evaluates a configured deployment of the framework in another environment; dedicated knowledge construction is part of that deployment.
+
+AgentGS and the official ReAct baseline are each reported on 202 tasks using GPT-5.6 Terra. The same model serves as the single judge under reference-solution matching: scores of 0, 1, and 2 denote mismatch, partial match, and match. Mean score and full-match rate are separate from GeoToolEval FAS.
+\input{tables/external_results}
+
+AgentGS obtains a mean score of 1.3762 versus ReAct's 1.1980, an absolute difference of 0.1782 on the 0--2 scale. Full-match rates are 62.87\% and 53.47\%, a difference of 9.40 percentage points. Both reported aggregates favor AgentGS.
+
+Exact paired task membership and matched execution conditions remain to be verified for these results. The single model judge also provides no estimate of agreement across evaluators. We therefore treat the comparison as reported external performance, without claiming controlled zero-shot transfer or attributing the difference solely to the planning representation.

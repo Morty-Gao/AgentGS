@@ -14,7 +14,7 @@ embedding_model = "sentence-transformers/paraphrase-multilingual-MiniLM-L12-v2"
 embedding_threads = 4
 embedding_batch_size = 8
 index_path = "data/geotoolkg"
-model_cache = "data/raw/models/fastembed"
+model_cache = "model/models--qdrant--paraphrase-multilingual-MiniLM-L12-v2-onnx-Q"
 
 [agent.modules]
 planning_structure = "hierarchical"

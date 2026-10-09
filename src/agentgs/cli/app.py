@@ -171,8 +171,12 @@ def run(
         None, "--command-attempts", min=1, help="Bash commands allowed for data_only"
     ),
     input_domain: str | None = typer.Option(None, "--input-domain"),
-    modules: str | None = typer.Option(None, "--modules", help="Module overrides as JSON or @file; skill_guided only"),
-    ablation: list[str] | None = typer.Option(None, "--ablation", help="Repeatable A1–A6 or BIPARTITE preset; skill_guided only"),
+    modules: str | None = typer.Option(
+        None, "--modules", help="Module overrides as JSON or @file; skill_guided only"
+    ),
+    ablation: list[str] | None = typer.Option(
+        None, "--ablation", help="Repeatable A1–A6 or BIPARTITE preset; skill_guided only"
+    ),
     concurrency: Concurrency = None,
     timeout: Timeout = None,
     rss_limit_mb: RssLimit = None,
@@ -644,11 +648,20 @@ def benchmark_command(
         None, "--dataset-name", help="Registered dataset name. A path alone is GeoToolEval"
     ),
     ids: str = typer.Option("", "--ids", help="Comma-separated example ids. Omit to run all"),
+    model: str | None = typer.Option(
+        None, "--model", help="llm.toml model key; omit to use the only configured model"
+    ),
     retry_failed: bool = typer.Option(False, "--retry-failed/--no-retry-failed"),
-    benchmark_scope: str | None = typer.Option(None, "--benchmark-scope", help="full or common_data; use the same scope for every compared mode"),
+    benchmark_scope: str | None = typer.Option(
+        None,
+        "--benchmark-scope",
+        help="full or common_data; use the same scope for every compared mode",
+    ),
     planning_mode: str = typer.Option("skill_guided", "--planning-mode"),
     modules: str | None = typer.Option(None, "--modules", help="Module overrides as JSON or @file"),
-    ablation: list[str] | None = typer.Option(None, "--ablation", help="Repeatable A1–A6 or BIPARTITE preset"),
+    ablation: list[str] | None = typer.Option(
+        None, "--ablation", help="Repeatable A1–A6 or BIPARTITE preset"
+    ),
     allow_rule_planning: bool = typer.Option(
         False,
         "--allow-rule-planning/--no-rule-planning",
@@ -727,6 +740,7 @@ def benchmark_command(
                 source,
                 under_project(root, output),
                 ids=parse_ids(ids),
+                model=model,
                 retry_failed=retry_failed,
                 benchmark_scope=benchmark_scope,
                 planning_mode=mode,
@@ -746,6 +760,7 @@ def benchmark_command(
 @eval_app.command("score")
 def score_benchmark(
     predictions: Path,
+    benchmark_scope: str = typer.Option("full", "--benchmark-scope"),
     project: Path = typer.Option(Path.cwd(), "--project"),
     output: Path = typer.Option(Path("outputs/evaluations/scored.json"), "--output"),
     dataset: Path | None = typer.Option(None, "--dataset"),
@@ -761,6 +776,7 @@ def score_benchmark(
         predictions,
         under_project(root, output),
         allow_partial=allow_partial,
+        benchmark_scope=benchmark_scope,
         project=root,
     )
     emit({key: value for key, value in report.items() if key != "results"})

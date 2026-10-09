@@ -1,4 +1,4 @@
-"""Capability composition and candidate scoring from the selected baseline.
+"""Scoped capability dependencies and candidate scoring.
 
 Declarations build the graph; tool availability is a separate input. Semantic
 nodes may be shared, while concrete tool execution instances are never merged.
@@ -63,7 +63,12 @@ class CapabilityGraph:
         for sid, skill in self.skills.items():
             order = []
             steps = workflow_steps(skill)
-            ids = {str(step.get("id", i)): capability_id(step.get("capability_id") or step.get("capability") or step.get("operation")) for i, step in enumerate(steps)}
+            ids = {
+                str(step.get("id", i)): capability_id(
+                    step.get("capability_id") or step.get("capability") or step.get("operation")
+                )
+                for i, step in enumerate(steps)
+            }
             scoped = {}
             previous = None
             for i, step in enumerate(steps):
@@ -72,9 +77,15 @@ class CapabilityGraph:
                 order.append(cid)
                 existing = self.capabilities.get(cid, {})
                 refs = step.get("depends_on")
-                dependencies = [ids.get(str(ref), capability_id(ref)) for ref in refs] if refs is not None else ([previous] if previous else [])
+                dependencies = (
+                    [ids.get(str(ref), capability_id(ref)) for ref in refs]
+                    if refs is not None
+                    else ([previous] if previous else [])
+                )
                 if cid in scoped:
-                    raise ValueError(f"Repeated capability {cid} inside Skill {sid} needs distinct capability IDs")
+                    raise ValueError(
+                        f"Repeated capability {cid} inside Skill {sid} needs distinct capability IDs"
+                    )
                 scoped[cid] = dependencies
                 description = " ".join(
                     str(value)
@@ -100,6 +111,7 @@ class CapabilityGraph:
                 label = str((skill.get("goal") or {}).get("capability") or sid)
                 cid = capability_id(label)
                 order.append(cid)
+                scoped[cid] = []
                 self.capabilities.setdefault(
                     cid,
                     {
@@ -114,7 +126,15 @@ class CapabilityGraph:
                     },
                 )
             self.scopes[sid] = scoped
-            self.required[sid] = {ids[str(step.get("id", i))] for i, step in enumerate(steps) if step.get("required", True)} or set(order)
+            self.required[sid] = (
+                {
+                    ids[str(step.get("id", i))]
+                    for i, step in enumerate(steps)
+                    if step.get("required", True)
+                }
+                if steps
+                else set(order)
+            )
             self.edges[sid] = {
                 "skill_id": sid,
                 "capability_ids": list(dict.fromkeys(order)),
@@ -130,8 +150,11 @@ class CapabilityGraph:
         for cid, definition in definitions.items():
             if cid in self.capabilities:
                 self.capabilities[cid].update(
-                    label=cid, operation=definition["description"], description=definition["description"],
-                    input_types=list(definition["input_types"]), output_types=list(definition["output_types"]),
+                    label=cid,
+                    operation=definition["description"],
+                    description=definition["description"],
+                    input_types=list(definition["input_types"]),
+                    output_types=list(definition["output_types"]),
                 )
         for cid, node in self.capabilities.items():
             node["dependency_scopes"] = {
@@ -143,6 +166,15 @@ class CapabilityGraph:
         for sid, edge in self.edges.items():
             skill = self.skills[sid]
             fallback = [str(tool) for tool in skill.get("tool_candidates", []) if tool]
+            if not workflow_steps(skill):
+                for cid in edge["order"]:
+                    self.capability_tools[cid] = list(
+                        dict.fromkeys([*self.capability_tools[cid], *fallback])
+                    )
+                    for tool in fallback:
+                        self.tool_capabilities.setdefault(tool, [])
+                        if cid not in self.tool_capabilities[tool]:
+                            self.tool_capabilities[tool].append(cid)
             for step, cid in zip(workflow_steps(skill), edge["order"]):
                 selection = step.get("tool_selection")
                 selection = selection if isinstance(selection, dict) else {}
@@ -172,7 +204,15 @@ class CapabilityGraph:
             }
         )
 
-    def expand(self, skill_ids, query="", *, complete_missing=True, expand_predecessors=True):
+    def expand(
+        self,
+        skill_ids,
+        query="",
+        *,
+        complete_missing=True,
+        expand_predecessors=True,
+        requirements=None,
+    ):
         selected = [sid for sid in dict.fromkeys(map(str, skill_ids)) if sid in self.edges]
         active = []
         completed = []
@@ -180,6 +220,7 @@ class CapabilityGraph:
         for sid in selected:
             order = self.edges[sid]["order"]
             checked, stack = set(), set()
+
             def check_cycle(cid):
                 if cid in stack:
                     raise ValueError(f"Cyclic capability dependencies in {sid}: {cid}")
@@ -190,24 +231,23 @@ class CapabilityGraph:
                     check_cycle(dep)
                 stack.remove(cid)
                 checked.add(cid)
+
             for cid in order:
                 check_cycle(cid)
             required = self.required[sid]
-            prerequisites = {dep for cid, deps in self.scopes[sid].items() if cid in required for dep in deps}
+            prerequisites = {
+                dep for cid, deps in self.scopes[sid].items() if cid in required for dep in deps
+            }
             terminals = [cid for cid in order if cid in required and cid not in prerequisites]
             # A scope without terminal nodes still needs cycle diagnostics.
-            active.extend((sid, cid) for cid in (terminals or order))
-        if complete_missing:
-            covered = set().union(*(concept_words(self.capabilities[cid]["description"]) for _, cid in active)) if active else set()
-            for sid in selected:
-                for other in self.edges[sid]["compatible_skills"]:
-                    for cid in self.edges.get(other, {}).get("order", []):
-                        if concept_words(self.capabilities[cid]["description"]) & (requested - covered):
-                            if (other, cid) not in active:
-                                active.append((other, cid))
-                                completed.append(cid)
+            roots = terminals if requirements is None else requirements.get(sid, [])
+            for cid in roots:
+                if cid not in self.scopes[sid]:
+                    raise ValueError(f"Unknown capability selection: {sid}::{cid}")
+                active.append((sid, cid))
         missing, visiting, visited, ordered = [], set(), set(), []
         initial = set(active)
+
         def visit(key):
             sid, cid = key
             if key in visiting:
@@ -226,26 +266,87 @@ class CapabilityGraph:
             visiting.remove(key)
             visited.add(key)
             ordered.append(key)
+
         for key in active:
             visit(key)
+        if complete_missing:
+            omitted_predecessors = set()
+            if not expand_predecessors:
+
+                def mark_predecessors(sid, cid):
+                    for dep in self.scopes[sid].get(cid, []):
+                        key = (sid, dep)
+                        if key not in omitted_predecessors:
+                            omitted_predecessors.add(key)
+                            mark_predecessors(sid, dep)
+
+                for sid, cid in active:
+                    mark_predecessors(sid, cid)
+            covered = (
+                set().union(
+                    *(concept_words(self.capabilities[cid]["description"]) for _, cid in ordered)
+                )
+                if ordered
+                else set()
+            )
+            for sid in selected:
+                for other in self.edges[sid]["compatible_skills"]:
+                    if self.skills.get(other, {}).get("planning", {}).get("bridge_only"):
+                        continue
+                    for cid in self.edges.get(other, {}).get("order", []):
+                        if (other, cid) in visited:
+                            continue
+                        # Support completion must not restore the predecessor closure
+                        # disabled by an independent intervention.
+                        if (other, cid) in omitted_predecessors:
+                            continue
+                        if concept_words(self.capabilities[cid]["description"]) & (
+                            requested - covered
+                        ):
+                            initial.add((other, cid))
+                            previous_count = len(ordered)
+                            visit((other, cid))
+                            completed.append(cid)
+                            for _, added in ordered[previous_count:]:
+                                covered.update(
+                                    concept_words(self.capabilities[added]["description"])
+                                )
+        realized = {f"{sid}::{cid}" for sid, cid in ordered}
+        missing = [ref for ref in missing if ref not in realized]
         capability_ids = list(dict.fromkeys(cid for _, cid in ordered))
         nodes = []
         for cid in capability_ids:
             node = deepcopy(self.capabilities[cid])
-            node["dependencies"] = list(dict.fromkeys(
-                dep for sid, item in ordered if item == cid for dep in self.scopes[sid].get(cid, [])
-            ))
+            node["dependencies"] = list(
+                dict.fromkeys(
+                    dep
+                    for sid, item in ordered
+                    if item == cid
+                    for dep in self.scopes[sid].get(cid, [])
+                )
+            )
             nodes.append(node)
         return {
             "skill_ids": list(dict.fromkeys(sid for sid, _ in ordered)),
-            "capabilities": nodes, "capability_ids": capability_ids,
-            "instances": [{"id": f"{sid}::{cid}", "skill_id": sid, "capability_id": cid,
-                           "depends_on": [f"{sid}::{dep}" for dep in self.scopes[sid].get(cid, [])]}
-                          for sid, cid in ordered],
+            "capabilities": nodes,
+            "capability_ids": capability_ids,
+            "instances": [
+                {
+                    "id": f"{sid}::{cid}",
+                    "skill_id": sid,
+                    "capability_id": cid,
+                    "depends_on": [f"{sid}::{dep}" for dep in self.scopes[sid].get(cid, [])],
+                }
+                for sid, cid in ordered
+            ],
             "completed_capabilities": list(dict.fromkeys(completed)),
             "missing_capabilities": list(dict.fromkeys(missing)),
             "unresolved_capabilities": list(dict.fromkeys(missing)),
-            "unmatched_query_terms": sorted(requested - set().union(*(concept_words(n["description"]) for n in nodes))) if nodes else sorted(requested),
+            "unmatched_query_terms": sorted(
+                requested - set().union(*(concept_words(n["description"]) for n in nodes))
+            )
+            if nodes
+            else sorted(requested),
             "dependency_order": [f"{sid}::{cid}" for sid, cid in ordered],
             "deduplicated_count": len(ordered) - len(capability_ids),
         }

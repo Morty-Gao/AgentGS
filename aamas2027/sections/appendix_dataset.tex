@@ -1,0 +1,20 @@
+\section{Dataset Sources and Construction Records}
+\label{app:dataset-details}
+\subsection{Source-Specific Task Construction}
+Geoscientific big-data analysis includes 40 GeoQuestions1089 questions concerning physical geographic objects and spatial operations. The remote-sensing theme retains 49 tasks from Earth-Bench's 248-task collection, including source questions, choices, and answers, with calls adapted to the registered interfaces. Critical-mineral and climate-change questions are selected by theme from \nolinkurl{habitable_earth_dataset}; the underlying resources include MRDS, paleoclimate reconstructions, GISTEMP, and SSP warming summaries.
+
+Earth-structure tasks use two models and an earthquake catalog. The models are LITHO1.0 and SEMUCB-WM1; earthquake records come from USGS. Energy-resource tasks use mineral, power-facility, installed-capacity, and population data. Global ocean-carbon tasks draw on SOCAT, GLODAP, and SNAPO-CO$_2$. Deep-time biosphere tasks use BioDeepTime, carbon-storage tasks use synthetic SCCS-OFPOSDU monitoring data, and disaster-event tasks use EM-DAT records. Synthetic carbon-storage data support reproducible operations under their supplied assumptions; they do not constitute field validation of storage safety.
+
+\subsection{Evaluation Records and Provenance}
+The dataset's task representation preserves one worksheet row per evaluation record. Fields identify the question and category, question text, expected answer, reference-chain information, answer type, input resource, and answer-format requirements. Stable record identities distinguish evaluation entries even when a question appears in two themes.
+
+A source task retains its question identifier or resource locator and its reference answer. A data-derived task retains data-location information and calculations describing how the reference was obtained. Reference calls map these operational requirements to registered tools, including parameters and the relevant input/output relationships.
+
+Construction checks record completeness and correspondence between reference-call names and registered interfaces. Sample executions check data access and invocation behavior, while computational records support recalculation. These checks are recorded separately from scored agent runs, preventing a successful construction check from being counted as an agent result.
+
+\subsection{Interface Granularity and Aggregation}
+The reference sequence is defined under the tool packaging available to the evaluated agents. A task wrapper may hide several operations inside one call, while another interface exposes them separately. Consequently, invocation count measures a property of the exposed workflow rather than an intrinsic scientific complexity.
+
+Record-weighted averaging gives each of the 603 entries equal weight. A domain-balanced mean would instead give the ten themes equal weight, and a deduplicated question mean would change the treatment of repeated cross-theme questions. Those quantities answer different questions and are not interchangeable with the reported main FAS.
+
+Numerical tolerances and answer normalization belong to the answer-type-specific scorer. Process metrics do not validate those numerical decisions. Conversely, matching a reference answer does not establish that the agent produced every requested artifact or followed the intended data dependencies.

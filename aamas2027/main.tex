@@ -1,5 +1,3 @@
-% Condensed submission draft; the complete faithful translation is full.tex.
-% Source gaps and editorial decisions are listed in TRANSLATION_NOTES.zh-CN.txt.
 \documentclass[sigconf,anonymous]{aamas}
 % For the camera-ready version: \documentclass[sigconf]{aamas}
 
@@ -16,6 +14,7 @@
 
 % Visible draft placeholders; replace each item when the missing material is ready.
 \newcommand{\drafttodo}[1]{\textbf{[TODO: #1]}}
+\newcommand{\papersection}[2]{Section~\ref{#1}}
 
 % Official AAMAS 2027 copyright metadata.
 \makeatletter
@@ -64,17 +63,25 @@ on Autonomous Agents and Multiagent Systems (AAMAS 2027)}{3--7 May 2027}{Hanoi, 
 \begin{document}
 \maketitle
 
-\input{submission/introduction}
-\input{submission/related_work}
-\input{submission/method}
-\input{submission/benchmark}
-\input{submission/experiments}
-\input{submission/conclusion}
+\input{figures/fig_main}
+\input{sections/introduction}
+\input{sections/related_work}
+\input{sections/method}
+\input{sections/benchmark}
+\input{sections/results}
+\input{sections/ablation}
+\input{sections/conclusion}
 
 \FloatBarrier
 \clearpage
 \bibliographystyle{ACM-Reference-Format}
 \balance
 \bibliography{references}
+
+\clearpage
+\nobalance
+\appendix
+\input{sections/appendix}
+\FloatBarrier
 
 \end{document}

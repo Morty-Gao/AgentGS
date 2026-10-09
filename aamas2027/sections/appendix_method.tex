@@ -1,0 +1,45 @@
+\section{Detailed Completion Procedure}
+\label{app:method-details}
+This appendix specifies the branch search and acceptance conditions supporting Section~\ref{sec:completion}.
+
+\subsection{Directed Bridging with a Fixed Active Boundary}
+Suppose activated Skills $A$ and $B$ supply disconnected fragments. Let $u$ be an output-boundary capability of $A$, with no successor among its active dependencies, and $v$ an input-boundary capability of $B$, with no predecessor among its active dependencies. If inactive Skill $C$ declares $u\to m\to v$, this branch can supply intermediate capability $m$ without importing the entire Skill.
+
+The active capability set is fixed at search start. Each branch must come from a single inactive Skill and contain at least one inactive intermediate capability. Membership first identifies Skills containing both endpoints; explicit dependencies or applicable conditional-ordering relations then determine directed simple paths. Co-occurrence and list order do not establish direction. An existing indirect data path from $u$ to $v$ excludes the candidate pair; a direct connection alone does not. Newly inserted capabilities do not recursively extend the current search.
+
+Candidate branches must satisfy five checks:
+\begin{enumerate}
+\item \textbf{Direction:} each adjacent pair follows an explicit dependency or applicable conditional order.
+\item \textbf{Prerequisites:} all required predecessors belong to the fixed active set or candidate branch.
+\item \textbf{Types:} upstream outputs and downstream inputs share at least one concrete type, excluding generic labels such as \texttt{Any} and \texttt{Parameter}.
+\item \textbf{Implementations:} branch operations and required predecessors have available tools within permitted scopes. The entry and external active predecessors retain their original scopes; other branch nodes use the provider Skill's constraints.
+\item \textbf{Acyclicity:} both individual and joint insertions preserve acyclic dependencies.
+\end{enumerate}
+For each ordered endpoint pair, only a unique valid branch may be inserted automatically. Multiple candidates produce an ambiguity report and halt completion for that pair. Insertion preserves the entry instance's dependencies and tools, updates the exit's dependencies, tool scope, and bindings, and recomposes the plan. A branch is rejected if recomposition adds capabilities outside the branch or leaves mandatory dependencies unsatisfied. Algorithm~\ref{alg:bridging} summarizes the procedure.
+
+\begin{algorithm}[t]
+\caption{Directed Bridging from a Single Provider}
+\label{alg:bridging}
+\begin{algorithmic}[1]
+\Require Plan $P$ after compatibility completion; registered knowledge; available tools
+\Ensure Updated $P$ and acceptance/rejection records
+\State Return if bridging is disabled or this plan has already been searched
+\State Fix active capabilities; mark $P$ as searched
+\State Enumerate boundary pairs from different Skills; skip pairs with an indirect data path
+\State Search inactive Skills for single-provider branches satisfying the five validity checks
+\State Deduplicate by provider/path; reject ambiguous pairs; check joint acyclicity
+\State Attempt insertion, preserving entry constraints and updating exit dependencies, tools, and bindings
+\State Recompose; reject external additions or unmet mandatory dependencies
+\end{algorithmic}
+\end{algorithm}
+
+\subsection{Grounding an Accepted Branch}
+A capability-level branch must be projected onto execution instances before it can carry data. The entry and exit must identify unique instances with an order consistent with the bridge. Required operations are inserted with their scoped implementations and all conjunctive predecessor dependencies. An endpoint ambiguity is a grounding failure, not permission to choose an arbitrary occurrence.
+
+Each declared bridge input identifies an upstream instance and a projection from its observed output. Projection can select a named object field or a nonnegative array index; a declared list transformation can wrap an artifact as a list input. A producing step must succeed before the value becomes available. If the branch cannot be grounded consistently, the system rejects that projection rather than treating capability connectivity as executable data flow.
+
+\subsection{Candidate Skill Representation}
+\label{app:skill-reuse}
+A verified composition can be described as a candidate Skill containing its objective, applicable inputs, expected outputs, capability instances, data and control dependencies, permitted tools, and usage constraints. Task-specific paths and values become rebindable inputs where appropriate. Distinct occurrences remain distinct, and provenance links retain the conditions inherited from contributing strategies.
+
+Registration requires checking those declarations and assigning the candidate a strategy identity before making it available for later retrieval. The proposal reuses existing capabilities and implementations; it does not create new scientific operations. Candidate packaging and registration are an extension of the workflow representation. The reported experiments do not evaluate autonomous registration, long-term accumulation, improved coverage, or reduced planning cost.

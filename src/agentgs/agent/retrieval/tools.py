@@ -201,7 +201,11 @@ class KGToolRetriever:
             for text in fun_rel_texts
             if (match := re.search("(?<=\\(')(.*?)(?=\\',)", text))
         }
-        domain_seeds = self._domain_seed_tools(query_bundle.query_str, available_tools)
+        domain_seeds = (
+            self._domain_seed_tools(query_bundle.query_str, available_tools)
+            if getattr(query_bundle, "routing_hints", True)
+            else []
+        )
         if domain_seeds:
             existing_pairs = list(zip(tool_retrieved, similarities))
             seed_score = max([abs(score) for score in similarities] + [1.0]) * 2.0
@@ -448,15 +452,12 @@ class KGToolRetriever:
         }
 
     @classmethod
-    def from_directory(cls, folder, embed_model):
+    def from_directory(cls, folder, embed_model, relation_vectors):
         folder = Path(folder)
-        stored = json.loads((folder / "index_store.json").read_text())
-        values = list(stored["index_store/data"].values())
-        record = next(value for value in values if value.get("__type__") == "kg")
-        index = (
-            json.loads(record["__data__"])
-            if isinstance(record["__data__"], str)
-            else record["__data__"]
-        )
-        graph = json.loads((folder / "graph_store.json").read_text())["graph_dict"]
-        return cls(index["embedding_dict"], graph, embed_model)
+        graph_path = folder / "graph_store.json"
+        if not graph_path.is_file():
+            raise FileNotFoundError(f"Frozen tool graph is missing: {graph_path}")
+        if not relation_vectors:
+            raise FileNotFoundError("Prepared tool relation embeddings are missing")
+        graph = json.loads(graph_path.read_text(encoding="utf-8"))["graph_dict"]
+        return cls(relation_vectors, graph, embed_model)

@@ -249,7 +249,8 @@ def test_generated_data_are_ignored_and_original_assets_remain_visible():
         "data/geotooleval.jsonl",
         "data/biodeeptime/zones.geojson",
         "data/hazard.jsonl",
-        "data/geotoolkg/index_store.json",
+        "embedding/tools.npz",
+        "embedding/questions.npz",
         "data/metadata/geotooleval.json",
     ]
     for original in originals:

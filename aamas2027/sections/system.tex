@@ -1,25 +1,28 @@
-\section{System Architecture and Implementation}
+\section{System Architecture and Execution Details}
 \label{sec:system}
-A task can require not only statistical and comparison tools but also propagation of statistics to later operations. AgentGS integrates the planning and completion methods of \papersection{sec:method}{3} into an interactive system. The frontend receives questions and task resources; plans, invocation records, and feedback are retained during execution, making the processing underlying an answer available for inspection.
-
-\subsection{Overall Architecture}
-\label{sec:architecture}
-Figure~\ref{fig:architecture} shows four components: an interactive frontend, an agent orchestration service, knowledge and capability resources, and a tool execution service. Users submit natural-language questions and resources through the frontend. Orchestration retrieves Skills, organizes capabilities and dependencies, completes missing operations, and forms a capability plan. Knowledge and capability resources supply strategies, capability-to-tool mappings, and tool associations. Concrete tools are invoked by the execution service through a unified interface.
-
-After planning, orchestration selects tools satisfying each capability instance's constraints and delegates calls to execution. The execution service accesses interfaces by tool identifier, supplies parameters and resources, and returns results or failure information. Orchestration decides whether to continue or handle failure under \papersection{sec:execution}{3.5}. Answers and feedback return to the frontend, connecting planning, execution, and result presentation within one task.
+AgentGS implements the method through an interactive frontend, an orchestration service, registered knowledge resources, and a tool execution service (Figure~\ref{fig:architecture}). This appendix describes how the plan in \papersection{sec:method}{3} becomes an inspectable sequence of calls.
 \input{figures/fig_architecture}
 
-\subsection{Tool Integration and Data Propagation}
-\label{sec:tool-integration}
-The system separately maintains strategy operation definitions, capability-to-tool mappings, and invocation interfaces. Integrating a tool registers its function, parameters, and input/output information and associates it with Capabilities. The containing Skill constrains prerequisites and candidate tools. Task-specific selection checks functional matching, instance constraints, and interface compatibility with the current inputs.
+\subsection{Separation of Planning and Execution}
+The frontend accepts questions and resources and displays the returned answer and execution records. Orchestration retrieves strategies and tools, prepares capability requirements, invokes model planning, and validates the resulting instances. Knowledge resources provide Skill declarations, capability mappings, and tool descriptions. The execution service invokes a registered interface and returns its observed output or failure.
 
-Correct use of preceding results depends on binding parameters to artifacts actually generated. Intermediate artifacts retain their types and provenance, including the generating tool, step, and metadata. Artifact references bind files or results to later parameters. For example, statistics receives the target raster, and comparison receives the value from that statistical operation. File inputs and numerical inputs are bound separately, avoiding reliance solely on natural-language data descriptions and preserving provenance in execution records.
+This separation allows planning to reason over declared operations while execution operates on concrete argument objects. Descriptive similarity between two tools does not by itself authorize substitution: the capability occurrence's scope and the selected interface schema still apply.
 
-On failure, preceding successful steps and results are retained, and retry rules and instance constraints govern the failed call. Parameters, return states, and recovery attempts are stored to trace propagation and locate failures. Attempt limits, substitution scopes, and conditions prohibiting automatic replay are given in \papersection{sec:execution}{3.5}.
+\subsection{Execution Instances and Input Bindings}
+An execution step records its identity, tool, purpose, predecessor identities, literal arguments, and upstream input bindings. Optional Skill and Capability identifiers establish its declared scope. Unknown or forward dependencies and duplicate instance identities are rejected before execution.
 
-\subsection{Interactive Interface and Process Inspection}
-\label{sec:interface}
-The frontend supports task dialogue, tool-graph browsing, and configuration management. After receiving an answer, users can expand the records in Figure~\ref{fig:interface} to inspect plans, invocation inputs and outputs, execution states, attempt counts, and explanations. These records help check whether a tool read the intended file and whether later steps used the corresponding upstream outputs. Questions, answers, and traces are retained in history for retrospective analysis.
+A binding names a producing instance and a path into its observed structured output. The consumer receives the resolved value rather than an unverified description of what the producer was expected to return. Explicit references remain authoritative when arguments are repaired. This prevents a failed or inappropriate argument from being silently replaced with a convenient unrelated value.
 
-The graph interface shows GeoToolKG tools as nodes and recommended transitions as edges. Selecting a node reveals its function, inputs, outputs, provenance, and recommended successors. Edges provide retrieval and workflow-understanding cues; the capability plan, instance constraints, and execution conditions determine whether those transitions are used in a specific task.
-\input{figures/interface}
+Artifacts additionally retain provenance such as the producing step and tool. File and scalar bindings are validated according to their expected inputs. An operation on the wrong artifact may still execute successfully, which is why invocation success and reference-answer correctness are tracked separately.
+
+\subsection{Recovery and Reuse Boundaries}
+When execution recovery is enabled, the runtime can use failure feedback for argument correction and another plan attempt under configured limits. Initial model-plan repair, protocol repair, transport retries, and scientific tool retries have separate counters and scopes. Exhausting a communication budget does not establish that a scientific computation has been safely replayed.
+
+A result can be reused across plan attempts only when the instance has unchanged semantics, fully specified inputs, and verified upstream reuse identities. The current runtime permits this for an explicit set of pure scalar computations. File-backed, implicit-input, and external-data operations are rerun rather than assumed unchanged. Matching tool names or retaining the same position in a chain is insufficient to establish reuse.
+
+With execution recovery disabled, the first failed scientific execution ends that chain and answer generation reports incomplete work. Initial argument construction and validation remain available, so the intervention targets reaction to observed failure rather than removal of ordinary execution checks.
+
+\subsection{Knowledge Integration and Process Inspection}
+Integrating a tool registers its identifier, parameter schema, and input/output information, then associates it with relevant capabilities. A Skill supplies the strategy-specific dependency and implementation constraints. Runtime selection checks those declarations together with tool availability and the task's concrete inputs.
+
+The interface exposes plans, invocation inputs and outputs, execution states, and failure feedback. Tool-graph browsing presents registered tools and associations as retrieval and inspection aids. These associations do not supersede capability dependencies or establish valid argument flow. Retained histories make it possible to inspect whether the intended file was read, whether the correct upstream value was consumed, and which attempts contributed to the final answer.

@@ -122,7 +122,7 @@ async def test_module_combinations_are_recorded_and_isolate_resume(benchmark_pro
         assert record.spec.input.ablations == ["A2", "A3"]
         assert record.spec.input.modules.execution_recovery is False
     resumed = Service(root)
-    await run_benchmark(resumed, dataset, output, ablations=["A2", "A3"], modules={"execution_recovery": False})
+    await run_benchmark(resumed, dataset, output, ablations=["A3", "A2", "A3"], modules={"execution_recovery": False})
     assert not resumed.records
     with pytest.raises(ValueError, match="protocol differ"):
         await run_benchmark(Service(root), dataset, output, ablations=["A2", "A4"])
@@ -150,7 +150,9 @@ async def test_tool_ablation_protocol_records_effective_overrides(benchmark_proj
     assert effective["planning_mode"] == "tool_only"
     assert effective["allow_rule_planning"] is False and effective["shared_bridge"] is False
     assert effective["plan_attempts"] == 2 and effective["tool_attempts"] == 1
-    assert set(protocol["planning_resources_sha256"]) == {"tool_catalog", "tool_scope"}
+    resources = protocol["planning_resources_sha256"]
+    assert {"contracts/catalog.json", "contracts/tool_scope.json"} <= set(resources)
+    assert not any(name.startswith("skills/") for name in resources)
     assert "require_llm" not in protocol and "require_llm" not in effective
     for record in service.records.values():
         request = record.spec.input
@@ -182,7 +184,7 @@ async def test_data_only_protocol_records_mounts_and_answer_metric(benchmark_pro
     assert protocol["primary_metric"] == "fas"
     assert protocol["tool_match"] == "not_applicable"
     assert protocol["data_mounts_sha256"]
-    assert "skill_definitions" not in protocol["planning_resources_sha256"]
+    assert not any(name.startswith("skills/") for name in protocol["planning_resources_sha256"])
     effective = protocol["effective_algorithm"]
     assert effective["planning_mode"] == "data_only"
     assert effective["allow_rule_planning"] is False

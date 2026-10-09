@@ -1,0 +1,56 @@
+{
+  "name": "module-mechanism-study",
+  "selection": {
+    "size": 60,
+    "per_domain": 6,
+    "single_step_controls_per_mixed_domain": 1,
+    "long_chains_per_domain": 3,
+    "policy": "purposeful_domain_chain_mechanism_coverage"
+  },
+  "repetitions": 3,
+  "schedule_seed": 20261009,
+  "bootstrap_seed": 20261010,
+  "bootstrap_samples": 5000,
+  "primary_metric": "domain_macro_fas",
+  "common_task": {
+    "planning_mode": "skill_guided",
+    "allow_rule_planning": false,
+    "candidate_pool": "all_registered",
+    "routing_hints": true,
+    "binding_assistance": true,
+    "bridge_diagnostics": false,
+    "plan_attempts": 3,
+    "tool_attempts": 3,
+    "max_model_calls": 64,
+    "max_total_tokens": 262144
+  },
+  "runtime": {
+    "max_concurrent_tasks": 2,
+    "max_concurrent_model_calls": 4,
+    "max_concurrent_tool_calls": 4,
+    "default_timeout_seconds": 1800,
+    "model_timeout_seconds": 600,
+    "tool_timeout_seconds": 120,
+    "default_rss_limit_mb": 1024,
+    "max_total_rss_mb": 4096
+  },
+  "outer_retries": 0,
+  "cells": [
+    {"id": "Full", "suite": "primary", "ablations": [], "role": "reference"},
+    {"id": "A1", "suite": "primary", "ablations": ["A1"], "role": "flat_representation_control"},
+    {"id": "A2", "suite": "primary", "ablations": ["A2"], "role": "predecessor_compensation_control"},
+    {"id": "A3", "suite": "primary", "ablations": ["A3"], "role": "support_insertion_intervention"},
+    {"id": "A4", "suite": "conditional", "ablations": ["A4"], "role": "requires_real_bridge_activation"},
+    {"id": "A5", "suite": "primary", "ablations": ["A5"], "role": "fixed_order_tool_selection"},
+    {"id": "A6", "suite": "primary", "ablations": ["A6"], "role": "execution_recovery_intervention"},
+    {"id": "BIPARTITE", "suite": "primary", "ablations": ["BIPARTITE"], "role": "incidence_representation_control"},
+    {"id": "A2_A3", "suite": "interaction", "ablations": ["A2", "A3"], "role": "predecessors_without_completion"},
+    {"id": "A3_A6", "suite": "interaction", "ablations": ["A3", "A6"], "role": "completion_recovery_interaction"},
+    {"id": "A5_A6", "suite": "interaction", "ablations": ["A5", "A6"], "role": "selection_recovery_interaction"}
+  ],
+  "interactions": [
+    ["A2", "A3", "A2_A3"],
+    ["A3", "A6", "A3_A6"],
+    ["A5", "A6", "A5_A6"]
+  ]
+}

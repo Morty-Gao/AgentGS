@@ -32,6 +32,7 @@ class StagePrompt:
     instruction: str
     context: dict = field(default_factory=dict)
 
+
 MODE_INSTRUCTIONS = {
     "skill_guided": "Use the supplied Skill/Capability context to plan and execute scientific tools.",
     "tool_only": "Plan directly over the supplied scientific tools and their input/output contracts.",
@@ -69,12 +70,25 @@ def task_context(question, instruction, *, input_resource=None, output_contract=
     )
 
 
+def budget_exhausted_instruction(kind: str) -> str:
+    subject = "bash command budget" if kind == "bash" else "tool execution budget"
+    return (
+        f"The {subject} is exhausted. Do not call tools or bash. "
+        "Give the final answer now from the observations already collected. "
+        "State missing values explicitly instead of inventing them."
+    )
+
+
 def tool_feedback(raw, instruction=None, stage=None):
     result = "<tool-result>\n" + escape(str(raw), quote=False) + "\n</tool-result>"
     if instruction is not None:
         prompt = instruction if isinstance(instruction, StagePrompt) else StagePrompt(instruction)
         if prompt.context:
-            result += "\n\n<runtime-context>\n" + escape(json.dumps(prompt.context, ensure_ascii=False), quote=False) + "\n</runtime-context>"
+            result += (
+                "\n\n<runtime-context>\n"
+                + escape(json.dumps(prompt.context, ensure_ascii=False), quote=False)
+                + "\n</runtime-context>"
+            )
         result += (
             "\n\n<system-reminder>\nStage: "
             + stage

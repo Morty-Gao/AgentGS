@@ -1,5 +1,5 @@
 {
-  "policy": "Keep the 101 tools from the previous GeoEval catalog and their related Skills and Capabilities. Do not switch the algorithm source baseline to another delivery copy.",
+  "policy": "Scientific strategies and authored compositions over the registered 101 GeoToolEval tools.",
   "skill_ids": [
     "deep-earth-model-query",
     "earthquake-catalog-analysis",
@@ -24,7 +24,10 @@
     "remote-sensing-raster-statistics",
     "remote-sensing-change-detection",
     "remote-sensing-trend-distribution",
-    "natural-hazard-table-analytics"
+    "natural-hazard-table-analytics",
+    "hazard-table-loading",
+    "hazard-subset-counting",
+    "hazard-filtered-count"
   ],
   "capability_ids": [
     "model-query",
@@ -57,7 +60,10 @@
     "hotspot",
     "time-series",
     "table-preparation",
-    "event-aggregation"
+    "event-aggregation",
+    "hazard-table-source",
+    "hazard-subset-count",
+    "hazard-subset-filter"
   ],
   "excluded_skill_ids": [
     "geodesic-coordinate-analysis",

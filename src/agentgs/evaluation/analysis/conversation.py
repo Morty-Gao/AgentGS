@@ -34,7 +34,7 @@ def tool_executions(value) -> list[dict[str, Any]]:
             if message.role == "assistant"
             for call in message.tool_calls
         )
-        if call.function.name != "submit_tool_plan"
+        if call.function.name not in {"submit_tool_plan", "select_capabilities"}
     }
     # Event annotations can contain historical tool_call-shaped payloads. Only
     # assistant/tool message pairs establish an actual invocation.
