@@ -10,6 +10,9 @@ import json
 import re
 from dataclasses import asdict, dataclass
 from typing import Any, Awaitable, Callable, Sequence
+from uuid import uuid4
+
+from agentgs.messages import Conversation
 
 INVALID_INPUT = re.compile(
     "^\\s*(?:input\\s+error|invalid\\s+input|parameter\\s+error|输入错误|参数错误)\\s*[:：]", re.I
@@ -32,7 +35,7 @@ class ExecutionFeedback:
     def as_dict(self):
         return asdict(self)
 
-    def to_trace(self, *, tool_name: str, attempt: int, max_attempts: int) -> dict:
+    def to_event(self, *, tool_name: str, attempt: int, max_attempts: int) -> dict:
         return {
             "type": "execution_feedback",
             "tool_name": tool_name,
@@ -181,6 +184,18 @@ class ToolExecutionResult:
         return f"\n\nTool **{self.tool_name}** failed after {len(self.attempts)} attempts.\nExecution feedback: {self.final_feedback.summary}\nLast tool output: {self.output}"
 
 
+@dataclass(frozen=True)
+class PreparedToolCall:
+    """An original native call plus the arguments resolved by the framework.
+
+    Missing calls and malformed arguments produce feedback without inventing an
+    assistant call. Runtime-only calls use the string adapter below.
+    """
+    call_id: str | None
+    tool_input: str
+    error_output: str | None = None
+
+
 async def run_tool_with_feedback(
     *,
     tool_name: str,
@@ -189,37 +204,48 @@ async def run_tool_with_feedback(
     tool_runner: ToolRunner,
     input_format: str = "",
     max_attempts: int = 3,
-    trace_list: list | None = None,
+    messages: Conversation | None = None,
+    checkpoint: Callable | None = None,
     producer_step: str = "",
 ) -> ToolExecutionResult:
     """Execute, assess, and (when possible) repair one tool call."""
     max_attempts = max(1, int(max_attempts))
     attempts: list[ToolAttempt] = []
     for attempt_number in range(1, max_attempts + 1):
-        tool_input = str(await input_provider(attempt_number, tuple(attempts))).strip()
+        supplied = await input_provider(attempt_number, tuple(attempts))
+        native = supplied if isinstance(supplied, PreparedToolCall) else None
+        tool_input = native.tool_input if native else str(supplied).strip()
         from contextlib import nullcontext
 
         from agentgs.agent.execution import scope as migration
         from agentgs.agent.execution.references import binding_error_response
 
-        binding_error = binding_error_response(tool_input)
+        binding_error = native.error_output if native and native.error_output else binding_error_response(tool_input)
         call_context = (
-            migration.call_scope()
+            migration.call_scope(native.call_id if native else None)
             if migration.active() and binding_error is None
             else nullcontext()
         )
         identity = {}
         produced_records = []
+        message_call_id = native.call_id if native else uuid4().hex
         try:
             with call_context as call_id:
                 if call_id:
                     identity = {"request_id": migration.current_request_id(), "call_id": call_id}
+                    if native is None:
+                        message_call_id = call_id
+                if messages is not None and native is None:
+                    messages.begin_tool(tool_name, tool_input, call_id=message_call_id)
+                    if checkpoint is not None:
+                        checkpoint()
                 try:
-                    raw_output = (
-                        binding_error
-                        if binding_error is not None
-                        else await tool_runner(tool_name, tool_input, file_path_list)
-                    )
+                    if binding_error is not None:
+                        raw_output = binding_error
+                    elif native:
+                        raw_output = await tool_runner(tool_name, tool_input, file_path_list, call_id=message_call_id)
+                    else:
+                        raw_output = await tool_runner(tool_name, tool_input, file_path_list)
                 except Exception as exc:
                     raw_output = f"Tool function execution error, {type(exc).__name__}: {exc}"
                 registry = migration.current_registry()
@@ -242,13 +268,13 @@ async def run_tool_with_feedback(
                             },
                         )
                     except Exception as exc:
-                        if trace_list is not None:
-                            trace_list.append(
+                        if messages is not None:
+                            messages.record_event(
+                                "artifact_provenance_error",
                                 {
-                                    "type": "artifact_provenance_error",
                                     **identity,
                                     "error_type": type(exc).__name__,
-                                }
+                                },
                             )
         except Exception as exc:
             raw_output = f"Tool function execution error, {type(exc).__name__}: {exc}"
@@ -266,31 +292,31 @@ async def run_tool_with_feedback(
             feedback=feedback,
         )
         attempts.append(record)
-        if trace_list is not None:
-            trace_list.append(
-                {
-                    "type": "tool_call" if feedback.status == "passed" else "tool_retry",
-                    "tool_name": tool_name,
-                    "tool_input": tool_input,
-                    "tool_output": tool_output,
-                    "attempt": attempt_number,
-                    "status": "success" if feedback.status == "passed" else feedback.status,
-                    **identity,
-                }
+        if messages is not None:
+            metadata = {
+                "attempt": attempt_number,
+                "status": "success" if feedback.status == "passed" else feedback.status,
+                **{key: value for key, value in identity.items() if key != "call_id"},
+            }
+            if message_call_id is not None:
+                if native:
+                    metadata["tool_input"] = tool_input
+                    metadata["argument_source"] = "native_function_call"
+                messages.finish_tool(message_call_id, tool_output, **metadata)
+            event = feedback.to_event(
+                tool_name=tool_name, attempt=attempt_number, max_attempts=max_attempts
             )
-            trace_list.append(
-                feedback.to_trace(
-                    tool_name=tool_name, attempt=attempt_number, max_attempts=max_attempts
+            messages.record_event(event.pop("type"), event)
+            if produced_records:
+                messages.record_event(
+                    "artifact_production",
+                    {
+                        **identity,
+                        "artifacts": [record.as_dict() for record in produced_records],
+                    },
                 )
-            )
-        if trace_list is not None and produced_records:
-            trace_list.append(
-                {
-                    "type": "artifact_production",
-                    **identity,
-                    "artifacts": [record.as_dict() for record in produced_records],
-                }
-            )
+            if checkpoint is not None:
+                checkpoint()
         if feedback.status == "passed":
             return ToolExecutionResult(
                 tool_name=tool_name,
@@ -308,7 +334,7 @@ async def run_tool_with_feedback(
     )
 
 
-InputProvider = Callable[[int, Sequence[ToolAttempt]], Awaitable[str]]
+InputProvider = Callable[[int, Sequence[ToolAttempt]], Awaitable[str | PreparedToolCall]]
 ToolRunner = Callable[[str, str, list], Awaitable[Any]]
 
 _stringify_output = stringify

@@ -10,14 +10,15 @@ import io
 import json
 import re
 from collections import Counter
-from importlib.resources import files
 from typing import Any
+
+from agentgs.datasets.references import load_reference
 
 SNAPSHOT_RESOURCE = "processed/geobigdata_snapshot.json"
 
 
 def snapshot_profile():
-    return json.loads(files("agentgs.datasets").joinpath("geoquestions_snapshot.json").read_text())
+    return load_reference("geoquestions/profile.json")
 
 
 def prepare_snapshot(questions: dict, answers: dict) -> list[dict]:
@@ -54,9 +55,25 @@ def load_snapshot(datasets):
     content = datasets.resolve("geoquestions1089", SNAPSHOT_RESOURCE).read_bytes()
     profile = snapshot_profile()
     actual_hash = hashlib.sha256(content).hexdigest()
-    if actual_hash != profile["snapshot_sha256"]:
-        raise ValueError("GeoQuestions snapshot hash differs; run prepare_geoquestions.py")
-    rows = json.loads(content)
+    try:
+        manifest = json.loads(
+            datasets.resolve("geoquestions1089", "processed/manifest.json").read_text()
+        )
+    except FileNotFoundError:
+        manifest = {}
+    expected = manifest.get("outputs", {}).get("queries.jsonl")
+    if expected is None:
+        expected = manifest.get("outputs", {}).get(
+            "geobigdata_snapshot.json", profile["snapshot_sha256"]
+        )
+    if actual_hash != expected:
+        raise ValueError(
+            "GeoQuestions data hash differs; run scripts/prepare/prepare_geoquestions.py"
+        )
+    if content.lstrip().startswith(b"["):
+        rows = json.loads(content)
+    else:
+        rows = [json.loads(line) for line in content.decode("utf-8").splitlines() if line.strip()]
     if [row["source_id"] for row in rows] != profile["source_ids"]:
         raise ValueError("GeoQuestions snapshot coverage differs from the pinned 40 records")
     return rows, actual_hash

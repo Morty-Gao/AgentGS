@@ -1,4 +1,7 @@
+"""Shared Skill contracts and the base implementation for packaged prompts."""
+
 from dataclasses import dataclass
+from importlib.resources import files
 from typing import Protocol
 
 from pydantic import Field
@@ -55,12 +58,10 @@ class PromptSkill:
             raise ValueError(f"Tool {call.tool} is outside Skill {self.spec.id}")
         return await context.tools.execute(call)
 
-    def prompt(self):
-        from importlib.resources import files
-
+    def prompt(self) -> str:
         return files(self.__class__.__module__.rsplit(".", 1)[0]).joinpath("prompt.md").read_text()
 
-    def validate_tools(self, names):
+    def validate_tools(self, names: set[str]) -> None:
         missing = set(self.spec.tools) - names
         if missing:
             raise ValueError(f"Missing skill tools: {sorted(missing)}")

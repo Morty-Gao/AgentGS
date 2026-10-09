@@ -20,5 +20,7 @@ def within(root: Path, relative: str) -> Path:
 
 def data_resource(root: Path, relative: str) -> Path:
     """Resolve inside the declared data root, including a linked local data bundle."""
-    path = Path(relative).relative_to("data")
-    return within(root / "data", str(path))
+    from agentgs.datasets.layout import prepared_locator, prepared_path
+
+    path = Path(prepared_locator(relative)).relative_to("data")
+    return prepared_path(root, str(path))

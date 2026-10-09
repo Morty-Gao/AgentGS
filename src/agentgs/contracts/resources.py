@@ -3,12 +3,15 @@
 from contextlib import contextmanager
 from contextvars import ContextVar
 from pathlib import Path
-from typing import Callable
+from typing import Any, Callable, Iterator
 
-_resolver = ContextVar("agent_resource_resolver", default=None)
+ResourceResolver = Callable[[Any], Path | None]
+
+_resolver: ContextVar[ResourceResolver | None] = ContextVar("agent_resource_resolver", default=None)
 
 
-def resolve_resource_path(value):
+def resolve_resource_path(value: Any) -> Path | None:
+    """Resolve through the injected adapter, or an existing local path."""
     resolver = _resolver.get()
     try:
         if resolver is not None:
@@ -20,7 +23,8 @@ def resolve_resource_path(value):
 
 
 @contextmanager
-def resource_access(resolver: Callable):
+def resource_access(resolver: ResourceResolver | None) -> Iterator[None]:
+    """Install a resolver for this context, restoring it on normal or error exit."""
     token = _resolver.set(resolver)
     try:
         yield

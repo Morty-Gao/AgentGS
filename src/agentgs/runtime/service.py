@@ -5,7 +5,7 @@ import sys
 import time
 from pathlib import Path
 
-from agentgs.config.settings import load_runtime
+from agentgs.config.settings import RuntimeSettings
 from agentgs.contracts.models import (
     TERMINAL,
     AgentResult,
@@ -21,12 +21,27 @@ from agentgs.runtime.storage.store import TaskStore
 class TaskService:
     def __init__(self, root: Path, settings=None):
         self.root = root.resolve()
-        self.settings = settings or load_runtime(root)
+        self.settings = settings or RuntimeSettings()
         self.store = TaskStore(root / "outputs" / "runtime")
         self.semaphore = asyncio.Semaphore(self.settings.max_concurrent_tasks)
         self.jobs = {}
         self.processes = {}
         self.closed = False
+        self._rss_snapshot = {}
+        self._rss_snapshot_at = 0.0
+
+    def _memory_usage(self, pid):
+        now = time.monotonic()
+        if now - self._rss_snapshot_at >= 0.05:
+            self._rss_snapshot = {p.pid: tree_rss(p.pid) for p in self.processes.values()}
+            self._rss_snapshot_at = time.monotonic()
+        elif pid not in self._rss_snapshot:
+            self._rss_snapshot[pid] = tree_rss(pid)
+        # Share one process-tree scan per watchdog interval across all workers.
+        active = {p.pid for p in self.processes.values()}
+        return self._rss_snapshot.get(pid, 0), sum(
+            rss for worker_pid, rss in self._rss_snapshot.items() if worker_pid in active
+        )
 
     def submit(self, task_input, **limits):
         if self.closed:
@@ -113,7 +128,8 @@ class TaskService:
                 interpreter = sys.executable
                 reproduction = self.root / "tools/envs/reproduction/bin/python"
                 if self.settings.worker_python:
-                    selected = (self.root / self.settings.worker_python).resolve()
+                    # Keep the virtualenv executable path; resolving its symlink loses the env.
+                    selected = (self.root / self.settings.worker_python).absolute()
                     if not selected.is_file():
                         raise FileNotFoundError(
                             f"Configured worker interpreter missing: {selected}"
@@ -156,9 +172,8 @@ class TaskService:
                     reader = asyncio.create_task(consume())
                     started = time.monotonic()
                     while process.returncode is None:
-                        rss = tree_rss(process.pid)
+                        rss, total = self._memory_usage(process.pid)
                         record.peak_rss_bytes = max(record.peak_rss_bytes, rss)
-                        total = sum(tree_rss(p.pid) for p in self.processes.values())
                         if (
                             rss > spec.rss_limit_mb * 1024 * 1024
                             or total > self.settings.max_total_rss_mb * 1024 * 1024
@@ -198,7 +213,7 @@ class TaskService:
                         record.status = TaskStatus.FAILED
                         record.error = ToolError(
                             code="task_incomplete",
-                            message="Algorithm returned Not Completed; answer and trace are preserved",
+                            message="Algorithm returned Not Completed; answer and messages are preserved",
                         )
                 else:
                     path = work / "error.json"

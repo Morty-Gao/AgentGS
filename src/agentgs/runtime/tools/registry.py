@@ -5,6 +5,7 @@ from typing import Callable
 from pydantic import Field
 
 from agentgs.contracts.models import Model, ToolSpec
+from agentgs.contracts.tool_inputs import tool_input_models
 from agentgs.runtime.tools.domains.geosparql import SnapshotQuery, replay_query
 from agentgs.skills.definitions import load_tool_scope
 
@@ -22,23 +23,20 @@ class RegisteredTool:
 
 
 def builtin_tools():
-    from typing import Any
-
-    from pydantic import RootModel
-
     from agentgs.contracts.catalog import load_catalog
     from agentgs.runtime.tools.dispatch import execute_domain
 
-    class Arguments(RootModel[dict[str, Any]]):
-        pass
-
     allowed = set(load_tool_scope()["tool_ids"])
+    models = dict(tool_input_models())
+    models["GeoBigDataExecuteGeoSPARQL"] = SnapshotQuery
+    if set(models) != allowed:
+        raise RuntimeError(f"Tool argument coverage mismatch: {set(models) ^ allowed}")
     result = {}
     for row in load_catalog()["specs"]:
         name = row["Name"]
         if name not in allowed:
             continue
-        schema = SnapshotQuery if name == "GeoBigDataExecuteGeoSPARQL" else Arguments
+        schema = models[name]
         lookup = name.startswith(
             ("DeepEarthQueryLITHO", "DeepEarthQuerySEMUCB", "DeepEarthSample")
         ) or name in {
@@ -62,8 +60,8 @@ def builtin_tools():
                 description=row["Function"],
                 input_schema=schema.model_json_schema(),
                 category=row["Category"],
-                legacy_input=row["Input"],
-                legacy_output=row["Output"],
+                input_description=row["Input"],
+                output_description=row["Output"],
             ),
             schema,
             replay_query if name == "GeoBigDataExecuteGeoSPARQL" else partial(execute_domain, name),

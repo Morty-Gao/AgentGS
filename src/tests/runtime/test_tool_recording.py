@@ -58,6 +58,7 @@ async def test_empty_catalog_arguments_use_the_legacy_count_contract(project):
     "relative",
     [
         "geotooleval/GeoToolEval.xlsx",
+        "geotooleval/GeoToolEval.jsonl",
         "geotooleval/release_v1_1/rescore_and_replay.json",
         "answer_formats/format.jsonl",
         "geoquestions1089/GeoQuestions1089_answers.json",

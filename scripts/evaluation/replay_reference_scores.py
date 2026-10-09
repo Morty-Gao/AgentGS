@@ -6,7 +6,7 @@ from pathlib import Path
 
 from agentgs.evaluation.benchmark import write_json
 from agentgs.evaluation.datasets.geotooleval import load_tasks
-from agentgs.evaluation.datasets.version import benchmark_workbook
+from agentgs.evaluation.datasets.version import benchmark_dataset
 from agentgs.evaluation.metrics.compatibility import score_compatible
 
 
@@ -17,7 +17,7 @@ def main():
         "--output", type=Path, default=root / "outputs/verification/reference_scores.json"
     )
     args = parser.parse_args()
-    tasks = {t.question_id: t for t in load_tasks(benchmark_workbook(root))}
+    tasks = {t.question_id: t for t in load_tasks(benchmark_dataset(root))}
     formats = {
         row["question_id"]: row["answer_format"]
         for row in (

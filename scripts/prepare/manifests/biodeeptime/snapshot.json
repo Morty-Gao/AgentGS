@@ -1,0 +1,8 @@
+{
+  "archive_sha256": "adbd15ccf4744d0557145bed94e7dc959f508bbdd0906d813c41628baab101fc",
+  "files": {
+    "biodeeptime_geospatial_subset.csv": "5c32105ed21c81b4c45b6febd3a361c51a411f14635edac72af19bfa47d03bff",
+    "biodeeptime_series_summary.csv": "f81baa4a79aa33e57145e8415b0b64d419c00b58d678f6cbb37976af039848da",
+    "deep_time_analysis_zones.geojson": "aa6f394f1b70acaab697f5b83e1fa0a451e049b5f8b1f9dbd7fed8a8a4f1fcbd"
+  }
+}

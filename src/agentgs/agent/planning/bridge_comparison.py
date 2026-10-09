@@ -13,6 +13,7 @@ from uuid import uuid4
 from agentgs.agent.execution.artifacts import ArtifactRegistry
 from agentgs.agent.execution.feedback import run_tool_with_feedback
 from agentgs.agent.planning.bridge import _project
+from agentgs.messages import Conversation
 
 SAFE_OPERANDS = {
     "RemoteSensingMean": {"x"},
@@ -46,12 +47,12 @@ def _safe_parameters(name, params):
         raise NotComparable("secondary_call_requires_only_finite_numeric_parameters")
 
 
-async def run_shared_bridge_comparisons(state, *, tool_runner, file_path_list=(), trace_list=None):
+async def run_shared_bridge_comparisons(state, *, tool_runner, file_path_list=(), messages=None):
     """Reuse the successful prefix and run only the direct numerical endpoint once.
 
     Each callback receives only deep-copied numeric parameters and file context.
     No main artifact registry, output list, result list, or mutable Plan is shared.
-    Secondary tool_call events remain nested in the comparison's branch trace.
+    Secondary tool_call events remain nested in the comparison's branch message log.
     """
     if not state:
         return []
@@ -69,7 +70,7 @@ async def run_shared_bridge_comparisons(state, *, tool_runner, file_path_list=()
             "status": "incomparable",
             "main_path": "declared_bridge",
             "direct_invocation_count": 0,
-            "branch_trace": [],
+            "messages": [],
             "scientific_equivalence": "not_established",
         }
         try:
@@ -109,7 +110,7 @@ async def run_shared_bridge_comparisons(state, *, tool_runner, file_path_list=()
                 state["prefix_artifacts"].get(indices[0], ArtifactRegistry())
             )
             branch_file_paths = deepcopy(list(file_path_list))
-            branch_trace = record["branch_trace"]
+            branch_messages = Conversation()
             record.update(
                 tool_name=name,
                 declared_input=deepcopy(declared),
@@ -130,8 +131,9 @@ async def run_shared_bridge_comparisons(state, *, tool_runner, file_path_list=()
                 input_provider=fixed_input,
                 tool_runner=tool_runner,
                 max_attempts=1,
-                trace_list=branch_trace,
+                messages=branch_messages,
             )
+            record["messages"] = branch_messages.model_dump(mode="json")["messages"]
             record["direct_output"] = deepcopy(result.output)
             if not result.succeeded:
                 record.update(status="failed", reason="direct_endpoint_did_not_succeed")
@@ -147,10 +149,8 @@ async def run_shared_bridge_comparisons(state, *, tool_runner, file_path_list=()
         except Exception as exc:
             record.update(status="failed", reason=f"comparison_error:{type(exc).__name__}")
         state["comparisons"].append(record)
-        if trace_list is not None:
-            trace_list.append(
-                {"type": "shared_bridge_path_comparison", "content": deepcopy(record)}
-            )
+        if messages is not None:
+            messages.record_event("shared_bridge_path_comparison", {"content": deepcopy(record)})
     return deepcopy(state["comparisons"])
 
 

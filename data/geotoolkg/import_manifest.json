@@ -1,0 +1,132 @@
+{
+  "archives": [
+    {
+      "name": "geotoolkg.zip",
+      "sha256": "c2bc5841697a6d1b5c5aea36269fee22f186215f4038a5805256c7b3e86da001",
+      "destination": "data/indexes/geotoolkg",
+      "files": {
+        "default__vector_store.json": {
+          "sha256": "d17ed74c1649a438e518a8dc56a7772913dfe1ea7a7605bce069c63872431455",
+          "size": 72
+        },
+        "docstore.json": {
+          "sha256": "44136fa355b3678a1146ad16f7e8649e94fb4fc21fe77e8310c060f61caaff8a",
+          "size": 2
+        },
+        "graph_store.json": {
+          "sha256": "be8a0d307ff3f9db6cc25e902ff66fa0534c74998c981b87413df8c6acfa05db",
+          "size": 108965
+        },
+        "image__vector_store.json": {
+          "sha256": "d17ed74c1649a438e518a8dc56a7772913dfe1ea7a7605bce069c63872431455",
+          "size": 72
+        },
+        "index_store.json": {
+          "sha256": "cc75700e0d5756f3b046895fd138173fc019e4588785b3757cf09020efa13f81",
+          "size": 843015
+        }
+      }
+    },
+    {
+      "name": "fastembed.zip",
+      "sha256": "6dc3ce2874c107a80cce9fe2841f52f9cec3bd1f56f9c041d5dd4809a54da857",
+      "destination": "data/models/fastembed",
+      "files": {
+        "CACHEDIR.TAG": {
+          "sha256": "e8893e2dcb3f4545ef67a0a5b7b769113d38eef1aa61c7c7ba14659b02af955f",
+          "size": 195
+        },
+        "models--qdrant--paraphrase-multilingual-MiniLM-L12-v2-onnx-Q/files_metadata.json": {
+          "sha256": "e47fe8b189dade1f9e0f777fade2d0bab566278d7c7fbb6fef93b8c7f6fb6b98",
+          "size": 736
+        },
+        "models--qdrant--paraphrase-multilingual-MiniLM-L12-v2-onnx-Q/refs/main": {
+          "sha256": "f5719ccbb70b50cf31f07542d53c3f498e8ee4f420527130b74c666f8dd80860",
+          "size": 40
+        },
+        "models--qdrant--paraphrase-multilingual-MiniLM-L12-v2-onnx-Q/snapshots/faf4aa4225822f3bc6376869cb1164e8e3feedd0/config.json": {
+          "sha256": "c8ec081fdad2df991bf5abbf18418fec7a5cdaa421f60ffb060a30040b8c376f",
+          "size": 673
+        },
+        "models--qdrant--paraphrase-multilingual-MiniLM-L12-v2-onnx-Q/snapshots/faf4aa4225822f3bc6376869cb1164e8e3feedd0/model_optimized.onnx": {
+          "sha256": "634d0f66c29dc934c8fa72b8a4fe91dd4d420a22f1d82a241058d4316e659a99",
+          "size": 235052644
+        },
+        "models--qdrant--paraphrase-multilingual-MiniLM-L12-v2-onnx-Q/snapshots/faf4aa4225822f3bc6376869cb1164e8e3feedd0/special_tokens_map.json": {
+          "sha256": "8c785abebea9ae3257b61681b4e6fd8365ceafde980c21970d001e834cf10835",
+          "size": 964
+        },
+        "models--qdrant--paraphrase-multilingual-MiniLM-L12-v2-onnx-Q/snapshots/faf4aa4225822f3bc6376869cb1164e8e3feedd0/tokenizer.json": {
+          "sha256": "fa685fc160bbdbab64058d4fc91b60e62d207e8dc60b9af5c002c5ab946ded00",
+          "size": 17083009
+        },
+        "models--qdrant--paraphrase-multilingual-MiniLM-L12-v2-onnx-Q/snapshots/faf4aa4225822f3bc6376869cb1164e8e3feedd0/tokenizer_config.json": {
+          "sha256": "0666eebf692422757e1dddf3c9fb1ded73ba3dc726c5828671fc89e45bf3609f",
+          "size": 1416
+        },
+        "models--qdrant--paraphrase-multilingual-MiniLM-L12-v2-onnx-Q/trees/faf4aa4225822f3bc6376869cb1164e8e3feedd0.json": {
+          "sha256": "292c0104b22e003fa965c11359baa62dff4ac112eebf8daab679cc9c41d33258",
+          "size": 1600
+        }
+      }
+    }
+  ],
+  "files": {
+    "data/indexes/geotoolkg/default__vector_store.json": {
+      "sha256": "d17ed74c1649a438e518a8dc56a7772913dfe1ea7a7605bce069c63872431455",
+      "size": 72
+    },
+    "data/indexes/geotoolkg/docstore.json": {
+      "sha256": "44136fa355b3678a1146ad16f7e8649e94fb4fc21fe77e8310c060f61caaff8a",
+      "size": 2
+    },
+    "data/indexes/geotoolkg/graph_store.json": {
+      "sha256": "be8a0d307ff3f9db6cc25e902ff66fa0534c74998c981b87413df8c6acfa05db",
+      "size": 108965
+    },
+    "data/indexes/geotoolkg/image__vector_store.json": {
+      "sha256": "d17ed74c1649a438e518a8dc56a7772913dfe1ea7a7605bce069c63872431455",
+      "size": 72
+    },
+    "data/indexes/geotoolkg/index_store.json": {
+      "sha256": "cc75700e0d5756f3b046895fd138173fc019e4588785b3757cf09020efa13f81",
+      "size": 843015
+    },
+    "data/models/fastembed/CACHEDIR.TAG": {
+      "sha256": "e8893e2dcb3f4545ef67a0a5b7b769113d38eef1aa61c7c7ba14659b02af955f",
+      "size": 195
+    },
+    "data/models/fastembed/models--qdrant--paraphrase-multilingual-MiniLM-L12-v2-onnx-Q/files_metadata.json": {
+      "sha256": "e47fe8b189dade1f9e0f777fade2d0bab566278d7c7fbb6fef93b8c7f6fb6b98",
+      "size": 736
+    },
+    "data/models/fastembed/models--qdrant--paraphrase-multilingual-MiniLM-L12-v2-onnx-Q/refs/main": {
+      "sha256": "f5719ccbb70b50cf31f07542d53c3f498e8ee4f420527130b74c666f8dd80860",
+      "size": 40
+    },
+    "data/models/fastembed/models--qdrant--paraphrase-multilingual-MiniLM-L12-v2-onnx-Q/snapshots/faf4aa4225822f3bc6376869cb1164e8e3feedd0/config.json": {
+      "sha256": "c8ec081fdad2df991bf5abbf18418fec7a5cdaa421f60ffb060a30040b8c376f",
+      "size": 673
+    },
+    "data/models/fastembed/models--qdrant--paraphrase-multilingual-MiniLM-L12-v2-onnx-Q/snapshots/faf4aa4225822f3bc6376869cb1164e8e3feedd0/model_optimized.onnx": {
+      "sha256": "634d0f66c29dc934c8fa72b8a4fe91dd4d420a22f1d82a241058d4316e659a99",
+      "size": 235052644
+    },
+    "data/models/fastembed/models--qdrant--paraphrase-multilingual-MiniLM-L12-v2-onnx-Q/snapshots/faf4aa4225822f3bc6376869cb1164e8e3feedd0/special_tokens_map.json": {
+      "sha256": "8c785abebea9ae3257b61681b4e6fd8365ceafde980c21970d001e834cf10835",
+      "size": 964
+    },
+    "data/models/fastembed/models--qdrant--paraphrase-multilingual-MiniLM-L12-v2-onnx-Q/snapshots/faf4aa4225822f3bc6376869cb1164e8e3feedd0/tokenizer.json": {
+      "sha256": "fa685fc160bbdbab64058d4fc91b60e62d207e8dc60b9af5c002c5ab946ded00",
+      "size": 17083009
+    },
+    "data/models/fastembed/models--qdrant--paraphrase-multilingual-MiniLM-L12-v2-onnx-Q/snapshots/faf4aa4225822f3bc6376869cb1164e8e3feedd0/tokenizer_config.json": {
+      "sha256": "0666eebf692422757e1dddf3c9fb1ded73ba3dc726c5828671fc89e45bf3609f",
+      "size": 1416
+    },
+    "data/models/fastembed/models--qdrant--paraphrase-multilingual-MiniLM-L12-v2-onnx-Q/trees/faf4aa4225822f3bc6376869cb1164e8e3feedd0.json": {
+      "sha256": "292c0104b22e003fa965c11359baa62dff4ac112eebf8daab679cc9c41d33258",
+      "size": 1600
+    }
+  }
+}

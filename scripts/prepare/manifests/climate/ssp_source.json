@@ -1,0 +1,144 @@
+{
+  "source": "IPCC AR6 WGI Table SPM.1",
+  "url": "https://www.ipcc.ch/report/ar6/wg1/downloads/report/IPCC_AR6_WGI_SummaryVolume.pdf",
+  "baseline": "1850-1900",
+  "range": "very likely",
+  "horizons_are_period_labels": true,
+  "observations": [
+    {
+      "scenario": "SSP1-1.9",
+      "horizon_year": "2030",
+      "period_start": "2021",
+      "period_end": "2040",
+      "warming_c_mid": "1.5",
+      "warming_c_low": "1.2",
+      "warming_c_high": "1.7"
+    },
+    {
+      "scenario": "SSP1-1.9",
+      "horizon_year": "2050",
+      "period_start": "2041",
+      "period_end": "2060",
+      "warming_c_mid": "1.6",
+      "warming_c_low": "1.2",
+      "warming_c_high": "2.0"
+    },
+    {
+      "scenario": "SSP1-1.9",
+      "horizon_year": "2100",
+      "period_start": "2081",
+      "period_end": "2100",
+      "warming_c_mid": "1.4",
+      "warming_c_low": "1.0",
+      "warming_c_high": "1.8"
+    },
+    {
+      "scenario": "SSP1-2.6",
+      "horizon_year": "2030",
+      "period_start": "2021",
+      "period_end": "2040",
+      "warming_c_mid": "1.5",
+      "warming_c_low": "1.2",
+      "warming_c_high": "1.8"
+    },
+    {
+      "scenario": "SSP1-2.6",
+      "horizon_year": "2050",
+      "period_start": "2041",
+      "period_end": "2060",
+      "warming_c_mid": "1.7",
+      "warming_c_low": "1.3",
+      "warming_c_high": "2.2"
+    },
+    {
+      "scenario": "SSP1-2.6",
+      "horizon_year": "2100",
+      "period_start": "2081",
+      "period_end": "2100",
+      "warming_c_mid": "1.8",
+      "warming_c_low": "1.3",
+      "warming_c_high": "2.4"
+    },
+    {
+      "scenario": "SSP2-4.5",
+      "horizon_year": "2030",
+      "period_start": "2021",
+      "period_end": "2040",
+      "warming_c_mid": "1.5",
+      "warming_c_low": "1.2",
+      "warming_c_high": "1.8"
+    },
+    {
+      "scenario": "SSP2-4.5",
+      "horizon_year": "2050",
+      "period_start": "2041",
+      "period_end": "2060",
+      "warming_c_mid": "2.0",
+      "warming_c_low": "1.6",
+      "warming_c_high": "2.5"
+    },
+    {
+      "scenario": "SSP2-4.5",
+      "horizon_year": "2100",
+      "period_start": "2081",
+      "period_end": "2100",
+      "warming_c_mid": "2.7",
+      "warming_c_low": "2.1",
+      "warming_c_high": "3.5"
+    },
+    {
+      "scenario": "SSP3-7.0",
+      "horizon_year": "2030",
+      "period_start": "2021",
+      "period_end": "2040",
+      "warming_c_mid": "1.5",
+      "warming_c_low": "1.2",
+      "warming_c_high": "1.8"
+    },
+    {
+      "scenario": "SSP3-7.0",
+      "horizon_year": "2050",
+      "period_start": "2041",
+      "period_end": "2060",
+      "warming_c_mid": "2.1",
+      "warming_c_low": "1.7",
+      "warming_c_high": "2.6"
+    },
+    {
+      "scenario": "SSP3-7.0",
+      "horizon_year": "2100",
+      "period_start": "2081",
+      "period_end": "2100",
+      "warming_c_mid": "3.6",
+      "warming_c_low": "2.8",
+      "warming_c_high": "4.6"
+    },
+    {
+      "scenario": "SSP5-8.5",
+      "horizon_year": "2030",
+      "period_start": "2021",
+      "period_end": "2040",
+      "warming_c_mid": "1.6",
+      "warming_c_low": "1.3",
+      "warming_c_high": "1.9"
+    },
+    {
+      "scenario": "SSP5-8.5",
+      "horizon_year": "2050",
+      "period_start": "2041",
+      "period_end": "2060",
+      "warming_c_mid": "2.4",
+      "warming_c_low": "1.9",
+      "warming_c_high": "3.0"
+    },
+    {
+      "scenario": "SSP5-8.5",
+      "horizon_year": "2100",
+      "period_start": "2081",
+      "period_end": "2100",
+      "warming_c_mid": "4.4",
+      "warming_c_low": "3.3",
+      "warming_c_high": "5.7"
+    }
+  ]
+}

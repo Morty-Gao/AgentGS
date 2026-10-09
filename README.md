@@ -29,26 +29,67 @@ uv sync --locked --extra visualization
 .venv/bin/python scripts/tools/install_reproduction.py --verify
 ```
 
-原始数据保留在 `data/`，不包含在 wheel 中。当前工作区已准备数据；新工作区可从原项目导入冻结输入、模型和 KG，按 SHA256 校验，不导入旧运行代码：
+整理结果统一放在 `data/`：单文件直接保存，多文件按数据集目录管理。超过 64 MiB 的多文件数据集额外压缩为 ZIP，由对应 prepare 脚本负责校验和展开；展开结果也在 `data/`，原始下载与临时文件仅放在 `data/raw/`。GeoToolEval 使用刻意纳入 Git 的 `data/geotooleval.jsonl`，保留原工作簿的题目、答案、资源、工具链和格式列。其余可生成数据通过 `scripts/prepare/` 从可用原始来源准备，默认不会使用 Git 管理的结果快照。
 
 ```bash
-tools/envs/reproduction/bin/python scripts/prepare/import_reference_data.py --source /mnt/d/gaosong/Desktop/GeoToolAgent
-tools/envs/reproduction/bin/python scripts/prepare/prepare_usgs.py
-tools/envs/reproduction/bin/python scripts/prepare/prepare_geoquestions.py
-tools/envs/reproduction/bin/python scripts/prepare/prepare_geotooleval.py --source /mnt/d/gaosong/Desktop/GeoToolAgent --contracts-source '/mnt/d/gaosong/Desktop/大创项目（新)/AgentGS_主项目_20261006'
+tools/envs/reproduction/bin/python scripts/prepare/prepare_all.py
+# 使用已下载的固定原始数据与本地原附件
+tools/envs/reproduction/bin/python scripts/prepare/prepare_all.py --offline
+# 首次使用保留的原附件时明确指定来源
+tools/envs/reproduction/bin/python scripts/prepare/prepare_all.py --source-root data
 ```
 
-GeoToolEval 原始工作簿和自然灾害表由 `scripts/download/download_geotooleval.py --source-dir <原数据目录>` 导入，清单校验原字节。`import_reference_data.py` 保留原 derived 表、完整 GEM/MRDS 输入与模型缓存；尚未把所有历史 QA/derived 生成脚本迁为重建入口，当前复现依赖冻结输入导入。
+各入口命名为 `prepare_<领域>.py`，总入口为 `prepare_all.py`；回答格式和 GeoQuestions 固定 40 条数据也由独立准备脚本生成并被 Git 忽略。矿产从 MRDS 按原 8,000 个记录 ID 重建，海洋和能源从原始文件计算，遥感保留固定 49 个目录的原始影像内容。GISTEMP 年表由 NASA 原始月表生成；World Bank 旧原始文件缺失时直接从当前 API ZIP 重建。来源更新允许改变科学结果，每次记录实际源文件哈希。BioDeepTime 原子集/手工区界、CCS 手工空间资产及原灾害表仍需要提供原输入。路径、来源与可选的显式快照恢复模式见 [prepare/README.md](scripts/prepare/README.md)。
+
+Git 保留 GeoToolEval、暂不能完整重建的少量原始资产、深地固定输入以及用户提供的冻结 KG JSON。可生成的处理结果、公开原始下载、大型模型及缓存均被忽略；来源哈希与选择参数放在准备脚本的 `manifests/`。数据准备通过不等同于真实模型端到端实验通过。
+
+用户提供的 `geotoolkg.zip` 和 `fastembed.zip` 已恢复到 `config.toml` 声明的 `data/geotoolkg/` 与 `data/raw/models/fastembed/`。索引覆盖全部 101 个工具，缓存模型离线生成 384 维向量；十领域检索通过，抽查五条索引关系的重新编码向量与原向量完全一致。来源包和逐文件 SHA-256 保存在 `data/geotoolkg/import_manifest.json`。轻量 KG JSON 可纳入 Git，大型 embedding 权重仍为本地资源；部署到其他机器时需迁移该缓存。
+
+本机 `.env` 已配置用户提供的模型连接，选择 `gpt-5.6-terra`，密钥被 Git 忽略。2026-10-08 服务器连接验收确认模型列表可访问，Q287 的真实 Agent 完成规划、`EnergyCapacityValue` 工具调用与最终回答，输出 `620.399 MW`；2 个模型阶段，FAS=1、PAS=0.8，严格参数成功门未通过。报告保存在 `outputs/verification/live-server-20261008-q287.json`。这是一题连接和执行验收，尚未启动服务器的 603 题完整实验。项目依赖包含 HTTPX 的 SOCKS 支持，适用于本机代理环境。
+
+随后按用户要求，服务器用 `gpt-5.6-terra` 将十领域各一题同时并行执行，固定选择 Q61、Q106、Q141、Q199、Q287、Q347、Q447、Q471、Q496、Q544。2026-10-08 本次十题全部执行完成，8 题 FAS=1，平均 FAS=0.855，共 22 个模型阶段、耗时约 52 秒；worker 事件证实峰值同时运行 10 个进程。Q106 最终回答省略五条自治市记录，FAS=0.216667；Q199 返回正确温度但省略 age 和结构字段，FAS=0.333333。严格参数成功门通过 2/10，不将执行成功视为所有评分项通过。完整回答、工具产物、事件、模型用量和评分保存在 `outputs/verification/parallel-domains-20261008.json`，未按成绩重跑或替换样题。
+
+十领域抽样的独立辅助脚本已移除，历史报告保留。新抽样实验统一使用 `agentgs evaluate benchmark --ids` 指定题号，并使用新的输出目录。
+
+用户随后授权启动服务器全部 603 题的真实 Agent 实验，输出目录为 `outputs/evaluations/server-603-max128-20261008T145211Z/`，模型 `gpt-5.6-terra`。本次使用运行器上限 128 并发，每题限时 600 秒、RSS 上限 2,048 MB，总 RSS 预算 256 GiB。评测入口采用有界并行调度；运行资源通过 CLI 参数指定。`experiment.log` 和 `experiment.events.jsonl` 持续记录进度，`progress.json` 保存当前计数，每题的 `attempt_*` 保存公开请求、task ID、完整结果、事件、stderr 和评分，产物保存在对应 `outputs/tasks/<task_id>/`。`launch.json` 记录监督进程与执行进程，`exit.json` 在执行进程结束时记录退出状态。
+
+本轮已于 2026-10-08 完成，监督进程耗时 653.176 秒，运行进程退出码 0。603 题均保留首次 attempt：512 题执行成功、91 题失败（85 题算法返回未完成、5 题最终回答生成 TypeError、1 题 worker 事件 JSONDecodeError），没有超时或 RSS 超限。平均 FAS=0.698711，十领域宏平均 FAS=0.621294，333/603 题 FAS=1；严格参数成功门通过 48/603，执行成功、答案评分与参数评分分别报告。1386 个模型阶段共报告 4,123,350 tokens，其中一题用量记录不完整，不将缺失用量补零。`run_audit.json` 已核对 603 个题号、每题六类记录、603 条预测、运行前后的源码/数据身份，以及 worker 时间线的 128 并发峰值；日志和报告未发现模型密钥。完整评分保存在 `summary.json`，未自动重跑失败题。
+
+```bash
+# 新实验：监督进程保存完整控制台日志及退出状态。
+tools/envs/reproduction/bin/python scripts/evaluation/run_logged_benchmark.py --output outputs/evaluations/server-603-new --concurrency 128 --timeout 600 --rss-limit-mb 2048
+# 实验结束或中断后，使用相同源码、数据和配置续跑尚未完成的题目：
+tools/envs/reproduction/bin/python -m agentgs evaluate benchmark --output outputs/evaluations/server-603-max128-20261008T145211Z --concurrency 128 --timeout 600 --rss-limit-mb 2048
+```
+
+默认续跑保留失败结果；需要重试失败题时显式加 `--retry-failed`，原 attempt 仍保留。若中断后留下 `.run.lock`，先确认 `launch.json` 的执行进程已退出，再移除该锁；运行中的目录不得并发续跑。十领域抽样与本次全量实验分别保留，均不作为旧 harness 所有模式完全等价的证据。
+
+用户确认的最新版 `GeoToolEval_固定回答格式.xlsx` 已一次性转换为 `data/geotooleval.jsonl`，包含 603 题、11 个原始字段，完整保留“固定回答格式”和“格式说明”；全部单元格值与类型已逐字段核对。原文件 SHA256、领域题数、输出哈希及另外两个工作表的内容统一保存在 `data/metadata/geotooleval.json`（保留公式文本及缓存值，不执行公式）。主数据及来源说明均可由 Git 跟踪，不保留转换脚本或工作簿副本。
 
 ## 最新数据与算法版本
 
-最新公开回答合同为 v1.2，含 2026-10-07 的 Q106/Q111 修订，SHA256 为 `a9cdf8fef4f82021cd6b5f5afa55ef9a262ea7ca1def3e2dcaeae0c0bdb60c25`。文件来源与选择记录在 `data/geotooleval/version_manifest.json`。保留发布的 603 题 v1.1 扩列工作簿，其前九列与原题表完全相同；当前运行提示使用更新的 v1.2 公开合同。旧文件及之前的验证结果均保留。
+内嵌数据以用户最后上传的 `GeoToolEval_固定回答格式.xlsx` 为准。与前次上传相比，新增两列回答格式字段，75 题的标准工具调用明细发生变化；原题文本、答案及其他原始字段一致。来源与变更记录保存在 `data/metadata/geotooleval.json`。工作簿中的格式列按原文保留，独立的版本化回答合同仍由各自的运行配置选择。
 
 GeoQuestions 只按公开 numeric source_id 或提交的 SPARQL 结构定位物化结果，符号 topic 不充当 ID。查询匹配保留原权重、阈值和歧义规则，未匹配返回失败。结果标记 `derived_lookup`、`answer_lookup=true`，不声称执行了 RDF 端点。
 
-`agent.toml` 固定算法开关与预算；`llm.toml` 管理 provider、model 和角色；`.env` 保存本机连接信息并被 Git 忽略。模型模式需要 `LLM_BASE_URL`（含 `/v1`）、`LLM_API_KEY`、`LLM_MODEL`。用量缺失、失败或中断时保留 unknown，成本和综合分不可据此补零。
+`config.toml` 的 `[agent]` 管理算法开关、预算与检索路径；`llm.toml` 独立存储模型调用信息（provider、model 和角色映射）；运行资源与沙箱通过 CLI 参数指定；`.env` 保存本机连接信息并被 Git 忽略。模型模式需要 `LLM_BASE_URL`（含 `/v1`）、`LLM_API_KEY`、`LLM_MODEL`。用量缺失、失败或中断时保留 unknown，成本和综合分不可据此补零。
 
 ## 启动与示例
+
+`run`、`evaluate run`、`evaluate benchmark` 和 `ui serve` 使用以下运行参数，不读取运行配置文件。未传参数时使用代码默认值：
+
+| CLI 参数 | 默认值 | 用途 |
+| --- | --- | --- |
+| `--concurrency` | 2 | 最大并发任务数（1–128） |
+| `--timeout` | 300 | 每题超时秒数 |
+| `--rss-limit-mb` | 1024 | 每题 RSS 内存上限（MB） |
+| `--max-total-rss-mb` | 4096 | 全部 worker 的 RSS 总预算（MB） |
+| `--code-timeout` | 20 | 代码步骤超时秒数 |
+| `--sandbox` | `auto` | `auto`、`bwrap`、`proot` 或 `disabled` |
+| `--allow-proot` / `--no-allow-proot` | 禁用 | 显式允许 PRoot 后端 |
+| `--worker-python` | 自动选择 | 指定 worker Python 的绝对路径或项目相对路径 |
+
+显式设置并发或每题 RSS 上限时，未指定的总 RSS 预算会自动提高到至少“并发 × 每题 RSS”；显式指定 `--max-total-rss-mb` 则使用该值。worker 默认优先使用项目的科学复现环境，缺失时使用当前 Python。
 
 显式工具调用无需模型密钥：
 
@@ -67,13 +108,10 @@ tools/envs/reproduction/bin/python -m agentgs ui serve
 tools/envs/reproduction/bin/python -m pytest -q
 .venv/bin/ruff check src scripts
 .venv/bin/ruff format --check src scripts
-tools/envs/reproduction/bin/python scripts/build/audit_algorithm_alignment.py --output outputs/alignment/current.json
-tools/envs/reproduction/bin/python scripts/evaluation/verify_tool_coverage.py --output outputs/verification/tools-new
-tools/envs/reproduction/bin/python scripts/evaluation/validate_workers.py --output outputs/verification/workers-new
 tools/envs/reproduction/bin/python scripts/evaluation/replay_reference_scores.py
 ```
 
-工具覆盖验证使用 reference / synthetic 参数，属于工具验收，不是模型规划实验。旧科学源码对照可加 `--source /mnt/d/gaosong/Desktop/GeoToolAgent`；仅验收脚本读旧源码，生产代码没有该依赖。`audit_algorithm_alignment.py --require-runtime-parity` 在完整旧 harness 回放验收前返回非零。
+历史基线采集、工具覆盖和 worker 辅助验收脚本已移除；既有对照记录与测试 fixture 保留。生产代码不依赖旧源码目录。
 
 已有预测可以离线评分；原 FAS、复合指标及历史兼容层分别报告：
 
@@ -81,13 +119,13 @@ tools/envs/reproduction/bin/python scripts/evaluation/replay_reference_scores.py
 tools/envs/reproduction/bin/python -m agentgs evaluate score predictions.jsonl --allow-partial --output outputs/evaluations/scored.json
 ```
 
-有界真实模型验收最多 5 题、每题最多 12 个模型阶段，结果保留每次失败，不按分数选择重跑：
+小规模真实模型实验使用同一 benchmark 入口，结果保留每次失败，不按分数选择重跑：
 
 ```bash
-tools/envs/reproduction/bin/python scripts/evaluation/validate_live.py --ids 61,86 --max-model-calls 8 --timeout 240 --output outputs/verification/live-new.json
+tools/envs/reproduction/bin/python -m agentgs evaluate benchmark --ids 61,86 --concurrency 2 --timeout 240 --output outputs/evaluations/small-run
 ```
 
-603 题实验入口为 `agentgs evaluate benchmark`，可先用 `--ids 61,86 --output outputs/evaluations/small-run`。完整实验没有在本次验收中启动。续跑检查源码、数据和配置身份；不同版本使用新目录。标准答案仅用于 evaluator，不进入 Agent 请求。
+603 题实验入口为 `agentgs evaluate benchmark`；省略 `--ids` 时评测全部题目。续跑检查源码、数据和配置身份；不同版本使用新目录。标准答案仅用于 evaluator，不进入 Agent 请求。
 
 实际模型验收使用 gpt-5.6-terra：Q61 FAS=1，Q86 FAS=0.75（218.015 的最终取舍与冻结答案不同）；Geo 参数修复后的 Q106/Q111 均 FAS=1。失败尝试和超时报告同时保留于 `outputs/verification/`，这些小样本不证明全部实验性能复现。
 

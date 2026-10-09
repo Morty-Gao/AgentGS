@@ -79,7 +79,7 @@ async def test_provider_token_parameter(config):
 
     client = OpenAICompatibleClient(config, httpx.MockTransport(handler))
     try:
-        assert (await client.chat([])).message["content"] == "ok"
+        assert (await client.chat([])).message.content == "ok"
     finally:
         await client.aclose()
 
@@ -98,20 +98,17 @@ async def test_staged_transport_uses_original_retry_codes_and_payload(config, st
 
     client = OpenAICompatibleClient(config, httpx.MockTransport(handler))
     try:
-        reply = await client.text(
-            "original prompt",
+        reply = await client.chat(
+            [{"role": "user", "content": "original prompt"}],
             stage="tool_argument_generation",
             settings=AlgorithmSettings(retry_base_seconds=0, retry_jitter_seconds=0),
         )
         assert reply.attempts == 2 and requests[0] == requests[1]
         assert requests[0] == {
             "model": "remote",
+            "max_tokens": 10,
             "temperature": 0.2,
             "messages": [
-                {
-                    "role": "system",
-                    "content": "You are ChatGPT, a large language model trained by OpenAI.\n",
-                },
                 {"role": "user", "content": "original prompt"},
             ],
         }
@@ -131,7 +128,7 @@ async def test_invalid_successful_model_reply_is_not_reissued(config):
     client = OpenAICompatibleClient(config, httpx.MockTransport(handler))
     try:
         with pytest.raises(ValueError):
-            await client.text("q", stage="final_answer_generation", settings=AlgorithmSettings())
+            await client.chat([{"role": "user", "content": "q"}], stage="final_answer_generation", settings=AlgorithmSettings())
         assert len(requests) == 1
     finally:
         await client.aclose()

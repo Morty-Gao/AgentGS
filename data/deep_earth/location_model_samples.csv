@@ -1,0 +1,9 @@
+key,name,latitude,longitude,node_index,sampled_latitude,sampled_longitude,distance_to_node_km,moho_depth_km,lab_depth_km,semucb_dlnvs_100km_percent,semucb_valid_100km,semucb_dlnvs_410km_percent,semucb_valid_410km,semucb_dlnvs_660km_percent,semucb_valid_660km,semucb_dlnvs_1000km_percent,semucb_valid_1000km
+tokyo,Tokyo,35.6762,139.6503,887,35.7005,139.3391,28.2349063,36.29,174.202,1.92,True,0.26,True,0.13,True,-0.15,True
+hawaii,Hawaii,19.6,-155.5,26248,19.6163,-155.2635,24.83880916,14.77,66.745,-2.37,True,-0.21,True,-1.19,True,-1.02,True
+andes,Andes,-23.0,-68.0,33234,-23.0051,-67.5116,49.99266033,51.22,145.24,2.6,True,0.5,True,1.24,True,-0.31,True
+east_african_rift,East African Rift,-3.0,36.0,4819,-3.3775,36.0,41.97608481,42.8,166.74,1.5,True,-1.77,True,-1.2,True,-1.94,True
+java,Java,-7.5,110.0,23813,-7.6209,109.7624,29.43900393,37.69,127.106,1.32,True,0.97,True,0.53,True,0.05,True
+mediterranean,Mediterranean,38.0,22.0,11256,37.6811,21.8845,36.88202124,37.91,210.452,3.46,True,1.83,True,0.81,True,1.1,True
+new_zealand,New Zealand,-41.0,174.0,38703,-41.0149,173.6941,25.72159031,30.83,165.388,2.95,True,0.57,True,0.77,True,1.22,True
+siberian_craton,Siberian Craton,62.0,110.0,14662,62.4215,109.2792,59.94076182,47.16,283.42,8.68,True,1.71,True,0.91,True,0.46,True

@@ -11,19 +11,10 @@ from pathlib import Path
 import numpy as np
 import pandas as pd
 
-EARTH_RADIUS_KM = 6371.0088
-OCEAN_BOXES = [
-    ("north_pacific_west", "西北太平洋", 120.0, 20.0, 180.0, 60.0),
-    ("north_pacific_east", "东北太平洋", -180.0, 20.0, -120.0, 60.0),
-    ("tropical_pacific_west", "西部热带太平洋", 120.0, -10.0, 180.0, 20.0),
-    ("tropical_pacific_east", "东部热带太平洋", -180.0, -10.0, -80.0, 20.0),
-    ("north_atlantic", "北大西洋", -80.0, 20.0, 10.0, 65.0),
-    ("tropical_atlantic", "热带大西洋", -60.0, -15.0, 20.0, 20.0),
-    ("indian_ocean", "印度洋", 20.0, -40.0, 120.0, 25.0),
-    ("southern_ocean", "南大洋", -180.0, -65.0, 180.0, -40.0),
-    ("arctic_ocean", "北冰洋", -180.0, 65.0, 180.0, 85.0),
-    ("mediterranean", "地中海", -6.0, 30.0, 36.0, 46.0),
-]
+from agentgs.datasets.references import load_reference
+
+OCEAN_BOXES = load_reference("reference/ocean.json")["ocean_boxes"]
+EARTH_RADIUS_KM = load_reference("reference/geography.json")["mean_earth_radius_km"]
 
 
 def sha256(path: Path) -> str:

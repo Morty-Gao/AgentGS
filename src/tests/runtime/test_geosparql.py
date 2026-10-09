@@ -10,7 +10,7 @@ from agentgs.agent.engine import AgentEngine
 from agentgs.agent.retrieval.skills import KeywordSkillRetriever
 from agentgs.client.models import ChatReply
 from agentgs.contracts.models import TaskInput, TaskStatus, ToolCall
-from agentgs.datasets.geoquestions import SNAPSHOT_RESOURCE, snapshot_profile
+from agentgs.datasets.geoquestions import snapshot_profile
 from agentgs.datasets.registry import DatasetRegistry
 from agentgs.runtime.artifacts.store import LocalArtifactStore
 from agentgs.runtime.service import TaskService
@@ -24,7 +24,7 @@ ORACLE = json.loads((FIXTURES / "replay.json").read_text())
 
 @pytest.fixture
 def snapshot_project(project):
-    target = project / "data/geoquestions1089" / SNAPSHOT_RESOURCE
+    target = project / "data/geoquestions/queries.jsonl"
     target.parent.mkdir(parents=True)
     target.write_bytes((FIXTURES / "snapshot.json").read_bytes())
     return project
@@ -52,7 +52,7 @@ def test_replay_matches_historical_source_decisions(snapshot_project, case):
 
 
 def test_missing_or_changed_snapshot_fails(project, snapshot_project):
-    target = snapshot_project / "data/geoquestions1089" / SNAPSHOT_RESOURCE
+    target = snapshot_project / "data/geoquestions/queries.jsonl"
     target.write_text("[]")
     with pytest.raises(ValueError, match="hash differs"):
         replay_query(SnapshotQuery(source_id=591), DatasetRegistry(project))
@@ -85,11 +85,9 @@ def test_oracle_identity_is_pinned():
         hashlib.sha256((FIXTURES / "snapshot.json").read_bytes()).hexdigest()
         == profile["snapshot_sha256"]
     )
-    root = Path(__file__).parents[3]
-    contract = json.loads((root / "docs/algorithm_alignment.json").read_text())
-    acceptance = contract["authorized_algorithm_changes"][0]["acceptance"]
     assert (
-        hashlib.sha256((FIXTURES / "replay.json").read_bytes()).hexdigest() == acceptance["sha256"]
+        hashlib.sha256((FIXTURES / "replay.json").read_bytes()).hexdigest()
+        == profile["replay_fixture_sha256"]
     )
 
 

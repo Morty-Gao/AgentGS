@@ -1,0 +1,18 @@
+{
+  "files": {
+    "glodap_surface_deep_profiles.csv": "dbcfb384f3c2a12ce78b246a2caa35ea79ca6134f10a3767072f60fdcca90958",
+    "snapo_cruise_dedup_summary.csv": "8fe1240610079bc5960f64bb4cd6f76202cc4595fa247a5f752b3480acc96c22",
+    "snapo_cruise_qc_summary.csv": "ad5c9eb1c418607a479ec002e3447566a0427bc752e1b03c38bfe3862265d003",
+    "snapo_station_samples.csv": "05fe718b69f9afec40d5c825c75d335925c90085c15d610f39a0d719b117ba1c",
+    "socat_glodap_nearest_samples.csv": "82d32ddd3346b72339a22a75ef52d92e2ffe113bec4c764640304f44b9e643f6",
+    "socat_monthly_grid_samples.csv": "abee8219f0563210ca3b4f3366bb17cf6016fa549a785a8d89f9759bac901954",
+    "socat_north_pacific_year_summary.csv": "68a4b8227a6a6793c15bbdc1090f297808cb94fbf6f0fa97ff47eb8e39231130",
+    "socat_region_map_samples.csv": "c04552352bf77292699794c781b05413ca757471a40b8c65f3667a4fae04cdd1",
+    "socat_region_trends.csv": "2f53f51378bda558044b2d0a28482aa5562e3abfe183eec7ebd58258974b6c6c"
+  },
+  "public_sources": [
+    "SOCAT v2026",
+    "GLODAPv2.2023 Pacific Ocean",
+    "SNAPO 113597.xlsx"
+  ]
+}

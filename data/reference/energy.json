@@ -1,0 +1,225 @@
+{
+  "capitals": {
+    "CH": [
+      46.948,
+      7.4474,
+      "Bern",
+      "伯尔尼"
+    ],
+    "DE": [
+      52.52,
+      13.405,
+      "Berlin",
+      "柏林"
+    ],
+    "DK": [
+      55.6761,
+      12.5683,
+      "Copenhagen",
+      "哥本哈根"
+    ],
+    "FR": [
+      48.8566,
+      2.3522,
+      "Paris",
+      "巴黎"
+    ],
+    "GB": [
+      51.5074,
+      -0.1278,
+      "London",
+      "伦敦"
+    ],
+    "SE": [
+      59.3293,
+      18.0686,
+      "Stockholm",
+      "斯德哥尔摩"
+    ],
+    "PL": [
+      52.2297,
+      21.0122,
+      "Warsaw",
+      "华沙"
+    ],
+    "CZ": [
+      50.0755,
+      14.4378,
+      "Prague",
+      "布拉格"
+    ]
+  },
+  "region_boxes": [
+    [
+      "western_us",
+      "美国西部",
+      -125.0,
+      30.0,
+      -100.0,
+      50.0
+    ],
+    [
+      "eastern_us",
+      "美国东部",
+      -100.0,
+      25.0,
+      -65.0,
+      50.0
+    ],
+    [
+      "andes",
+      "安第斯地区",
+      -80.0,
+      -40.0,
+      -65.0,
+      5.0
+    ],
+    [
+      "central_europe",
+      "中欧",
+      -10.0,
+      35.0,
+      30.0,
+      60.0
+    ],
+    [
+      "india",
+      "印度",
+      68.0,
+      7.0,
+      90.0,
+      37.0
+    ],
+    [
+      "china",
+      "中国",
+      73.0,
+      18.0,
+      135.0,
+      54.0
+    ],
+    [
+      "australia",
+      "澳大利亚",
+      112.0,
+      -44.0,
+      154.0,
+      -10.0
+    ],
+    [
+      "southern_africa",
+      "南部非洲",
+      10.0,
+      -35.0,
+      40.0,
+      -15.0
+    ],
+    [
+      "brazil",
+      "巴西",
+      -75.0,
+      -35.0,
+      -35.0,
+      5.0
+    ],
+    [
+      "canada",
+      "加拿大",
+      -140.0,
+      45.0,
+      -50.0,
+      70.0
+    ]
+  ],
+  "selected_country_codes": [
+    "CH",
+    "DE",
+    "DK",
+    "FR",
+    "GB",
+    "SE",
+    "PL",
+    "CZ"
+  ],
+  "transition_countries": [
+    "China",
+    "United States",
+    "India",
+    "Germany",
+    "France",
+    "United Kingdom",
+    "Brazil",
+    "Canada",
+    "Australia",
+    "Japan"
+  ],
+  "renewable_types": [
+    "bioenergy",
+    "geothermal",
+    "hydropower",
+    "solar",
+    "wind"
+  ],
+  "critical_patterns": {
+    "Lithium": "\\blithium\\b",
+    "Cobalt": "\\bcobalt\\b",
+    "Nickel": "\\bnickel\\b",
+    "Rare earths": "rare earth",
+    "Copper": "\\bcopper\\b",
+    "Uranium": "\\buranium\\b",
+    "Graphite": "\\bgraphite\\b",
+    "Manganese": "\\bmanganese\\b"
+  },
+  "capacity_series": [
+    [
+      "CH_solar_capacity",
+      "Switzerland solar",
+      "瑞士太阳能"
+    ],
+    [
+      "DE_solar_capacity",
+      "Germany solar",
+      "德国太阳能"
+    ],
+    [
+      "DE_wind_capacity",
+      "Germany wind",
+      "德国风电"
+    ],
+    [
+      "DK_wind_capacity",
+      "Denmark wind",
+      "丹麦风电"
+    ],
+    [
+      "FR_hydro_capacity",
+      "France hydro",
+      "法国水电"
+    ],
+    [
+      "FR_solar_capacity",
+      "France solar",
+      "法国太阳能"
+    ],
+    [
+      "GB-UKM_solar_capacity",
+      "United Kingdom solar",
+      "英国太阳能"
+    ],
+    [
+      "GB-UKM_wind_capacity",
+      "United Kingdom wind",
+      "英国风电"
+    ],
+    [
+      "SE_wind_capacity",
+      "Sweden wind",
+      "瑞典风电"
+    ],
+    [
+      "DE_wind_offshore_capacity",
+      "Germany offshore wind",
+      "德国海上风电"
+    ]
+  ]
+}

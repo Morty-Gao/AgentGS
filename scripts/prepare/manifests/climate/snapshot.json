@@ -1,0 +1,18 @@
+{
+  "source_name": "present_climate_gistemp_global_annual.csv",
+  "source_sha256": "090acc8bd21c67f8d82b69df12509c65504b80a4c22140b61b0ef6c4d6a81054",
+  "row_count": 146,
+  "columns": [
+    "year",
+    "temp_anomaly_C",
+    "source"
+  ],
+  "year_range": [
+    1880,
+    2025
+  ],
+  "selection": "All supplied annual records in original order; no recalculation or replacement",
+  "files": {
+    "present_climate_gistemp_global_annual.csv": "090acc8bd21c67f8d82b69df12509c65504b80a4c22140b61b0ef6c4d6a81054"
+  }
+}

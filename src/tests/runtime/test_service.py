@@ -1,3 +1,7 @@
+import asyncio
+import sys
+from types import SimpleNamespace
+
 import pytest
 
 from agentgs.config.settings import RuntimeSettings
@@ -60,3 +64,41 @@ async def test_close_finalizes_not_yet_started_tasks(project):
     task = service.submit(catalog_query())
     await service.close()
     assert service.get(task.spec.id).status == TaskStatus.CANCELLED
+
+
+def test_watchdogs_share_rss_scans_and_drop_finished_workers(project, monkeypatch):
+    scans = []
+    monkeypatch.setattr("agentgs.runtime.service.time.monotonic", lambda: 1.0)
+    monkeypatch.setattr("agentgs.runtime.service.tree_rss", lambda pid: scans.append(pid) or pid)
+    service = TaskService(project)
+    service.processes = {"a": SimpleNamespace(pid=10), "b": SimpleNamespace(pid=20)}
+    assert service._memory_usage(10) == (10, 30)
+    assert service._memory_usage(20) == (20, 30)
+    assert scans == [10, 20]
+    service.processes.pop("a")
+    assert service._memory_usage(20) == (20, 20)
+    service.processes["c"] = SimpleNamespace(pid=30)
+    assert service._memory_usage(30) == (30, 50)
+    assert scans == [10, 20, 30]
+
+
+async def test_rss_watchdog_enforces_limit_without_code_sandbox(project, monkeypatch):
+    spawn = asyncio.create_subprocess_exec
+
+    async def memory_worker(*args, **kwargs):
+        return await spawn(
+            sys.executable,
+            "-c",
+            "import time; data=bytearray(150*1024*1024); time.sleep(5)",
+            **kwargs,
+        )
+
+    monkeypatch.setattr("agentgs.runtime.service.asyncio.create_subprocess_exec", memory_worker)
+    service = TaskService(project)
+    try:
+        record = service.submit(catalog_query(), rss_limit_mb=64)
+        finished = await service.wait(record.spec.id)
+        assert finished.status == TaskStatus.FAILED
+        assert finished.error.code == "resource_limit"
+    finally:
+        await service.close()

@@ -48,14 +48,18 @@ async def execute(root, work, spec, settings):
         paths = ToolPaths.create(root, artifacts.root)
         contracts = AnswerContracts(root)
         retriever = None
+        from agentgs.datasets.layout import prepared_path
+
+        index_folder = root / options.index_path
+        if options.index_path.startswith("data/"):
+            index_folder = prepared_path(root, options.index_path.removeprefix("data/"))
         if (
             not spec.input.calls
-            and spec.input.algorithm != "prototype"
-            and (root / options.index_path / "index_store.json").exists()
+            and (index_folder / "index_store.json").exists()
         ):
             retriever = LazyToolRetriever(
                 lambda: KGToolRetriever.from_directory(
-                    root / options.index_path,
+                    index_folder,
                     LocalEmbedding(
                         root / options.model_cache,
                         options.embedding_model,

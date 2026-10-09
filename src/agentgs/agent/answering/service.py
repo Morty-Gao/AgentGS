@@ -37,7 +37,7 @@ class AnsweringService:
                             k: event.get(k)
                             for k in ("tool_name", "attempt", "tool_input", "tool_output")
                         }
-                        for event in state.trace
+                        for event in state.execution_events()
                         if event.get("type") == "tool_call" and event.get("status") == "success"
                     ],
                     "failed_tool_attempts": [
@@ -45,7 +45,7 @@ class AnsweringService:
                             k: event.get(k)
                             for k in ("tool_name", "attempt", "tool_input", "tool_output")
                         }
-                        for event in state.trace
+                        for event in state.execution_events()
                         if event.get("type") in {"tool_call", "tool_retry"}
                         and event.get("status") != "success"
                     ],
@@ -68,7 +68,7 @@ class AnsweringService:
                 raise ValueError("The final-answer model returned an empty or malformed answer")
             outputs = [
                 event.get("tool_output", "")
-                for event in state.trace
+                for event in state.execution_events()
                 if event.get("type") == "tool_call" and event.get("status") == "success"
             ]
             suggested, diagnostic = validate_final_answer(
@@ -86,9 +86,10 @@ class AnsweringService:
             event["answer_llm_required"] = True
             if contract:
                 format_event = check_fixed_answer(answer, contract)
-                state.trace.append(format_event)
+                state.record(format_event)
                 event.update(
-                    diagnostic_only=True, completion_policy="geotooleval_fixed_format_v1.1"
+                    diagnostic_only=True,
+                    completion_policy="geotooleval_fixed_format_" + format_event["version"],
                 )
                 if not format_event["valid"] or format_event["has_unknown"]:
                     status = "Not Completed"
@@ -96,7 +97,7 @@ class AnsweringService:
                 status = "Not Completed"
             if not completed:
                 status = "Not Completed"
-            state.trace.append(event)
+            state.record(event)
             state.answer, state.completion_status, state.answer_generation_status = (
                 answer,
                 status,

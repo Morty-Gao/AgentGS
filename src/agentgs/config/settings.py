@@ -1,9 +1,5 @@
-import tomllib
-from pathlib import Path
-
 from pydantic import Field
 
-from agentgs.config.env import environment, interpolate
 from agentgs.contracts.models import Model
 
 
@@ -16,9 +12,3 @@ class RuntimeSettings(Model):
     sandbox: str = "auto"
     allow_proot: bool = False
     worker_python: str | None = None
-
-
-def load_runtime(root: Path) -> RuntimeSettings:
-    path = root / "runtime.toml"
-    raw = tomllib.loads(path.read_text()) if path.exists() else {}
-    return RuntimeSettings.model_validate(interpolate(raw.get("runtime", {}), environment(root)))

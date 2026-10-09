@@ -1,0 +1,367 @@
+{
+  "type": "FeatureCollection",
+  "name": "synthetic_ccs_facilities",
+  "source_disclaimer": "Coordinates and facility values are synthetic SCCS-OFPOSDU records.",
+  "features": [
+    {
+      "type": "Feature",
+      "properties": {
+        "record_id": "RCCS00",
+        "case_id": "CCS-A",
+        "facility_id": "PLANT-00",
+        "country_code": "US",
+        "capture_tech": "Selexol",
+        "co2_captured_tonnes": "725880",
+        "capture_energy_MWh": "145176.0",
+        "transport_mode": "Pipeline",
+        "pipeline_length_km": "165.1",
+        "transport_loss_tonnes": "491.4",
+        "well_id": "WELL-INJ-000",
+        "injection_start_date": "1/1/24",
+        "injection_end_date": "12/31/24",
+        "co2_injected_tonnes": "724118.4",
+        "co2_produced_tonnes": "0.0",
+        "reservoir_type": "Basalt",
+        "avg_reservoir_pressure_MPa": "19.49",
+        "avg_reservoir_temp_C": "44.9",
+        "mmv_methods": "pressure, microseismic, 4D seismic",
+        "leak_events_count": "1",
+        "leak_mass_tonnes": "39.7",
+        "ch4_emissions_tonnes": "2.18",
+        "ogmp_source_category": "ST",
+        "co2_net_stored_tonnes": "723587.3"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -98.5544,
+          43.4035
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "record_id": "RCCS01",
+        "case_id": "CCS-B",
+        "facility_id": "PLANT-01",
+        "country_code": "US",
+        "capture_tech": "PSA",
+        "co2_captured_tonnes": "433005",
+        "capture_energy_MWh": "86601.0",
+        "transport_mode": "Pipeline",
+        "pipeline_length_km": "239.5",
+        "transport_loss_tonnes": "203.2",
+        "well_id": "WELL-INJ-001",
+        "injection_start_date": "1/1/24",
+        "injection_end_date": "12/31/24",
+        "co2_injected_tonnes": "431477.6",
+        "co2_produced_tonnes": "0.0",
+        "reservoir_type": "Basalt",
+        "avg_reservoir_pressure_MPa": "8.0",
+        "avg_reservoir_temp_C": "48.0",
+        "mmv_methods": "pressure, microseismic, 4D seismic",
+        "leak_events_count": "1",
+        "leak_mass_tonnes": "31.6",
+        "ch4_emissions_tonnes": "5.35",
+        "ogmp_source_category": "TR",
+        "co2_net_stored_tonnes": "431242.8"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -94.6457,
+          44.9311
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "record_id": "RCCS02",
+        "case_id": "CCS-C",
+        "facility_id": "PLANT-02",
+        "country_code": "US",
+        "capture_tech": "MEA",
+        "co2_captured_tonnes": "770793",
+        "capture_energy_MWh": "175794.0",
+        "transport_mode": "Pipeline",
+        "pipeline_length_km": "186.5",
+        "transport_loss_tonnes": "273.8",
+        "well_id": "WELL-INJ-002",
+        "injection_start_date": "1/1/24",
+        "injection_end_date": "12/31/24",
+        "co2_injected_tonnes": "768862.6",
+        "co2_produced_tonnes": "0.0",
+        "reservoir_type": "Basalt",
+        "avg_reservoir_pressure_MPa": "10.89",
+        "avg_reservoir_temp_C": "67.1",
+        "mmv_methods": "pressure, microseismic, 4D seismic",
+        "leak_events_count": "0",
+        "leak_mass_tonnes": "0.0",
+        "ch4_emissions_tonnes": "0.61",
+        "ogmp_source_category": "PR",
+        "co2_net_stored_tonnes": "768588.8"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -115.9768,
+          36.0341
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "record_id": "RCCS03",
+        "case_id": "CCS-D",
+        "facility_id": "PLANT-03",
+        "country_code": "US",
+        "capture_tech": "MEA",
+        "co2_captured_tonnes": "727024",
+        "capture_energy_MWh": "208684.0",
+        "transport_mode": "Pipeline",
+        "pipeline_length_km": "112.4",
+        "transport_loss_tonnes": "418.1",
+        "well_id": "WELL-INJ-003",
+        "injection_start_date": "1/1/24",
+        "injection_end_date": "12/31/24",
+        "co2_injected_tonnes": "725816.3",
+        "co2_produced_tonnes": "0.0",
+        "reservoir_type": "Saline aquifer",
+        "avg_reservoir_pressure_MPa": "18.98",
+        "avg_reservoir_temp_C": "83.6",
+        "mmv_methods": "pressure, tracers, 4D seismic",
+        "leak_events_count": "0",
+        "leak_mass_tonnes": "0.0",
+        "ch4_emissions_tonnes": "1.11",
+        "ogmp_source_category": "ST",
+        "co2_net_stored_tonnes": "725398.2"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -85.3096,
+          31.0453
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "record_id": "RCCS04",
+        "case_id": "CCS-E",
+        "facility_id": "PLANT-04",
+        "country_code": "US",
+        "capture_tech": "MEA",
+        "co2_captured_tonnes": "851817",
+        "capture_energy_MWh": "172677.0",
+        "transport_mode": "Pipeline",
+        "pipeline_length_km": "22.7",
+        "transport_loss_tonnes": "93.3",
+        "well_id": "WELL-INJ-004",
+        "injection_start_date": "1/1/24",
+        "injection_end_date": "12/31/24",
+        "co2_injected_tonnes": "850705.8",
+        "co2_produced_tonnes": "0.0",
+        "reservoir_type": "Basalt",
+        "avg_reservoir_pressure_MPa": "19.26",
+        "avg_reservoir_temp_C": "37.2",
+        "mmv_methods": "pressure, microseismic, 4D seismic",
+        "leak_events_count": "0",
+        "leak_mass_tonnes": "0.0",
+        "ch4_emissions_tonnes": "3.55",
+        "ogmp_source_category": "PR",
+        "co2_net_stored_tonnes": "850612.5"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -110.6946,
+          39.4217
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "record_id": "RCCS05",
+        "case_id": "CCS-F",
+        "facility_id": "PLANT-05",
+        "country_code": "US",
+        "capture_tech": "MDEA",
+        "co2_captured_tonnes": "644822",
+        "capture_energy_MWh": "155999.0",
+        "transport_mode": "Pipeline",
+        "pipeline_length_km": "61.3",
+        "transport_loss_tonnes": "239.7",
+        "well_id": "WELL-INJ-005",
+        "injection_start_date": "1/1/24",
+        "injection_end_date": "12/31/24",
+        "co2_injected_tonnes": "643814.7",
+        "co2_produced_tonnes": "3799.6",
+        "reservoir_type": "Depleted gas field",
+        "avg_reservoir_pressure_MPa": "21.67",
+        "avg_reservoir_temp_C": "41.1",
+        "mmv_methods": "pressure, tracers, production logging, well integrity",
+        "leak_events_count": "1",
+        "leak_mass_tonnes": "5.5",
+        "ch4_emissions_tonnes": "1.58",
+        "ogmp_source_category": "ST",
+        "co2_net_stored_tonnes": "639769.9"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -92.4369,
+          40.1837
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "record_id": "RCCS06",
+        "case_id": "CCS-G",
+        "facility_id": "PLANT-06",
+        "country_code": "US",
+        "capture_tech": "Selexol",
+        "co2_captured_tonnes": "796263",
+        "capture_energy_MWh": "159252.6",
+        "transport_mode": "Pipeline",
+        "pipeline_length_km": "167.3",
+        "transport_loss_tonnes": "320.3",
+        "well_id": "WELL-INJ-006",
+        "injection_start_date": "1/1/24",
+        "injection_end_date": "12/31/24",
+        "co2_injected_tonnes": "793203.5",
+        "co2_produced_tonnes": "4160.9",
+        "reservoir_type": "Depleted gas field",
+        "avg_reservoir_pressure_MPa": "24.74",
+        "avg_reservoir_temp_C": "56.6",
+        "mmv_methods": "pressure, tracers, production logging, well integrity",
+        "leak_events_count": "0",
+        "leak_mass_tonnes": "0.0",
+        "ch4_emissions_tonnes": "7.46",
+        "ogmp_source_category": "PR",
+        "co2_net_stored_tonnes": "788722.3"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -110.4639,
+          41.7167
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "record_id": "RCCS07",
+        "case_id": "CCS-H",
+        "facility_id": "PLANT-07",
+        "country_code": "US",
+        "capture_tech": "MEA",
+        "co2_captured_tonnes": "731902",
+        "capture_energy_MWh": "147516.0",
+        "transport_mode": "Pipeline",
+        "pipeline_length_km": "83.6",
+        "transport_loss_tonnes": "415.4",
+        "well_id": "WELL-INJ-007",
+        "injection_start_date": "1/1/24",
+        "injection_end_date": "12/31/24",
+        "co2_injected_tonnes": "728491.4",
+        "co2_produced_tonnes": "1403.5",
+        "reservoir_type": "Depleted gas field",
+        "avg_reservoir_pressure_MPa": "9.92",
+        "avg_reservoir_temp_C": "72.4",
+        "mmv_methods": "pressure, tracers, production logging, well integrity",
+        "leak_events_count": "1",
+        "leak_mass_tonnes": "7.7",
+        "ch4_emissions_tonnes": "1.91",
+        "ogmp_source_category": "TR",
+        "co2_net_stored_tonnes": "726664.8"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -91.5424,
+          46.299
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "record_id": "RCCS08",
+        "case_id": "CCS-I",
+        "facility_id": "PLANT-08",
+        "country_code": "US",
+        "capture_tech": "Amine",
+        "co2_captured_tonnes": "712403",
+        "capture_energy_MWh": "179710.0",
+        "transport_mode": "Pipeline",
+        "pipeline_length_km": "157.2",
+        "transport_loss_tonnes": "219.0",
+        "well_id": "WELL-INJ-008",
+        "injection_start_date": "1/1/24",
+        "injection_end_date": "12/31/24",
+        "co2_injected_tonnes": "709879.4",
+        "co2_produced_tonnes": "0.0",
+        "reservoir_type": "Basalt",
+        "avg_reservoir_pressure_MPa": "17.99",
+        "avg_reservoir_temp_C": "37.9",
+        "mmv_methods": "pressure, microseismic, 4D seismic",
+        "leak_events_count": "0",
+        "leak_mass_tonnes": "0.0",
+        "ch4_emissions_tonnes": "5.58",
+        "ogmp_source_category": "ST",
+        "co2_net_stored_tonnes": "709660.4"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -104.1568,
+          38.9217
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "record_id": "RCCS09",
+        "case_id": "CCS-J",
+        "facility_id": "PLANT-09",
+        "country_code": "US",
+        "capture_tech": "PSA",
+        "co2_captured_tonnes": "554971",
+        "capture_energy_MWh": "110994.2",
+        "transport_mode": "Pipeline",
+        "pipeline_length_km": "237.2",
+        "transport_loss_tonnes": "358.4",
+        "well_id": "WELL-INJ-009",
+        "injection_start_date": "1/1/24",
+        "injection_end_date": "12/31/24",
+        "co2_injected_tonnes": "553554.3",
+        "co2_produced_tonnes": "3719.4",
+        "reservoir_type": "Depleted gas field",
+        "avg_reservoir_pressure_MPa": "17.09",
+        "avg_reservoir_temp_C": "68.9",
+        "mmv_methods": "pressure, tracers, production logging, well integrity",
+        "leak_events_count": "0",
+        "leak_mass_tonnes": "0.0",
+        "ch4_emissions_tonnes": "0.57",
+        "ogmp_source_category": "ST",
+        "co2_net_stored_tonnes": "549476.5"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -116.1399,
+          46.9537
+        ]
+      }
+    }
+  ]
+}

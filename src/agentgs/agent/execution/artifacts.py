@@ -444,7 +444,7 @@ class ArtifactRegistry:
             )
         return _json_safe({"counts": counts, "available_types": sorted(counts), "recent": recent})
 
-    def as_trace(self) -> dict[str, Any]:
+    def as_event(self) -> dict[str, Any]:
         return {
             "artifact_count": len(self.records),
             "available_types": self.available_types(),

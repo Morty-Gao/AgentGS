@@ -133,6 +133,56 @@ def _match_template(template, answer):
     return dict(zip(names, matched.groups())) if matched else None
 
 
+def _workbook_pattern(spec):
+    """Match literal workbook layouts, including explicitly repeated record lines."""
+    numeric = {
+        "value", "magnitude", "energy", "actual_age", "lower", "upper", "distance",
+        "area", "capacity", "fCO2", "TCO2", "latitude", "longitude", "seconds",
+        "temperature",
+    }
+
+    def slot_pattern(name):
+        if name in {"count", "death_count", "degrees", "minutes"}:
+            pattern = r"\d+"
+        elif name in numeric:
+            decimals = spec.get("decimals")
+            pattern = (
+                r"[-+]?\d+\.\d{" + str(decimals) + "}"
+                if decimals is not None else NUMBER
+            )
+        elif name == "option_letter":
+            pattern = "[" + "".join(spec["allowed_options"]) + "]"
+        elif name == "yes_or_no":
+            pattern = "(?:yes|no)"
+        elif name == "hemisphere":
+            pattern = "[NSEW]"
+        elif name == "YYYY-MM":
+            pattern = r"\d{4}-(?:0[1-9]|1[0-2])"
+        elif name == "YYYY-MM-DD":
+            pattern = r"\d{4}-(?:0[1-9]|1[0-2])-(?:0[1-9]|[12]\d|3[01])"
+        elif name in {"resource_or_records", "asset_CRS_records"}:
+            pattern = r"[\s\S]+?"
+        else:
+            pattern = r"[^\n]+?"
+        return "(?:unknown|" + pattern + ")"
+
+    patterns = []
+    for index, line in enumerate(spec["template"].splitlines()):
+        chunks = []
+        last = 0
+        for match in SLOT.finditer(line):
+            chunks.extend((re.escape(line[last:match.start()]), slot_pattern(match[1])))
+            last = match.end()
+        chunks.append(re.escape(line[last:]))
+        pattern = "".join(chunks)
+        if index in spec.get("repeat_lines", []):
+            limit = spec.get("max_records")
+            repetitions = "*" if limit is None else "{0," + str(limit - 1) + "}"
+            pattern = "(?:" + pattern + ")(?:\n" + pattern + ")" + repetitions
+        patterns.append(pattern)
+    return "\n".join(patterns)
+
+
 def check_fixed_answer(answer, contract):
     """Non-mutating format/existence checks; never a scientific correctness score.
 
@@ -151,7 +201,16 @@ def check_fixed_answer(answer, contract):
         issues.append("unfilled_placeholder")
     if spec.get("allowed_options") and answer not in spec["allowed_options"]:
         issues.append("invalid_option_format")
-    if spec.get("version") == "1.2":
+    if spec.get("version") == "workbook-1":
+        if not re.fullmatch(_workbook_pattern(spec), answer):
+            issues.append("fixed_template_mismatch")
+        if spec["template"] == "<YYYY-MM-DD>" and answer != "unknown":
+            try:
+                if date.fromisoformat(answer).isoformat() != answer:
+                    raise ValueError()
+            except ValueError:
+                issues.append("invalid_date")
+    elif spec.get("version") == "1.2":
         matched_fields = []
         remaining = answer
         if spec.get("header_template"):

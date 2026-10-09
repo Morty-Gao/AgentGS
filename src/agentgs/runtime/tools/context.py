@@ -22,15 +22,17 @@ class ToolPaths:
     @classmethod
     def create(cls, root, outputs, artifact_root=None):
         root, outputs = Path(root).resolve(), Path(outputs).resolve()
-        manifest = root / "data/processed/resource_manifest.json"
+        manifest = root / "data/metadata/resources.json"
         aliases = json.loads(manifest.read_text("utf-8"))["aliases"] if manifest.exists() else {}
         outputs.mkdir(parents=True, exist_ok=True)
         return cls(
             root, outputs, aliases, Path(artifact_root).resolve() if artifact_root else outputs
         )
 
-    def dataset(self, name):
-        return self.root / "data/processed" / name
+    def data(self, dataset, relative):
+        from agentgs.datasets.layout import prepared_name, prepared_path
+
+        return prepared_path(self.root, prepared_name(dataset, relative))
 
     def resolve(self, value):
         if value is None:
@@ -42,7 +44,9 @@ class ToolPaths:
         text = text.replace("{asset_dir}", "")
         relative = self.aliases.get(text)
         if relative:
-            candidate = (self.root / relative).resolve()
+            from agentgs.config.paths import data_resource
+
+            candidate = data_resource(self.root, relative).resolve()
         else:
             candidate = Path(text).expanduser()
             candidate = (
@@ -50,18 +54,32 @@ class ToolPaths:
                 if candidate.is_absolute()
                 else (self.root / candidate).resolve()
             )
-        data_root = (self.root / "data").resolve()
-        if candidate.is_relative_to(data_root):
-            relative = candidate.relative_to(data_root)
+        input_roots = [(self.root / "data").resolve()]
+        input_root = next((root for root in input_roots if candidate.is_relative_to(root)), None)
+        if input_root is not None:
+            relative = candidate.relative_to(input_root)
+            if (
+                input_root == (self.root / "data").resolve()
+                and relative.parts
+                and relative.parts[0] == "raw"
+            ):
+                if relative != Path("raw/hazard/10.自然灾害与极端地震.xlsx"):
+                    raise ValueError(
+                        "Raw downloads and backups are unavailable to generic scientific tools"
+                    )
             # Evaluation labels/reports and application contracts are not
             # scientific input assets. The dedicated Geo snapshot adapter
             # reads its authorized replay data separately.
-            if relative.parts and relative.parts[0] in {"answer_formats", "geotooleval"}:
+            if relative.parts and (
+                relative.parts[0] in {"answer_formats", "geotooleval"}
+                or relative.parts[0].startswith("geotooleval")
+                or relative == Path("metadata/geotooleval.json")
+            ):
                 if relative != Path("geotooleval/10.自然灾害与极端地震.xlsx"):
                     raise ValueError(
                         "Evaluation labels and reports are unavailable to scientific tools"
                     )
-            if relative.parts and relative.parts[0] == "geoquestions1089":
+            if relative.parts and relative.parts[0] in {"geoquestions1089", "geoquestions"}:
                 raise ValueError("GeoQuestions replay data requires the dedicated snapshot tool")
         roots = (self.root / "data", self.artifact_root)
         if candidate.exists() and any(candidate.is_relative_to(p.resolve()) for p in roots):

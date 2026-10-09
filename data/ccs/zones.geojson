@@ -1,0 +1,75 @@
+{
+  "type": "FeatureCollection",
+  "name": "ccs_analysis_zones",
+  "source_disclaimer": "Synthetic west/east zones derived solely for tool-path evaluation.",
+  "features": [
+    {
+      "type": "Feature",
+      "properties": {
+        "zone_id": "CCS-W",
+        "zone_name": "West synthetic zone"
+      },
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [
+          [
+            [
+              -117.1399,
+              30.0453
+            ],
+            [
+              -101.35560000000001,
+              30.0453
+            ],
+            [
+              -101.35560000000001,
+              47.9537
+            ],
+            [
+              -117.1399,
+              47.9537
+            ],
+            [
+              -117.1399,
+              30.0453
+            ]
+          ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "zone_id": "CCS-E",
+        "zone_name": "East synthetic zone"
+      },
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [
+          [
+            [
+              -101.35560000000001,
+              30.0453
+            ],
+            [
+              -84.3096,
+              30.0453
+            ],
+            [
+              -84.3096,
+              47.9537
+            ],
+            [
+              -101.35560000000001,
+              47.9537
+            ],
+            [
+              -101.35560000000001,
+              30.0453
+            ]
+          ]
+        ]
+      }
+    }
+  ]
+}

@@ -22,6 +22,12 @@ def test_submit_events_artifact_and_errors(project):
                 break
             time.sleep(0.03)
         assert record["status"] == "succeeded"
+        assert "trace" not in record["result"]
+        messages = client.get(f"/api/tasks/{task_id}/messages").json()
+        assert messages == record["result"]["messages"]
+        call = next(m["tool_calls"][0] for m in messages if m["tool_calls"])
+        result = next(m for m in messages if m["role"] == "tool")
+        assert result["tool_call_id"] == call["id"]
         events = client.get("/api/tasks/" + task_id + "/events").text
         assert "task.succeeded" in events
         ref = record["result"]["tool_results"][0]["artifacts"][0]

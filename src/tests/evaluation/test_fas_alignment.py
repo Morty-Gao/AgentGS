@@ -1,4 +1,3 @@
-import importlib.util
 import json
 from pathlib import Path
 
@@ -8,17 +7,14 @@ ROOT = Path(__file__).parents[3]
 
 
 def test_frozen_fas_all_answer_types_match_original_source():
-    if (
-        importlib.util.find_spec("openpyxl") is None
-        or not (ROOT / "data/geotooleval/GeoToolEval.xlsx").exists()
-    ):
-        pytest.skip("Frozen benchmark workbook and reproduction profile are required")
+    if not (ROOT / "data/geotooleval.jsonl").exists():
+        pytest.skip("Embedded GeoToolEval JSONL is required")
     from agentgs.evaluation.datasets.geotooleval import load_tasks
     from agentgs.evaluation.metrics.answers import score_answer
 
     cases = json.loads((ROOT / "src/tests/fixtures/evaluation/fas.json").read_text("utf-8"))
     tasks = {
-        task.question_id: task for task in load_tasks(ROOT / "data/geotooleval/GeoToolEval.xlsx")
+        task.question_id: task for task in load_tasks(ROOT / "data/geotooleval.jsonl")
     }
     assert len(tasks) == 603
     for case in cases:
@@ -28,8 +24,6 @@ def test_frozen_fas_all_answer_types_match_original_source():
 
 
 def test_public_task_never_contains_private_reference_data():
-    if importlib.util.find_spec("openpyxl") is None:
-        pytest.skip("Benchmark adapter optional dependency")
     from agentgs.evaluation.benchmark import public_input
     from agentgs.evaluation.datasets.geotooleval import EvalTask
 
@@ -50,20 +44,15 @@ def test_public_task_never_contains_private_reference_data():
 
 
 def test_missing_usage_remains_unknown_for_original_cost_metrics():
-    if importlib.util.find_spec("openpyxl") is None:
-        pytest.skip("Benchmark adapter optional dependency")
     from agentgs.evaluation.metrics.tools import score_task
+    from agentgs.messages import Conversation
 
+    conversation = Conversation()
+    call_id = conversation.begin_tool("T", '{"value":1}')
+    conversation.finish_tool(call_id, "1", status="success")
     result = score_task(
         gold_steps=[{"tool_name": "T", "arguments": {"value": 1}}],
-        trace=[
-            {
-                "type": "tool_call",
-                "tool_name": "T",
-                "status": "success",
-                "tool_input": '{"value":1}',
-            }
-        ],
+        messages=conversation.messages,
         answer_score=1,
         token_usage={"usage_complete": False, "total_tokens": 0},
     )

@@ -1,0 +1,208 @@
+{
+  "mrds/mrds-csv.zip": {
+    "sha256": "31be4baaa86b082787bc74989146183db21badf7157db39b3f0a6fe0b38a5477",
+    "size": 25791223,
+    "urls": [
+      "https://mrdata.usgs.gov/mrds/mrds-csv.zip"
+    ]
+  },
+  "climate/bintanja2005.txt": {
+    "sha256": "ee6fd316d5a23fd1f164764bbee03630e0f83c029cc06fd91cfba20151d9cd8c",
+    "size": 1168402,
+    "urls": [
+      "https://www.ncei.noaa.gov/pub/data/paleo/contributions_by_author/bintanja2005/bintanja2005.txt"
+    ]
+  },
+  "climate/friedrich2016temp.txt": {
+    "sha256": "fd59e9617b8fa9949a417221570e7bfc04198db902d3b8952a1f737eb9aa89df",
+    "size": 17221,
+    "urls": [
+      "https://www.ncei.noaa.gov/pub/data/paleo/reconstructions/friedrich2016/friedrich2016temp.txt"
+    ]
+  },
+  "ccs/ccs_full_dataset_v1.0.csv": {
+    "sha256": "de794e510ba2a7b5927b7451284d83d7f279d97a41bc1574b1b054b0bb869dd4",
+    "size": 2599,
+    "urls": [
+      "https://zenodo.org/api/records/17003094/files/ccs_full_dataset_v1.0.csv/content"
+    ]
+  },
+  "ccs/ccs_injection_daily_v1.0.csv": {
+    "sha256": "f83d78603a1232ec4b2990a8404b79d3014ab14aa241462f73e6475101353118",
+    "size": 119361,
+    "urls": [
+      "https://zenodo.org/api/records/17003094/files/ccs_injection_daily_v1.0.csv/content"
+    ]
+  },
+  "ccs/ccs_injection_monthly_v1.0.csv": {
+    "sha256": "73a0e12124bfaa0446cb3dbc5792f8a6520b627364efd11291acf01e4f9a1498",
+    "size": 2848,
+    "urls": [
+      "https://zenodo.org/api/records/17003094/files/ccs_injection_monthly_v1.0.csv/content"
+    ]
+  },
+  "ccs/CITATION.cff": {
+    "sha256": "4e7e052f28970cbfaab4ade69563c86ec078c852c38f4d4d24232e9cdaa5785e",
+    "size": 329,
+    "urls": [
+      "https://zenodo.org/api/records/17003094/files/CITATION.cff/content"
+    ]
+  },
+  "ccs/LICENSE.txt": {
+    "sha256": "9081d1b60a74974282a6048fc7052242f990494b5800c8e6f90068909fed9658",
+    "size": 126,
+    "urls": [
+      "https://zenodo.org/api/records/17003094/files/LICENSE.txt/content"
+    ]
+  },
+  "ccs/NOTES.md": {
+    "sha256": "5bfa6cd195f4be26f608e53a4838a3201b78241613a6cdbcd1130039e3818adf",
+    "size": 1127,
+    "urls": [
+      "https://zenodo.org/api/records/17003094/files/NOTES.md/content"
+    ]
+  },
+  "ccs/README.md": {
+    "sha256": "429585298496ec827b6b995eae4b26566b41a23a94aa5930682d6c46ef82743d",
+    "size": 2425,
+    "urls": [
+      "https://zenodo.org/api/records/17003094/files/README.md/content"
+    ]
+  },
+  "ccs/SCCS-OFPOSDU_dataset_whitepaper.pdf": {
+    "sha256": "819d1c6a4e4d41fdc5e6b60206bf31dc573634cf38826c8e3f930d6e352909e4",
+    "size": 181241,
+    "urls": [
+      "https://zenodo.org/api/records/17003094/files/SCCS-OFPOSDU_dataset_whitepaper.pdf/content"
+    ]
+  },
+  "ccs/schema.yaml": {
+    "sha256": "9b222f769a298ff2145690036a05a82a538d2bfcdc334238ba21dedf538e6b64",
+    "size": 1854,
+    "urls": [
+      "https://zenodo.org/api/records/17003094/files/schema.yaml/content"
+    ]
+  },
+  "ccs/schema_crosswalk.csv": {
+    "sha256": "dd259d7914c92b1d74ab8b29bc1c720908bc71ff6a4af2e077f6bbe1c42157f5",
+    "size": 1468,
+    "urls": [
+      "https://zenodo.org/api/records/17003094/files/schema_crosswalk.csv/content"
+    ]
+  },
+  "ccs/zenodo_metadata.json": {
+    "sha256": "9e599bf48b218d45e1271c3415c47f422a92134c78d18f02596dd2a8547ffb92",
+    "size": 941,
+    "urls": [
+      "https://zenodo.org/api/records/17003094/files/zenodo_metadata.json/content"
+    ]
+  },
+  "socat/SOCATv2026_NorthPacific.tsv": {
+    "sha256": "32d1cb59c3e3c57180dd1eb039a75a50915b9b8051330da2a8d7d8db9b7fd68f",
+    "size": 327816280,
+    "urls": [
+      "https://www.ncei.noaa.gov/data/oceans/ncei/ocads/data/0315110/SOCATv2026_NorthPacific.tsv"
+    ]
+  },
+  "socat/SOCATv2026_tracks_gridded_monthly.csv": {
+    "sha256": "4768c5a20ba0cebdd72501964ecd80a3c67f344ed57e37bb8ccefc45bb15f407",
+    "size": 49866648,
+    "urls": [
+      "https://www.ncei.noaa.gov/data/oceans/ncei/ocads/data/0315110/SOCATv2026_Gridded_Data/SOCATv2026_tracks_gridded_monthly.csv"
+    ]
+  },
+  "glodap/GLODAPv2.2023_Pacific_Ocean.csv": {
+    "sha256": "d59b0776c5edaca5e921141444f22b9cdad5088db70f9129dc1b0fc50218d7ea",
+    "size": 365692237,
+    "urls": [
+      "https://www.ncei.noaa.gov/data/oceans/ncei/ocads/data/0283442/GLODAPv2.2023_Pacific_Ocean.csv"
+    ]
+  },
+  "snapo/113597.xlsx": {
+    "sha256": "3b3a32c79ffca24b12e71bb7eaf3335d2906a16019a6bfe5332956c4ce013a48",
+    "size": 9745354,
+    "urls": [
+      "https://www.seanoe.org/data/00911/102337/data/113597.xlsx"
+    ]
+  },
+  "biodeeptime/biodeeptime_csv.zip": {
+    "sha256": "fd95b9cbd8efc754887620847696ed07c14a972f0a8f50973024ef7fd3181e30",
+    "size": 88352037,
+    "urls": [
+      "https://zenodo.org/records/8154672/files/biodeeptime_csv.zip?download=1"
+    ]
+  },
+  "opsd/renewable_capacity_timeseries.csv": {
+    "size": 11708095,
+    "sha256": "d5c15d15447fa02c70064d7708e2047c023d923dbc3548632b9c39c355d96486",
+    "urls": [
+      "https://data.open-power-system-data.org/renewable_power_plants/2020-08-25/renewable_capacity_timeseries.csv"
+    ]
+  },
+  "opsd/renewable_power_plants_EU.csv": {
+    "size": 265825487,
+    "sha256": "1a61a9fbd0435a2a9d71ae567f4e602f8bee52bffd529ec440dbca6a3bf2aee1",
+    "urls": [
+      "https://data.open-power-system-data.org/renewable_power_plants/2020-08-25/renewable_power_plants_EU.csv"
+    ]
+  },
+  "population/population-with-un-projections.csv": {
+    "size": 1172501,
+    "sha256": "a77c8da5a75a47c82057c12ae52a38f4f11e3333c2a39a8b0260928caee45aa2",
+    "urls": [
+      "https://ourworldindata.org/grapher/population-with-un-projections.csv"
+    ],
+    "note": "Frozen legacy OWID CSV; upstream updates can fail checksum. No transformation."
+  },
+  "world_bank/API_EG.FEC.RNEW.ZS_DS2_en_csv_v2_50.zip": {
+    "size": 39816,
+    "sha256": "ebe5052c97e067cc9522875b199cce52f07c587ff4909fc4157fb776ae5e6092",
+    "urls": [
+      "https://api.worldbank.org/v2/en/indicator/EG.FEC.RNEW.ZS?downloadformat=csv"
+    ],
+    "note": "Legacy original ZIP. Live API ZIP changes can fail checksum; import old original for reproduction."
+  },
+  "gem/Global-Integrated-Power-March-2026-II.xlsx": {
+    "sha256": "18e14321cbc1f7a8f580417f4d1ec1176b78f9b61f19cfbfb9a3123c2d80f27b",
+    "urls": [],
+    "local_glob": "gem/*.xlsx"
+  },
+  "mrds/mrds.csv": {
+    "sha256": "ac1b70dcc8159ad4a691739f62c13ec738af3453f4840db7fafe4ed1c1253e37",
+    "urls": []
+  },
+  "world_bank/API_EG.FEC.RNEW.ZS_DS2_en_csv_v2_50.csv": {
+    "sha256": "d844ecd9e7be44b628a34ab83d7bdbdf07a602ecaa6ba37db3578451881da9d1",
+    "urls": []
+  },
+  "geoquestions1089/GeoQuestions1089.json": {
+    "sha256": "58645517fbb50723d02501bb24d41c663e020616a3f6cb4a9c6ea3fcfb9cb862",
+    "urls": [
+      "https://raw.githubusercontent.com/AI-team-UoA/GeoQuestions1089/b23ded0dd321c45b421be21f907d05929dbc20d8/GeoQuestions1089.json"
+    ],
+    "latest_urls": [
+      "https://raw.githubusercontent.com/AI-team-UoA/GeoQuestions1089/main/GeoQuestions1089.json"
+    ]
+  },
+  "geoquestions1089/GeoQuestions1089_answers.json": {
+    "sha256": "75b5a3abfab344139633345b03de24c4efe86244dde50c379570c4d8eb0d44e0",
+    "urls": [
+      "https://raw.githubusercontent.com/AI-team-UoA/GeoQuestions1089/b23ded0dd321c45b421be21f907d05929dbc20d8/GeoQuestions1089_answers.json"
+    ],
+    "latest_urls": [
+      "https://raw.githubusercontent.com/AI-team-UoA/GeoQuestions1089/main/GeoQuestions1089_answers.json"
+    ]
+  },
+  "climate/NASA_GISTEMP_current.csv": {
+    "sha256": null,
+    "urls": [
+      "https://data.giss.nasa.gov/gistemp/tabledata_v4/GLB.Ts+dSST.csv"
+    ]
+  },
+  "world_bank/renewable_current.zip": {
+    "sha256": null,
+    "urls": [
+      "https://api.worldbank.org/v2/en/indicator/EG.FEC.RNEW.ZS?downloadformat=csv"
+    ]
+  }
+}

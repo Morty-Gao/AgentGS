@@ -1,0 +1,17 @@
+{
+  "archive_sha256": "38ec78b9c5b425ce1ecfcdae714a3b901f2aa00ca8ce69bf68ba4b7d54d76fcd",
+  "files": {
+    "ccs_analysis_zones.geojson": "e28d682ec8b111fc7ea5dd6d850896b4f44db0e90612840a5b7f50130ae624e9",
+    "ccs_crs_inventory.csv": "bead08a9445fbb4bdbd2058c1e429274ddccc77bf42e362995e32d6d7319f039",
+    "ccs_facilities.geojson": "1e3b77121f4b22d11a67921c6e36df92570cc420004c8c7ad67a3f8aa351dd8f",
+    "ccs_facilities_webmercator.csv": "389f4bb8ebadf946ef4be84eb734729a4c636b940b11ad9a63a700d35cfb6226",
+    "ccs_full_dataset_v1.0.csv": "de794e510ba2a7b5927b7451284d83d7f279d97a41bc1574b1b054b0bb869dd4",
+    "ccs_injection_daily_v1.0.csv": "f83d78603a1232ec4b2990a8404b79d3014ab14aa241462f73e6475101353118",
+    "ccs_injection_monthly_geo.csv": "0cde09cb61d5563570f74b185241ca053c9d5e24422f3503f1d4dd77403c54ca",
+    "ccs_injection_monthly_v1.0.csv": "73a0e12124bfaa0446cb3dbc5792f8a6520b627364efd11291acf01e4f9a1498",
+    "CITATION.cff": "4e7e052f28970cbfaab4ade69563c86ec078c852c38f4d4d24232e9cdaa5785e",
+    "LICENSE.txt": "9081d1b60a74974282a6048fc7052242f990494b5800c8e6f90068909fed9658",
+    "schema.yaml": "9b222f769a298ff2145690036a05a82a538d2bfcdc334238ba21dedf538e6b64",
+    "schema_crosswalk.csv": "dd259d7914c92b1d74ab8b29bc1c720908bc71ff6a4af2e077f6bbe1c42157f5"
+  }
+}

@@ -1,0 +1,15 @@
+{
+  "archive_sha256": "f5a6f3c90c6e57142c6a5f7fe93a4077be745c1564f4d617d04a8cf208baa60c",
+  "files": {
+    "country_transition_metrics.csv": "e5cb068bf865cc652b704935566869325eec0949f0da37d2c55fa5b14974dd58",
+    "gip_operating_country_type.csv": "3486714219874e8dd6cd001cbbb092bf60a3f5fbdb0d77064acb2405784c5e59",
+    "gip_top_operating_facilities.csv": "af736134b4e4679253d75b8ca1ade81c29eee9a1189d4fae4e76ce59ecb29225",
+    "mrds_critical_mineral_snapshot.csv": "06d01ef2d90704bf2db4e4a567aaf47349324e2bc21a1752a54f641b238c508c",
+    "opsd_capacity_year_end.csv": "5682de5930589c2f50e0836e7aad6e39c6d6c47aa26bfa89cdae72b227b8ab11",
+    "opsd_capital_nearest.csv": "8195269b15ecc8aab1bb00897cd3f0b0d26916b57bb2cc68e1fec533109cff24",
+    "opsd_country_energy_summary.csv": "c891b915b91451fb843d61403fdd0e9368cdfd9deb53a1c019a82e4fdd341faf",
+    "opsd_landmark_facilities.csv": "658fa06a98b81980427b79d9cbb99bcc7670d74b867534be4b7606de36d6c25c",
+    "power_mineral_nearest_samples.csv": "bfbaa656df8d876877339d1efd0bf999a0cae81c46ce474d36d4201004e8eb95"
+  },
+  "upstream_raw_present": false
+}

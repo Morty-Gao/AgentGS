@@ -1,0 +1,26 @@
+{
+  "source_name": "metal_minerals_subset.csv",
+  "source_sha256": "fa3f7cec9d74b0221a52cf7b4e68d667f389b3ae6b36d06c03a4906b0732f3f9",
+  "row_count": 8000,
+  "columns": [
+    "dep_id",
+    "url",
+    "site_name",
+    "latitude",
+    "longitude",
+    "country",
+    "state",
+    "com_type",
+    "commod1",
+    "commod2",
+    "commod3",
+    "dep_type",
+    "prod_size",
+    "dev_stat",
+    "ore"
+  ],
+  "selection": "All supplied rows, in original order; no resampling or conversion",
+  "files": {
+    "metal_minerals_subset.csv": "fa3f7cec9d74b0221a52cf7b4e68d667f389b3ae6b36d06c03a4906b0732f3f9"
+  }
+}

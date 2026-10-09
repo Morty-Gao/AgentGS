@@ -7,8 +7,21 @@ import typer
 from rich.console import Console
 from rich.table import Table
 
+from agentgs.cli.runtime import (
+    AllowProot,
+    CodeTimeout,
+    Concurrency,
+    RssLimit,
+    Sandbox,
+    SandboxMode,
+    Timeout,
+    TotalRssLimit,
+    WorkerPython,
+    runtime_settings,
+)
 from agentgs.config.paths import project_root
 from agentgs.contracts.models import TaskInput, TaskStatus, ToolCall
+from agentgs.messages import Conversation
 from agentgs.runtime.service import TaskService
 from agentgs.runtime.storage.store import TaskStore
 
@@ -45,14 +58,54 @@ def run(
     arguments: str = typer.Option("{}", "--arguments"),
     model: str | None = typer.Option(None, "--model"),
     effort: str | None = typer.Option(None, "--effort"),
+    messages: Path | None = typer.Option(
+        None, "--messages", help="Conversation JSON or JSONL history"
+    ),
+    concurrency: Concurrency = None,
+    timeout: Timeout = None,
+    rss_limit_mb: RssLimit = None,
+    max_total_rss_mb: TotalRssLimit = None,
+    code_timeout: CodeTimeout = None,
+    sandbox: Sandbox = SandboxMode.AUTO,
+    allow_proot: AllowProot = False,
+    worker_python: WorkerPython = None,
 ):
     """Run a question or a typed tool call. Explicit calls require no LLM credentials."""
     root = project_root(project)
     calls = [ToolCall(tool=tool, arguments=json.loads(arguments))] if tool else []
-    task = TaskInput(question=question, calls=calls, model=model, effort=effort)
+    history = []
+    if messages:
+        if messages.suffix == ".jsonl":
+            history = Conversation.from_jsonl(messages.read_text(encoding="utf-8")).messages
+        else:
+            data = json.loads(messages.read_text(encoding="utf-8"))
+            history = (
+                Conversation(messages=data).messages
+                if isinstance(data, list)
+                else Conversation.model_validate(data).messages
+            )
+    task = TaskInput(
+        question=question,
+        calls=calls,
+        model=model,
+        effort=effort,
+        messages=history,
+    )
 
     async def execute():
-        service = TaskService(root)
+        service = TaskService(
+            root,
+            settings=runtime_settings(
+                concurrency,
+                timeout,
+                rss_limit_mb,
+                max_total_rss_mb,
+                code_timeout,
+                sandbox,
+                allow_proot,
+                worker_python,
+            ),
+        )
         try:
             record = service.submit(task)
             return await service.wait(record.spec.id)
@@ -179,23 +232,46 @@ def doctor(project: Path = typer.Option(Path.cwd(), "--project")):
 @config_app.command("validate")
 def validate_config(project: Path = typer.Option(Path.cwd(), "--project")):
     from agentgs.client.config import load_llm
-    from agentgs.config.settings import load_runtime
+    from agentgs.config.algorithm import load_algorithm
 
     root = project_root(project)
     llm = load_llm(root)
     emit(
-        {"models": list(llm.models), "roles": llm.roles, "runtime": load_runtime(root).model_dump()}
+        {"models": list(llm.models), "roles": llm.roles, "agent": load_algorithm(root).model_dump()}
     )
 
 
 @eval_app.command("run")
-def evaluate_command(cases: Path, project: Path = typer.Option(Path.cwd(), "--project")):
+def evaluate_command(
+    cases: Path,
+    project: Path = typer.Option(Path.cwd(), "--project"),
+    concurrency: Concurrency = None,
+    timeout: Timeout = None,
+    rss_limit_mb: RssLimit = None,
+    max_total_rss_mb: TotalRssLimit = None,
+    code_timeout: CodeTimeout = None,
+    sandbox: Sandbox = SandboxMode.AUTO,
+    allow_proot: AllowProot = False,
+    worker_python: WorkerPython = None,
+):
     from agentgs.evaluation.runner import evaluate, load_cases
 
     root = project_root(project)
 
     async def execute():
-        service = TaskService(root)
+        service = TaskService(
+            root,
+            settings=runtime_settings(
+                concurrency,
+                timeout,
+                rss_limit_mb,
+                max_total_rss_mb,
+                code_timeout,
+                sandbox,
+                allow_proot,
+                worker_python,
+            ),
+        )
         try:
             return await evaluate(service, load_cases(cases), root / "outputs" / "evaluations")
         finally:
@@ -212,21 +288,41 @@ def benchmark_command(
     retry_failed: bool = typer.Option(False, "--retry-failed"),
     planning_mode: str = typer.Option("skill_guided", "--planning-mode"),
     require_llm: bool = typer.Option(True, "--require-llm/--allow-rule-routing"),
+    concurrency: Concurrency = None,
+    timeout: Timeout = None,
+    rss_limit_mb: RssLimit = None,
+    max_total_rss_mb: TotalRssLimit = None,
+    code_timeout: CodeTimeout = None,
+    sandbox: Sandbox = SandboxMode.AUTO,
+    allow_proot: AllowProot = False,
+    worker_python: WorkerPython = None,
 ):
     """Run actual Agent requests with frozen FAS/flow metrics; preserve every attempt."""
     from agentgs.evaluation.benchmark import run_benchmark
-    from agentgs.evaluation.datasets.version import benchmark_workbook
+    from agentgs.evaluation.datasets.version import benchmark_dataset
     from agentgs.runtime.answer_contracts import AnswerContracts
 
     root = project_root(project)
     chosen = {int(value) for value in ids.split(",") if value.strip()} if ids else None
 
     async def execute():
-        service = TaskService(root)
+        service = TaskService(
+            root,
+            settings=runtime_settings(
+                concurrency,
+                timeout,
+                rss_limit_mb,
+                max_total_rss_mb,
+                code_timeout,
+                sandbox,
+                allow_proot,
+                worker_python,
+            ),
+        )
         try:
             return await run_benchmark(
                 service,
-                benchmark_workbook(root),
+                benchmark_dataset(root),
                 root / output,
                 ids=chosen,
                 retry_failed=retry_failed,
@@ -250,11 +346,11 @@ def score_benchmark(
 ):
     """Score saved original model answers without any new model calls."""
     from agentgs.evaluation.benchmark import score_predictions
-    from agentgs.evaluation.datasets.version import benchmark_workbook
+    from agentgs.evaluation.datasets.version import benchmark_dataset
 
     root = project_root(project)
     report = score_predictions(
-        benchmark_workbook(root),
+        benchmark_dataset(root),
         predictions,
         root / output,
         allow_partial=allow_partial,
@@ -264,13 +360,33 @@ def score_benchmark(
 
 @ui_app.command("serve")
 def serve(
-    project: Path = typer.Option(Path.cwd(), "--project"), host: str = "127.0.0.1", port: int = 8000
+    project: Path = typer.Option(Path.cwd(), "--project"),
+    host: str = "127.0.0.1",
+    port: int = 8000,
+    concurrency: Concurrency = None,
+    timeout: Timeout = None,
+    rss_limit_mb: RssLimit = None,
+    max_total_rss_mb: TotalRssLimit = None,
+    code_timeout: CodeTimeout = None,
+    sandbox: Sandbox = SandboxMode.AUTO,
+    allow_proot: AllowProot = False,
+    worker_python: WorkerPython = None,
 ):
     import uvicorn
 
     from agentgs.visualization.backend.app import create_app
 
-    uvicorn.run(create_app(project_root(project)), host=host, port=port)
+    settings = runtime_settings(
+        concurrency,
+        timeout,
+        rss_limit_mb,
+        max_total_rss_mb,
+        code_timeout,
+        sandbox,
+        allow_proot,
+        worker_python,
+    )
+    uvicorn.run(create_app(project_root(project), settings=settings), host=host, port=port)
 
 
 @app.command("wsl")

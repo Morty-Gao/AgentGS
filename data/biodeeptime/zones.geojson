@@ -1,0 +1,77 @@
+{
+  "type": "FeatureCollection",
+  "name": "deep_time_analysis_zones",
+  "crs_note": "RFC 7946 WGS84; synthetic analytical zones derived from selected-point extent.",
+  "features": [
+    {
+      "type": "Feature",
+      "properties": {
+        "zone_id": "DT-W",
+        "zone_name": "West analytical zone",
+        "synthetic": true
+      },
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [
+          [
+            [
+              -131.15,
+              -40.5
+            ],
+            [
+              -62.591665000000006,
+              -40.5
+            ],
+            [
+              -62.591665000000006,
+              70.68035
+            ],
+            [
+              -131.15,
+              70.68035
+            ],
+            [
+              -131.15,
+              -40.5
+            ]
+          ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "zone_id": "DT-E",
+        "zone_name": "East analytical zone",
+        "synthetic": true
+      },
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [
+          [
+            [
+              -62.591665000000006,
+              -40.5
+            ],
+            [
+              152.33333,
+              -40.5
+            ],
+            [
+              152.33333,
+              70.68035
+            ],
+            [
+              -62.591665000000006,
+              70.68035
+            ],
+            [
+              -62.591665000000006,
+              -40.5
+            ]
+          ]
+        ]
+      }
+    }
+  ]
+}

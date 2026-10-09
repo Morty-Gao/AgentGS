@@ -22,7 +22,7 @@ from agentgs.runtime.tools.resources import _load_dataset_generator
 
 def _energy_facility_distance(params: dict[str, Any]) -> str:
     municipality = params.get("solar_municipality")
-    table = _read_csv(paths().dataset("energy") / "derived" / "opsd_landmark_facilities.csv")
+    table = _read_csv(paths().data("energy", "derived/opsd_landmark_facilities.csv"))
     country = str(params["country"])
     wind_municipality = params.get("wind_municipality")
     missing_solar_locator = (
@@ -84,7 +84,7 @@ def _energy_facility_distance(params: dict[str, Any]) -> str:
 
 
 def _energy_mineral_distance(params: dict[str, Any]) -> str:
-    table = _read_csv(paths().dataset("energy") / "derived" / "mrds_critical_mineral_snapshot.csv")
+    table = _read_csv(paths().data("energy", "derived/mrds_critical_mineral_snapshot.csv"))
     first = table[table["dep_id"].astype(int) == int(params["dep_id_1"])].iloc[0]
     second = table[table["dep_id"].astype(int) == int(params["dep_id_2"])].iloc[0]
     distance = _haversine(
@@ -102,7 +102,7 @@ def _energy_bbox(params: dict[str, Any]) -> str:
 
 
 def _energy_nearest(params: dict[str, Any]) -> str:
-    table = _read_csv(paths().dataset("energy") / "derived" / "opsd_capital_nearest.csv")
+    table = _read_csv(paths().data("energy", "derived/opsd_capital_nearest.csv"))
     rows = table[
         (table["country"] == params["country"])
         & (table["energy_source"] == params["energy_source"])
@@ -113,7 +113,7 @@ def _energy_nearest(params: dict[str, Any]) -> str:
 def _capacity_row(series: str, year: int):
     import pandas as pd
 
-    table = _read_csv(paths().dataset("energy") / "derived" / "opsd_capacity_year_end.csv")
+    table = _read_csv(paths().data("energy", "derived/opsd_capacity_year_end.csv"))
     table["day"] = pd.to_datetime(table["day"])
     rows = table[table["day"].dt.year == year]
     if rows.empty:
@@ -133,13 +133,13 @@ def _energy_capacity(params: dict[str, Any]) -> str:
 
 
 def _energy_cross_nearest(params: dict[str, Any]) -> str:
-    table = _read_csv(paths().dataset("energy") / "derived" / "power_mineral_nearest_samples.csv")
+    table = _read_csv(paths().data("energy", "derived/power_mineral_nearest_samples.csv"))
     rows = table[table["facility"].astype(str) == str(params["plant_name"])]
     return _result(match=_row_dict(rows.iloc[0]))
 
 
 def _energy_mix(params: dict[str, Any]) -> str:
-    table = _read_csv(paths().dataset("energy") / "derived" / "gip_operating_country_type.csv")
+    table = _read_csv(paths().data("energy", "derived/gip_operating_country_type.csv"))
     rows = table[table["country"].astype(str) == str(params["country"])]
     if params.get("renewable_types"):
         rows = rows[rows["type"].isin(params["renewable_types"])]
@@ -165,7 +165,7 @@ def _energy_growth(params: dict[str, Any]) -> str:
 
 
 def _energy_transition(params: dict[str, Any]) -> str:
-    table = _read_csv(paths().dataset("energy") / "derived" / "country_transition_metrics.csv")
+    table = _read_csv(paths().data("energy", "derived/country_transition_metrics.csv"))
     rows = table[table["country"].astype(str) == str(params["country"])]
     return _result(metrics=_row_dict(rows.iloc[0]))
 
@@ -178,10 +178,14 @@ def _energy_full_overlay_sources():
     examples, not bbox population statistics.  Parse the retained authoritative
     sources once and cache their normalized point tables for subsequent calls.
     """
+    facilities = paths().data("energy", "full/gip_renewable_points.csv.gz")
+    minerals = paths().data("energy", "full/mrds_critical_mineral_points.csv.gz")
+    if facilities.is_file() and minerals.is_file():
+        return (_read_csv(facilities), _read_csv(minerals))
     generator = _load_dataset_generator("generate_energy_resources_toolqa")
-    extracted = paths().root / "data" / "processed/raw_sources"
-    gip_path = extracted / "gem-data" / "Global-Integrated-Power-March-2026-II.xlsx"
-    mrds_path = extracted / "mrds-csv" / "mrds.csv"
+    extracted = paths().root / "data/raw"
+    gip_path = paths().root / "data/gem.jsonl"
+    mrds_path = extracted / "mrds" / "mrds.csv"
     if not gip_path.is_file() or not mrds_path.is_file():
         raise FileNotFoundError(
             "Full GEM/MRDS sources required for regional overlay are unavailable"

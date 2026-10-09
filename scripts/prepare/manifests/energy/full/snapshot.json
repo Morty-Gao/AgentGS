@@ -1,0 +1,14 @@
+{
+  "files": {
+    "gip_renewable_points.csv.gz": "ca524eacf758ea6c1d59880375a063003aa771751056fa3a33630afede62323f",
+    "mrds_critical_mineral_points.csv.gz": "9924490bd66335dd0c0600c013ed9b0751f1487a8ec48a5fa2dc17e27c5f0ed2"
+  },
+  "rows": {
+    "gip_renewable_points.csv.gz": 28685,
+    "mrds_critical_mineral_points.csv.gz": 70649
+  },
+  "source_sha256": {
+    "gem": "18e14321cbc1f7a8f580417f4d1ec1176b78f9b61f19cfbfb9a3123c2d80f27b",
+    "mrds": "ac1b70dcc8159ad4a691739f62c13ec738af3453f4840db7fafe4ed1c1253e37"
+  }
+}

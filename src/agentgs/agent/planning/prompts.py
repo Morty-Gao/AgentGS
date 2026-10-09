@@ -1,46 +1,4 @@
-def generate_plan_input_template(
-    question,
-    current_output,
-    tool_name,
-    input_type,
-    output_type,
-    previous_answer,
-    execution_feedback=None,
-    attempt_history=None,
-):
-    execution_feedback = execution_feedback or "No previous failed execution."
-    attempt_history = attempt_history or []
-    return f"""
-    You are the information extractor, and your task is to extract the incoming parameters from the currently provided information as input to the tool function.
-
-    This is the reference information for you
-    question: {question} 
-    tool_name: {tool_name}
-    input_type:{input_type}
-    output_type: {output_type}
-    current_output: {current_output}
-    previous_answer: {previous_answer}
-    execution_feedback: {execution_feedback}
-    previous_attempts: {attempt_history}
-
-    current_output indicates the output of an existing tool, and previous_answer indicates the existing answer to the problem, tool_name is the name of the tool function that needs to be used, input_type is the input parameter type of the tool function, and output_type is the output type of the tool function.
-
-    Before extracting parameters, you first need to check "input_type". If "input_type" asks for JSON arguments or a JSON object, return one valid JSON object containing all parameters required by that tool, including source paths, sheet names, filters, fields, arrays, thresholds, and identifiers that are present in the question or previous tool output. Do not reduce a JSON tool input to a single scalar or bare file path. Otherwise, if "input_type" contains "pair", such as "smiles pair", "protein sequence pair", it means that multiple parameters need to be extracted. Use between different parameters. '.' separated. If "input_type" is neither JSON nor a pair, such as "molecule name" or "protein name", only one parameter can be extracted.
-
-    Note: The one-parameter restriction applies only to scalar, non-JSON input types. A JSON input is one structured argument and must preserve all required fields. When later tools depend on earlier outputs, copy the concrete values or artifact paths from previous_answer into the correct JSON keys.
-
-    You need to combine the input type of the tool function and extract the correct input parameters of the tool function from the description document. It is then given strictly as follows:
-    Input:your answer
-
-    Note that your answer should strictly match the input parameter type and need not contain other information. For example, if you need to extract information about smiles, your answer should be "input:CCO" and be sure not to include any additional information.
-
-    Execution-feedback rules:
-    1. If execution_feedback reports invalid_input or tool_runtime_error, repair the input using the reported error and expected input format.
-    2. Do not repeat a rejected input. A transport_error is the only case where retrying the same input is allowed.
-    3. Return only one corrected input after the "Input:" prefix; do not explain the correction.
-    4. Use the exact required JSON key names shown by input_type. Do not replace a required array key with a directory, years, or another source-locator field.
-    5. Prefer concrete values from current_output over the original question when preparing a downstream call. In particular, map a preceding file-list result's "files" array to a required "file_list" array, and map preceding numeric result values to the required x or y array.
-    """
+"""Stage instructions; tool invocation is exclusively native function calling."""
 
 
 def generate_output_template(question, output):
@@ -98,70 +56,38 @@ Answer presentation:
 """
 
 
-def generate_tools_plan_template(
-    question, tools_retrieved, previous_answer="", skill_plan_context=""
-):
+
+def generate_tools_plan_template(question, tools_retrieved, previous_answer="", skill_plan_context=""):
     return f"""
-    You are a professional planner. Now you need to develop a plan chain to complete the task based on the task description and corresponding reference information I provide.
+You are the tool planner for a geoscience task. Submit the ordered tool execution
+instances using submit_tool_plan. This planning function does not execute any
+scientific tool. Choose only registered tools in the supplied candidate context.
 
-    And your answer should strictly follow the following format:
-    - A detailed breakdown of each sub-task.
-    - The name of the tool required for each sub-task.
-    - A plan chain showing all tools in order, clearly distinguishing between tools used for similar sub-tasks.
+Preserve these planning rules:
+- Each list entry is one physical execution. Preserve repeated tool names for
+  distinct entities, periods, scenes or cohorts; never merge independent instances.
+- Follow producer/consumer dependencies and the selected Skill capabilities.
+  Include required validation, algebra, aggregation and rendering intermediates.
+- Start with dedicated table-load or file-discovery tools when raw source assets
+  need discovery and the graph declares those pipelines.
+- Do not add executions just for narration, formatting, reading returned values
+  or rounding. A single sufficient execution should produce a one-entry plan.
+- Per-scene statistics followed by scalar averaging differs from pixelwise raster
+  compositing. Respect the actual tool's reduction and grid contracts.
+- Ground choices in the tool schemas and actual available resources. Dependency
+  and library names are not callable tools.
+- Repair persistent failures using execution feedback; do not repeat an unchanged
+  failed plan. Upstream successful executions may be reused by the runtime.
 
-    The tools and their sequence should be formatted as:
-    Plan Chain:
-    ['tool_A', 'tool_B', 'tool_C', ...]
+Question and public resources:
+{question}
 
-    Note:
-    1.If the same tool is required multiple times for different inputs, it should appear as many times as needed in the plan chain.
-    2.Your answer must include "Plan Chain:". And the tools part of it must be from existing tools, not made up.
-    3.No comments need to be added in the Plan Chain: 
-    4.Use only registered tool names that appear as actual tool subjects in the reference information. Do not use library or dependency names such as GeoPandas, xarray, pandas, GDAL, MetPy, or similar package names unless they are explicitly registered as tools.
-    5.Each Plan Chain entry means one real tool execution. Do not add tool calls for reasoning-only actions such as identifying a tool, reading a returned value, rounding, formatting, or writing the final answer.
-    6.If one tool execution can answer the question, return exactly one tool in Plan Chain. Repeat a tool only when it must be executed with distinct input values; never repeat it merely because several explanatory sub-tasks mention it.
-    7.When the question provides a raw workbook, directory, or other source asset and the retrieved graph contains a dedicated load/list entry tool followed by recommended next tools, start with that entry tool and follow the graph pipeline needed for the requested operation.
-    8.Treat every explicitly requested entity, period, band pair, or temporal cohort as a separate execution instance when the Tool input schema cannot consume all of them at once. Preserve repeated tool names in Plan Chain.
-    9.Follow data dependencies: a Tool consuming a raster/vector/table artifact must appear after the producer that creates it. Include validation, algebra, aggregation, and rendering capabilities when the Skill workflow and Tool schemas require those intermediate artifacts.
-    10.Do not add a Tool merely for narration. Each entry must have a concrete input artifact or parameter and a downstream consumer or final evidence role.
-    11.Respect reduction semantics from Tool schemas. A request that first reduces every raster to a unit-area/per-image value and then averages those values over a period is a two-stage reduction: use the registered batch per-image statistic Tool followed by the registered scalar mean Tool. A pixelwise composite/GeoTIFF-average Tool is not interchangeable because it returns a raster artifact.
+Retrieved tools and relationships:
+{tools_retrieved}
 
-    Next, start your attempt:
-    This is the task question:
-    {question}
+Previous execution results and feedback:
+{previous_answer}
 
-    This is the reference information provided to you:
-    {tools_retrieved}
-
-    Previous execution results and feedback (may be empty):
-    {previous_answer}
-
-    Skill Plan (when Skill-guided Planning is enabled):
-    {skill_plan_context}
-
-    Treat the Skill Plan as a capability-level constraint. Select concrete
-    registered tools dynamically; do not invent a Skill name as a Tool call.
-
-    If previous execution feedback reports a persistent failure, repair the plan by choosing a compatible registered tool or by changing the required step. Do not repeat an unchanged failed plan.
-
-    Please give your answer.
-    """
-
-
-def query_next_tool_template(question, triplet):
-    return f"""
-    Your task is to tell me what needs to be done to solve this problem based on the existing information.
-
-    I will give you the problem to be solved:
-    {question}
-
-    The existing triple information:
-    {triplet}
-
-    You need to analyze the problem and the given information and tell me what needs to be done.
-
-    Note:
-    1. You only need to answer the steps that need to be done later. You do not need to include the existing triple information or reflect the thinking process. You only need to tell me what needs to be done. The answer should be as concise as possible.
-    2. The existing triple information may be the first step to solve this problem, or it may be the subsequent step.
-    3. The existing triple information may also be irrelevant to solving this problem. At this time, you need to think about what needs to be done.
-    """
+Skill/capability constraints:
+{skill_plan_context}
+"""

@@ -1,18 +1,15 @@
-"""Task-oriented implementation of the frozen staged GeoToolAgent algorithm."""
+"""Staged GeoToolAgent orchestration with native model function calls."""
 
 from __future__ import annotations
 
 import asyncio
 import json
-import re
 from copy import deepcopy
 from types import SimpleNamespace
 
 from agentgs.agent.answering.service import AnsweringService, FinalAnswerGenerationError
 from agentgs.agent.execution import scope
 from agentgs.agent.execution.artifacts import ArtifactRegistry
-from agentgs.agent.execution.bindings import prepare_tool_input, tool_input_is_ready
-from agentgs.agent.execution.feedback import run_tool_with_feedback
 from agentgs.agent.execution.scientific import overlay_scientific_tool_schema
 from agentgs.agent.execution.service import ExecutionService
 from agentgs.agent.planning.bridge import (
@@ -24,42 +21,19 @@ from agentgs.agent.planning.bridge_comparison import run_shared_bridge_compariso
 from agentgs.agent.planning.geosparql import _heuristic_geosparql_query
 from agentgs.agent.planning.grounding import ground_plan
 from agentgs.agent.planning.model_stages import ModelStages
-from agentgs.agent.planning.parsing import extract_tool_path
 from agentgs.agent.planning.routing.entry import infer_tools, normalize_plan
 from agentgs.agent.planning.skills import builtin_planner
 from agentgs.agent.retrieval.scored_skills import RESOURCE_MARKER
 from agentgs.agent.state import AgentExecutionError, RunState
 from agentgs.config.algorithm import AlgorithmSettings
 from agentgs.contracts.catalog import load_catalog
+from agentgs.contracts.remote_sensing import contract_scope
 from agentgs.contracts.resources import resource_access
 
 
 class MutablePlan(SimpleNamespace):
     def as_dict(self):
         return deepcopy({k: v for k, v in self.__dict__.items() if not k.startswith("_")})
-
-
-def explicit_chain(question, names):
-    if not any(
-        marker in question
-        for marker in ("工具链", "依次调用", "严格按", "tool chain", "Tool Chain")
-    ):
-        return []
-    steps = []
-    for raw in question.splitlines():
-        line = re.sub(r"^\s*(?:[-*]\s*)?\d+[\.\、)]\s*", "", raw.strip())
-        for name in sorted(set(names), key=len, reverse=True):
-            if line.startswith(name):
-                rest = re.sub(
-                    r"^(?:\||:|：|输入|input)\s*[:：]?\s*",
-                    "",
-                    line[len(name) :].strip(),
-                    flags=re.I,
-                )
-                if rest:
-                    steps.append((name, rest))
-                break
-    return steps if len(steps) >= 2 else []
 
 
 def available_tool_names(relations, allowed):
@@ -104,10 +78,6 @@ def snapshot_relations(relations):
 
 class AgentEngine:
     async def run(self, task, context):
-        if task.algorithm == "prototype":
-            from agentgs.agent.prototype import PrototypeToolCallingEngine
-
-            return await PrototypeToolCallingEngine().run(task, context)
         context.options = context.options or AlgorithmSettings()
         if task.planning_mode is not None:
             context.options = context.options.model_copy(
@@ -116,15 +86,14 @@ class AgentEngine:
         if task.require_llm is not None:
             context.options = context.options.model_copy(update={"require_llm": task.require_llm})
         state = RunState(context, task)
-        # Explicit offline tool requests are a separate transport protocol, not an LLM experiment.
+        # Explicit structured requests use the same tool schemas without a model.
         if task.calls:
             state.emit(
                 "plan.created",
                 {"source": "explicit_calls", "tools": [call.tool for call in task.calls]},
             )
             for call in task.calls:
-                result = await context.tools.execute(call)
-                state.results.append(result)
+                result = await state.execute(call)
                 state.save()
                 if not result.succeeded:
                     raise AgentExecutionError(
@@ -144,7 +113,7 @@ class AgentEngine:
                 "\n\n" + RESOURCE_MARKER + " " + json.dumps(task.input_resource, ensure_ascii=False)
             )
         stages = ModelStages(
-            state.model,
+            state,
             lambda q: (
                 task.output_contract
                 or (context.answer_contract_lookup(q) if context.answer_contract_lookup else None)
@@ -154,14 +123,15 @@ class AgentEngine:
         execution = ExecutionService(state, stages)
         answering = AnsweringService(state, stages)
         permission = scope._permitted.set(context.options.rs_explicit_references)
-        from agentgs.contracts.remote_sensing import _enabled
-
-        rs_token = _enabled.set(context.options.rs_local_contracts)
         from agentgs.agent.planning.bridge import _bridge_enabled
 
         bridge_token = _bridge_enabled.set(context.options.shared_bridge)
         try:
-            with resource_access(context.resource_resolver), scope.request_scope(task.input_domain):
+            with (
+                contract_scope(context.options.rs_local_contracts),
+                resource_access(context.resource_resolver),
+                scope.request_scope(task.input_domain),
+            ):
                 return await self._staged(question, state, stages, execution, answering)
         except Exception as exc:
             if isinstance(exc, AgentExecutionError):
@@ -172,7 +142,6 @@ class AgentEngine:
             ) from exc
         finally:
             scope._permitted.reset(permission)
-            _enabled.reset(rs_token)
             _bridge_enabled.reset(bridge_token)
 
     async def _staged(self, question, state, stages, execution, answering):
@@ -182,45 +151,6 @@ class AgentEngine:
         planner = context.planner or builtin_planner(rs_local_contracts=options.rs_local_contracts)
         registry = ArtifactRegistry(question)
         scope.set_registry(registry)
-        explicit = explicit_chain(question, names) if not options.require_llm else []
-        if explicit:
-            if options.planning_mode == "skill_guided":
-                explicit_plan, _ = self._skill_layer(
-                    question, [name for name, _ in explicit], names, planner, state
-                )
-                state.emit(
-                    "tool_grounding",
-                    {
-                        "content": ground_plan(
-                            planner.graph,
-                            explicit_plan.as_dict(),
-                            names,
-                            [name for name, _ in explicit],
-                            tool_next=load_catalog()["next"],
-                        )
-                    },
-                )
-            state.emit("plan", {"content": "Explicit Tool Chain:\n" + str(explicit)})
-            outputs = []
-            for name, arguments in explicit:
-
-                async def fixed(_attempt, _history, text=arguments):
-                    return text
-
-                result = await run_tool_with_feedback(
-                    tool_name=name,
-                    file_path_list=task.file_path_list,
-                    input_provider=fixed,
-                    tool_runner=execution.physical,
-                    max_attempts=1,
-                    trace_list=state.trace,
-                )
-                outputs.append(f"{name}: {result.output}")
-                if not result.succeeded:
-                    return await answering.generate(
-                        question, "\n".join(outputs), completed=False, tool_attempts_exhausted=True
-                    )
-            return await answering.generate(question, "\n".join(outputs))
         inferred = [name for name in infer_tools(question) if name in allowed]
         skill_guided = options.planning_mode == "skill_guided"
         plan = None
@@ -250,52 +180,11 @@ class AgentEngine:
                     "selected_tools": ["GeoBigDataExecuteGeoSPARQL"],
                 },
             )
-            prepared, event = prepare_tool_input(
-                "GeoBigDataExecuteGeoSPARQL", "{}", question, artifact_registry=registry
-            )
-            if not tool_input_is_ready("GeoBigDataExecuteGeoSPARQL", prepared):
-                generated = json.dumps(
-                    {
-                        "query": _heuristic_geosparql_query(question),
-                        "dataset": "YAGO2geo_original_RDF",
-                    },
-                    ensure_ascii=False,
-                )
-                if options.geosparql_llm:
-                    try:
-                        generated = await asyncio.wait_for(
-                            stages.generate_plan_input(
-                                question,
-                                "",
-                                "GeoBigDataExecuteGeoSPARQL",
-                                "JSON object containing source_id or query and optional dataset provenance",
-                                "JSON pinned result table",
-                                model=None,
-                                previous_answer="",
-                            ),
-                            timeout=max(5, options.geosparql_plan_timeout),
-                        )
-                    except Exception as exc:
-                        state.emit(
-                            "geosparql_parameter_fallback", {"error_type": type(exc).__name__}
-                        )
-                prepared, event = prepare_tool_input(
-                    "GeoBigDataExecuteGeoSPARQL", generated, question, artifact_registry=registry
-                )
-
-            async def fixed(_attempt, _history):
-                return prepared
-
-            state.trace.append(event)
-            state.emit("plan", {"content": "Plan Chain:\n['GeoBigDataExecuteGeoSPARQL']"})
-            result = await run_tool_with_feedback(
-                tool_name="GeoBigDataExecuteGeoSPARQL",
-                file_path_list=task.file_path_list,
-                input_provider=fixed,
-                tool_runner=execution.physical,
-                max_attempts=3,
-                trace_list=state.trace,
-            )
+            seed = None
+            if not options.geosparql_llm:
+                seed = {"query": _heuristic_geosparql_query(question), "dataset": "YAGO2geo_original_RDF"}
+            state.emit("plan.created", {"source": "schema_route", "tools": ["GeoBigDataExecuteGeoSPARQL"]})
+            result = await execution.run("GeoBigDataExecuteGeoSPARQL", question, registry, "", initial_arguments=seed)
             return await answering.generate(
                 question,
                 result.render_for_agent(),
@@ -370,10 +259,9 @@ class AgentEngine:
                     )
                 else:
                     try:
-                        text = await stages.generate_tools_plan(
+                        proposed = await stages.generate_tools_plan(
                             question,
                             retrieved,
-                            None,
                             total_output,
                             {
                                 "skill_plan": plan.as_dict() if plan else {},
@@ -381,8 +269,7 @@ class AgentEngine:
                                 "hint_policy": "Hints identify compatible capabilities; instantiate repeated calls from distinct entity/temporal cohorts.",
                             },
                         )
-                        state.emit("plan", {"content": text})
-                        proposed = extract_tool_path(text)
+                        state.emit("plan", {"source": "native_function_call", "tools": proposed})
                     except Exception as exc:
                         if options.require_llm:
                             raise
@@ -521,7 +408,7 @@ class AgentEngine:
                         bridge_state,
                         tool_runner=execution.comparison,
                         file_path_list=task.file_path_list,
-                        trace_list=state.trace,
+                        messages=state.conversation,
                     )
                 # Successful chains are never rerun because final generation or validation failed.
                 return await answering.generate(question, total_output)

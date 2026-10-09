@@ -54,8 +54,8 @@ def request_scope(domains=None):
 
 
 @contextmanager
-def call_scope():
-    token = _call.set(uuid4().hex if active() else None)
+def call_scope(call_id=None):
+    token = _call.set((call_id or uuid4().hex) if active() else None)
     try:
         yield current_call_id()
     finally:
@@ -83,7 +83,7 @@ def service_scope(metadata=None):
         and (metadata.get("domains") == ["remote_sensing"])
         and all(
             (
-                isinstance(metadata.get(k), str) and re.fullmatch("[0-9a-f]{32}", metadata[k])
+                isinstance(metadata.get(k), str) and re.fullmatch("[0-9a-f]{32}" if k == "request_id" else "[A-Za-z0-9_-]{1,128}", metadata[k])
                 for k in ("request_id", "call_id")
             )
         )

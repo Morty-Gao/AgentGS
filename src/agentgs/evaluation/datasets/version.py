@@ -7,11 +7,11 @@ from agentgs.config.paths import data_resource
 
 
 def benchmark_manifest(root: Path):
-    path = root / "data/geotooleval/version_manifest.json"
-    return json.loads(path.read_text("utf-8")) if path.exists() else {}
+    path = root / "data/metadata/geotooleval.json"
+    return json.loads(path.read_text("utf-8")).get("version_manifest", {}) if path.exists() else {}
 
 
-def benchmark_workbook(root: Path):
+def benchmark_dataset(root: Path):
     manifest = benchmark_manifest(root)
-    relative = manifest.get("selected_workbook", "data/geotooleval/GeoToolEval.xlsx")
+    relative = manifest.get("selected_dataset", "data/geotooleval.jsonl")
     return data_resource(root, relative)

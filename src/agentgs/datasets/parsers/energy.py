@@ -4,6 +4,7 @@ from __future__ import annotations
 
 import csv
 import hashlib
+import json
 import math
 import re
 import zipfile
@@ -14,56 +15,20 @@ from xml.etree import ElementTree as ET
 import numpy as np
 import pandas as pd
 
-CAPITALS = {
-    "CH": (46.948, 7.4474, "Bern", "伯尔尼"),
-    "DE": (52.52, 13.405, "Berlin", "柏林"),
-    "DK": (55.6761, 12.5683, "Copenhagen", "哥本哈根"),
-    "FR": (48.8566, 2.3522, "Paris", "巴黎"),
-    "GB": (51.5074, -0.1278, "London", "伦敦"),
-    "SE": (59.3293, 18.0686, "Stockholm", "斯德哥尔摩"),
-    "PL": (52.2297, 21.0122, "Warsaw", "华沙"),
-    "CZ": (50.0755, 14.4378, "Prague", "布拉格"),
-}
-REGION_BOXES = [
-    ("western_us", "美国西部", -125.0, 30.0, -100.0, 50.0),
-    ("eastern_us", "美国东部", -100.0, 25.0, -65.0, 50.0),
-    ("andes", "安第斯地区", -80.0, -40.0, -65.0, 5.0),
-    ("central_europe", "中欧", -10.0, 35.0, 30.0, 60.0),
-    ("india", "印度", 68.0, 7.0, 90.0, 37.0),
-    ("china", "中国", 73.0, 18.0, 135.0, 54.0),
-    ("australia", "澳大利亚", 112.0, -44.0, 154.0, -10.0),
-    ("southern_africa", "南部非洲", 10.0, -35.0, 40.0, -15.0),
-    ("brazil", "巴西", -75.0, -35.0, -35.0, 5.0),
-    ("canada", "加拿大", -140.0, 45.0, -50.0, 70.0),
-]
+from agentgs.datasets.references import load_reference
+
 MAIN_NS = "http://schemas.openxmlformats.org/spreadsheetml/2006/main"
 REL_NS = "http://schemas.openxmlformats.org/officeDocument/2006/relationships"
 PKG_REL_NS = "http://schemas.openxmlformats.org/package/2006/relationships"
-EARTH_RADIUS_KM = 6371.0088
-SELECTED_COUNTRY_CODES = ["CH", "DE", "DK", "FR", "GB", "SE", "PL", "CZ"]
-TRANSITION_COUNTRIES = [
-    "China",
-    "United States",
-    "India",
-    "Germany",
-    "France",
-    "United Kingdom",
-    "Brazil",
-    "Canada",
-    "Australia",
-    "Japan",
-]
-RENEWABLE_TYPES = {"bioenergy", "geothermal", "hydropower", "solar", "wind"}
-CRITICAL_PATTERNS = {
-    "Lithium": "\\blithium\\b",
-    "Cobalt": "\\bcobalt\\b",
-    "Nickel": "\\bnickel\\b",
-    "Rare earths": "rare earth",
-    "Copper": "\\bcopper\\b",
-    "Uranium": "\\buranium\\b",
-    "Graphite": "\\bgraphite\\b",
-    "Manganese": "\\bmanganese\\b",
-}
+
+_REFERENCE = load_reference("reference/energy.json")
+CAPITALS = _REFERENCE["capitals"]
+REGION_BOXES = _REFERENCE["region_boxes"]
+SELECTED_COUNTRY_CODES = _REFERENCE["selected_country_codes"]
+TRANSITION_COUNTRIES = _REFERENCE["transition_countries"]
+RENEWABLE_TYPES = set(_REFERENCE["renewable_types"])
+CRITICAL_PATTERNS = _REFERENCE["critical_patterns"]
+EARTH_RADIUS_KM = load_reference("reference/geography.json")["mean_earth_radius_km"]
 
 
 def sha256(path: Path) -> str:
@@ -209,8 +174,25 @@ def write_csv(path: Path, rows: list[dict], fieldnames: list[str] | None = None)
             writer.writerow({key: clean_scalar(row.get(key)) for key in names})
 
 
+def iter_gip_rows(path: Path, sheet_name: str) -> Iterable[list[object | None]]:
+    if path.suffix != ".jsonl":
+        yield from iter_xlsx_rows(path, sheet_name)
+        return
+    found = False
+    with path.open(encoding="utf-8") as stream:
+        for line in stream:
+            if not line.strip():
+                continue
+            record = json.loads(line)
+            if record.get("record") == "row" and record.get("sheet") == sheet_name:
+                found = True
+                yield record["values"]
+    if not found:
+        raise KeyError(f"GEM sheet is missing: {sheet_name}")
+
+
 def process_gip(path: Path) -> tuple[pd.DataFrame, pd.DataFrame, pd.DataFrame]:
-    rows = iter_xlsx_rows(path, "Power facilities")
+    rows = iter_gip_rows(path, "Power facilities")
     header = [str(value) if value is not None else "" for value in next(rows)]
     index = {name: position for position, name in enumerate(header)}
     required = [
@@ -435,18 +417,7 @@ def process_capacity_timeseries(path: Path) -> tuple[pd.DataFrame, list[dict], l
     frame["day"] = pd.to_datetime(frame["day"], errors="coerce")
     frame = frame.dropna(subset=["day"]).sort_values("day")
     year_end = frame.groupby(frame["day"].dt.year, as_index=False).tail(1).copy()
-    selected_series = [
-        ("CH_solar_capacity", "Switzerland solar", "瑞士太阳能"),
-        ("DE_solar_capacity", "Germany solar", "德国太阳能"),
-        ("DE_wind_capacity", "Germany wind", "德国风电"),
-        ("DK_wind_capacity", "Denmark wind", "丹麦风电"),
-        ("FR_hydro_capacity", "France hydro", "法国水电"),
-        ("FR_solar_capacity", "France solar", "法国太阳能"),
-        ("GB-UKM_solar_capacity", "United Kingdom solar", "英国太阳能"),
-        ("GB-UKM_wind_capacity", "United Kingdom wind", "英国风电"),
-        ("SE_wind_capacity", "Sweden wind", "瑞典风电"),
-        ("DE_wind_offshore_capacity", "Germany offshore wind", "德国海上风电"),
-    ]
+    selected_series = _REFERENCE["capacity_series"]
     final_year = int(year_end["day"].dt.year.max())
     single_rows: list[dict] = []
     growth_rows: list[dict] = []

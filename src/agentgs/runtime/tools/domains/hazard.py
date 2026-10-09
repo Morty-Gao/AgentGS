@@ -18,8 +18,16 @@ from agentgs.runtime.tools.resources import _resolve_path
 def _hazard_table():
     import pandas as pd
 
+    source = paths().data("hazard", "events.jsonl")
+    if source.is_file():
+        records = [json.loads(line) for line in source.read_text("utf-8").splitlines() if line]
+        # Excel readers interpret blank cells as missing values. Keep that policy
+        # while the embedded JSONL preserves the original cell values verbatim.
+        return pd.DataFrame(
+            [{key: None if value == "" else value for key, value in row.items()} for row in records]
+        )
     return pd.read_excel(
-        paths().root / "data/geotooleval/10.自然灾害与极端地震.xlsx", sheet_name="Sheet1"
+        paths().root / "data/raw/hazard/10.自然灾害与极端地震.xlsx", sheet_name="Sheet1"
     )
 
 
@@ -55,8 +63,11 @@ def _hazard_filtered(params: dict[str, Any]):
 
 def _hazard_load(params: dict[str, Any]) -> str:
     table = _hazard_table()
+    source = paths().data("hazard", "events.jsonl")
+    if not source.is_file():
+        source = paths().root / "data/raw/hazard/10.自然灾害与极端地震.xlsx"
     return _result(
-        source=paths().root / "data/geotooleval/10.自然灾害与极端地震.xlsx",
+        source=source,
         sheet="Sheet1",
         record_count=int(len(table)),
         columns=list(table.columns),

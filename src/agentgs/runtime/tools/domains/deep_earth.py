@@ -13,7 +13,7 @@ from agentgs.runtime.tools.domains.shared import _read_csv, _result, _row_dict
 
 
 def _deep_litho(params: dict[str, Any]) -> str:
-    table = _read_csv(paths().dataset("deep_earth") / "derived" / "location_model_samples.csv")
+    table = _read_csv(paths().data("deep_earth", "derived/location_model_samples.csv"))
     key = params.get("location_key") or params.get("key")
     rows = table[table["key"].astype(str) == str(key)]
     if rows.empty:
@@ -34,7 +34,7 @@ def _deep_litho(params: dict[str, Any]) -> str:
 
 
 def _deep_semucb(params: dict[str, Any]) -> str:
-    table = _read_csv(paths().dataset("deep_earth") / "derived" / "location_model_samples.csv")
+    table = _read_csv(paths().data("deep_earth", "derived/location_model_samples.csv"))
     key = params.get("location_key") or params.get("key")
     depth = int(params.get("depth_km", 100))
     field = f"semucb_dlnvs_{depth}km_percent"
@@ -57,9 +57,9 @@ def _deep_semucb(params: dict[str, Any]) -> str:
 def _usgs_catalog():
     import pandas as pd
 
-    path = paths().dataset("deep_earth") / "source_snapshot" / "usgs_2010_2020_m7.csv"
+    path = paths().data("deep_earth", "source_snapshot/usgs_2010_2020_m7.csv")
     if not path.is_file():
-        path = paths().root / "data/usgs/usgs_2010_2020_m7.csv"
+        path = paths().root / "data/raw/usgs/usgs_2010_2020_m7.csv"
     table = pd.read_csv(path)
     table["time"] = pd.to_datetime(table["time"], utc=True)
     return table
@@ -107,7 +107,7 @@ def _deep_usgs_query(params: dict[str, Any]) -> str:
 
 def _deep_event_models(params: dict[str, Any]) -> str:
     event_id = str(params.get("event_id") or params.get("id"))
-    table = _read_csv(paths().dataset("deep_earth") / "derived" / "cross_event_samples.csv")
+    table = _read_csv(paths().data("deep_earth", "derived/cross_event_samples.csv"))
     rows = table[table["event_id"].astype(str) == event_id]
     if rows.empty:
         raise ValueError(f"No pinned three-model sample for event_id: {event_id}")

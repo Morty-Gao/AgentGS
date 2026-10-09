@@ -1,0 +1,34 @@
+{
+  "dataset": "EnergyResources-ToolQA-100",
+  "generated_at": "2026-07-17",
+  "sources": {
+    "GEM Global Integrated Power Tracker": {
+      "file": "dataset_work\\extracted\\gem-data\\Global-Integrated-Power-March-2026-II.xlsx",
+      "sha256": "18e14321cbc1f7a8f580417f4d1ec1176b78f9b61f19cfbfb9a3123c2d80f27b",
+      "version": "March 2026 II"
+    },
+    "OPSD Renewable Capacity Time Series": {
+      "file": "dataset_work\\数据集下载\\renewable_capacity_timeseries.csv",
+      "sha256": "d5c15d15447fa02c70064d7708e2047c023d923dbc3548632b9c39c355d96486",
+      "through": "2020-12-02"
+    },
+    "OPSD Renewable Power Plants Europe": {
+      "file": "dataset_work\\数据集下载\\renewable_power_plants_EU.csv",
+      "sha256": "1a61a9fbd0435a2a9d71ae567f4e602f8bee52bffd529ec440dbca6a3bf2aee1",
+      "version": "2020-08-25 snapshot"
+    },
+    "UN Population Projections via OWID": {
+      "file": "dataset_work\\extracted\\population-with-un-projections (1)\\population-with-un-projections.csv",
+      "sha256": "a77c8da5a75a47c82057c12ae52a38f4f11e3333c2a39a8b0260928caee45aa2"
+    },
+    "USGS MRDS CSV": {
+      "file": "dataset_work\\extracted\\mrds-csv\\mrds.csv",
+      "sha256": "ac1b70dcc8159ad4a691739f62c13ec738af3453f4840db7fafe4ed1c1253e37"
+    },
+    "World Bank EG.FEC.RNEW.ZS": {
+      "file": "dataset_work\\extracted\\API_EG.FEC.RNEW.ZS_DS2_en_csv_v2_50\\API_EG.FEC.RNEW.ZS_DS2_en_csv_v2_50.csv",
+      "indicator": "Renewable energy consumption (% of total final energy consumption)",
+      "sha256": "d844ecd9e7be44b628a34ab83d7bdbdf07a602ecaa6ba37db3578451881da9d1"
+    }
+  }
+}

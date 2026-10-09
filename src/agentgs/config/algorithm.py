@@ -25,11 +25,11 @@ class AlgorithmSettings(Model):
     embedding_model: str = "sentence-transformers/paraphrase-multilingual-MiniLM-L12-v2"
     embedding_threads: int = 4
     embedding_batch_size: int = 8
-    index_path: str = "data/indexes/geotoolkg"
-    model_cache: str = "data/models/fastembed"
+    index_path: str = "data/geotoolkg"
+    model_cache: str = "data/raw/models/fastembed"
 
 
 def load_algorithm(root: Path):
-    path = root / "agent.toml"
+    path = root / "config.toml"
     raw = tomllib.loads(path.read_text()) if path.exists() else {}
     return AlgorithmSettings.model_validate(raw.get("agent", {}))

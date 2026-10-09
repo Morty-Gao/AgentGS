@@ -5,8 +5,6 @@ from dataclasses import dataclass
 from pathlib import Path
 from typing import Any
 
-from openpyxl import load_workbook
-
 CATEGORY_NAMES = {
     1: "DeepEarthTools",
     2: "GeoBigDataTools",
@@ -35,57 +33,73 @@ class EvalTask:
     gold_steps: tuple[dict[str, Any], ...]
 
 
-def load_tasks(workbook_path: Path) -> list[EvalTask]:
-    workbook = load_workbook(workbook_path, read_only=True, data_only=True)
-    try:
-        sheet = workbook["评测集合"]
-        rows = sheet.iter_rows(values_only=True)
-        headers = [str(value or "").strip() for value in next(rows)]
-        columns = {name: index for index, name in enumerate(headers)}
-        required = {
-            "题目序号",
-            "所属类别",
-            "题目正文",
-            "题目答案",
-            "标准工具链调用",
-            "单/多工具链调用",
-            "答案类型",
-            "输入资源",
-            "标准工具调用明细",
-        }
-        missing = required - columns.keys()
-        if missing:
-            raise ValueError(f"GeoToolEval workbook is missing columns: {sorted(missing)}")
-        tasks: list[EvalTask] = []
-        for row in rows:
-            question_id = int(row[columns["题目序号"]])
-            category_id = int(row[columns["所属类别"]])
-            raw_steps = row[columns["标准工具调用明细"]]
+def load_tasks(dataset_path: Path) -> list[EvalTask]:
+    """Read one workbook row per JSONL record, preserving original column names."""
+    required = {
+        "题目序号",
+        "所属类别",
+        "题目正文",
+        "题目答案",
+        "标准工具链调用",
+        "单/多工具链调用",
+        "答案类型",
+        "输入资源",
+        "标准工具调用明细",
+    }
+    tasks: list[EvalTask] = []
+    seen = set()
+
+    def text(value):
+        return "" if value is None else str(value)
+
+    with dataset_path.open(encoding="utf-8-sig") as stream:
+        for line_number, line in enumerate(stream, 1):
+            if not line.strip():
+                continue
             try:
-                gold_steps = json.loads(str(raw_steps or "[]"))
+                row = json.loads(line)
+            except json.JSONDecodeError as exc:
+                raise ValueError(f"GeoToolEval line {line_number} has invalid JSON: {exc}") from exc
+            if not isinstance(row, dict):
+                raise ValueError(f"GeoToolEval line {line_number} must be an object")
+            missing = required - row.keys()
+            if missing:
+                raise ValueError(
+                    f"GeoToolEval line {line_number} is missing columns: {sorted(missing)}"
+                )
+            question_id = int(row["题目序号"])
+            category_id = int(row["所属类别"])
+            if question_id in seen:
+                raise ValueError(f"Duplicate GeoToolEval question id: {question_id}")
+            seen.add(question_id)
+            raw_steps = row["标准工具调用明细"]
+            try:
+                gold_steps = json.loads(raw_steps) if isinstance(raw_steps, str) else raw_steps
             except json.JSONDecodeError as exc:
                 raise ValueError(
                     f"Question {question_id} has invalid standard tool-call JSON: {exc}"
                 ) from exc
             if not isinstance(gold_steps, list) or not gold_steps:
                 raise ValueError(f"Question {question_id} has no standard tool calls")
+            if not all(isinstance(step, dict) for step in gold_steps):
+                raise ValueError(f"Question {question_id} has invalid standard tool-call objects")
             tasks.append(
                 EvalTask(
                     question_id=question_id,
                     category_id=category_id,
                     category=CATEGORY_NAMES.get(category_id, f"Category{category_id}"),
-                    question=str(row[columns["题目正文"]] or ""),
-                    expected_answer=str(row[columns["题目答案"]] or ""),
-                    answer_type=str(row[columns["答案类型"]] or ""),
-                    input_resource=str(row[columns["输入资源"]] or ""),
-                    chain_mode=str(row[columns["单/多工具链调用"]] or ""),
-                    gold_chain_text=str(row[columns["标准工具链调用"]] or ""),
+                    question=text(row["题目正文"]),
+                    expected_answer=text(row["题目答案"]),
+                    answer_type=text(row["答案类型"]),
+                    input_resource=text(row["输入资源"]),
+                    chain_mode=text(row["单/多工具链调用"]),
+                    gold_chain_text=text(row["标准工具链调用"]),
                     gold_steps=tuple(gold_steps),
                 )
             )
-        return tasks
-    finally:
-        workbook.close()
+    if not tasks:
+        raise ValueError("GeoToolEval dataset is empty")
+    return tasks
 
 
 def build_agent_question(task: EvalTask) -> str:

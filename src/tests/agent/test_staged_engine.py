@@ -10,6 +10,17 @@ from agentgs.config.algorithm import AlgorithmSettings
 from agentgs.contracts.models import TaskInput, ToolError, ToolResult, ToolSpec
 
 
+def function_call(name, arguments, call_id=None):
+    from uuid import uuid4
+    return {"role": "assistant", "content": None, "reasoning_content": "fixture reasoning",
+            "tool_calls": [{"id": call_id or uuid4().hex, "type": "function",
+                            "function": {"name": name, "arguments": json.dumps(arguments)}}]}
+
+
+def plan_call(names):
+    return function_call("submit_tool_plan", {"tools": names})
+
+
 class Events:
     def emit(self, *args):
         return None
@@ -64,18 +75,19 @@ class Client:
         value = next(self.replies)
         if isinstance(value, Exception):
             raise value
-        return ChatReply(message={"role": "assistant", "content": value})
+        return ChatReply(message=value if isinstance(value, dict) else {"role": "assistant", "content": value})
 
 
 class StageClient:
-    async def text(self, prompt, *, stage, **kwargs):
-        if stage == "skill_tool_planning":
-            text = self.plan
+    async def chat(self, messages, *, stage, **kwargs):
+        if stage in {"skill_tool_planning", "tool_planning"}:
+            value = plan_call(self.plan)
         elif stage == "tool_argument_generation":
-            text = 'Input:{"x":[1,2,3],"a":2,"b":1}'
+            name = kwargs["tool_choice"]["function"]["name"]
+            value = function_call(name, {"x": [1, 2, 3]} if name == "RemoteSensingMean" else {"a": 3, "b": 1})
         else:
-            text = "IsCompleted:Completed\nFinalAnswer:2"
-        return ChatReply(message={"role": "assistant", "content": text})
+            value = {"role": "assistant", "content": "IsCompleted:Completed\nFinalAnswer:2"}
+        return ChatReply(message=value)
 
 
 def context(tools, client, strict=True):
@@ -91,12 +103,44 @@ def context(tools, client, strict=True):
     )
 
 
+@pytest.mark.parametrize("explicit_contract", [True, False])
+async def test_fixed_format_reaches_final_request_through_engine(explicit_contract):
+    from pathlib import Path
+
+    from agentgs.runtime.answer_contracts import AnswerContracts
+
+    contracts = AnswerContracts(Path(__file__).resolve().parents[3])
+    contract = next(
+        c for c in contracts.contracts.values() if c["question_id"] == 199
+    )
+    tools = Tools()
+    client = Client([
+        plan_call(["RemoteSensingMean"]),
+        function_call("RemoteSensingMean", {"x": [1, 2, 3]}),
+        "temperature_anomaly: 2 °C",
+    ])
+    ctx = context(tools, client)
+    ctx.answer_system_prompt = contracts.system_prompt
+    ctx.answer_contract_lookup = lambda _: contract if not explicit_contract else None
+    result = await AgentEngine().run(
+        TaskInput(question="Compute the requested statistic.",
+                  output_contract=contract if explicit_contract else None), ctx
+    )
+    final_request = client.requests[-1]
+    assert contract["answer_format"]["template"] in final_request[-1]["content"]
+    assert contract["answer_format"]["notes"] in final_request[-1]["content"]
+    assert final_request[-1]["role"] == "developer" and final_request[-1]["content"].startswith(contracts.system_prompt)
+    assert result.answer == "temperature_anomaly: 2 °C"
+    validation = next(t for t in result.execution_events() if t["type"] == "final_answer_format_validation")
+    assert validation["valid"]
+
+
 async def test_staged_plan_argument_answer_preserves_model_text():
     tools = Tools()
     client = Client(
         [
-            "Plan Chain:\n['RemoteSensingMean']",
-            'Input:{"x":[1,2,3]}',
+            plan_call(["RemoteSensingMean"]),
+            function_call("RemoteSensingMean", {"x": [1, 2, 3]}),
             "IsCompleted:Completed\nFinalAnswer:2",
         ]
     )
@@ -117,8 +161,8 @@ async def test_final_answer_failure_never_replays_successful_tools():
     tools = Tools()
     client = Client(
         [
-            "Plan Chain:\n['RemoteSensingMean']",
-            'Input:{"x":[1,2,3]}',
+            plan_call(["RemoteSensingMean"]),
+            function_call("RemoteSensingMean", {"x": [1, 2, 3]}),
             RuntimeError("provider unavailable"),
         ]
     )
@@ -139,7 +183,7 @@ async def test_final_authentication_error_preserves_status_for_benchmark_abort()
 
     tools = Tools()
     client = Client(
-        ["Plan Chain:\n['RemoteSensingMean']", 'Input:{"x":[1,2,3]}', ProviderError(401)]
+        [plan_call(["RemoteSensingMean"]), function_call("RemoteSensingMean", {"x": [1, 2, 3]}), ProviderError(401)]
     )
     with pytest.raises(AgentExecutionError) as caught:
         await AgentEngine().run(
@@ -153,10 +197,10 @@ async def test_exhausted_repairs_still_generate_an_explicit_incomplete_answer():
     tools = Tools(True)
     client = Client(
         [
-            "Plan Chain:\n['RemoteSensingMean']",
-            'Input:{"x":[1,2,3]}',
-            'Input:{"x":[2,3,4]}',
-            'Input:{"x":[3,4,5]}',
+            plan_call(["RemoteSensingMean"]),
+            function_call("RemoteSensingMean", {"x": [1, 2, 3]}),
+            function_call("RemoteSensingMean", {"x": [2, 3, 4]}),
+            function_call("RemoteSensingMean", {"x": [3, 4, 5]}),
             "IsCompleted:Not Completed\nFinalAnswer:The result is uncertain.",
         ]
     )
@@ -167,15 +211,15 @@ async def test_exhausted_repairs_still_generate_an_explicit_incomplete_answer():
     assert result.completion_status == "Not Completed"
     assert result.answer == "The result is uncertain."
     assert result.answer_generation_status == "success" and not result.tool_chain_completed
-    assert len([event for event in result.trace if event["type"] == "tool_retry"]) == 3
+    assert len([event for event in result.execution_events() if event["type"] == "tool_retry"]) == 3
 
 
 async def test_unsupported_numeric_answer_is_preserved_and_marked_incomplete():
     tools = Tools()
     client = Client(
         [
-            "Plan Chain:\n['RemoteSensingMean']",
-            'Input:{"x":[1,2,3]}',
+            plan_call(["RemoteSensingMean"]),
+            function_call("RemoteSensingMean", {"x": [1, 2, 3]}),
             "IsCompleted:Completed\nFinalAnswer:999",
         ]
     )
@@ -196,7 +240,7 @@ async def test_replanning_reuses_successful_name_prefix_after_three_atomic_failu
             return await super().execute(call)
 
     tools = RepairTools()
-    plan = "Plan Chain:\n['RemoteSensingMean', 'RemoteSensingDifference']"
+    plan = ["RemoteSensingMean", "RemoteSensingDifference"]
     client = StageClient()
     client.plan = plan
     result = await AgentEngine().run(
@@ -206,14 +250,14 @@ async def test_replanning_reuses_successful_name_prefix_after_three_atomic_failu
         "RemoteSensingDifference"
     ] * 4
     assert result.tool_chain_completed and result.answer == "2"
-    resumed = [row for row in result.trace if row["type"] == "plan_resume"]
+    resumed = [row for row in result.execution_events() if row["type"] == "plan_resume"]
     assert resumed[0]["skipped_successful_prefix"] == ["RemoteSensingMean"]
 
 
 async def test_strict_model_plan_preserves_duplicate_tool_instances():
     tools = Tools()
     client = StageClient()
-    client.plan = "Plan Chain:\n['RemoteSensingMean', 'RemoteSensingMean']"
+    client.plan = ["RemoteSensingMean", "RemoteSensingMean"]
     result = await AgentEngine().run(
         TaskInput(question="Compute independent statistics."), context(tools, client)
     )

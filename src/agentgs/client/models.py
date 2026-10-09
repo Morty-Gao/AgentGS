@@ -1,8 +1,9 @@
 from typing import Any, Protocol
 
-from pydantic import Field, SecretStr
+from pydantic import Field, SecretStr, field_validator
 
 from agentgs.contracts.models import Model
+from agentgs.messages import Conversation, Message
 
 
 class Provider(Model):
@@ -38,18 +39,32 @@ class LLMConfig(Model):
 
 
 class ChatReply(Model):
-    message: dict[str, Any]
+    message: Message
     usage: dict[str, Any] | None = None
     attempts: int = 1
     response_model: str | None = None
     response_id: str | None = None
+    raw_response: dict[str, Any] | None = None
+    request_payload: dict[str, Any] | None = None
+
+    @field_validator("message", mode="before")
+    @classmethod
+    def parse_message(cls, value):
+        if isinstance(value, dict):
+            return Message.from_openai({"role": "assistant", **value})
+        return value
 
 
 class ModelClient(Protocol):
     async def chat(
         self,
-        messages: list[dict],
+        messages: Conversation | list[Message | dict],
         tools: list[dict] | None = None,
         model: str | None = None,
         effort: str | None = None,
+        *,
+        tool_choice: str | dict | None = None,
+        parallel_tool_calls: bool = False,
+        stage: str = "tool_calling",
+        settings: Any = None,
     ) -> ChatReply: ...

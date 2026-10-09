@@ -38,11 +38,18 @@ class LocalToolExecutor:
         try:
             if not item:
                 raise KeyError(call.tool)
-            params = item.input_type.model_validate(call.arguments)
+            arguments = {
+                key: value for key, value in call.arguments.items()
+                if value is not None or key not in item.input_type.model_fields
+                or item.input_type.model_fields[key].is_required()
+            }
+            params = item.input_type.model_validate(arguments)
+            arguments = params.model_dump(exclude_unset=True, by_alias=True)
+            arguments.update(call._runtime_arguments)
             if call.tool == "ExecutePython":
                 data = await self.code_executor.run_python(params.code)
             elif call.tool == "DeepEarthQueryUSGSCatalog":
-                args = params.model_dump()
+                args = arguments
                 modern = {"start_year", "end_year", "min_magnitude", "limit"}
                 if args and set(args).issubset(modern):
                     data = query_catalog(CatalogQuery.model_validate(args), self.datasets)
@@ -50,13 +57,13 @@ class LocalToolExecutor:
                     data = self._domain(call.tool, args, call_id=call.id)
             elif call.tool == "DeepEarthGetUSGSEvent":
                 if importlib.util.find_spec("pandas") is not None:
-                    data = self._domain(call.tool, params.model_dump(), call_id=call.id)
+                    data = self._domain(call.tool, arguments, call_id=call.id)
                 else:
-                    data = get_event(EventQuery.model_validate(params.model_dump()), self.datasets)
+                    data = get_event(EventQuery.model_validate(arguments), self.datasets)
             elif call.tool == "GeoBigDataExecuteGeoSPARQL":
                 data = item.handler(params, self.datasets)
             else:
-                data = self._domain(call.tool, params.model_dump(), call_id=call.id)
+                data = self._domain(call.tool, arguments, call_id=call.id)
             raw_output = data if isinstance(data, str) else json.dumps(data, ensure_ascii=False)
             assessment = assess_tool_execution(raw_output)
             if assessment.score == 0:

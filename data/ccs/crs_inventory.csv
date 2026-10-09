@@ -1,0 +1,4 @@
+asset,crs
+ccs_facilities.geojson,EPSG:4326
+ccs_facilities_webmercator.csv,EPSG:3857
+ccs_analysis_zones.geojson,EPSG:4326

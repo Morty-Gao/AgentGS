@@ -10,56 +10,35 @@ from collections import Counter
 from pathlib import Path
 from typing import Any, Iterable
 
-from openpyxl import load_workbook
+from agentgs.evaluation.datasets.geotooleval import load_tasks
+from agentgs.messages import Conversation, Message
 
 DEFAULT_TOKEN_BUDGET_PER_GOLD_STEP = 10000
 _IGNORED_ARGUMENT_KEYS = {"_output_keys"}
 
 
 def load_gold_tasks(
-    workbook_path: str | Path, question_ids: Iterable[int] | None = None
+    dataset_path: str | Path, question_ids: Iterable[int] | None = None
 ) -> dict[int, dict[str, Any]]:
-    """Load structured gold calls from the GeoToolEval workbook."""
+    """Load structured gold calls from the embedded GeoToolEval JSONL."""
     selected = None if question_ids is None else {int(value) for value in question_ids}
-    workbook = load_workbook(workbook_path, read_only=True, data_only=True)
-    try:
-        sheet = workbook["评测集合"]
-        rows = sheet.iter_rows(values_only=True)
-        headers = [str(value or "").strip() for value in next(rows)]
-        columns = {name: index for index, name in enumerate(headers)}
-        required = {"题目序号", "所属类别", "题目正文", "题目答案", "答案类型", "标准工具调用明细"}
-        missing = required - columns.keys()
-        if missing:
-            raise ValueError(f"GeoToolEval workbook is missing columns: {sorted(missing)}")
-        tasks: dict[int, dict[str, Any]] = {}
-        for row in rows:
-            question_id = int(row[columns["题目序号"]])
-            if selected is not None and question_id not in selected:
-                continue
-            raw_steps = row[columns["标准工具调用明细"]]
-            try:
-                gold_steps = json.loads(str(raw_steps or "[]"))
-            except json.JSONDecodeError as exc:
-                raise ValueError(
-                    f"Question {question_id} has invalid standard tool-call JSON: {exc}"
-                ) from exc
-            if not isinstance(gold_steps, list) or not gold_steps:
-                raise ValueError(f"Question {question_id} has no standard tool calls")
-            tasks[question_id] = {
-                "question_id": question_id,
-                "category_id": int(row[columns["所属类别"]]),
-                "question": str(row[columns["题目正文"]] or ""),
-                "expected_answer": str(row[columns["题目答案"]] or ""),
-                "answer_type": str(row[columns["答案类型"]] or ""),
-                "gold_steps": gold_steps,
-            }
-        if selected is not None:
-            missing_ids = selected - tasks.keys()
-            if missing_ids:
-                raise KeyError(f"Question IDs not found in GeoToolEval: {sorted(missing_ids)}")
-        return tasks
-    finally:
-        workbook.close()
+    tasks = {
+        task.question_id: {
+            "question_id": task.question_id,
+            "category_id": task.category_id,
+            "question": task.question,
+            "expected_answer": task.expected_answer,
+            "answer_type": task.answer_type,
+            "gold_steps": list(task.gold_steps),
+        }
+        for task in load_tasks(Path(dataset_path))
+        if selected is None or task.question_id in selected
+    }
+    if selected is not None:
+        missing_ids = selected - tasks.keys()
+        if missing_ids:
+            raise KeyError(f"Question IDs not found in GeoToolEval: {sorted(missing_ids)}")
+    return tasks
 
 
 def parse_tool_input(raw_input: Any) -> Any:
@@ -219,7 +198,7 @@ def _tool_selection_scores(
 def score_task(
     *,
     gold_steps: list[dict[str, Any]],
-    trace: list[dict[str, Any]],
+    messages: list[Message | dict[str, Any]],
     answer_score: float,
     token_usage: dict[str, Any] | None,
     token_budget_per_gold_step: int = DEFAULT_TOKEN_BUDGET_PER_GOLD_STEP,
@@ -227,7 +206,8 @@ def score_task(
     """Score one task on the 0-100 accuracy, token-cost and final scales."""
     gold_steps = list(gold_steps or [])
     gold_tools = [str(step.get("tool_name") or "") for step in gold_steps]
-    attempts = [event for event in trace or [] if event.get("type") == "tool_call"]
+    events = Conversation(messages=messages).execution_events()
+    attempts = [event for event in events if event.get("type") == "tool_call"]
     successful = [event for event in attempts if event.get("status") == "success"]
     actual_tools = [str(event.get("tool_name") or "") for event in successful]
     precision, recall, tsf1, matched_success = _tool_selection_scores(gold_tools, actual_tools)

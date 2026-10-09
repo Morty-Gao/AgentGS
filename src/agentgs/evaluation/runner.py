@@ -4,6 +4,7 @@ from uuid import uuid4
 
 from agentgs.contracts.models import TaskStatus
 from agentgs.evaluation.models import EvaluationCase
+from agentgs.messages import Conversation
 
 
 async def evaluate(service, cases, output: Path):
@@ -14,7 +15,12 @@ async def evaluate(service, cases, output: Path):
         # Only TaskInput crosses the runtime boundary; gold stays here.
         task = service.submit(case.input)
         record = await service.wait(task.spec.id)
-        actual = [result.tool for result in record.result.tool_results] if record.result else []
+        messages = record.result.messages if record.result else []
+        actual = [
+            event["tool_name"]
+            for event in Conversation(messages=messages).execution_events()
+            if event["type"] == "tool_call" and event["status"] == "success"
+        ]
         row = {
             "case_id": case.id,
             "task_id": task.spec.id,
@@ -23,6 +29,7 @@ async def evaluate(service, cases, output: Path):
             "answer_exact_match": record.result.answer.strip() == case.expected_answer.strip()
             if record.result and case.expected_answer is not None
             else None,
+            "messages": [message.model_dump(mode="json") for message in messages],
             "usage": record.result.usage if record.result else None,
             "error": record.error.model_dump() if record.error else None,
         }

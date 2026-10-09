@@ -37,12 +37,17 @@ async def execute(project, name, upstream, generated, context, question):
     class Stages:
         calls = []
 
-        async def generate_plan_input(self, *args, **kwargs):
-            self.calls.append(kwargs.get("execution_feedback"))
+        async def generate_tool_call(self, name, question, registry, context, input_contract, output_contract, feedback, history):
+            self.calls.append(feedback)
             value = generated[len(self.calls) - 1]
             if isinstance(value, Exception):
                 raise value
-            return value
+            from agentgs.messages import Message
+            from uuid import uuid4
+            message = Message.from_openai({"role": "assistant", "reasoning_content": "preserve reference operand",
+                "tool_calls": [{"id": uuid4().hex, "type": "function", "function": {"name": name, "arguments": value}}]})
+            state.conversation.append(message)
+            return message
 
     events = Events()
     artifacts = LocalArtifactStore(project / "artifacts")
@@ -71,7 +76,7 @@ async def test_only_declared_measurement_is_projected_and_reference_survives(
         project,
         "RemoteSensingDifference",
         measured,
-        [json.dumps({"parameters": {"a": 999, "b": reference}})],
+        [json.dumps({"a": 999, "b": reference})],
         bridge_context(measured),
         f"Subtract the fixed reference value {reference} from the upstream spatial mean.",
     )
@@ -86,7 +91,7 @@ async def test_divisor_survives_feedback_repair(project):
         project,
         "RemoteSensingDivision",
         6.0,
-        ['{"a":999,"b":0}', 'input: {"arguments":{"a":123,"b":4}}'],
+        ['{"a":999,"b":0}', '{"a":123,"b":4}'],
         bridge_context(6.0),
         "Divide the upstream difference by a fixed divisor 4.",
     )
@@ -113,6 +118,6 @@ async def test_non_bridge_keeps_original_deterministic_upstream_pair(project):
     result, state, calls = await execute(
         project, "RemoteSensingDifference", 5, ['{"a":5,"b":2}'], None, "Compute a difference."
     )
-    assert result.succeeded and calls == []
+    assert result.succeeded and len(calls) == 1
     assert json.loads(result.final_input)["a"] == json.loads(result.final_input)["b"] == 5
     assert state.results[-1].data["value"] == 0

@@ -5,6 +5,7 @@ from __future__ import annotations
 import json
 from typing import Any, Callable
 
+from agentgs.contracts.arguments import parse_arguments
 from agentgs.runtime.tools.domains.climate import (
     _climate_compare,
     _climate_deep,
@@ -75,7 +76,7 @@ from agentgs.runtime.tools.domains.raster import (
     _rs_scalar,
     _rs_tiff_average,
 )
-from agentgs.runtime.tools.domains.shared import _clean, _params, _result
+from agentgs.runtime.tools.domains.shared import _clean, _result
 from agentgs.runtime.tools.domains.spatial import (
     _batch_vector,
     _bbox_tool,
@@ -200,7 +201,7 @@ _SCALAR_REMOTE = {
 
 
 def dispatch(tool_name: str, input_str: str) -> str:
-    params = _params(input_str)
+    params = parse_arguments(input_str)
     from agentgs.contracts.remote_sensing import RASTER_STEPS, VERSION, enabled, inspect_inputs
 
     rs_report = None
@@ -235,7 +236,7 @@ def _tool(tool_name: str) -> Callable[[str], str]:
 
     def run(input_str: str) -> str:
         try:
-            params = _params(input_str)
+            params = parse_arguments(input_str)
             raw = dispatch(tool_name, input_str)
             output_keys = params.get("_output_keys") or []
             if output_keys:

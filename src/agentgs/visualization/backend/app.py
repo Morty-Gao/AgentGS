@@ -7,16 +7,18 @@ from fastapi.responses import FileResponse, StreamingResponse
 from fastapi.staticfiles import StaticFiles
 
 from agentgs.config.paths import within
+from agentgs.config.settings import RuntimeSettings
 from agentgs.contracts.models import TERMINAL, TaskInput
+from agentgs.messages import Message
 from agentgs.runtime.service import TaskService
 
 TERMINAL_NAMES = {status.value for status in TERMINAL}
 
 
-def create_app(root: Path):
+def create_app(root: Path, settings: RuntimeSettings | None = None):
     @asynccontextmanager
     async def lifespan(app):
-        app.state.tasks = TaskService(root)
+        app.state.tasks = TaskService(root, settings=settings)
         yield
         await app.state.tasks.close()
 
@@ -42,6 +44,11 @@ def create_app(root: Path):
     @app.get("/api/tasks/{task_id}")
     def get(task_id: str, request: Request):
         return find(request, task_id)
+
+    @app.get("/api/tasks/{task_id}/messages", response_model=list[Message])
+    def messages(task_id: str, request: Request):
+        record = find(request, task_id)
+        return record.result.messages if record.result else []
 
     @app.post("/api/tasks/{task_id}/cancel")
     async def cancel(task_id: str, request: Request):

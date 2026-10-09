@@ -16,7 +16,7 @@ from agentgs.runtime.tools.domains.shared import _read_csv, _result, _row_dict
 
 
 def _mineral_table():
-    return _read_csv(paths().dataset("habitable") / "metal_minerals_subset.csv")
+    return _read_csv(paths().data("habitable", "metal_minerals_subset.csv"))
 
 
 def _mineral_search(params: dict[str, Any]) -> str:

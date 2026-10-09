@@ -1,0 +1,130 @@
+{
+  "schema_version": 1,
+  "dataset_version": "deep-earth-pipeline-v1",
+  "legacy_equivalence": false,
+  "locations": [
+    {
+      "key": "tokyo",
+      "name": "Tokyo",
+      "latitude": 35.6762,
+      "longitude": 139.6503
+    },
+    {
+      "key": "hawaii",
+      "name": "Hawaii",
+      "latitude": 19.6,
+      "longitude": -155.5
+    },
+    {
+      "key": "andes",
+      "name": "Andes",
+      "latitude": -23.0,
+      "longitude": -68.0
+    },
+    {
+      "key": "east_african_rift",
+      "name": "East African Rift",
+      "latitude": -3.0,
+      "longitude": 36.0
+    },
+    {
+      "key": "java",
+      "name": "Java",
+      "latitude": -7.5,
+      "longitude": 110.0
+    },
+    {
+      "key": "mediterranean",
+      "name": "Mediterranean",
+      "latitude": 38.0,
+      "longitude": 22.0
+    },
+    {
+      "key": "new_zealand",
+      "name": "New Zealand",
+      "latitude": -41.0,
+      "longitude": 174.0
+    },
+    {
+      "key": "siberian_craton",
+      "name": "Siberian Craton",
+      "latitude": 62.0,
+      "longitude": 110.0
+    }
+  ],
+  "depths_km": [
+    100,
+    410,
+    660,
+    1000
+  ],
+  "earth_radius_km": 6371.0,
+  "events": 169,
+  "question_generation": false,
+  "litho_sampling": "nearest spherical node; CRUST3-BOTTOM and LID-BOTTOM; metres / 1000",
+  "semucb_sampling": "unmodified upstream C spline evaluator; dlnVs/dlnXi percent",
+  "semucb_precision": "upstream output: perturbations 0.01%; velocities 0.001 km/s",
+  "invalid_mantle_samples": "CSV blanks / JSON null; retain validity flags; no imputation",
+  "event_model_depths": "fixed depths beneath epicentre, not earthquake hypocentre depth",
+  "model_combination": "side-by-side samples only; not a coupled waveform model",
+  "usgs_selection": "2010-01-01 <= UTC time < 2021-01-01; mag >= 7; sort time then id",
+  "compiler": "gcc (Ubuntu 13.3.0-6ubuntu2~24.04.1) 13.3.0",
+  "numpy_version": "2.5.3",
+  "pipeline_sha256": "199f98b7eb1ad614906d7f16f86a97225f48fa0e19fb240a5c7d42ae49dda594",
+  "sources": {
+    "litho1": {
+      "sha256": "50b4b3ae4f7bd84ecb5e1f4a67fa936efde0e2ecfbf299ba4dce9c51bc77b406",
+      "url": "https://pypi.org/project/litho1pt0/1.5.0/"
+    },
+    "semucb": {
+      "sha256": "d7bbfbac19030eb5773b060f7d63e8ab05c8fcc4c931830433faf8a45c5972b7",
+      "revision": "870eb96ad2ae05a095deae33321f12cf5a63d884",
+      "url": "https://github.com/bsl-group/SEMUCB-WM1-Model"
+    },
+    "usgs": {
+      "sha256": "3a3385e8509aa33f6746dce4e8cc6bf0c71c064356efeabb8a6520fea98d586a",
+      "url": "https://earthquake.usgs.gov/fdsnws/event/1/query?format=csv&starttime=2010-01-01&endtime=2021-01-01&minmagnitude=7&eventtype=earthquake&orderby=time-asc",
+      "query": {
+        "format": "csv",
+        "starttime": "2010-01-01",
+        "endtime": "2021-01-01",
+        "minmagnitude": "7",
+        "eventtype": "earthquake",
+        "orderby": "time-asc"
+      },
+      "downloaded_at": "2026-10-08T11:27:57.850828+00:00",
+      "eligible_events": 169,
+      "legacy_sha256_required": false
+    }
+  },
+  "outputs": {
+    "derived/location_model_samples.csv": {
+      "sha256": "3a2317e4be2c6fcbbfb844593ae5fc76cd6d4947648e0e20b72d6f31b06c08e4"
+    },
+    "derived/location_semucb_samples.csv": {
+      "sha256": "05b3bc969d3f3a68d4db7ccdf0fc045adc99f15342973903a138702c156a1dc6"
+    },
+    "derived/cross_event_samples.csv": {
+      "sha256": "fbd4a53b56d8ce864dcd5a348c5dc608d9e9b5c226a886872330d7ad1ffe0a8b"
+    },
+    "derived/event_semucb_samples.csv": {
+      "sha256": "1a17f7141460b2b290c6852ed9acbf80302e5781d5082e69e44fe2a96288111e"
+    },
+    "derived/usgs_catalog.csv": {
+      "sha256": "587b1900c59e0a7775d922c443b67b1b6ab2cd9d8fb3cacaff3bb0d24bd8674a"
+    },
+    "source_snapshot/usgs_2010_2020_m7.csv": {
+      "sha256": "3a3385e8509aa33f6746dce4e8cc6bf0c71c064356efeabb8a6520fea98d586a"
+    }
+  },
+  "entrypoint_sha256": "e82921dcd2681b29414d92a4520fea8e8d9c180d91e47cbda7653593005c623c",
+  "dependency_lock_sha256": "090ff243ed01222de2b5a54e00a3ccfd2274f6de41c5fb9fbbdc73ebcb696a04",
+  "prepared_files": {
+    "usgs_source.csv": "76a953382f8ad860b98aa938b9055a9f545ec634c63cc6e5318b748ca278cbec",
+    "cross_event_samples.csv": "fbd4a53b56d8ce864dcd5a348c5dc608d9e9b5c226a886872330d7ad1ffe0a8b",
+    "event_semucb_samples.csv": "1a17f7141460b2b290c6852ed9acbf80302e5781d5082e69e44fe2a96288111e",
+    "location_model_samples.csv": "3a2317e4be2c6fcbbfb844593ae5fc76cd6d4947648e0e20b72d6f31b06c08e4",
+    "location_semucb_samples.csv": "05b3bc969d3f3a68d4db7ccdf0fc045adc99f15342973903a138702c156a1dc6",
+    "usgs_catalog.csv": "587b1900c59e0a7775d922c443b67b1b6ab2cd9d8fb3cacaff3bb0d24bd8674a"
+  }
+}

@@ -19,7 +19,7 @@ def _climate_deep(params: dict[str, Any]) -> str:
         if "bintanja" in dataset
         else "deep_time_friedrich2016_temp.csv"
     )
-    table = _read_csv(paths().dataset("habitable") / filename)
+    table = _read_csv(paths().data("habitable", filename))
     if str(params.get("find", "")).lower() in ("min_temp", "min_temp_friedrich", "coldest"):
         row = table.loc[table["temp_anomaly_C"].astype(float).idxmin()]
         return _result(dataset=dataset, nearest=_row_dict(row))
@@ -37,7 +37,7 @@ def _climate_deep(params: dict[str, Any]) -> str:
 
 
 def _climate_present(params: dict[str, Any]) -> str:
-    table = _read_csv(paths().dataset("habitable") / "present_climate_gistemp_global_annual.csv")
+    table = _read_csv(paths().data("habitable", "present_climate_gistemp_global_annual.csv"))
     start = int(params.get("year_start", table["year"].min()))
     end = int(params.get("year_end", params.get("modern_year", table["year"].max())))
     if end < start:
@@ -59,7 +59,7 @@ def _climate_ssp(params: dict[str, Any]) -> str:
     if isinstance(year_value, (list, tuple)):
         year_value = next((item for item in reversed(year_value) if str(item).isdigit()), 2100)
     year = int(year_value)
-    table = _read_csv(paths().dataset("habitable") / "future_climate_ssp_warming_summary.csv")
+    table = _read_csv(paths().data("habitable", "future_climate_ssp_warming_summary.csv"))
     rows = table[(table["scenario"] == scenario) & (table["horizon_year"] == year)]
     if rows.empty:
         raise ValueError(f"Unknown SSP scenario/horizon: {scenario}/{year}")
