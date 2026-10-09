@@ -8,4 +8,6 @@ This procedure heuristically prunes the planning space. Task relevance narrows t
 
 Each operation retains its source Skill, required inputs, and permitted implementations. These records constrain tool selection and preserve the operation's role in the workflow.
 
+The plan distinguishes data dependencies from control dependencies. Data dependencies identify which earlier result an operation consumes; control dependencies specify ordering without making the preceding output an input. This distinction is retained when fragments from different Skills are composed.
+
 The model thus receives a structured starting plan and scoped tool candidates. It can reuse part of a Skill without regenerating its declared prerequisites or adopting the whole workflow. When no Skill applies, the agent falls back to the existing tool-only planning path.
