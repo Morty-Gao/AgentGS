@@ -1,29 +1,9 @@
-import subprocess
-from pathlib import Path
-
 import pytest
 
 from agentgs.config.settings import RuntimeSettings
 from agentgs.contracts.models import TaskInput, ToolCall
 from agentgs.runtime.sandbox.base import CodeExecutor, SandboxUnavailable
 from agentgs.runtime.service import TaskService
-
-
-@pytest.fixture
-def sandbox_project(project):
-    binary = Path(__file__).parents[3] / "tools" / "bin" / "bwrap"
-    if not binary.exists():
-        pytest.skip("Local bwrap integration dependency missing")
-    probe = subprocess.run(
-        [str(binary), "--unshare-all", "--ro-bind", "/", "/", "/usr/bin/true"],
-        capture_output=True,
-        timeout=5,
-    )
-    if probe.returncode:
-        pytest.skip("Host does not permit the bwrap integration sandbox")
-    (project / "tools" / "bin").mkdir(parents=True)
-    (project / "tools" / "bin" / "bwrap").symlink_to(binary.resolve())
-    return project
 
 
 async def test_code_does_not_inherit_secrets_or_host_files(sandbox_project, monkeypatch):

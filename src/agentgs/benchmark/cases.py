@@ -1,12 +1,39 @@
+"""Exact-match runs for caller-supplied cases.
+
+These cases already contain a ``TaskInput``. They are not an evaluation dataset:
+gold expectations are compared here and never sent to the runtime.
+"""
+
 import asyncio
 import json
 from pathlib import Path
 from uuid import uuid4
 
 from agentgs.contracts.async_utils import invoke
-from agentgs.contracts.models import TaskStatus
-from agentgs.evaluation.conversation import as_conversation, conversation_usage, tool_executions
-from agentgs.evaluation.models import EvaluationCase
+from agentgs.contracts.models import Model, TaskInput, TaskStatus
+from agentgs.evaluation.analysis.conversation import (
+    as_conversation,
+    conversation_usage,
+    tool_executions,
+)
+
+
+class EvaluationCase(Model):
+    id: str
+    input: TaskInput
+    expected_answer: str | None = None
+    expected_tools: list[str] | None = None
+
+
+def load_cases(path):
+    cases = [
+        EvaluationCase.model_validate_json(line)
+        for line in path.read_text(encoding="utf-8-sig").splitlines()
+        if line.strip()
+    ]
+    if len({case.id for case in cases}) != len(cases):
+        raise ValueError("Duplicate evaluation case ids")
+    return cases
 
 
 async def evaluate(service, cases, output: Path):
@@ -75,14 +102,3 @@ async def evaluate(service, cases, output: Path):
         encoding="utf-8",
     )
     return run
-
-
-def load_cases(path):
-    cases = [
-        EvaluationCase.model_validate_json(line)
-        for line in path.read_text(encoding="utf-8-sig").splitlines()
-        if line.strip()
-    ]
-    if len({c.id for c in cases}) != len(cases):
-        raise ValueError("Duplicate evaluation case ids")
-    return cases

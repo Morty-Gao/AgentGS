@@ -84,7 +84,6 @@ def setup(project, replies, names=("RemoteSensingMean",), *, skill_guided=False)
                     "max_output_tokens": 8192,
                 }
             },
-            "roles": {"planner": "m", "answer": "m"},
         }
     )
     client = OpenAICompatibleClient(config, httpx.MockTransport(respond))

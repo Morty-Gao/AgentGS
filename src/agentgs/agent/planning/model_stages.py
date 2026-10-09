@@ -186,7 +186,7 @@ Recent attempts:
             tool_choice={"type": "function", "function": {"name": name}},
         )
 
-    async def generate_output(self, question, output, model=None, *, execution_incomplete=False):
+    async def generate_output(self, question, output, *, execution_incomplete=False):
         contract = self.find_contract(question)
         policy = ""
         if execution_incomplete:

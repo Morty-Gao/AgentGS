@@ -61,7 +61,9 @@ def run(
     project: Path = typer.Option(Path.cwd(), "--project"),
     tool: str | None = typer.Option(None, "--tool"),
     arguments: str = typer.Option("{}", "--arguments"),
-    model: str | None = typer.Option(None, "--model"),
+    model: str | None = typer.Option(
+        None, "--model", help="llm.toml model key; omit to use the only configured model"
+    ),
     effort: str | None = typer.Option(None, "--effort"),
     messages: Path | None = typer.Option(
         None, "--messages", help="Conversation JSON or JSONL history"
@@ -251,9 +253,7 @@ def validate_config(project: Path = typer.Option(Path.cwd(), "--project")):
 
     root = project_root(project)
     llm = load_llm(root)
-    emit(
-        {"models": list(llm.models), "roles": llm.roles, "agent": load_algorithm(root).model_dump()}
-    )
+    emit({"models": list(llm.models), "agent": load_algorithm(root).model_dump()})
 
 
 @eval_app.command("run")
@@ -274,7 +274,7 @@ def evaluate_command(
     model_timeout: ModelTimeout = None,
     tool_timeout: ToolTimeout = None,
 ):
-    from agentgs.evaluation.runner import evaluate, load_cases
+    from agentgs.benchmark.cases import evaluate, load_cases
 
     root = project_root(project)
 
@@ -329,6 +329,12 @@ def benchmark_command(
         min=1,
         help="Argument/execution attempts per tool instance",
     ),
+    command_attempts: int | None = typer.Option(
+        None,
+        "--command-attempts",
+        min=1,
+        help="Bash commands allowed during data_only exploration",
+    ),
     concurrency: Concurrency = None,
     timeout: Timeout = None,
     rss_limit_mb: RssLimit = None,
@@ -344,7 +350,7 @@ def benchmark_command(
     tool_timeout: ToolTimeout = None,
 ):
     """Run actual Agent requests with conversation metrics; preserve every attempt."""
-    from agentgs.evaluation.benchmark import run_benchmark
+    from agentgs.benchmark.runner import run_benchmark
     from agentgs.evaluation.datasets.version import benchmark_dataset
     from agentgs.runtime.answer_contracts import AnswerContracts
 
@@ -381,6 +387,7 @@ def benchmark_command(
                 allow_rule_planning=allow_rule_planning,
                 plan_attempts=plan_attempts,
                 tool_attempts=tool_attempts,
+                command_attempts=command_attempts,
                 contract_provider=AnswerContracts(root),
             )
         finally:
@@ -398,7 +405,7 @@ def score_benchmark(
     allow_partial: bool = typer.Option(False, "--allow-partial"),
 ):
     """Score saved original model answers without any new model calls."""
-    from agentgs.evaluation.benchmark import score_predictions
+    from agentgs.benchmark.score import score_predictions
     from agentgs.evaluation.datasets.version import benchmark_dataset
 
     root = project_root(project)

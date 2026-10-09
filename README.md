@@ -72,7 +72,7 @@ tools/envs/reproduction/bin/python -m agentgs evaluate benchmark --output output
 
 GeoQuestions 只按公开 numeric source_id 或提交的 SPARQL 结构定位物化结果，符号 topic 不充当 ID。查询匹配保留原权重、阈值和歧义规则，未匹配返回失败。结果标记 `derived_lookup`、`answer_lookup=true`，不声称执行了 RDF 端点。
 
-`config.toml` 的 `[agent]` 管理算法开关、预算与检索路径；`llm.toml` 独立存储模型调用信息（provider、model 和角色映射）；运行资源与沙箱通过 CLI 参数指定；`.env` 保存本机连接信息并被 Git 忽略。模型模式需要 `LLM_BASE_URL`（含 `/v1`）、`LLM_API_KEY`、`LLM_MODEL`。用量缺失、失败或中断时保留 unknown，成本和综合分不可据此补零。
+`config.toml` 的 `[agent]` 管理算法开关、预算与检索路径；`llm.toml` 独立存储 provider 和唯一模型，规划、填参和最终回答使用这同一个模型；运行资源与沙箱通过 CLI 参数指定；`.env` 保存本机连接信息并被 Git 忽略。模型模式需要 `LLM_BASE_URL`（含 `/v1`）、`LLM_API_KEY`、`LLM_MODEL`。用量缺失、失败或中断时保留 unknown，成本和综合分不可据此补零。
 
 ## 工具规划消融
 
@@ -89,14 +89,22 @@ GeoQuestions 只按公开 numeric source_id 或提交的 SPARQL 结构定位物�
 | `tool_attempts` | `3` | 每个工具实例的参数与执行修复总次数 |
 | `argument_attempts` | `3` | 原生规划调用的协议修复预算及参数请求的传输重试上限 |
 | `model_attempts` | `4` | 模型请求的传输重试预算 |
+| `command_attempts` | `12` | `data_only` 中允许的 bash 次数；其他模式忽略 |
 
-旧 `require_llm=true` 的规划策略对应 `allow_rule_planning=false`；旧 `require_llm=false` 对应 `allow_rule_planning=true`。本次默认统一关闭规则规划；若要保留旧配置的规则辅助，需要显式开启。规划次数单独指定，不再因为关闭规则规划而降为一次。`shared_bridge` 在工具模式下有效值固定为 `false`。
+旧 `require_llm=true` 的规划策略对应 `allow_rule_planning=false`；旧 `require_llm=false` 对应 `allow_rule_planning=true`。本次默认统一关闭规则规划；若要保留旧配置的规则辅助，需要显式开启。规划次数单独指定，不再因为关闭规则规划而降为一次。`shared_bridge` 在 `tool_only` 和 `data_only` 下固定为 `false`。`data_only` 同时固定 `allow_rule_planning` 为 `false`。
 
-正式对比只改变模式，使用相同题目、模型和预算，并分别保存到新实验目录：
+`planning_mode="data_only"` 不加载 Skill、工具 KG 或科学工具注册表。模型只有 `bash`。Linux 使用 bwrap，把允许的目录和文件只读绑定到 `/data` 的原相对路径，不复制、不改格式、不按题目打包；拒绝顶层数据路径的符号链接。`geotooleval.jsonl`、`metadata/`、`geoquestions/`、`raw/` 和 `geotoolkg/` 不进入沙箱。该题的 `/work` 可写并跨调用保留，`/tmp` 和 `/dev/shm` 是临时空间。网络由独立网络命名空间显式阻断，宿主环境变量不传入；解释器和虚拟环境只读可用。若容器不能挂载私有 `/proc`，使用空 `/proc`，仍保留 PID、网络等命名空间；不会绑定宿主 `/proc`，也不会回退到 PRoot 或宿主 Bash。
+
+Bash 与科学工具共用 runtime 的工具额度、排队期限、取消和任务 RSS 监督，并记录标准 `ToolResult`、事件和 JSON 产物。非零退出是失败，stdout/stderr 保留；每流最多保存 16 KiB，超出后继续消费输出，让命令正常完成。探索次数由 `command_attempts` 限制，其他模式忽略它。最终回答走统一格式检查。这组实验的可比指标是答案分 FAS；工具链匹配汇总标为 `not_applicable`。
+
+桌面 demo 使用 `--sandbox auto`：macOS 的 `sandbox-exec` 通过功能探测时使用系统策略限制文件读写并禁止网络；缺失或探测失败时使用本机 Bash。Windows 使用 Git Bash，也可通过现有 WSL 入口获得 Linux 隔离。桌面本机路径不会映射成 `/data`，模型收到实际数据与工作目录路径。本机降级会记录 `isolation=native_demo`、`data_mount=native_unprotected`、`network_isolated=false`，不保证只读、隐藏宿主文件或断网；它用于 demo，不等同于 Linux 隔离实验。
+
+正式对比只改变模式，使用相同题目和模型，并分别保存到新实验目录。`data_only` 可以单独加大每题超时：
 
 ```bash
 tools/envs/reproduction/bin/python -m agentgs evaluate benchmark --planning-mode skill_guided --no-rule-planning --plan-attempts 3 --tool-attempts 3 --output outputs/evaluations/full-new
 tools/envs/reproduction/bin/python -m agentgs evaluate benchmark --planning-mode tool_only --no-rule-planning --plan-attempts 3 --tool-attempts 3 --output outputs/evaluations/tool-only-new
+tools/envs/reproduction/bin/python -m agentgs evaluate benchmark --planning-mode data_only --no-rule-planning --command-attempts 12 --timeout 900 --output outputs/evaluations/data-only-new
 ```
 
 日志监督脚本也支持上述模式和预算参数。实验协议记录实际生效的任务覆盖、恢复预算及工具/规划声明哈希；每个 AgentResult 的 `provenance.effective_algorithm` 保存有效配置。旧参数、源码或协议的实验不能混入新目录续跑。
@@ -119,13 +127,13 @@ tools/envs/reproduction/bin/python -m agentgs evaluate benchmark --planning-mode
 | `--rss-limit-mb` | 1024 | 每题 RSS 内存上限（MB） |
 | `--max-total-rss-mb` | 4096 | 全部 worker 的 RSS 总预算（MB） |
 | `--code-timeout` | 20 | 代码步骤超时秒数 |
-| `--sandbox` | `auto` | `auto`、`bwrap`、`proot` 或 `disabled` |
-| `--allow-proot` / `--no-allow-proot` | 禁用 | 显式允许 PRoot 后端 |
+| `--sandbox` | `auto` | Linux 的 `auto`/`bwrap` 要求 bwrap；桌面 `auto` 使用系统沙箱或 demo 降级；`disabled` 仅桌面允许本机执行 |
+| `--allow-proot` / `--no-allow-proot` | 禁用 | 保留参数兼容；模型代码和 Bash 均不允许 PRoot |
 | `--worker-python` | 自动选择 | 指定 worker Python 的绝对路径或项目相对路径 |
 
 显式设置并发或每题 RSS 上限时，未指定的总 RSS 预算会自动提高到至少“并发 × 每题 RSS”；显式指定 `--max-total-rss-mb` 则使用该值。worker 默认优先使用项目的科学复现环境，缺失时使用当前 Python。
 
-任务、模型和工具的额度通过 `outputs/runtime/coordination.sqlite3` 共享。相同项目根目录的多个 runtime 实例和 worker 使用同一额度，活动实例必须使用一致的并发配置；跨实例可以查询、等待和取消任务。科学内置工具默认通过独立子进程计算，超时或取消时回收进程树。同步扩展 handler 在线程中执行，异步 handler 直接等待；线程中的同步函数取消后会等待其退出，因此需要硬终止的计算应使用进程后端。
+任务、模型和工具的额度通过 `outputs/runtime/coordination/<worker-identity>/coordination.sqlite3` 共享。相同项目和 worker 环境内的多个 runtime 实例使用同一额度，活动实例必须使用一致的并发配置；不同机器或 PID 命名空间使用各自额度，避免把其他 pod 的租约误判为死进程。跨实例可以查询、等待和取消任务。科学内置工具默认直接调用 Python handler，不进入沙箱；同步 handler 在线程中执行，异步 handler 直接等待。同步函数取消后会等待其退出；需要工具级硬终止时，可在 Python API 中设置 `RuntimeSettings(tool_backend="process")`。任务 worker 和 Bash 子进程仍受 runtime 监督，取消 Bash 会回收进程树，嵌套沙箱执行复用已取得的工具额度。
 
 Python 运行时 API 的提交、查询和事件读取均需要 `await`，可以用异步上下文管理器关闭服务：
 

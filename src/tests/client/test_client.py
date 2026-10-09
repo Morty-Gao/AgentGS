@@ -23,7 +23,6 @@ def config():
                     "supported_efforts": ["low"],
                 }
             },
-            "roles": {"planner": "m"},
         }
     )
 

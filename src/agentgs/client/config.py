@@ -24,7 +24,7 @@ def load_llm(root: Path, path: Path | None = None) -> LLMConfig:
             raise ValueError(f"Invalid default effort for model {name}")
         if model.max_output_tokens >= model.context_window:
             raise ValueError(f"Output budget must be smaller than context for {name}")
-    for role, model in config.roles.items():
-        if model not in config.models:
-            raise ValueError(f"Unknown model for role {role}")
+    if len(config.models) != 1:
+        raise ValueError("llm.toml must define exactly one model")
+    config.configured_model()
     return config

@@ -16,8 +16,6 @@ model="test"
 context_window=100
 max_output_tokens=10
 supported_efforts=["low"]
-[roles]
-planner="m"
 """
 
 
@@ -29,6 +27,23 @@ def test_config_does_not_mutate_environment(project, monkeypatch):
     assert config.providers["p"].api_key.get_secret_value() == "process-secret"
     assert os.environ.get("TEST_LLM_URL") is None
     assert "process-secret" not in repr(config)
+
+
+def test_loader_rejects_empty_model_id(project):
+    (project / ".env").write_text("TEST_LLM_URL=https://fixture/v1\nTEST_LLM_KEY=local-secret\n")
+    (project / "llm.toml").write_text(CONFIG.replace('model="test"', 'model="  "'))
+    with pytest.raises(ValueError, match="empty"):
+        load_llm(project)
+
+
+def test_loader_requires_exactly_one_model(project):
+    (project / ".env").write_text("TEST_LLM_URL=https://fixture/v1\nTEST_LLM_KEY=local-secret\n")
+    (project / "llm.toml").write_text(
+        CONFIG
+        + '[models.n]\nprovider="p"\nmodel="other"\ncontext_window=100\nmax_output_tokens=10\n'
+    )
+    with pytest.raises(ValueError, match="exactly one model"):
+        load_llm(project)
 
 
 def test_missing_env_and_root_discovery(project):

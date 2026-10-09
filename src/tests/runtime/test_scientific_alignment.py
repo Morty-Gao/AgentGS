@@ -30,7 +30,7 @@ SYNTHETIC = json.loads((ROOT / "src/tests/fixtures/scientific/synthetic.json").r
 def test_portable_raster_and_spatial_source_decisions(case, tmp_path):
     if importlib.util.find_spec("rasterio") is None:
         pytest.skip("Scientific raster extra is required")
-    from agentgs.evaluation.scientific import bind_inputs, create_inputs, observe_result
+    from agentgs.evaluation.analysis.scientific import bind_inputs, create_inputs, observe_result
 
     inputs = create_inputs(tmp_path)
     outputs = tmp_path / "outputs"

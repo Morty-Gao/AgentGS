@@ -12,6 +12,3 @@ max_output_tokens = 8192
 supported_efforts = []
 [models.default.capabilities]
 tool_calling = true
-[roles]
-planner = "default"
-answer = "default"

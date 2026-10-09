@@ -7,41 +7,19 @@ import math
 import re
 import unicodedata
 from collections import Counter
-from pathlib import Path
-from typing import Any, Iterable
+from typing import Any
 
-from agentgs.evaluation.conversation import as_conversation, conversation_usage, tool_executions
-from agentgs.evaluation.datasets.geotooleval import load_tasks
+from agentgs.evaluation.analysis.conversation import (
+    as_conversation,
+    conversation_usage,
+    tool_executions,
+)
 from agentgs.messages import Conversation, Message
 
 SCORING_PROTOCOL = "geotooleval-conversation-v2"
 
 DEFAULT_TOKEN_BUDGET_PER_GOLD_STEP = 10000
 _IGNORED_ARGUMENT_KEYS = {"_output_keys"}
-
-
-def load_gold_tasks(
-    dataset_path: str | Path, question_ids: Iterable[int] | None = None
-) -> dict[int, dict[str, Any]]:
-    """Load structured gold calls from the embedded GeoToolEval JSONL."""
-    selected = None if question_ids is None else {int(value) for value in question_ids}
-    tasks = {
-        task.question_id: {
-            "question_id": task.question_id,
-            "category_id": task.category_id,
-            "question": task.question,
-            "expected_answer": task.expected_answer,
-            "answer_type": task.answer_type,
-            "gold_steps": list(task.gold_steps),
-        }
-        for task in load_tasks(Path(dataset_path))
-        if selected is None or task.question_id in selected
-    }
-    if selected is not None:
-        missing_ids = selected - tasks.keys()
-        if missing_ids:
-            raise KeyError(f"Question IDs not found in GeoToolEval: {sorted(missing_ids)}")
-    return tasks
 
 
 def parse_tool_input(raw_input: Any) -> Any:
@@ -291,12 +269,12 @@ def score_task(
 
 
 def _domain_macro_average(samples: list[dict[str, Any]], field: str) -> float | None:
-    by_domain: dict[int, list[float]] = {}
+    by_domain: dict[Any, list[float]] = {}
     for sample in samples:
         value = (sample.get("scores") or {}).get(field)
         if value is None:
             return None
-        by_domain.setdefault(int(sample["category_id"]), []).append(float(value))
+        by_domain.setdefault(sample["category_id"], []).append(float(value))
     if not by_domain:
         return None
     domain_means = [sum(values) / len(values) for values in by_domain.values()]
@@ -322,8 +300,8 @@ def aggregate_scores(samples: list[dict[str, Any]]) -> dict[str, Any]:
     }
     return {
         "protocol": SCORING_PROTOCOL,
-        "aggregation": "macro average over represented GeoToolEval domains",
-        "domain_count": len({int(sample["category_id"]) for sample in samples}),
+        "aggregation": "macro average over represented domains",
+        "domain_count": len({sample["category_id"] for sample in samples}),
         "sample_count": len(samples),
         "token_budget_per_gold_step": (samples[0].get("scores") or {}).get("token_budget", 0)
         // max(1, len(samples[0].get("gold_steps") or []))

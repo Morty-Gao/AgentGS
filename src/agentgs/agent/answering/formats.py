@@ -1,7 +1,6 @@
 """Public answer contracts. No gold values, scoring imports, or answer generation.
 
 Exact question matching excludes only the evaluator's appended resource locator.
-The final model call remains in tool_plan_executor.generate_output.
 """
 
 import math
@@ -16,8 +15,6 @@ from agentgs.contracts.answer_formats import validate_contract_rows as validate_
 RESOURCE_MARKER = "\n\nEvaluation input resource (authoritative benchmark locator; use it exactly when relevant, but retrieve and select the registered tools yourself): "
 SLOT = re.compile("<([^<>\\n]+)>")
 NUMBER = "[-+]?(?:\\d+(?:\\.\\d*)?|\\.\\d+)(?:[Ee][-+]?\\d+)?"
-
-
 
 
 def fixed_answer_prompt(question, evidence, contract):

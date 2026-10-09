@@ -3,25 +3,31 @@ from dataclasses import replace
 
 import pytest
 
-from agentgs.evaluation.benchmark import public_input, score_prediction, score_predictions
-from agentgs.evaluation.conversation import conversation_usage, tool_executions, usage_summary
+from agentgs.benchmark.inputs import public_input
+from agentgs.benchmark.score import score_predictions
+from agentgs.evaluation.analysis.conversation import (
+    conversation_usage,
+    tool_executions,
+    usage_summary,
+)
 from agentgs.evaluation.datasets.geotooleval import EvalTask, load_tasks
+from agentgs.evaluation.metrics.report import score_prediction
 from agentgs.evaluation.metrics.tools import SCORING_PROTOCOL, score_task
 from agentgs.messages import Conversation, Message
 
 
 def task():
     return EvalTask(
-        1,
-        1,
-        "DeepEarthTools",
-        "Compute the value",
-        "2",
-        "单数值结果",
-        "",
-        "single",
-        "T",
-        ({"tool_name": "T", "arguments": {"x": [1, 3]}},),
+        question_id=1,
+        category_id=1,
+        category="DeepEarthTools",
+        question="Compute the value",
+        expected_answer="2",
+        answer_type="单数值结果",
+        input_resource="",
+        chain_mode="single",
+        gold_chain_text="T",
+        gold_steps=({"tool_name": "T", "arguments": {"x": [1, 3]}},),
     )
 
 

@@ -59,7 +59,7 @@ class AnsweringService:
         try:
             contract = self.stages.find_contract(question)
             text = await self.stages.generate_output(
-                question, evidence, model=None, execution_incomplete=not completed
+                question, evidence, execution_incomplete=not completed
             )
             status, answer = (
                 ("Completed" if completed else "Not Completed", text.strip())

@@ -13,7 +13,11 @@ from agentgs.agent.planning.selection import select_skill_ids
 from agentgs.agent.planning.skills import SkillPlanner, builtin_planner
 from agentgs.agent.retrieval.scored_skills import WeightedSkillRetriever
 from agentgs.contracts.tool_feedback import assess_tool_execution
-from agentgs.evaluation.alignment import alignment_report, decision_digest, verify_components
+from agentgs.evaluation.analysis.alignment import (
+    alignment_report,
+    decision_digest,
+    verify_components,
+)
 from agentgs.skills.definitions import (
     load_capability_extensions,
     load_library_scope,

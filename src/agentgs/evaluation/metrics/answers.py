@@ -7,7 +7,7 @@ import unicodedata
 from collections import Counter
 from typing import Any
 
-from agentgs.evaluation.datasets.geotooleval import EvalTask
+from agentgs.evaluation.datasets.base import Example
 
 NUMBER_RE = re.compile("(?<![A-Za-z0-9.])[-+]?\\d+(?:\\.\\d+)?(?:[Ee][-+]?\\d+)?")
 
@@ -214,7 +214,7 @@ def structured_field_score(
     )
 
 
-def score_answer(task: EvalTask, final_answer: str) -> dict[str, Any]:
+def score_answer(task: Example, final_answer: str) -> dict[str, Any]:
     expected = task.expected_answer
     answer_type = task.answer_type
     predicted = str(final_answer or "")

@@ -6,6 +6,7 @@ from pydantic import Field
 
 from agentgs.contracts.catalog import load_tool_scope
 from agentgs.contracts.models import Model, ToolSpec
+from agentgs.contracts.sandbox import BashInput
 from agentgs.contracts.tool_inputs import tool_input_models
 from agentgs.runtime.tools.domains.geosparql import SnapshotQuery, replay_query
 
@@ -77,6 +78,16 @@ def builtin_tools():
 def internal_operations():
     """Infrastructure operations for explicit requests; excluded from tool retrieval."""
     return {
+        "bash": RegisteredTool(
+            ToolSpec(
+                id="bash",
+                description="Explore read-only /data with persistent writable /work; no network",
+                input_schema=BashInput.model_json_schema(),
+                effects="write",
+            ),
+            BashInput,
+            None,
+        ),
         "ExecutePython": RegisteredTool(
             ToolSpec(
                 id="ExecutePython",
@@ -86,5 +97,5 @@ def internal_operations():
             ),
             CodeInput,
             None,
-        )
+        ),
     }

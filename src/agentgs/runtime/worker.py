@@ -43,23 +43,24 @@ class PipeEvents:
 async def execute(root, work, spec, settings):
     events = PipeEvents()
     coordinator = RuntimeCoordinator(root)
+    options = resolve_algorithm(await invoke(load_algorithm, root), spec.input)
     artifacts = await invoke(LocalArtifactStore, work / "artifacts")
+    code = CodeExecutor(root, work / "code", settings, coordinator=coordinator)
     tools = await invoke(
         LocalToolExecutor,
         DatasetRegistry(root),
         artifacts,
         events,
-        CodeExecutor(root, work / "code", settings),
+        code,
         allow_internal_operations=bool(spec.input.calls),
+        include_scientific_tools=bool(spec.input.calls) or options.planning_mode != "data_only",
         settings=settings,
         coordinator=coordinator,
     )
-    options, contracts, paths = await asyncio.gather(
-        invoke(load_algorithm, root),
+    contracts, paths = await asyncio.gather(
         invoke(AnswerContracts, root),
         invoke(ToolPaths.create, root, artifacts.root),
     )
-    options = resolve_algorithm(options, spec.input)
     client = None
     try:
         if not spec.input.calls:
@@ -73,7 +74,11 @@ async def execute(root, work, spec, settings):
         if options.index_path.startswith("data/"):
             index_folder = prepared_path(root, options.index_path.removeprefix("data/"))
         retriever = None
-        if not spec.input.calls and await invoke((index_folder / "index_store.json").exists):
+        if (
+            not spec.input.calls
+            and options.planning_mode != "data_only"
+            and await invoke((index_folder / "index_store.json").exists)
+        ):
             retriever = LazyToolRetriever(
                 lambda: KGToolRetriever.from_directory(
                     index_folder,
@@ -119,6 +124,7 @@ async def execute(root, work, spec, settings):
             answer_contract_lookup=contracts.find,
             answer_system_prompt=contracts.system_prompt,
             checkpoint=checkpoint,
+            code_executor=code,
         )
         return await AgentEngine().run(spec.input, context)
     finally:

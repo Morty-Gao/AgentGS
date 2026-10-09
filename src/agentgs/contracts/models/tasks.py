@@ -37,10 +37,11 @@ class TaskInput(Model):
     input_resource: Any = None
     file_path_list: list[str] = Field(default_factory=list)
     output_contract: dict[str, Any] | None = None
-    planning_mode: Literal["tool_only", "skill_guided"] | None = None
+    planning_mode: Literal["tool_only", "skill_guided", "data_only"] | None = None
     allow_rule_planning: bool | None = None
     plan_attempts: int | None = Field(default=None, ge=1)
     tool_attempts: int | None = Field(default=None, ge=1)
+    command_attempts: int | None = Field(default=None, ge=1)
     input_domain: str | None = None
 
     @model_validator(mode="after")

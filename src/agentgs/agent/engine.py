@@ -8,6 +8,7 @@ from copy import copy, deepcopy
 from types import SimpleNamespace
 
 from agentgs.agent.answering.service import AnsweringService, FinalAnswerGenerationError
+from agentgs.agent.data_only import explore
 from agentgs.agent.execution import scope
 from agentgs.agent.execution.artifacts import ArtifactRegistry
 from agentgs.agent.execution.scientific import overlay_scientific_tool_schema
@@ -136,6 +137,8 @@ class AgentEngine:
                 resource_access(context.resource_resolver),
                 scope.request_scope(task.input_domain),
             ):
+                if context.options.planning_mode == "data_only":
+                    return await explore(question, state, stages, answering)
                 return await self._staged(question, state, stages, execution, answering)
         except Exception as exc:
             if isinstance(exc, AgentExecutionError):

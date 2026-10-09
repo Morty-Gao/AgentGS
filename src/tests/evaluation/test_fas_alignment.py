@@ -22,20 +22,20 @@ def test_frozen_fas_all_answer_types_match_original_source():
 
 
 def test_public_task_never_contains_private_reference_data():
-    from agentgs.evaluation.benchmark import public_input
+    from agentgs.benchmark.inputs import public_input
     from agentgs.evaluation.datasets.geotooleval import EvalTask
 
     task = EvalTask(
-        1,
-        1,
-        "DeepEarthTools",
-        "A public question",
-        "PRIVATE_ANSWER",
-        "单项文本结果",
-        '{"source_id":1,"gold_answer":"PRIVATE_VALUE"}',
-        "single",
-        "PRIVATE_CHAIN",
-        ({"tool_name": "PRIVATE_TOOL"},),
+        question_id=1,
+        category_id=1,
+        category="DeepEarthTools",
+        question="A public question",
+        expected_answer="PRIVATE_ANSWER",
+        answer_type="单项文本结果",
+        input_resource='{"source_id":1,"gold_answer":"PRIVATE_VALUE"}',
+        chain_mode="single",
+        gold_chain_text="PRIVATE_CHAIN",
+        gold_steps=({"tool_name": "PRIVATE_TOOL"},),
     )
     request = public_input(task).model_dump_json()
     assert "PRIVATE_" not in request and "gold_answer" not in request
@@ -58,7 +58,7 @@ def test_missing_usage_remains_unknown_for_original_cost_metrics():
 
 
 def test_inflight_or_retried_requests_cannot_be_reported_as_complete_token_usage():
-    from agentgs.evaluation.benchmark import usage_summary
+    from agentgs.evaluation.analysis.conversation import usage_summary
 
     partial = usage_summary(
         [{"usage": {"total_tokens": 10}, "attempts": 1}, {"usage": None, "attempts": None}]

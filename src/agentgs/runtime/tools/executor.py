@@ -29,13 +29,16 @@ class LocalToolExecutor:
         code_executor=None,
         *,
         allow_internal_operations=False,
+        include_scientific_tools=True,
         settings=None,
         coordinator=None,
     ):
         self.datasets, self.artifacts, self.events = datasets, artifacts, events
-        self.registry = builtin_tools()
+        self.registry = builtin_tools() if include_scientific_tools else {}
         self._builtin_handlers = {name: item.handler for name, item in self.registry.items()}
         self.internal = internal_operations() if allow_internal_operations else {}
+        if code_executor is not None:
+            self.internal["bash"] = internal_operations()["bash"]
         self.code_executor = code_executor
         self.settings = settings or RuntimeSettings()
         self.coordinator = coordinator or RuntimeCoordinator(datasets.root.parent)
@@ -72,34 +75,42 @@ class LocalToolExecutor:
         item = self.registry.get(call.tool) or self.internal.get(call.tool)
         try:
             await self._emit("tool.started", {"call_id": call.id, "tool": call.tool})
-            async with asyncio.timeout(
-                timeout if timeout is not None else self.settings.tool_timeout_seconds
+            async with self.coordinator.tool_invocation(
+                self.settings,
+                timeout if timeout is not None else self.settings.tool_timeout_seconds,
             ):
-                async with self.coordinator.slot("tools", self.settings.max_concurrent_tool_calls):
-                    if item is None:
-                        raise KeyError(call.tool)
-                    arguments = {
-                        key: value
-                        for key, value in call.arguments.items()
-                        if value is not None
-                        or key not in item.input_type.model_fields
-                        or item.input_type.model_fields[key].is_required()
-                    }
-                    params = item.input_type.model_validate(arguments)
-                    arguments = params.model_dump(exclude_unset=True, by_alias=True)
-                    arguments.update(call._runtime_arguments)
-                    data = await self._compute(call, item, params, arguments)
+                if item is None:
+                    raise KeyError(call.tool)
+                arguments = {
+                    key: value
+                    for key, value in call.arguments.items()
+                    if value is not None
+                    or key not in item.input_type.model_fields
+                    or item.input_type.model_fields[key].is_required()
+                }
+                params = item.input_type.model_validate(arguments)
+                arguments = params.model_dump(exclude_unset=True, by_alias=True)
+                arguments.update(call._runtime_arguments)
+                data = await self._compute(call, item, params, arguments, timeout=timeout)
+                if call.tool == "bash":
+                    # Shell streams are already preserved in data; avoid duplicating model context.
+                    raw_output = None
+                else:
                     data, raw_output = await invoke(self._decode_result, data)
-                    produced = await self._register_products(call, data)
-                    result = ToolResult(
-                        call_id=call.id,
-                        tool=call.tool,
-                        succeeded=True,
-                        data=data,
-                        artifacts=produced,
-                        source_type=item.source_type,
-                        raw_output=raw_output,
-                    )
+                produced = await self._register_products(call, data)
+                error = None
+                if call.tool == "bash" and data["exit_code"] != 0:
+                    error = ToolError(code="shell_exit", message=f"Bash exited {data['exit_code']}")
+                result = ToolResult(
+                    call_id=call.id,
+                    tool=call.tool,
+                    succeeded=error is None,
+                    data=data,
+                    artifacts=produced,
+                    error=error,
+                    source_type=item.source_type,
+                    raw_output=raw_output,
+                )
         except asyncio.CancelledError:
             await self._emit("tool.cancelled", {"call_id": call.id, "tool": call.tool})
             raise
@@ -132,7 +143,16 @@ class LocalToolExecutor:
         )
         return result
 
-    async def _compute(self, call, item, params, arguments):
+    async def _compute(self, call, item, params, arguments, *, timeout=None):
+        if call.tool == "bash":
+            if self.code_executor is None:
+                raise SandboxUnavailable("No code executor is configured")
+            return await self.code_executor.run_shell(
+                params.command,
+                work=self.code_executor.work / "shell",
+                data_root=self.datasets.root,
+                timeout=timeout if timeout is not None else self.settings.tool_timeout_seconds,
+            )
         if call.tool == "ExecutePython":
             if self.code_executor is None:
                 raise SandboxUnavailable("No code executor is configured")

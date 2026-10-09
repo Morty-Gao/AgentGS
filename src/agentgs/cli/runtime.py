@@ -41,7 +41,10 @@ CodeTimeout = Annotated[
 ]
 Sandbox = Annotated[SandboxMode, typer.Option("--sandbox", help="Code sandbox backend")]
 AllowProot = Annotated[
-    bool, typer.Option("--allow-proot/--no-allow-proot", help="Enable the PRoot backend")
+    bool,
+    typer.Option(
+        "--allow-proot/--no-allow-proot", help="Compatibility flag; model code requires isolation"
+    ),
 ]
 WorkerPython = Annotated[
     Path | None,

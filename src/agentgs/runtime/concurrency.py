@@ -6,10 +6,13 @@ belong to a PID plus its creation time, so crashed processes cannot hold slots.
 """
 
 import asyncio
+import hashlib
 import os
+import socket
 import sqlite3
 import time
 from contextlib import asynccontextmanager
+from contextvars import ContextVar
 from pathlib import Path
 from uuid import uuid4
 
@@ -17,10 +20,29 @@ import psutil
 
 from agentgs.contracts.async_utils import drain, invoke
 
+_tool_admission = ContextVar("tool_admission", default=None)
+
+
+def worker_identity():
+    """PID liveness is meaningful only within the same machine and namespaces."""
+    parts = [socket.gethostname(), psutil.Process().username()]
+    for name in ("/proc/self/ns/pid", "/proc/self/ns/cgroup", "/proc/sys/kernel/random/boot_id"):
+        path = Path(name)
+        try:
+            parts.append(str(path.readlink()) if path.is_symlink() else path.read_text())
+        except OSError:
+            pass
+    return hashlib.sha256("\n".join(parts).encode()).hexdigest()[:20]
+
 
 class RuntimeCoordinator:
     def __init__(self, root: Path):
-        self.path = Path(root) / "outputs/runtime/coordination.sqlite3"
+        self.path = (
+            Path(root).resolve()
+            / "outputs/runtime/coordination"
+            / worker_identity()
+            / "coordination.sqlite3"
+        )
         self.pid = os.getpid()
         self.identity = psutil.Process(self.pid).create_time()
         self._ready = False
@@ -138,6 +160,21 @@ class RuntimeCoordinator:
     async def slot(self, scope, capacity):
         async with self.invocation({scope: capacity}):
             yield
+
+    @asynccontextmanager
+    async def tool_invocation(self, settings, timeout):
+        """Share tool capacity with nested sandbox execution in the same task."""
+        owner = (self.path.absolute(), asyncio.current_task(), settings.max_concurrent_tool_calls)
+        async with asyncio.timeout(timeout):
+            if _tool_admission.get() == owner:
+                yield
+                return
+            async with self.slot("tools", settings.max_concurrent_tool_calls):
+                token = _tool_admission.set(owner)
+                try:
+                    yield
+                finally:
+                    _tool_admission.reset(token)
 
     def _rate(self, key, scope, tokens, rpm, tpm):
         now = time.time()

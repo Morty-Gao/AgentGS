@@ -4,10 +4,11 @@ from types import SimpleNamespace
 
 import pytest
 
+from agentgs.benchmark.runner import run_benchmark
+from agentgs.benchmark.score import score_predictions
 from agentgs.config.settings import RuntimeSettings
 from agentgs.contracts.models import AgentResult, TaskRecord, TaskSpec, TaskStatus, ToolError
-from agentgs.evaluation.benchmark import run_benchmark, score_predictions
-from agentgs.evaluation.datasets.geotooleval import EvalTask
+from agentgs.evaluation.datasets.geotooleval import EvalTask, GeoToolEvalDataset
 from agentgs.messages import Conversation, Message
 
 
@@ -48,8 +49,6 @@ class Service:
 
 @pytest.fixture
 def benchmark_project(project, monkeypatch):
-    from agentgs.evaluation import benchmark
-
     tasks = [
         EvalTask(
             question_id=i,
@@ -65,10 +64,10 @@ def benchmark_project(project, monkeypatch):
         )
         for i in range(1, 6)
     ]
-    monkeypatch.setattr(benchmark, "load_tasks", lambda _: tasks)
+    monkeypatch.setattr(GeoToolEvalDataset, "load", lambda self: tasks)
     monkeypatch.setattr(
         "agentgs.client.config.load_llm",
-        lambda _: SimpleNamespace(models={}, providers={}, roles={}),
+        lambda _: SimpleNamespace(models={}, providers={}),
     )
     dataset = project / "dataset.jsonl"
     dataset.write_text("frozen dataset")
@@ -146,6 +145,37 @@ async def test_tool_ablation_protocol_records_effective_overrides(benchmark_proj
             plan_attempts=3,
             tool_attempts=1,
         )
+
+
+async def test_data_only_protocol_records_mounts_and_answer_metric(benchmark_project):
+    root, dataset = benchmark_project
+    output = root / "data_only"
+    report = await run_benchmark(
+        Service(root),
+        dataset,
+        output,
+        planning_mode="data_only",
+        allow_rule_planning=True,
+        command_attempts=4,
+    )
+    protocol = json.loads((output / "protocol.json").read_text())
+    assert protocol["primary_metric"] == "fas"
+    assert protocol["tool_match"] == "not_applicable"
+    assert protocol["data_mounts_sha256"]
+    assert "skill_definitions" not in protocol["planning_resources_sha256"]
+    effective = protocol["effective_algorithm"]
+    assert effective["planning_mode"] == "data_only"
+    assert effective["allow_rule_planning"] is False
+    assert effective["shared_bridge"] is False
+    assert effective["command_attempts"] == 4
+    assert report["primary_metric"] == "fas"
+    assert report["tool_match"] == "not_applicable"
+    request = json.loads(
+        next((output / "tasks").glob("*/attempt_001/public_input.json")).read_text()
+    )
+    assert request["planning_mode"] == "data_only"
+    assert request["allow_rule_planning"] is False
+    assert request["command_attempts"] == 4
 
 
 async def test_auth_failure_stops_new_tasks_and_preserves_retry(benchmark_project):

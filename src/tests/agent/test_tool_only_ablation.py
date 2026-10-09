@@ -243,8 +243,15 @@ def test_planning_policy_and_budgets_are_explicit_and_validated():
     assert effective.plan_attempts == 4 and effective.tool_attempts == 2
     assert effective.allow_rule_planning and not effective.shared_bridge
     assert options.shared_bridge and options.planning_mode == "skill_guided"
+    data_only = resolve_algorithm(
+        options,
+        TaskInput(planning_mode="data_only", allow_rule_planning=True, command_attempts=5),
+    )
+    assert data_only.planning_mode == "data_only"
+    assert data_only.command_attempts == 5
+    assert not data_only.allow_rule_planning and not data_only.shared_bridge
     for model in (AlgorithmSettings, TaskInput):
-        for field in ("plan_attempts", "tool_attempts"):
+        for field in ("plan_attempts", "tool_attempts", "command_attempts"):
             with pytest.raises(ValidationError):
                 model(**{field: 0})
         with pytest.raises(ValidationError):

@@ -8,6 +8,7 @@ from agentgs.config.algorithm import AlgorithmSettings
 from agentgs.contracts.models import AgentResult, ArtifactStore, EventSink, ToolExecutor
 from agentgs.contracts.resources import ResourceResolver
 from agentgs.contracts.retrieval import ToolRetriever
+from agentgs.contracts.sandbox import DataSandbox
 
 if TYPE_CHECKING:
     from agentgs.agent.planning.skills import SkillPlanner
@@ -30,3 +31,4 @@ class AgentContext:
     answer_contract_lookup: Callable | None = None
     answer_system_prompt: str = ""
     checkpoint: Callable[[AgentResult], Awaitable[None] | None] | None = None
+    code_executor: DataSandbox | None = None

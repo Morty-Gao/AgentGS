@@ -162,7 +162,6 @@ async def test_transport_applies_turn_policy_and_retries_identical_payloads(
                     "max_output_tokens": 100,
                 }
             },
-            "roles": {"planner": "m"},
         }
     )
     requests = []

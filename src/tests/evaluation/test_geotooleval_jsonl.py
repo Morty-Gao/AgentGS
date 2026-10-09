@@ -2,9 +2,12 @@ import json
 
 import pytest
 
-from agentgs.evaluation.datasets.geotooleval import build_agent_question, load_tasks
+from agentgs.evaluation.datasets.geotooleval import (
+    GeoToolEvalDataset,
+    build_agent_question,
+    load_tasks,
+)
 from agentgs.evaluation.datasets.version import benchmark_dataset, compatibility_contracts
-from agentgs.evaluation.metrics.tools import load_gold_tasks
 
 
 def record():
@@ -36,9 +39,9 @@ def test_jsonl_preserves_text_zero_answer_and_structured_gold(tmp_path):
     assert task.gold_steps == ({"tool_name": "ToolA", "arguments": {"value": 0}},)
     assert source["输入资源"] in build_agent_question(task)
     assert json.loads(path.read_text())["额外字段"] == source["额外字段"]
-    assert load_gold_tasks(path, [1])[1]["expected_answer"] == "0"
+    assert GeoToolEvalDataset(path).require([1])[1].expected_answer == "0"
     with pytest.raises(KeyError, match="not found"):
-        load_gold_tasks(path, [2])
+        GeoToolEvalDataset(path).require([2])
 
 
 def test_jsonl_accepts_native_call_arrays_and_rejects_duplicate_ids(tmp_path):

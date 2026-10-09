@@ -4,6 +4,7 @@ from types import SimpleNamespace
 
 import pytest
 
+from agentgs.benchmark.cases import EvaluationCase, evaluate
 from agentgs.contracts.models import (
     AgentResult,
     TaskInput,
@@ -12,8 +13,6 @@ from agentgs.contracts.models import (
     TaskStatus,
     ToolCall,
 )
-from agentgs.evaluation.models import EvaluationCase
-from agentgs.evaluation.runner import evaluate
 from agentgs.messages import Conversation, Message
 from agentgs.runtime.service import TaskService
 

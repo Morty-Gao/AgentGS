@@ -168,7 +168,6 @@ def config():
                     "max_output_tokens": 10,
                 }
             },
-            "roles": {"planner": "m"},
         }
     )
 
@@ -570,9 +569,9 @@ async def test_provider_waiters_do_not_hold_global_model_capacity(project):
         RuntimeSettings(max_concurrent_model_calls=2),
         RuntimeCoordinator(project),
     )
-    first = asyncio.create_task(client.chat([]))
+    first = asyncio.create_task(client.chat([], model="m"))
     await entered.wait()
-    waiting = asyncio.create_task(client.chat([]))
+    waiting = asyncio.create_task(client.chat([], model="m"))
     await asyncio.sleep(0.04)
     try:
         async with asyncio.timeout(1):

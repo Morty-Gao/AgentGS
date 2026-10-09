@@ -8,11 +8,11 @@ import pytest
 from agentgs.agent.answering.formats import RESOURCE_MARKER, check_fixed_answer
 from agentgs.agent.planning.model_stages import ModelStages
 from agentgs.agent.state import RunState
+from agentgs.benchmark.inputs import public_input
 from agentgs.client.models import LLMConfig
 from agentgs.client.openai_compatible import OpenAICompatibleClient
 from agentgs.config.algorithm import AlgorithmSettings
 from agentgs.datasets.geotooleval import ANSWER_SYSTEM_PROMPT
-from agentgs.evaluation.benchmark import public_input
 from agentgs.evaluation.datasets.geotooleval import load_tasks
 from agentgs.runtime.answer_contracts import AnswerContracts
 
@@ -71,7 +71,6 @@ async def test_every_question_format_reaches_the_provider_request(incomplete):
                     "max_output_tokens": 8192,
                 }
             },
-            "roles": {"answer": "fixture", "planner": "fixture"},
         }
     )
     client = OpenAICompatibleClient(config, transport=httpx.MockTransport(handler))
@@ -89,7 +88,7 @@ async def test_every_question_format_reaches_the_provider_request(incomplete):
             state = RunState(context, request)
             stages = ModelStages(state, lambda _: request.output_contract, contracts.system_prompt)
             await stages.generate_output(
-                task.question, "fixture tool evidence", model=None, execution_incomplete=incomplete
+                task.question, "fixture tool evidence", execution_incomplete=incomplete
             )
             messages = payloads[-1]["messages"]
             assert messages[-1]["role"] == "developer" and messages[-1]["content"].startswith(

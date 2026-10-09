@@ -100,6 +100,7 @@ class RunState:
                 "effective_algorithm": options.model_dump(mode="json")
                 if options is not None
                 else {},
+                **(getattr(self, "provenance_extra", None) or {}),
             },
         )
 

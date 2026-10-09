@@ -93,17 +93,7 @@ class OpenAICompatibleClient:
                 messages=[m if isinstance(m, Message) else Message.from_openai(m) for m in messages]
             )
         messages = conversation.to_request_messages()
-        role = (
-            "answer"
-            if stage == "final_answer_generation"
-            else "argument"
-            if stage == "tool_argument_generation"
-            else "planner"
-        )
-        name = model or self.config.roles.get(role) or self.config.roles.get("planner")
-        if name not in self.config.models:
-            raise ValueError(f"Unknown configured model: {name}")
-        spec = self.config.models[name]
+        name, spec = self.config.configured_model(model)
         provider = self.config.providers[spec.provider]
         if provider.protocol != "openai_compatible":
             raise ValueError(f"Unsupported provider protocol: {provider.protocol}")

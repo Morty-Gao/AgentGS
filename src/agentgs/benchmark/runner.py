@@ -1,4 +1,4 @@
-"""Conversation-based GeoToolEval scoring and append-only experiment attempts."""
+"""Run a dataset on the agent and store each attempt. Scoring is delegated to evaluation."""
 
 import asyncio
 import hashlib
@@ -9,182 +9,15 @@ import time
 from datetime import datetime, timezone
 from pathlib import Path
 
+from agentgs.benchmark.inputs import public_input
+from agentgs.benchmark.io import write_json
+from agentgs.benchmark.selection import id_from_dirname, resolve_dataset, task_dirname
 from agentgs.contracts.async_utils import invoke
 from agentgs.contracts.models import TaskInput
-from agentgs.evaluation.conversation import as_conversation, conversation_usage
-from agentgs.evaluation.conversation import usage_summary as usage_summary
-from agentgs.evaluation.datasets.geotooleval import load_tasks
-from agentgs.evaluation.datasets.version import compatibility_contracts
-from agentgs.evaluation.metrics.answers import score_answer
-from agentgs.evaluation.metrics.tools import SCORING_PROTOCOL, aggregate_scores, score_task
-
-PRIVATE_KEYS = frozenset(
-    {
-        "gold_answer",
-        "gold_sparql",
-        "gold_chain",
-        "gold_steps",
-        "expected_answer",
-        "reference_answer",
-        "reference_tools",
-        "expected_tools",
-        "gold_chain_text",
-    }
-)
-
-
-def public_resource(value):
-    if isinstance(value, dict):
-        return {
-            key: public_resource(item) for key, item in value.items() if key not in PRIVATE_KEYS
-        }
-    if isinstance(value, list):
-        return [public_resource(item) for item in value]
-    return value
-
-
-def public_input(
-    task,
-    *,
-    planning_mode="skill_guided",
-    allow_rule_planning=False,
-    plan_attempts=None,
-    tool_attempts=None,
-    output_contract=None,
-):
-    resource = task.input_resource
-    if isinstance(resource, str):
-        try:
-            resource = json.loads(resource) if resource else None
-        except ValueError:
-            pass
-    return TaskInput(
-        question=task.question,
-        input_resource=public_resource(resource),
-        planning_mode=planning_mode,
-        allow_rule_planning=allow_rule_planning,
-        plan_attempts=plan_attempts,
-        tool_attempts=tool_attempts,
-        output_contract=output_contract,
-        input_domain="remote_sensing" if task.category == "RemoteSensingTools" else None,
-    )
-
-
-def score_prediction(task, answer, messages=(), usage=None):
-    final = score_answer(task, answer)
-    scores = score_task(
-        gold_steps=list(task.gold_steps),
-        messages=as_conversation(messages),
-        answer_score=final["score"],
-        token_usage=usage,
-    )
-    return {
-        "scoring_protocol": SCORING_PROTOCOL,
-        "question_id": task.question_id,
-        "category_id": task.category_id,
-        "category": task.category,
-        "answer_score": final,
-        "scores": scores,
-        "gold_steps": list(task.gold_steps),
-    }
-
-
-def summarize(rows, total=603):
-    grouped = {}
-    for row in rows:
-        grouped.setdefault(row["category_id"], []).append(row["scores"]["fas"])
-    micro = sum(row["scores"]["fas"] for row in rows) / len(rows) if rows else None
-    macro = (
-        sum(sum(values) / len(values) for values in grouped.values()) / len(grouped)
-        if grouped
-        else None
-    )
-    return {
-        "scoring_protocol": SCORING_PROTOCOL,
-        "submitted": len(rows),
-        "expected": total,
-        "complete": len(rows) == total and len(grouped) == 10,
-        "micro_fas": micro,
-        "macro_fas": macro,
-        "full_score_rate": sum(row["scores"]["fas"] == 1 for row in rows) / len(rows)
-        if rows
-        else None,
-        "domains": {str(k): {"n": len(v), "fas": sum(v) / len(v)} for k, v in grouped.items()},
-        "composite_metrics": aggregate_scores(rows),
-        "results": rows,
-    }
-
-
-def write_json(path, value):
-    path.parent.mkdir(parents=True, exist_ok=True)
-    from uuid import uuid4
-
-    tmp = path.with_suffix(path.suffix + "." + uuid4().hex + ".part")
-    tmp.write_text(
-        json.dumps(value, ensure_ascii=False, allow_nan=False, indent=2, default=str) + "\n",
-        encoding="utf-8",
-    )
-    tmp.replace(path)
-
-
-def score_predictions(dataset, predictions, output, *, allow_partial=False, project=None):
-    tasks = {task.question_id: task for task in load_tasks(dataset)}
-    rows = []
-    seen = set()
-    records = []
-    for line in predictions.read_text("utf-8-sig").splitlines():
-        if not line.strip():
-            continue
-        record = json.loads(line)
-        if not isinstance(record, dict):
-            raise ValueError("Each prediction must be an object")
-        if record.get("trace") and "messages" not in record and "conversation" not in record:
-            raise ValueError(
-                "Trace-only predictions are unsupported; provide Conversation messages"
-            )
-        qid = int(record.get("question_id", record.get("case_id")))
-        if qid in seen or qid not in tasks:
-            raise ValueError("Duplicate or unknown prediction ID")
-        seen.add(qid)
-        records.append(record)
-        conversation = record.get("conversation", record.get("messages", []))
-        rows.append(
-            score_prediction(
-                tasks[qid],
-                record.get("final_answer", record.get("answer", "")),
-                conversation,
-                record.get("token_usage", record.get("usage")),
-            )
-        )
-    if not allow_partial and seen != set(tasks):
-        raise ValueError("Complete benchmark scoring requires every frozen task ID")
-    report = summarize(rows, len(tasks))
-    path = compatibility_contracts(dataset, project=project)
-    if path is not None:
-        formats = {
-            row["question_id"]: row["answer_format"]
-            for row in (json.loads(line) for line in path.read_text().splitlines() if line.strip())
-        }
-        from agentgs.evaluation.metrics.compatibility import VERSION, score_compatible
-
-        compatibility = [
-            {
-                "question_id": int(record.get("question_id", record.get("case_id"))),
-                "result": score_compatible(
-                    tasks[int(record.get("question_id", record.get("case_id")))],
-                    record.get("final_answer", record.get("answer", "")),
-                    formats[int(record.get("question_id", record.get("case_id")))],
-                ),
-            }
-            for record in records
-        ]
-        report["compatibility"] = {
-            "protocol": VERSION,
-            "results": compatibility,
-            "note": "Separate historical compatibility scores; answer FAS and conversation metrics above are unchanged.",
-        }
-    write_json(output, report)
-    return report
+from agentgs.evaluation.analysis.conversation import as_conversation, conversation_usage
+from agentgs.evaluation.datasets.base import Dataset
+from agentgs.evaluation.metrics.report import score_prediction, summarize
+from agentgs.evaluation.metrics.tools import SCORING_PROTOCOL
 
 
 def _benchmark_identity(
@@ -195,11 +28,12 @@ def _benchmark_identity(
     allow_rule_planning,
     plan_attempts,
     tool_attempts,
+    command_attempts,
     contract_provider,
 ):
-    input_hash = (lambda: hashlib.sha256(dataset.read_bytes()).hexdigest())()
+    input_hash = hashlib.sha256(dataset.source.read_bytes()).hexdigest()
     identity = {
-        "schema_version": 4,
+        "schema_version": 5,
         "scoring_protocol": SCORING_PROTOCOL,
         "message_protocol": "openai_tool_calls",
         "dataset_sha256": input_hash,
@@ -211,9 +45,9 @@ def _benchmark_identity(
         "selected_question_ids": [task.question_id for task in selected],
     }
     code_files = sorted((service.root / "src/agentgs").rglob("*.py"))
-    identity["code_sha256"] = (
-        lambda: hashlib.sha256(b"".join((path.read_bytes() for path in code_files))).hexdigest()
-    )()
+    identity["code_sha256"] = hashlib.sha256(
+        b"".join(path.read_bytes() for path in code_files)
+    ).hexdigest()
     for name in ["config.toml", "llm.toml"]:
         path = service.root / name
         identity[name + "_sha256"] = (
@@ -225,7 +59,6 @@ def _benchmark_identity(
     identity["effective_models"] = {
         name: model.model_dump(mode="json") for name, model in configuration.models.items()
     }
-    identity["roles"] = configuration.roles
     from agentgs.config.algorithm import load_algorithm, resolve_algorithm
 
     identity["effective_algorithm"] = resolve_algorithm(
@@ -235,6 +68,7 @@ def _benchmark_identity(
             allow_rule_planning=allow_rule_planning,
             plan_attempts=plan_attempts,
             tool_attempts=tool_attempts,
+            command_attempts=command_attempts,
         ),
     ).model_dump(mode="json")
     from importlib.resources import files
@@ -253,6 +87,14 @@ def _benchmark_identity(
         name: hashlib.sha256(resource.read_bytes()).hexdigest()
         for name, resource in resources.items()
     }
+    if planning_mode == "data_only":
+        from agentgs.runtime.sandbox.mounts import mount_manifest
+
+        identity["data_mounts_sha256"] = hashlib.sha256(
+            json.dumps(mount_manifest(service.root / "data"), sort_keys=True).encode()
+        ).hexdigest()
+        identity["tool_match"] = "not_applicable"
+        identity["primary_metric"] = "fas"
     if contract_provider is not None:
         identity["answer_contracts_sha256"] = hashlib.sha256(
             json.dumps(
@@ -282,9 +124,13 @@ def _benchmark_identity(
     return (identity, configuration)
 
 
+def _task_folder(output: Path, question_id) -> Path:
+    return output / "tasks" / task_dirname(question_id)
+
+
 async def run_benchmark(
     service,
-    dataset: Path,
+    dataset: Dataset | Path,
     output: Path,
     *,
     ids=None,
@@ -293,21 +139,26 @@ async def run_benchmark(
     allow_rule_planning=False,
     plan_attempts=None,
     tool_attempts=None,
+    command_attempts=None,
     contract_provider=None,
 ):
-    tasks = await invoke(load_tasks, dataset)
+    if planning_mode == "data_only":
+        allow_rule_planning = False
+    source = resolve_dataset(dataset)
+    tasks = await invoke(source.load)
     selected = [task for task in tasks if ids is None or task.question_id in ids]
     if ids is not None and (missing := set(ids) - {task.question_id for task in tasks}):
         raise ValueError(f"Unknown benchmark question IDs: {sorted(missing)}")
     identity, configuration = await invoke(
         _benchmark_identity,
         service,
-        dataset,
+        source,
         selected,
         planning_mode,
         allow_rule_planning,
         plan_attempts,
         tool_attempts,
+        command_attempts,
         contract_provider,
     )
     await invoke(output.mkdir, parents=True, exist_ok=True)
@@ -320,7 +171,7 @@ async def run_benchmark(
             "Code, model configuration, inputs or protocol differ; use a new run directory"
         )
     for task in selected:
-        current = output / "tasks" / f"{task.question_id:04d}" / "result.json"
+        current = _task_folder(output, task.question_id) / "result.json"
         if await invoke(current.exists):
             previous = await invoke(lambda: json.loads(current.read_text(encoding="utf-8")))
             if previous.get("scores", {}).get("protocol") != SCORING_PROTOCOL:
@@ -377,7 +228,7 @@ async def run_benchmark(
 
     try:
         for task in selected:
-            folder = output / "tasks" / f"{task.question_id:04d}"
+            folder = _task_folder(output, task.question_id)
             current = folder / "result.json"
             if await invoke(current.exists):
                 previous = await invoke(lambda: json.loads(current.read_text(encoding="utf-8")))
@@ -392,7 +243,7 @@ async def run_benchmark(
 
         async def execute_task(task):
             nonlocal stopped_for_auth
-            folder = output / "tasks" / f"{task.question_id:04d}"
+            folder = _task_folder(output, task.question_id)
             current = folder / "result.json"
             await invoke(folder.mkdir, parents=True, exist_ok=True)
             number = await invoke(lambda: len(list(folder.glob("attempt_*"))) + 1)
@@ -404,6 +255,7 @@ async def run_benchmark(
                 allow_rule_planning=allow_rule_planning,
                 plan_attempts=plan_attempts,
                 tool_attempts=tool_attempts,
+                command_attempts=command_attempts,
                 output_contract=contract_provider.find(task.question)
                 if contract_provider
                 else None,
@@ -520,10 +372,13 @@ async def run_benchmark(
             rows = [
                 json.loads(path.read_text())
                 for path in sorted((output / "tasks").glob("*/result.json"))
-                if int(path.parent.name) in selected_ids
+                if id_from_dirname(path.parent.name, selected_ids) in selected_ids
             ]
-            report = summarize(rows, len(tasks))
+            report = summarize(rows, len(tasks), domain_count=source.domain_count)
             report["execution"] = progress()
+            if planning_mode == "data_only":
+                report["primary_metric"] = "fas"
+                report["tool_match"] = "not_applicable"
             write_json(output / "summary.json", report)
             with (output / "predictions.jsonl").open("w", encoding="utf-8") as stream:
                 for row in rows:

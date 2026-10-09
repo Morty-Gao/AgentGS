@@ -38,7 +38,18 @@ class LLMConfig(Model):
     schema_version: int = 1
     providers: dict[str, Provider]
     models: dict[str, LLMModel]
-    roles: dict[str, str]
+
+    def configured_model(self, name: str | None = None) -> tuple[str, LLMModel]:
+        if not name:
+            if len(self.models) != 1:
+                raise ValueError("Exactly one configured model is required")
+            name = next(iter(self.models))
+        if name not in self.models:
+            raise ValueError(f"Unknown configured model: {name}")
+        spec = self.models[name]
+        if not spec.model.strip():
+            raise ValueError(f"Model id for {name} is empty")
+        return name, spec
 
 
 class ChatReply(Model):

@@ -12,8 +12,8 @@ from agentgs.runtime.service import TaskService
 
 @pytest.mark.parametrize("command", ["run", "evaluate run", "evaluate benchmark", "ui serve"])
 def test_runtime_options_reach_service_and_workers(project, monkeypatch, command):
+    from agentgs.benchmark import cases, runner
     from agentgs.cli import app as cli
-    from agentgs.evaluation import benchmark, runner
     from agentgs.evaluation.datasets import version
     from agentgs.visualization.backend import app as backend
 
@@ -37,8 +37,8 @@ def test_runtime_options_reach_service_and_workers(project, monkeypatch, command
         with TestClient(application):
             pass
 
-    monkeypatch.setattr(runner, "evaluate", evaluate)
-    monkeypatch.setattr(benchmark, "run_benchmark", run_benchmark)
+    monkeypatch.setattr(cases, "evaluate", evaluate)
+    monkeypatch.setattr(runner, "run_benchmark", run_benchmark)
     monkeypatch.setattr(version, "benchmark_dataset", lambda root: root / "dataset.jsonl")
     monkeypatch.setattr("uvicorn.run", serve)
     # An obsolete file must never affect startup, even if it cannot be parsed.
@@ -115,7 +115,7 @@ def test_invalid_runtime_options_are_rejected_before_task_submission(project, op
 
 @pytest.mark.parametrize("rules", [False, True])
 def test_ablation_options_reach_benchmark(project, monkeypatch, rules):
-    from agentgs.evaluation import benchmark
+    from agentgs.benchmark import runner
     from agentgs.evaluation.datasets import version
 
     received = []
@@ -124,7 +124,7 @@ def test_ablation_options_reach_benchmark(project, monkeypatch, rules):
         received.append(kwargs)
         return {}
 
-    monkeypatch.setattr(benchmark, "run_benchmark", run_benchmark)
+    monkeypatch.setattr(runner, "run_benchmark", run_benchmark)
     monkeypatch.setattr(version, "benchmark_dataset", lambda root: root / "dataset.jsonl")
     result = CliRunner().invoke(
         app,
