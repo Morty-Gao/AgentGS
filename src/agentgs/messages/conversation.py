@@ -8,13 +8,20 @@ from uuid import uuid4
 
 from pydantic import BaseModel, ConfigDict, Field, model_validator
 
-from agentgs.messages.models import Function, FunctionCall, Message
+from agentgs.messages.models import (
+    Function,
+    FunctionCall,
+    LogEntry,
+    Message,
+    RuntimeEvent,
+    parse_entry,
+)
 
 
 class Conversation(BaseModel):
     model_config = ConfigDict(extra="forbid")
-    schema_version: Literal[1] = 1
-    messages: list[Message] = Field(default_factory=list)
+    schema_version: Literal[2] = 2
+    messages: list[LogEntry] = Field(default_factory=list)
 
     @model_validator(mode="after")
     def validate_links(self):
@@ -25,6 +32,8 @@ class Conversation(BaseModel):
             if message.id in seen_messages:
                 raise ValueError(f"Duplicate message id: {message.id}")
             seen_messages.add(message.id)
+            if isinstance(message, RuntimeEvent):
+                continue
             for call in message.tool_calls:
                 if call.id in calls:
                     raise ValueError(f"Duplicate function call id: {call.id}")
@@ -37,10 +46,13 @@ class Conversation(BaseModel):
                 results.add(message.tool_call_id)
         return self
 
-    def append(self, message: Message | dict[str, Any]) -> Message:
-        row = message if isinstance(message, Message) else Message.model_validate(message)
+    def append(self, message: LogEntry | dict[str, Any]) -> LogEntry:
+        row = parse_entry(message) if isinstance(message, dict) else message
         if any(existing.id == row.id for existing in self.messages):
             raise ValueError(f"Duplicate message id: {row.id}")
+        if isinstance(row, RuntimeEvent):
+            self.messages.append(row)
+            return row
         if row.role == "tool":
             calls = self.function_calls()
             if row.tool_call_id not in calls:
@@ -72,8 +84,8 @@ class Conversation(BaseModel):
     def to_request_messages(self) -> list[dict[str, Any]]:
         """Strip reasoning from previous user turns and retain the current turn.
 
-        Only a user message starts a new turn. Developer instructions, tool
-        calls, tool results, and internal events continue the existing turn.
+        Only a user message starts a new turn. Tool calls, tool results,
+        and internal events continue the existing turn.
         With no user message there is no cutoff, so all reasoning is retained.
         The durable log is never modified by preparing a request.
         """
@@ -91,12 +103,13 @@ class Conversation(BaseModel):
             if message.role != "event"
         ]
 
-    def record_event(self, kind: str, payload: dict[str, Any]) -> Message:
-        # An annotation in the same log, not a second mutable trace collection.
-        return self.append(Message(role="event", metadata={"type": kind, **payload}))
+    def record_event(self, kind: str, payload: dict[str, Any]) -> RuntimeEvent:
+        return self.append(RuntimeEvent(metadata={"type": kind, **payload}))
 
     def function_calls(self) -> dict[str, FunctionCall]:
-        return {call.id: call for m in self.messages for call in m.tool_calls}
+        return {
+            call.id: call for m in self.messages if isinstance(m, Message) for call in m.tool_calls
+        }
 
     def pending_tool_calls(self) -> list[FunctionCall]:
         completed = {m.tool_call_id for m in self.messages if m.role == "tool"}
@@ -139,7 +152,9 @@ class Conversation(BaseModel):
                         else "tool_retry",
                         "tool_name": call.function.name,
                         "tool_input": call.function.arguments,
-                        "tool_output": deepcopy(message.content),
+                        "tool_output": deepcopy(
+                            message.metadata.get("raw_tool_output", message.content)
+                        ),
                         "call_id": call.id,
                         "attempt": message.metadata.get("attempt", 1),
                         "status": status,
@@ -150,6 +165,9 @@ class Conversation(BaseModel):
 
     def request_messages(self, request_id: str) -> list[dict[str, Any]]:
         """Reconstruct the exact input messages for a recorded model request."""
+        for entry in reversed(self.messages):
+            if entry.role == "event" and entry.metadata.get("request_id") == request_id and entry.metadata.get("type") == "model.transport_request":
+                return deepcopy(entry.metadata["payload"]["messages"])
         request = next(
             (
                 m
@@ -162,6 +180,8 @@ class Conversation(BaseModel):
         )
         if request is None:
             raise KeyError(f"Unknown model request: {request_id}")
+        if "request_messages" in request.metadata:
+            return deepcopy(request.metadata["request_messages"])
         by_id = {m.id: m for m in self.messages}
         inputs = [by_id[mid] for mid in request.metadata["input_message_ids"]]
         return Conversation(messages=inputs).to_request_messages()
@@ -183,9 +203,5 @@ class Conversation(BaseModel):
     @classmethod
     def from_jsonl(cls, text: str) -> "Conversation":
         return cls(
-            messages=[
-                Message.model_validate(json.loads(line))
-                for line in text.splitlines()
-                if line.strip()
-            ]
+            messages=[parse_entry(json.loads(line)) for line in text.splitlines() if line.strip()]
         )

@@ -107,13 +107,13 @@ def terminal_measure(outputs):
 
 
 def option_contract(question, answer, outputs):
-    split = re.split(r"(?:Options|选项)\s*[:：]", question, maxsplit=1, flags=re.I)
+    split = re.split(r"Options\s*:", question, maxsplit=1, flags=re.I)
     if len(split) == 1:
         return {"present": False, "valid": True}
     options = {
         label: body.strip()
         for label, body in re.findall(
-            r"(?:^|[；;\n]|\s)([A-H])[.、)]\s*(.*?)(?=(?:[；;\n]|\s)[A-H][.、)]\s|$)",
+            r"(?:^|[;\n]|\s)([A-H])[.)]\s*(.*?)(?=(?:[;\n]|\s)[A-H][.)]\s|$)",
             split[1],
             re.S,
         )
@@ -124,7 +124,7 @@ def option_contract(question, answer, outputs):
     for label, body in options.items():
         if terminal and "slope" in terminal["field"].casefold():
             match = re.search(
-                r"(?:slope|斜率)(?:\s+(?:of|is))?\s*[:=]?\s*([-+]?\d+(?:\.\d+)?(?:[eE][-+]?\d+)?)",
+                r"slope(?:\s+(?:of|is))?\s*[:=]?\s*([-+]?\d+(?:\.\d+)?(?:[eE][-+]?\d+)?)",
                 body,
                 re.I,
             )
@@ -136,19 +136,19 @@ def option_contract(question, answer, outputs):
             supported.append(label)
     rejection = bool(
         re.search(
-            r"none of (?:the )?(?:listed |provided |given )?options|no (?:listed |provided |given )?option.{0,30}(?:supported|matches|consistent)|没有.{0,12}选项.{0,12}(?:支持|符合)|均不符合",
+            r"none of (?:the )?(?:listed |provided |given )?options|no (?:listed |provided |given )?option.{0,30}(?:supported|matches|consistent)",
             answer,
             re.I,
         )
     )
     selected = re.search(
-        r"^\s*(?:\*\*|`)?(?:answer\s*[:：]?\s*|option\s+|答案\s*[:：]?\s*)?([A-H])(?:[.、)\s`*:：]|$)",
+        r"^\s*(?:\*\*|`)?(?:answer\s*:?\s*|option\s+)?([A-H])(?:[.)\s`*:]|$)",
         answer,
         re.I,
     )
     if not selected and not rejection:
         selected = re.search(
-            r"(?:choose|select|correct (?:answer|option) is|答案(?:是|为))\s*[:：]?\s*([A-H])\b",
+            r"(?:choose|select|correct (?:answer|option) is)\s*:?\s*([A-H])\b",
             answer,
             re.I,
         )
@@ -225,7 +225,7 @@ def validate_returned_evidence(
             elif isinstance(value, str):
                 # Dates, DMS and other scientific strings are genuine returned facts.
                 allowed.extend(float(token) for token in tokens(value))
-    context = re.split(r"(?:Options|选项)\s*[:：]", question, maxsplit=1, flags=re.I)[0]
+    context = re.split(r"Options\s*:", question, maxsplit=1, flags=re.I)[0]
     allowed.extend(float(token) for token in tokens(context))
     # Preserve exact returned representations (including dates and coordinates).
     for fragment in sorted(set(strings), key=len, reverse=True):
@@ -246,7 +246,7 @@ def validate_returned_evidence(
     if option.get("rejected_all_options") and option.get("valid"):
         # A rejected option is a quotation of a hypothesis, not an asserted result.
         text = re.sub(
-            r"[^.!?\n]*(?:not consistent with options|options.{0,20}(?:incorrect|unsupported)|选项.{0,20}不符合)[^\n]*",
+            r"[^.!?\n]*(?:not consistent with options|options.{0,20}(?:incorrect|unsupported))[^\n]*",
             " ",
             text,
             flags=re.I,

@@ -18,7 +18,7 @@ def config():
                 "m": {
                     "provider": "p",
                     "model": "remote",
-                    "context_window": 100,
+                    "context_window": 4096,
                     "max_output_tokens": 10,
                     "supported_efforts": ["low"],
                 }

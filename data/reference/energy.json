@@ -3,56 +3,47 @@
     "CH": [
       46.948,
       7.4474,
-      "Bern",
-      "伯尔尼"
+      "Bern"
     ],
     "DE": [
       52.52,
       13.405,
-      "Berlin",
-      "柏林"
+      "Berlin"
     ],
     "DK": [
       55.6761,
       12.5683,
-      "Copenhagen",
-      "哥本哈根"
+      "Copenhagen"
     ],
     "FR": [
       48.8566,
       2.3522,
-      "Paris",
-      "巴黎"
+      "Paris"
     ],
     "GB": [
       51.5074,
       -0.1278,
-      "London",
-      "伦敦"
+      "London"
     ],
     "SE": [
       59.3293,
       18.0686,
-      "Stockholm",
-      "斯德哥尔摩"
+      "Stockholm"
     ],
     "PL": [
       52.2297,
       21.0122,
-      "Warsaw",
-      "华沙"
+      "Warsaw"
     ],
     "CZ": [
       50.0755,
       14.4378,
-      "Prague",
-      "布拉格"
+      "Prague"
     ]
   },
   "region_boxes": [
     [
       "western_us",
-      "美国西部",
       -125.0,
       30.0,
       -100.0,
@@ -60,7 +51,6 @@
     ],
     [
       "eastern_us",
-      "美国东部",
       -100.0,
       25.0,
       -65.0,
@@ -68,7 +58,6 @@
     ],
     [
       "andes",
-      "安第斯地区",
       -80.0,
       -40.0,
       -65.0,
@@ -76,7 +65,6 @@
     ],
     [
       "central_europe",
-      "中欧",
       -10.0,
       35.0,
       30.0,
@@ -84,7 +72,6 @@
     ],
     [
       "india",
-      "印度",
       68.0,
       7.0,
       90.0,
@@ -92,7 +79,6 @@
     ],
     [
       "china",
-      "中国",
       73.0,
       18.0,
       135.0,
@@ -100,7 +86,6 @@
     ],
     [
       "australia",
-      "澳大利亚",
       112.0,
       -44.0,
       154.0,
@@ -108,7 +93,6 @@
     ],
     [
       "southern_africa",
-      "南部非洲",
       10.0,
       -35.0,
       40.0,
@@ -116,7 +100,6 @@
     ],
     [
       "brazil",
-      "巴西",
       -75.0,
       -35.0,
       -35.0,
@@ -124,7 +107,6 @@
     ],
     [
       "canada",
-      "加拿大",
       -140.0,
       45.0,
       -50.0,
@@ -173,53 +155,43 @@
   "capacity_series": [
     [
       "CH_solar_capacity",
-      "Switzerland solar",
-      "瑞士太阳能"
+      "Switzerland solar"
     ],
     [
       "DE_solar_capacity",
-      "Germany solar",
-      "德国太阳能"
+      "Germany solar"
     ],
     [
       "DE_wind_capacity",
-      "Germany wind",
-      "德国风电"
+      "Germany wind"
     ],
     [
       "DK_wind_capacity",
-      "Denmark wind",
-      "丹麦风电"
+      "Denmark wind"
     ],
     [
       "FR_hydro_capacity",
-      "France hydro",
-      "法国水电"
+      "France hydro"
     ],
     [
       "FR_solar_capacity",
-      "France solar",
-      "法国太阳能"
+      "France solar"
     ],
     [
       "GB-UKM_solar_capacity",
-      "United Kingdom solar",
-      "英国太阳能"
+      "United Kingdom solar"
     ],
     [
       "GB-UKM_wind_capacity",
-      "United Kingdom wind",
-      "英国风电"
+      "United Kingdom wind"
     ],
     [
       "SE_wind_capacity",
-      "Sweden wind",
-      "瑞典风电"
+      "Sweden wind"
     ],
     [
       "DE_wind_offshore_capacity",
-      "Germany offshore wind",
-      "德国海上风电"
+      "Germany offshore wind"
     ]
   ],
   "opsd_landmark_sources": [

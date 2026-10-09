@@ -28,7 +28,5 @@ class AgentContext:
     planner: SkillPlanner | None = None
     options: AlgorithmSettings | None = None
     resource_resolver: ResourceResolver | None = None
-    answer_contract_lookup: Callable | None = None
-    answer_system_prompt: str = ""
     checkpoint: Callable[[AgentResult], Awaitable[None] | None] | None = None
     code_executor: DataSandbox | None = None

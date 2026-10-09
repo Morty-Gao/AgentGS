@@ -16,7 +16,7 @@ from agentgs.evaluation.analysis.conversation import (
 )
 from agentgs.messages import Conversation, Message
 
-SCORING_PROTOCOL = "geotooleval-conversation-v2"
+SCORING_PROTOCOL = "geotooleval-conversation-v3"
 
 DEFAULT_TOKEN_BUDGET_PER_GOLD_STEP = 10000
 _IGNORED_ARGUMENT_KEYS = {"_output_keys"}
@@ -49,7 +49,7 @@ def _clean_arguments(value: Any) -> Any:
 def _normalized_text(value: str) -> str:
     text = unicodedata.normalize("NFKC", value).strip().replace("\\", "/")
     text = re.sub("\\s+", " ", text).casefold()
-    for anchor in ("geotoolagent数据集/", "benchmark/", "assets/", "outputs/geotool_runtime/"):
+    for anchor in ("geotoolagent-dataset/", "benchmark/", "assets/", "outputs/geotool_runtime/"):
         index = text.find(anchor)
         if index >= 0:
             return text[index:]

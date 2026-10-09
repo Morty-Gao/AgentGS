@@ -63,7 +63,7 @@ class ToolPaths:
                 and relative.parts
                 and relative.parts[0] == "raw"
             ):
-                if relative != Path("raw/hazard/10.自然灾害与极端地震.xlsx"):
+                if relative != Path("raw/hazard/10.natural-hazards-and-extreme-earthquakes.xlsx"):
                     raise ValueError(
                         "Raw downloads and backups are unavailable to generic scientific tools"
                     )
@@ -75,7 +75,7 @@ class ToolPaths:
                 or relative.parts[0].startswith("geotooleval")
                 or relative == Path("metadata/geotooleval.json")
             ):
-                if relative != Path("geotooleval/10.自然灾害与极端地震.xlsx"):
+                if relative != Path("geotooleval/10.natural-hazards-and-extreme-earthquakes.xlsx"):
                     raise ValueError(
                         "Evaluation labels and reports are unavailable to scientific tools"
                     )

@@ -19,11 +19,11 @@ NUMBER = "[-+]?(?:\\d+(?:\\.\\d*)?|\\.\\d+)(?:[Ee][-+]?\\d+)?"
 
 def fixed_answer_prompt(question, evidence, contract):
     return (
-        "【题目】\n"
+        "Question:\n"
         + str(question)
-        + "\n\n【本题格式】\n"
+        + "\n\nFormat for this question:\n"
         + contract["answer_format"]["llm_instruction"]
-        + "\n\n【工具结果】\n"
+        + "\n\nTool results:\n"
         + str(evidence)
     )
 
@@ -239,7 +239,9 @@ def check_fixed_answer(answer, contract):
         "version": spec["version"],
         "valid": not issues,
         "issues": list(dict.fromkeys(issues)),
-        "has_unknown": missing_token or bool(re.search("\\bunknown\\b", answer)),
+        "has_unknown": missing_token
+        or bool(re.search(r"\b(?:unknown|nan|null|none)\b", answer, re.I))
+        or any("<" + name + ">" in answer for name in SLOT.findall(spec["template"])),
         "model_answer_preserved": True,
         "validation_scope": "Public structure/types/units/precision and local file existence only; no factual or artifact-functionality verification",
     }

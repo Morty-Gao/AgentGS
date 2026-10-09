@@ -27,7 +27,7 @@ def _unique(values: Iterable[str]) -> list[str]:
 
 def _task_text(text: str) -> str:
     """Exclude multiple-choice distractors from capability inference."""
-    return re.split("\\b(?:options|选项)\\s*:", text or "", maxsplit=1, flags=re.IGNORECASE)[
+    return re.split("\\boptions\\s*:", text or "", maxsplit=1, flags=re.IGNORECASE)[
         0
     ].strip()
 

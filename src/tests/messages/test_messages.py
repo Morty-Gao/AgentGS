@@ -144,7 +144,7 @@ async def test_staged_requests_reconstruct_exact_inputs_and_preserve_raw_reasoni
     assert conversation.request_messages(started["request_id"]) == requests[0]
     contents = [row["content"] for row in requests[0]]
     assert "Earlier question" in contents and "Earlier answer" in contents
-    assert requests[0][-1]["content"].endswith("Stage prompt")
+    assert "Stage prompt" in requests[0][-1]["content"]
     reply = next(
         m for m in result.messages if m.role == "assistant" and m.metadata.get("request_id")
     )
@@ -174,7 +174,7 @@ async def test_failed_model_request_is_durable_without_an_invented_reply():
     with pytest.raises(RuntimeError, match="offline"):
         await state.model("Full prompt", stage="planning")
     conversation = Conversation(messages=AgentResult.model_validate_json(checkpoints[-1]).messages)
-    assert any(m.content == "Full prompt" for m in conversation.messages)
+    assert any(m.role == "user" and "Full prompt" in m.content for m in conversation.messages)
     assert not any(m.role == "assistant" for m in conversation.messages)
     assert conversation.execution_events()[-1]["type"] == "model.failed"
 
@@ -208,7 +208,13 @@ async def test_tool_retries_and_checkpoints_use_function_messages():
     assert [m.metadata["status"] for m in tools] == ["retrying", "success"]
     assert tools[0].tool_call_id != tools[1].tool_call_id
     assert (
-        len([m for m in Conversation.model_validate_json(checkpoints[0]).messages if m.tool_calls])
+        len(
+            [
+                m
+                for m in Conversation.model_validate_json(checkpoints[0]).messages
+                if m.role == "assistant" and m.tool_calls
+            ]
+        )
         == 1
     )
     assert not any(
@@ -287,14 +293,16 @@ async def test_dialogue_continues_history_with_parallel_calls_and_reasoning():
             state.answer = message.content
             await state.save()
     result = state.result()
-    assert [m["content"] for m in requests[0]] == [
+    assert [m["content"] for m in requests[0] if m["role"] != "system"] == [
         "Previous question",
         "Previous answer",
         "Compare",
     ]
     assert result.answer == "The difference is one."
     persisted = AgentResult.model_validate_json(snapshots[-1])
-    assert [m.reasoning for m in persisted.messages if m.reasoning is not None] == [
+    assert [
+        m.reasoning for m in persisted.messages if m.role == "assistant" and m.reasoning is not None
+    ] == [
         "Calculate both.",
         "Compare results.",
     ]

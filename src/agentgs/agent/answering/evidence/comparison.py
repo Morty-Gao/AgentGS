@@ -64,7 +64,7 @@ def _ordered_comparison_option(
     observed = _observed_comparison_pair(successful_outputs)
     if not options or observed is None:
         return None
-    stem = re.split("(?:Options|选项)\\s*:", question or "", maxsplit=1, flags=re.I)[0]
+    stem = re.split("Options\\s*:", question or "", maxsplit=1, flags=re.I)[0]
     periods: list[str] = []
     for year in re.findall("\\b(?:19|20)\\d{2}\\b", stem):
         if year not in periods:

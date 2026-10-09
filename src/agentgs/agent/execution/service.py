@@ -127,7 +127,8 @@ class ExecutionService:
                 execution_context,
             )
             observed = dict(registry.compact_context() if registry else {})
-            observed["declared_binding_candidate"] = object_arguments(candidate)
+            if self.state.context.options.binding_assistance:
+                observed["declared_binding_candidate"] = object_arguments(candidate)
             feedback = history[-1].to_prompt_context() if history else None
             # There is no fallback to parsing model prose or manufacturing arguments.
             message = await self.stages.generate_tool_call(
@@ -210,6 +211,8 @@ class ExecutionService:
                     registry,
                     execution_context,
                 )
+                if not self.state.context.options.binding_assistance:
+                    prepared = generated_text
                 prepared = preserve_scientific_arguments(name, generated_text, prepared)
                 if bridge:
                     prepared = apply_shared_bridge_inputs(generated_text, execution_context)
@@ -241,7 +244,7 @@ class ExecutionService:
             input_provider=input_provider,
             tool_runner=self.physical,
             input_format=info["input_format"],
-            max_attempts=self.state.context.options.tool_attempts,
+            max_attempts=self.state.context.options.tool_attempts if self.state.context.options.execution_recovery else 1,
             messages=self.state.conversation,
             checkpoint=self.state.save,
             producer_step=f"tool_step_{execution_context['execution_index']:02d}"

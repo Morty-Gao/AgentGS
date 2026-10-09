@@ -1,0 +1,131 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" width="1800" height="900" viewBox="0 0 1800 900">
+<defs></defs>
+<rect x="0" y="0" width="1800" height="900" fill="#FFFFFF" stroke="none"/>
+<rect x="32" y="130" width="1736" height="400" rx="18" fill="#FFFFFF" stroke="#34414A" stroke-width="2" stroke-linejoin="miter" stroke-linecap="butt"/>
+<rect x="32" y="620" width="1736" height="250" rx="18" fill="#FFFFFF" stroke="#34414A" stroke-width="2" stroke-linejoin="miter" stroke-linecap="butt"/>
+<path d="M425,130 L463.38,281" fill="none" stroke="#75818A" stroke-width="2" stroke-linejoin="miter" stroke-linecap="butt" stroke-dasharray="10 8"/>
+<path d="M462.78,341 L411,530" fill="none" stroke="#75818A" stroke-width="2" stroke-linejoin="miter" stroke-linecap="butt" stroke-dasharray="10 8"/>
+<path d="M501,302 L501,281 L521,311 L501,341 L501,320 L441,320 L441,341 L421,311 L441,281 L441,302 Z" fill="#FFFFFF" stroke="#000000" stroke-width="1" stroke-linejoin="miter" stroke-linecap="butt"/>
+<path d="M823.6,132 L869.03,284" fill="none" stroke="#75818A" stroke-width="2" stroke-linejoin="miter" stroke-linecap="butt" stroke-dasharray="10 8"/>
+<path d="M871.95,344 L834.2,531.2" fill="none" stroke="#75818A" stroke-width="2" stroke-linejoin="miter" stroke-linecap="butt" stroke-dasharray="10 8"/>
+<path d="M908,305 L908,284 L928,314 L908,344 L908,323 L848,323 L848,344 L828,314 L848,284 L848,305 Z" fill="#FFFFFF" stroke="#000000" stroke-width="1" stroke-linejoin="miter" stroke-linecap="butt"/>
+<path d="M1288.9,129.2 L1332.54,284" fill="none" stroke="#75818A" stroke-width="2" stroke-linejoin="miter" stroke-linecap="butt" stroke-dasharray="10 8"/>
+<path d="M1334.89,344 L1297,530" fill="none" stroke="#75818A" stroke-width="2" stroke-linejoin="miter" stroke-linecap="butt" stroke-dasharray="10 8"/>
+<path d="M1371,305 L1371,284 L1391,314 L1371,344 L1371,323 L1311,323 L1311,344 L1291,314 L1311,284 L1311,305 Z" fill="#FFFFFF" stroke="#000000" stroke-width="1" stroke-linejoin="miter" stroke-linecap="butt"/>
+<rect x="95" y="177" width="284" height="222" rx="14" fill="#FFFFFF" stroke="#29353E" stroke-width="2.3" stroke-linejoin="miter" stroke-linecap="butt"/>
+<path d="M 109,177 L 365,177 C 374,177 379,182 379,191 L 379,212 L 95,212 L 95,191 C 95,182 100,177 109,177 Z" fill="#D5EEF9" stroke="#29353E" stroke-width="2.3" stroke-linejoin="round" stroke-linecap="butt"/>
+<ellipse cx="119" cy="194.5" rx="6.3" ry="6.3" fill="#F3978D" stroke="#29353E" stroke-width="2" stroke-linejoin="miter" stroke-linecap="butt"/>
+<ellipse cx="144" cy="194.5" rx="6.3" ry="6.3" fill="#FFF0BC" stroke="#29353E" stroke-width="2" stroke-linejoin="miter" stroke-linecap="butt"/>
+<ellipse cx="169" cy="194.5" rx="6.3" ry="6.3" fill="#A9DBCA" stroke="#29353E" stroke-width="2" stroke-linejoin="miter" stroke-linecap="butt"/>
+<path d="M 127,231 L 245,231 C 257,231 264,238 264,249 L 264,263 C 264,274 257,281 245,281 L 126,281 L 103,285 L 112,272 L 112,249 C 112,238 118,231 127,231 Z" fill="#D5EEF9" stroke="#29353E" stroke-width="2.3" stroke-linejoin="round" stroke-linecap="butt"/>
+<rect x="129" y="247" width="113" height="7" rx="3.5" fill="#8CA6B8" stroke="none"/>
+<rect x="129" y="263" width="75" height="7" rx="3.5" fill="#8CA6B8" stroke="none"/>
+<path d="M 192,296 L 337,296 C 347,296 354,303 354,313 L 354,331 L 363,349 L 343,345 L 192,345 C 182,345 175,339 175,328 L 175,313 C 175,303 182,296 192,296 Z" fill="#D8F1E5" stroke="#29353E" stroke-width="2.3" stroke-linejoin="round" stroke-linecap="butt"/>
+<rect x="196" y="311" width="141" height="7" rx="3.5" fill="#91ACA8" stroke="none"/>
+<rect x="196" y="327" width="91" height="7" rx="3.5" fill="#91ACA8" stroke="none"/>
+<rect x="112" y="364" width="234" height="7" rx="3.5" fill="#CDD4DB" stroke="none"/>
+<rect x="112" y="378" width="121" height="7" rx="3.5" fill="#CDD4DB" stroke="none"/>
+<rect x="477" y="215" width="107" height="50" rx="25" fill="#D5EEF9" stroke="#29353E" stroke-width="2.3" stroke-linejoin="miter" stroke-linecap="butt"/>
+<ellipse cx="505" cy="240" rx="10.7" ry="10.7" fill="#96D0EF" stroke="#29353E" stroke-width="2.3" stroke-linejoin="miter" stroke-linecap="butt"/>
+<path d="M526,240 L567,240" fill="none" stroke="#29353E" stroke-width="2.2" stroke-linejoin="miter" stroke-linecap="butt"/>
+<rect x="609" y="215" width="107" height="50" rx="25" fill="#D8F1E5" stroke="#29353E" stroke-width="2.3" stroke-linejoin="miter" stroke-linecap="butt"/>
+<ellipse cx="637" cy="240" rx="10.7" ry="10.7" fill="#A9DBCA" stroke="#29353E" stroke-width="2.3" stroke-linejoin="miter" stroke-linecap="butt"/>
+<path d="M658,240 L699,240" fill="none" stroke="#29353E" stroke-width="2.2" stroke-linejoin="miter" stroke-linecap="butt"/>
+<rect x="741" y="215" width="107" height="50" rx="25" fill="#E8DDF6" stroke="#29353E" stroke-width="2.3" stroke-linejoin="miter" stroke-linecap="butt"/>
+<ellipse cx="769" cy="240" rx="10.7" ry="10.7" fill="#CDB8EA" stroke="#29353E" stroke-width="2.3" stroke-linejoin="miter" stroke-linecap="butt"/>
+<path d="M790,240 L831,240" fill="none" stroke="#29353E" stroke-width="2.2" stroke-linejoin="miter" stroke-linecap="butt"/>
+<rect x="531" y="339" width="118" height="50" rx="25" fill="#CEF0F5" stroke="#29353E" stroke-width="2.3" stroke-linejoin="miter" stroke-linecap="butt"/>
+<ellipse cx="559" cy="364" rx="10.7" ry="10.7" fill="#97DADB" stroke="#29353E" stroke-width="2.3" stroke-linejoin="miter" stroke-linecap="butt"/>
+<path d="M580,364 L632,364" fill="none" stroke="#29353E" stroke-width="2.2" stroke-linejoin="miter" stroke-linecap="butt"/>
+<rect x="691" y="339" width="118" height="50" rx="25" fill="#FFF0BC" stroke="#29353E" stroke-width="2.3" stroke-linejoin="miter" stroke-linecap="butt"/>
+<ellipse cx="719" cy="364" rx="10.7" ry="10.7" fill="#FFE296" stroke="#29353E" stroke-width="2.3" stroke-linejoin="miter" stroke-linecap="butt"/>
+<path d="M740,364 L792,364" fill="none" stroke="#29353E" stroke-width="2.2" stroke-linejoin="miter" stroke-linecap="butt"/>
+<path d="M584,240 L595.13,240" fill="none" stroke="#29353E" stroke-width="2.3" stroke-linejoin="miter" stroke-linecap="butt"/>
+<polygon points="606.43,240 595.13,245.65 595.13,234.35" fill="#29353E" stroke="#29353E" stroke-width="2.3" stroke-linejoin="miter" stroke-linecap="butt"/>
+<path d="M716,240 L727.13,240" fill="none" stroke="#29353E" stroke-width="2.3" stroke-linejoin="miter" stroke-linecap="butt"/>
+<polygon points="738.43,240 727.13,245.65 727.13,234.35" fill="#29353E" stroke="#29353E" stroke-width="2.3" stroke-linejoin="miter" stroke-linecap="butt"/>
+<path d="M794.5,265 L794.5,299 Q794.5,303 790.5,303 L594,303 Q590,303 590,307 L590,325.13" fill="none" stroke="#29353E" stroke-width="2.3" stroke-linejoin="round" stroke-linecap="butt"/>
+<polygon points="590,336.43 584.35,325.13 595.65,325.13" fill="#29353E" stroke="#29353E" stroke-width="2.3" stroke-linejoin="miter" stroke-linecap="butt"/>
+<path d="M649,364 L677.13,364" fill="none" stroke="#29353E" stroke-width="2.3" stroke-linejoin="miter" stroke-linecap="butt"/>
+<polygon points="688.43,364 677.13,369.65 677.13,358.35" fill="#29353E" stroke="#29353E" stroke-width="2.3" stroke-linejoin="miter" stroke-linecap="butt"/>
+<rect x="934" y="207" width="108" height="156" rx="10" fill="#D5EEF9" stroke="#29353E" stroke-width="2.3" stroke-linejoin="miter" stroke-linecap="butt"/>
+<path d="M 959,225 L 1042.75,225 L 1079,261.25 L 1079,382 Q 1079,387 1074,387 L 959,387 Q 954,387 954,382 L 954,230 Q 954,225 959,225 Z" fill="#F9FBFD" stroke="#29353E" stroke-width="2.3" stroke-linejoin="round" stroke-linecap="round"/>
+<path d="M 1042.75,225 L 1079,261.25 L 1047.75,261.25 Q 1042.75,261.25 1042.75,256.25 Z" fill="#D5EEF9" stroke="#29353E" stroke-width="2.3" stroke-linejoin="round" stroke-linecap="round"/>
+<path d="M1014,269 L988,308" fill="none" stroke="#29353E" stroke-width="2" stroke-linejoin="miter" stroke-linecap="butt"/>
+<path d="M1014,269 L1043,308" fill="none" stroke="#29353E" stroke-width="2" stroke-linejoin="miter" stroke-linecap="butt"/>
+<ellipse cx="1014" cy="269" rx="12.3" ry="12.3" fill="#96D0EF" stroke="#29353E" stroke-width="2.3" stroke-linejoin="miter" stroke-linecap="butt"/>
+<ellipse cx="988" cy="308" rx="12.3" ry="12.3" fill="#A9DBCA" stroke="#29353E" stroke-width="2.3" stroke-linejoin="miter" stroke-linecap="butt"/>
+<ellipse cx="1043" cy="308" rx="12.3" ry="12.3" fill="#CDB8EA" stroke="#29353E" stroke-width="2.3" stroke-linejoin="miter" stroke-linecap="butt"/>
+<rect x="973" y="340" width="87" height="7" rx="3.5" fill="#97A3AD" stroke="none"/>
+<rect x="973" y="361" width="68" height="7" rx="3.5" fill="#97A3AD" stroke="none"/>
+<path d="M1199,227 L1122,276" fill="none" stroke="#29353E" stroke-width="2.2" stroke-linejoin="miter" stroke-linecap="butt"/>
+<path d="M1199,227 L1277,276" fill="none" stroke="#29353E" stroke-width="2.2" stroke-linejoin="miter" stroke-linecap="butt"/>
+<path d="M1199,227 L1199,311" fill="none" stroke="#29353E" stroke-width="2.2" stroke-linejoin="miter" stroke-linecap="butt"/>
+<path d="M1122,276 L1199,311" fill="none" stroke="#29353E" stroke-width="2.2" stroke-linejoin="miter" stroke-linecap="butt"/>
+<path d="M1277,276 L1199,311" fill="none" stroke="#29353E" stroke-width="2.2" stroke-linejoin="miter" stroke-linecap="butt"/>
+<path d="M1199,311 L1135,369" fill="none" stroke="#29353E" stroke-width="2.2" stroke-linejoin="miter" stroke-linecap="butt"/>
+<path d="M1199,311 L1266,369" fill="none" stroke="#29353E" stroke-width="2.2" stroke-linejoin="miter" stroke-linecap="butt"/>
+<path d="M1135,369 L1266,369" fill="none" stroke="#29353E" stroke-width="2.2" stroke-linejoin="miter" stroke-linecap="butt"/>
+<ellipse cx="1199" cy="227" rx="24" ry="24" fill="#96D0EF" stroke="#29353E" stroke-width="2.3" stroke-linejoin="miter" stroke-linecap="butt"/>
+<ellipse cx="1122" cy="276" rx="24" ry="24" fill="#E8DDF6" stroke="#29353E" stroke-width="2.3" stroke-linejoin="miter" stroke-linecap="butt"/>
+<ellipse cx="1277" cy="276" rx="24" ry="24" fill="#FFF0BC" stroke="#29353E" stroke-width="2.3" stroke-linejoin="miter" stroke-linecap="butt"/>
+<ellipse cx="1199" cy="311" rx="24" ry="24" fill="#A9DBCA" stroke="#29353E" stroke-width="2.3" stroke-linejoin="miter" stroke-linecap="butt"/>
+<ellipse cx="1135" cy="369" rx="24" ry="24" fill="#D8F1E5" stroke="#29353E" stroke-width="2.3" stroke-linejoin="miter" stroke-linecap="butt"/>
+<ellipse cx="1266" cy="369" rx="24" ry="24" fill="#D9DCF5" stroke="#29353E" stroke-width="2.3" stroke-linejoin="miter" stroke-linecap="butt"/>
+<path d="M 1401,245 L 1450.67,245 L 1473,267.33 L 1473,351 Q 1473,356 1468,356 L 1401,356 Q 1396,356 1396,351 L 1396,250 Q 1396,245 1401,245 Z" fill="#F9FBFD" stroke="#29353E" stroke-width="2.3" stroke-linejoin="round" stroke-linecap="round"/>
+<path d="M 1450.67,245 L 1473,267.33 L 1455.67,267.33 Q 1450.67,267.33 1450.67,262.33 Z" fill="#EDF3F7" stroke="#29353E" stroke-width="2.3" stroke-linejoin="round" stroke-linecap="round"/>
+<rect x="1411" y="288" width="45" height="7" rx="3.5" fill="#939FA8" stroke="none"/>
+<rect x="1411" y="309" width="45" height="7" rx="3.5" fill="#939FA8" stroke="none"/>
+<rect x="1539" y="260" width="64" height="37" rx="9" fill="#FFF0BC" stroke="#29353E" stroke-width="2.3" stroke-linejoin="miter" stroke-linecap="butt"/>
+<rect x="1549" y="269" width="44" height="29" rx="4" fill="#FFFFFF" stroke="#29353E" stroke-width="2.3" stroke-linejoin="miter" stroke-linecap="butt"/>
+<rect x="1517" y="305" width="110" height="51" rx="6" fill="#CEF0F5" stroke="#29353E" stroke-width="2.3" stroke-linejoin="miter" stroke-linecap="butt"/>
+<rect x="1515" y="284" width="114" height="31" rx="6" fill="#CEF0F5" stroke="#29353E" stroke-width="2.3" stroke-linejoin="miter" stroke-linecap="butt"/>
+<rect x="1564" y="299" width="17" height="28" rx="1" fill="#F3978D" stroke="#29353E" stroke-width="2" stroke-linejoin="miter" stroke-linecap="butt"/>
+<path d="M 1689,245 L 1738.67,245 L 1761,267.33 L 1761,360 Q 1761,365 1756,365 L 1689,365 Q 1684,365 1684,360 L 1684,250 Q 1684,245 1689,245 Z" fill="#D8F1E5" stroke="#29353E" stroke-width="2.3" stroke-linejoin="round" stroke-linecap="round"/>
+<path d="M 1738.67,245 L 1761,267.33 L 1743.67,267.33 Q 1738.67,267.33 1738.67,262.33 Z" fill="#EBF8F0" stroke="#29353E" stroke-width="2.3" stroke-linejoin="round" stroke-linecap="round"/>
+<path d="M1706,299 L1717,311 L1740,282" fill="none" stroke="#4FAD93" stroke-width="8" stroke-linejoin="round" stroke-linecap="round"/>
+<rect x="1701" y="325" width="49" height="7" rx="3.5" fill="#8CAAA1" stroke="none"/>
+<rect x="1701" y="342" width="38" height="7" rx="3.5" fill="#8CAAA1" stroke="none"/>
+<path d="M1481,308 L1493.34,308" fill="none" stroke="#29353E" stroke-width="2.2" stroke-linejoin="miter" stroke-linecap="butt"/>
+<polygon points="1504.54,308 1493.34,313.6 1493.34,302.4" fill="#29353E" stroke="#29353E" stroke-width="2.2" stroke-linejoin="miter" stroke-linecap="butt"/>
+<path d="M1638,308 L1661.34,308" fill="none" stroke="#29353E" stroke-width="2.2" stroke-linejoin="miter" stroke-linecap="butt"/>
+<polygon points="1672.54,308 1661.34,313.6 1661.34,302.4" fill="#29353E" stroke="#29353E" stroke-width="2.2" stroke-linejoin="miter" stroke-linecap="butt"/>
+<text font-family="'Times New Roman', 'TeX Gyre Termes', 'Nimbus Roman', serif" font-size="52" font-weight="bold" fill="#111111" text-anchor="middle"><tspan x="900" y="80.8">AgentGS System Architecture</tspan></text>
+<text font-family="'Times New Roman', 'TeX Gyre Termes', 'Nimbus Roman', serif" font-size="33" fill="#111111" text-anchor="middle"><tspan x="236" y="482.2">User Interface</tspan></text>
+<text font-family="'Times New Roman', 'TeX Gyre Termes', 'Nimbus Roman', serif" font-size="33" fill="#111111" text-anchor="middle"><tspan x="667" y="482.2">Agent Orchestration</tspan></text>
+<text font-family="'Times New Roman', 'TeX Gyre Termes', 'Nimbus Roman', serif" font-size="33" fill="#111111" text-anchor="middle"><tspan x="1113" y="464.9">Knowledge and</tspan><tspan x="1113" y="504.5">Capability Resources</tspan></text>
+<text font-family="'Times New Roman', 'TeX Gyre Termes', 'Nimbus Roman', serif" font-size="33" fill="#111111" text-anchor="middle"><tspan x="1544.5" y="482.2">Tool Execution Service</tspan></text>
+<ellipse cx="71.5" cy="671.5" rx="3.5" ry="3.5" fill="#111111" stroke="none"/>
+<text font-family="'Times New Roman', 'TeX Gyre Termes', 'Nimbus Roman', serif" font-size="28" fill="#111111" text-anchor="start"><tspan x="103" y="681.2">Task Dialogue</tspan></text>
+<ellipse cx="71.5" cy="721.5" rx="3.5" ry="3.5" fill="#111111" stroke="none"/>
+<text font-family="'Times New Roman', 'TeX Gyre Termes', 'Nimbus Roman', serif" font-size="28" fill="#111111" text-anchor="start"><tspan x="103" y="731.2">Process Inspection</tspan></text>
+<ellipse cx="71.5" cy="771.5" rx="3.5" ry="3.5" fill="#111111" stroke="none"/>
+<text font-family="'Times New Roman', 'TeX Gyre Termes', 'Nimbus Roman', serif" font-size="28" fill="#111111" text-anchor="start"><tspan x="103" y="781.2">Graph Browsing</tspan></text>
+<ellipse cx="477.5" cy="663.5" rx="3.5" ry="3.5" fill="#111111" stroke="none"/>
+<text font-family="'Times New Roman', 'TeX Gyre Termes', 'Nimbus Roman', serif" font-size="28" fill="#111111" text-anchor="start"><tspan x="508" y="673.4">Capability Planning and</tspan><tspan x="508" y="707">Completion</tspan></text>
+<ellipse cx="477.5" cy="739.5" rx="3.5" ry="3.5" fill="#111111" stroke="none"/>
+<text font-family="'Times New Roman', 'TeX Gyre Termes', 'Nimbus Roman', serif" font-size="28" fill="#111111" text-anchor="start"><tspan x="508" y="749.2">Tool Selection and Binding</tspan></text>
+<ellipse cx="477.5" cy="781.5" rx="3.5" ry="3.5" fill="#111111" stroke="none"/>
+<text font-family="'Times New Roman', 'TeX Gyre Termes', 'Nimbus Roman', serif" font-size="28" fill="#111111" text-anchor="start"><tspan x="508" y="791.4">Execution Feedback and</tspan><tspan x="508" y="825">Recovery</tspan></text>
+<ellipse cx="943.5" cy="671.5" rx="3.5" ry="3.5" fill="#111111" stroke="none"/>
+<text font-family="'Times New Roman', 'TeX Gyre Termes', 'Nimbus Roman', serif" font-size="28" fill="#111111" text-anchor="start"><tspan x="976" y="681.2">Skill Definitions</tspan></text>
+<ellipse cx="943.5" cy="721.5" rx="3.5" ry="3.5" fill="#111111" stroke="none"/>
+<text font-family="'Times New Roman', 'TeX Gyre Termes', 'Nimbus Roman', serif" font-size="28" fill="#111111" text-anchor="start"><tspan x="976" y="731.2">Capability–Tool Mapping</tspan></text>
+<ellipse cx="943.5" cy="771.5" rx="3.5" ry="3.5" fill="#111111" stroke="none"/>
+<text font-family="'Times New Roman', 'TeX Gyre Termes', 'Nimbus Roman', serif" font-size="28" fill="#111111" text-anchor="start"><tspan x="976" y="781.2">Tool Knowledge Graph</tspan></text>
+<ellipse cx="1379.5" cy="671.5" rx="3.5" ry="3.5" fill="#111111" stroke="none"/>
+<text font-family="'Times New Roman', 'TeX Gyre Termes', 'Nimbus Roman', serif" font-size="28" fill="#111111" text-anchor="start"><tspan x="1410" y="681.2">Unified Invocation</tspan></text>
+<ellipse cx="1379.5" cy="721.5" rx="3.5" ry="3.5" fill="#111111" stroke="none"/>
+<text font-family="'Times New Roman', 'TeX Gyre Termes', 'Nimbus Roman', serif" font-size="28" fill="#111111" text-anchor="start"><tspan x="1410" y="731.2">Tool Execution</tspan></text>
+<ellipse cx="1379.5" cy="771.5" rx="3.5" ry="3.5" fill="#111111" stroke="none"/>
+<text font-family="'Times New Roman', 'TeX Gyre Termes', 'Nimbus Roman', serif" font-size="28" fill="#111111" text-anchor="start"><tspan x="1410" y="781.2">Result Return</tspan></text>
+<path d="M237,530 L237,590.55" fill="none" stroke="#29353E" stroke-width="2.1" stroke-linejoin="miter" stroke-linecap="butt"/>
+<polygon points="237,604.65 229.95,590.55 244.05,590.55" fill="#29353E" stroke="#29353E" stroke-width="2.1" stroke-linejoin="miter" stroke-linecap="butt"/>
+<path d="M666,530 L666,590.55" fill="none" stroke="#29353E" stroke-width="2.1" stroke-linejoin="miter" stroke-linecap="butt"/>
+<polygon points="666,604.65 658.95,590.55 673.05,590.55" fill="#29353E" stroke="#29353E" stroke-width="2.1" stroke-linejoin="miter" stroke-linecap="butt"/>
+<path d="M1113,530 L1113,590.55" fill="none" stroke="#29353E" stroke-width="2.1" stroke-linejoin="miter" stroke-linecap="butt"/>
+<polygon points="1113,604.65 1105.95,590.55 1120.05,590.55" fill="#29353E" stroke="#29353E" stroke-width="2.1" stroke-linejoin="miter" stroke-linecap="butt"/>
+<path d="M1549,530 L1549,590.55" fill="none" stroke="#29353E" stroke-width="2.1" stroke-linejoin="miter" stroke-linecap="butt"/>
+<polygon points="1549,604.65 1541.95,590.55 1556.05,590.55" fill="#29353E" stroke="#29353E" stroke-width="2.1" stroke-linejoin="miter" stroke-linecap="butt"/>
+</svg>

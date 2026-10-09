@@ -30,7 +30,7 @@ def test_workbook_export_preserves_sheets_values_formulas_and_energy_results(mon
             "Longitude",
         ]
     )
-    facilities.append(["Solar", "China", "太阳能电站", 12.5, "operating", 20.0, 100.0])
+    facilities.append(["Solar", "China", "Solar Plant One", 12.5, "operating", 20.0, 100.0])
     about = workbook.create_sheet("About")
     about.append(["source notes", True, None, 0])
     regions = workbook.create_sheet("Regions, area, and countries")

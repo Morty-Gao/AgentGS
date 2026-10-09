@@ -12,6 +12,10 @@ class SandboxUnavailable(RuntimeError):
     pass
 
 
+class SandboxResourceLimit(RuntimeError):
+    pass
+
+
 class BashInput(Model):
     command: str = Field(min_length=1, max_length=4000, strict=True)
 

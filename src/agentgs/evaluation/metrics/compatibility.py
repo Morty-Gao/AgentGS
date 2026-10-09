@@ -14,7 +14,7 @@ import unicodedata
 from dataclasses import dataclass
 from typing import Any
 
-from agentgs.evaluation.metrics.answers import score_answer as legacy_score
+from agentgs.evaluation.metrics.legacy_answers import score_answer as legacy_score
 
 VERSION = "semantic_compat_v0.1"
 NUMBER = r"[-+]?(?:(?:\d{1,3}(?:,\d{3})+|\d+)(?:\.\d*)?|\.\d+)(?:[eE][-+]?\d+)?"
@@ -26,14 +26,14 @@ ALIASES = {
     + r"\s*km(?:\s+depth)?|\s*\(\s*"
     + NUMBER
     + r"\s*km\s*\))?",
-    "age": r"(?:nearest\s+age|actual\s+age|age|年代)",
-    "temperature_anomaly": r"(?:temperature\s+anomaly|temp\s+anomaly|temperature\s+departure|t|温度异常)",
-    "sea_level": r"(?:sea\s+level|sl|海平面)",
-    "valid_count": r"(?:valid\s+count|valid\s+records(?:\s+in\s+\d{4})?(?:\s*\([^)]*\))?|record\s+count|记录数)",
+    "age": r"(?:nearest\s+age|actual\s+age|age)",
+    "temperature_anomaly": r"(?:temperature\s+anomaly|temp\s+anomaly|temperature\s+departure|t)",
+    "sea_level": r"(?:sea\s+level|sl)",
+    "valid_count": r"(?:valid\s+count|valid\s+records(?:\s+in\s+\d{4})?(?:\s*\([^)]*\))?|record\s+count)",
     "mean_fco2": r"(?:mean\s+fco2|fco2)",
     "mean_sst": r"(?:mean\s+sst|sst)",
-    "latitude": r"(?:latitude|lat|纬度)",
-    "longitude": r"(?:longitude|lon|lng|经度)",
+    "latitude": r"(?:latitude|lat)",
+    "longitude": r"(?:longitude|lon|lng)",
     "dep_id": r"(?:dep\s+id|deposit\s+id)",
 }
 # Canonical conversion is (value * multiplier + offset); incompatible dimensions fail.
@@ -144,7 +144,7 @@ def parse_unit(tail: str, canonical: str) -> str | None:
         if (
             not tail
             or re.match(r"^[;,.\n)\]]|^\s*$", tail)
-            or re.match(r"(?:records?|条|个)\b", tail)
+            or re.match(r"records?\b", tail)
         ):
             return canonical
     return None
@@ -164,7 +164,7 @@ def convert(measurement: Measurement, canonical: str, field: str = "") -> float 
 def collect_numeric(text: str, field: str, unit: str) -> tuple[Measurement | None, str]:
     alias = ALIASES[field]
     label = re.compile(
-        r"(?<![a-z0-9])" + alias + r"(?![a-z])\s*(?::|=|≈|is|为|是)?\s*(" + NUMBER + r")", re.I
+        r"(?<![a-z0-9])" + alias + r"(?![a-z])\s*(?::|=|≈|is)?\s*(" + NUMBER + r")", re.I
     )
     candidates = []
     matches = list(label.finditer(text))
@@ -236,7 +236,7 @@ def parse_record(answer: str, schema: dict) -> dict:
                     fields[field] = Measurement(value, pair[index], "degree")
                     issues[field] = "parsed_pair"
         # Restrict text fields to their own clauses; an unlabeled leading name is accepted.
-        site = re.search(r"(?:^|[;\n])\s*(?:site\s*name|site|矿点名称)\s*[:=]\s*([^;\n]+)", text)
+        site = re.search(r"(?:^|[;\n])\s*(?:site\s*name|site)\s*[:=]\s*([^;\n]+)", text)
         first = re.split(r"[;\n]", text)[0].strip()
         fields["site_name"] = (
             site[1].strip()
@@ -264,11 +264,11 @@ def parse_record(answer: str, schema: dict) -> dict:
 def choice_letter(text: str, allowed: list[str]) -> str | None:
     options = "".join(re.escape(x) for x in allowed)
     value = str(text or "").strip()
-    match = re.fullmatch(r"\(?([" + options + r"])\)?[.。]?", value, re.I)
+    match = re.fullmatch(r"\(?([" + options + r"])\)?[.]?", value, re.I)
     if match:
         return match[1].upper()
     labels = re.findall(
-        r"(?:answer|option|choice|答案|选项|选择)\s*(?:is|为|是)?\s*[:：]?\s*(["
+        r"(?:answer|option|choice)\s*(?:is)?\s*:?\s*(["
         + options
         + r"])(?![a-z])",
         value,
@@ -280,7 +280,7 @@ def choice_letter(text: str, allowed: list[str]) -> str | None:
 def score_compatible(task, answer: str, format_spec: dict) -> dict:
     original = legacy_score(task, answer)
     schema = format_spec.get("scoring_schema")
-    if task.answer_type == "选择题选项":
+    if task.answer_type == "choice":
         allowed = format_spec.get("allowed_options", [])
         expected = choice_letter(task.expected_answer, allowed)
         actual = choice_letter(answer, allowed)

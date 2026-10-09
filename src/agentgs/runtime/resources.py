@@ -21,8 +21,10 @@ def tree_rss(pid):
 
 def kill_tree(pid):
     try:
-        children = psutil.Process(pid).children(recursive=True)
+        root = psutil.Process(pid)
+        children = root.children(recursive=True)
     except psutil.NoSuchProcess:
+        root = None
         children = []
     for child in reversed(children):
         try:
@@ -34,13 +36,9 @@ def kill_tree(pid):
             os.killpg(pid, signal.SIGKILL)
         except ProcessLookupError:
             pass
-    else:
+    # A caller may supply a child that is not a process-group leader.
+    if root is not None:
         try:
-            processes = [*psutil.Process(pid).children(recursive=True), psutil.Process(pid)]
+            root.kill()
         except psutil.NoSuchProcess:
-            return
-        for proc in reversed(processes):
-            try:
-                proc.kill()
-            except psutil.NoSuchProcess:
-                pass
+            pass

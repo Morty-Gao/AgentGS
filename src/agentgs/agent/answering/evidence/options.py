@@ -7,7 +7,7 @@ from agentgs.agent.answering.evidence.core import _numbers
 
 
 def _option_blocks(question: str) -> list[tuple[str, str]]:
-    match = re.search("(?:Options|选项)\\s*:\\s*(.*)$", question or "", re.I | re.S)
+    match = re.search("Options\\s*:\\s*(.*)$", question or "", re.I | re.S)
     if not match:
         return []
     text = re.split(

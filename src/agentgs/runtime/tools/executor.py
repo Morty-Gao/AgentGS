@@ -3,12 +3,14 @@
 import asyncio
 import json
 import logging
+import time
 
 from pydantic import ValidationError
 
 from agentgs.config.settings import RuntimeSettings
 from agentgs.contracts.async_utils import invoke
 from agentgs.contracts.models import ToolError, ToolResult
+from agentgs.contracts.sandbox import SandboxResourceLimit
 from agentgs.contracts.tool_feedback import assess_tool_execution
 from agentgs.runtime.concurrency import RuntimeCoordinator
 from agentgs.runtime.sandbox.base import SandboxUnavailable
@@ -73,12 +75,28 @@ class LocalToolExecutor:
 
     async def _execute(self, call, *, timeout=None):
         item = self.registry.get(call.tool) or self.internal.get(call.tool)
-        try:
+        queued_at = time.monotonic()
+        started_at = finished_at = None
+
+        async def started():
+            nonlocal started_at
+            started_at = time.monotonic()
             await self._emit("tool.started", {"call_id": call.id, "tool": call.tool})
-            async with self.coordinator.tool_invocation(
-                self.settings,
-                timeout if timeout is not None else self.settings.tool_timeout_seconds,
+
+        async def compute(params, arguments):
+            nonlocal finished_at
+            try:
+                return await self._compute(
+                    call, item, params, arguments, timeout=timeout, on_started=started
+                )
+            finally:
+                finished_at = time.monotonic()
+
+        try:
+            async with asyncio.timeout(
+                timeout if timeout is not None else self.settings.tool_timeout_seconds
             ):
+                await self._emit("tool.queued", {"call_id": call.id, "tool": call.tool})
                 if item is None:
                     raise KeyError(call.tool)
                 arguments = {
@@ -91,7 +109,15 @@ class LocalToolExecutor:
                 params = item.input_type.model_validate(arguments)
                 arguments = params.model_dump(exclude_unset=True, by_alias=True)
                 arguments.update(call._runtime_arguments)
-                data = await self._compute(call, item, params, arguments, timeout=timeout)
+                if call.tool in {"bash", "ExecutePython"}:
+                    data = await compute(params, arguments)
+                else:
+                    async with self.coordinator.tool_invocation(
+                        self.settings,
+                        timeout if timeout is not None else self.settings.tool_timeout_seconds,
+                    ):
+                        await started()
+                        data = await compute(params, arguments)
                 if call.tool == "bash":
                     # Shell streams are already preserved in data; avoid duplicating model context.
                     raw_output = None
@@ -120,6 +146,8 @@ class LocalToolExecutor:
             )
         except SandboxUnavailable as exc:
             result = self._failure(call, "sandbox_unavailable", str(exc))
+        except SandboxResourceLimit as exc:
+            result = self._failure(call, "resource_limit", str(exc))
         except KeyError:
             result = self._failure(call, "unknown_tool", f"Unavailable tool: {call.tool}")
         except (FileNotFoundError, ImportError) as exc:
@@ -139,11 +167,15 @@ class LocalToolExecutor:
                 "error": result.error.model_dump() if result.error else None,
                 "arguments": call.arguments,
                 "result": result.model_dump(mode="json"),
+                "wait_seconds": (started_at or time.monotonic()) - queued_at,
+                "execution_seconds": max(0, (finished_at or time.monotonic()) - started_at)
+                if started_at is not None
+                else 0,
             },
         )
         return result
 
-    async def _compute(self, call, item, params, arguments, *, timeout=None):
+    async def _compute(self, call, item, params, arguments, *, timeout=None, on_started=None):
         if call.tool == "bash":
             if self.code_executor is None:
                 raise SandboxUnavailable("No code executor is configured")
@@ -152,11 +184,19 @@ class LocalToolExecutor:
                 work=self.code_executor.work / "shell",
                 data_root=self.datasets.root,
                 timeout=timeout if timeout is not None else self.settings.tool_timeout_seconds,
+                coordinator=self.coordinator,
+                settings=self.settings,
+                on_started=on_started,
             )
         if call.tool == "ExecutePython":
             if self.code_executor is None:
                 raise SandboxUnavailable("No code executor is configured")
-            return await self.code_executor.run_python(params.code)
+            return await self.code_executor.run_python(
+                params.code,
+                coordinator=self.coordinator,
+                settings=self.settings,
+                on_started=on_started,
+            )
         unchanged_handler = self._builtin_handlers.get(call.tool) is item.handler
         unchanged_dispatch = getattr(self._domain, "__func__", None) is LocalToolExecutor._domain
         if (

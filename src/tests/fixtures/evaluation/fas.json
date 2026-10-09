@@ -8972,7 +8972,7 @@
   },
   {
     "question_id": 102,
-    "answer": "forest=http://yago-knowledge.org/resource/geoentity_Killoughrum_Forest_2963306；forestArea=8.170903020995307E-5 / forest=http://yago-knowledge.org/resource/geoentity_Tombrick_Wood_3302725；forestArea=6.0697087429997614E-5",
+    "answer": "forest=http://yago-knowledge.org/resource/geoentity_Killoughrum_Forest_2963306; forestArea=8.170903020995307E-5 / forest=http://yago-knowledge.org/resource/geoentity_Tombrick_Wood_3302725; forestArea=6.0697087429997614E-5",
     "expected": {
       "score": 1.0,
       "method": "structured_record_field_score",
@@ -8992,7 +8992,7 @@
   },
   {
     "question_id": 102,
-    "answer": "forest=http://yago-knowledge.org/resource/geoentity_Killoughrum_Forest_2963306；forestArea=8.170903020995307E-5 / forest=http://yago-knowledge.org/resource/geoentity_Tombrick_Wood_3302725；forestArea=6.0697087429997614E-5",
+    "answer": "forest=http://yago-knowledge.org/resource/geoentity_Killoughrum_Forest_2963306; forestArea=8.170903020995307E-5 / forest=http://yago-knowledge.org/resource/geoentity_Tombrick_Wood_3302725; forestArea=6.0697087429997614E-5",
     "expected": {
       "score": 1.0,
       "method": "structured_record_field_score",
@@ -9075,7 +9075,7 @@
   },
   {
     "question_id": 103,
-    "answer": "locality=http://yago-knowledge.org/resource/geoentity_Boldermere_Lake_7116376；lakeArea=7.223164074996838E-6",
+    "answer": "locality=http://yago-knowledge.org/resource/geoentity_Boldermere_Lake_7116376; lakeArea=7.223164074996838E-6",
     "expected": {
       "score": 1.0,
       "method": "structured_record_field_score",
@@ -9095,7 +9095,7 @@
   },
   {
     "question_id": 103,
-    "answer": "locality=http://yago-knowledge.org/resource/geoentity_Boldermere_Lake_7116376；lakeArea=7.223164074996838E-6",
+    "answer": "locality=http://yago-knowledge.org/resource/geoentity_Boldermere_Lake_7116376; lakeArea=7.223164074996838E-6",
     "expected": {
       "score": 1.0,
       "method": "structured_record_field_score",
@@ -9235,7 +9235,7 @@
   },
   {
     "question_id": 105,
-    "answer": "total=13；sum=1.8424967596399934E-3；avg=1.417305199723072E-4",
+    "answer": "total=13; sum=1.8424967596399934E-3; avg=1.417305199723072E-4",
     "expected": {
       "score": 1.0,
       "method": "structured_record_field_score",
@@ -9255,7 +9255,7 @@
   },
   {
     "question_id": 105,
-    "answer": "total=13；sum=1.8424967596399934E-3；avg=1.417305199723072E-4",
+    "answer": "total=13; sum=1.8424967596399934E-3; avg=1.417305199723072E-4",
     "expected": {
       "score": 1.0,
       "method": "structured_record_field_score",
@@ -9331,7 +9331,7 @@
   },
   {
     "question_id": 106,
-    "answer": "reg_unit=http://yago-knowledge.org/resource/geoentity_Dimos_Igoumenitsa_8133725；avg_no_of_beaches=0.0E0 / reg_unit=http://yago-knowledge.org/resource/geoentity_Dimos_Parga_8133742；avg_no_of_beaches=0.0E0 / reg_unit=http://yago-knowledge.org/resource/geoentity_Dimos_Lefkada_8133851；avg_no_of_beaches=0.0E0 / reg_unit=http://yago-knowledge.org/resource/geoentity_Dimos_Corfu_8133855；avg_no_of_beaches=0.0E0 / reg_unit=http://yago-knowledge.org/resource/geoentity_Dimos_Paxoi_8133911；avg_no_of_beaches=0.0E0",
+    "answer": "reg_unit=http://yago-knowledge.org/resource/geoentity_Dimos_Igoumenitsa_8133725; avg_no_of_beaches=0.0E0 / reg_unit=http://yago-knowledge.org/resource/geoentity_Dimos_Parga_8133742; avg_no_of_beaches=0.0E0 / reg_unit=http://yago-knowledge.org/resource/geoentity_Dimos_Lefkada_8133851; avg_no_of_beaches=0.0E0 / reg_unit=http://yago-knowledge.org/resource/geoentity_Dimos_Corfu_8133855; avg_no_of_beaches=0.0E0 / reg_unit=http://yago-knowledge.org/resource/geoentity_Dimos_Paxoi_8133911; avg_no_of_beaches=0.0E0",
     "expected": {
       "score": 1.0,
       "method": "structured_record_field_score",
@@ -9351,7 +9351,7 @@
   },
   {
     "question_id": 106,
-    "answer": "reg_unit=http://yago-knowledge.org/resource/geoentity_Dimos_Igoumenitsa_8133725；avg_no_of_beaches=0.0E0 / reg_unit=http://yago-knowledge.org/resource/geoentity_Dimos_Parga_8133742；avg_no_of_beaches=0.0E0 / reg_unit=http://yago-knowledge.org/resource/geoentity_Dimos_Lefkada_8133851；avg_no_of_beaches=0.0E0 / reg_unit=http://yago-knowledge.org/resource/geoentity_Dimos_Corfu_8133855；avg_no_of_beaches=0.0E0 / reg_unit=http://yago-knowledge.org/resource/geoentity_Dimos_Paxoi_8133911；avg_no_of_beaches=0.0E0",
+    "answer": "reg_unit=http://yago-knowledge.org/resource/geoentity_Dimos_Igoumenitsa_8133725; avg_no_of_beaches=0.0E0 / reg_unit=http://yago-knowledge.org/resource/geoentity_Dimos_Parga_8133742; avg_no_of_beaches=0.0E0 / reg_unit=http://yago-knowledge.org/resource/geoentity_Dimos_Lefkada_8133851; avg_no_of_beaches=0.0E0 / reg_unit=http://yago-knowledge.org/resource/geoentity_Dimos_Corfu_8133855; avg_no_of_beaches=0.0E0 / reg_unit=http://yago-knowledge.org/resource/geoentity_Dimos_Paxoi_8133911; avg_no_of_beaches=0.0E0",
     "expected": {
       "score": 1.0,
       "method": "structured_record_field_score",
@@ -9497,7 +9497,7 @@
   },
   {
     "question_id": 107,
-    "answer": "total_lakes=19；total_streams=39",
+    "answer": "total_lakes=19; total_streams=39",
     "expected": {
       "score": 1.0,
       "method": "structured_record_field_score",
@@ -9517,7 +9517,7 @@
   },
   {
     "question_id": 107,
-    "answer": "total_lakes=19；total_streams=39",
+    "answer": "total_lakes=19; total_streams=39",
     "expected": {
       "score": 1.0,
       "method": "structured_record_field_score",
@@ -9656,7 +9656,7 @@
   },
   {
     "question_id": 109,
-    "answer": "county=http://yago-knowledge.org/resource/North_Yorkshire；lake_count=2 / county=http://yago-knowledge.org/resource/Cambridge；lake_count=8 / county=http://yago-knowledge.org/resource/Surrey；lake_count=4 / county=http://yago-knowledge.org/resource/Norfolk；lake_count=10 / county=http://yago-knowledge.org/resource/Cumbria；lake_count=20",
+    "answer": "county=http://yago-knowledge.org/resource/North_Yorkshire; lake_count=2 / county=http://yago-knowledge.org/resource/Cambridge; lake_count=8 / county=http://yago-knowledge.org/resource/Surrey; lake_count=4 / county=http://yago-knowledge.org/resource/Norfolk; lake_count=10 / county=http://yago-knowledge.org/resource/Cumbria; lake_count=20",
     "expected": {
       "score": 1.0,
       "method": "structured_record_field_score",
@@ -9676,7 +9676,7 @@
   },
   {
     "question_id": 109,
-    "answer": "county=http://yago-knowledge.org/resource/North_Yorkshire；lake_count=2 / county=http://yago-knowledge.org/resource/Cambridge；lake_count=8 / county=http://yago-knowledge.org/resource/Surrey；lake_count=4 / county=http://yago-knowledge.org/resource/Norfolk；lake_count=10 / county=http://yago-knowledge.org/resource/Cumbria；lake_count=20",
+    "answer": "county=http://yago-knowledge.org/resource/North_Yorkshire; lake_count=2 / county=http://yago-knowledge.org/resource/Cambridge; lake_count=8 / county=http://yago-knowledge.org/resource/Surrey; lake_count=4 / county=http://yago-knowledge.org/resource/Norfolk; lake_count=10 / county=http://yago-knowledge.org/resource/Cumbria; lake_count=20",
     "expected": {
       "score": 1.0,
       "method": "structured_record_field_score",
@@ -9879,7 +9879,7 @@
   },
   {
     "question_id": 111,
-    "answer": "areas_min=1.8218561900008377E-6；areas_max=7.697400551350174E-4；areas_avg=1.4819109035088407E-4",
+    "answer": "areas_min=1.8218561900008377E-6; areas_max=7.697400551350174E-4; areas_avg=1.4819109035088407E-4",
     "expected": {
       "score": 1.0,
       "method": "structured_record_field_score",
@@ -9899,7 +9899,7 @@
   },
   {
     "question_id": 111,
-    "answer": "areas_min=1.8218561900008377E-6；areas_max=7.697400551350174E-4；areas_avg=1.4819109035088407E-4",
+    "answer": "areas_min=1.8218561900008377E-6; areas_max=7.697400551350174E-4; areas_avg=1.4819109035088407E-4",
     "expected": {
       "score": 1.0,
       "method": "structured_record_field_score",
@@ -10755,7 +10755,7 @@
   },
   {
     "question_id": 122,
-    "answer": "numBeaches=3；totalArea=2.155678840002368E-6",
+    "answer": "numBeaches=3; totalArea=2.155678840002368E-6",
     "expected": {
       "score": 1.0,
       "method": "structured_record_field_score",
@@ -10775,7 +10775,7 @@
   },
   {
     "question_id": 122,
-    "answer": "numBeaches=3；totalArea=2.155678840002368E-6",
+    "answer": "numBeaches=3; totalArea=2.155678840002368E-6",
     "expected": {
       "score": 1.0,
       "method": "structured_record_field_score",
@@ -11226,7 +11226,7 @@
   },
   {
     "question_id": 128,
-    "answer": "lake=http://yago-knowledge.org/resource/Lough_Leane；area=2.575920421759999E-3",
+    "answer": "lake=http://yago-knowledge.org/resource/Lough_Leane; area=2.575920421759999E-3",
     "expected": {
       "score": 1.0,
       "method": "structured_record_field_score",
@@ -11246,7 +11246,7 @@
   },
   {
     "question_id": 128,
-    "answer": "lake=http://yago-knowledge.org/resource/Lough_Leane；area=2.575920421759999E-3",
+    "answer": "lake=http://yago-knowledge.org/resource/Lough_Leane; area=2.575920421759999E-3",
     "expected": {
       "score": 1.0,
       "method": "structured_record_field_score",
@@ -11352,7 +11352,7 @@
   },
   {
     "question_id": 130,
-    "answer": "forest=http://yago-knowledge.org/resource/geoentity_Pedlars_Wood_9883765；area1=1.8218561900008377E-6",
+    "answer": "forest=http://yago-knowledge.org/resource/geoentity_Pedlars_Wood_9883765; area1=1.8218561900008377E-6",
     "expected": {
       "score": 1.0,
       "method": "structured_record_field_score",
@@ -11372,7 +11372,7 @@
   },
   {
     "question_id": 130,
-    "answer": "forest=http://yago-knowledge.org/resource/geoentity_Pedlars_Wood_9883765；area1=1.8218561900008377E-6",
+    "answer": "forest=http://yago-knowledge.org/resource/geoentity_Pedlars_Wood_9883765; area1=1.8218561900008377E-6",
     "expected": {
       "score": 1.0,
       "method": "structured_record_field_score",
@@ -11434,7 +11434,7 @@
   },
   {
     "question_id": 131,
-    "answer": "forest=http://yago-knowledge.org/resource/Savernake_Forest；totalArea=1.5999443545550666E-3",
+    "answer": "forest=http://yago-knowledge.org/resource/Savernake_Forest; totalArea=1.5999443545550666E-3",
     "expected": {
       "score": 1.0,
       "method": "structured_record_field_score",
@@ -11454,7 +11454,7 @@
   },
   {
     "question_id": 131,
-    "answer": "forest=http://yago-knowledge.org/resource/Savernake_Forest；totalArea=1.5999443545550666E-3",
+    "answer": "forest=http://yago-knowledge.org/resource/Savernake_Forest; totalArea=1.5999443545550666E-3",
     "expected": {
       "score": 1.0,
       "method": "structured_record_field_score",
@@ -11826,7 +11826,7 @@
   },
   {
     "question_id": 138,
-    "answer": "m=http://yago-knowledge.org/resource/Essex；count=6 / m=http://yago-knowledge.org/resource/Norfolk；count=6 / m=http://yago-knowledge.org/resource/Kent；count=4 / m=http://yago-knowledge.org/resource/Derbyshire；count=2 / m=http://yago-knowledge.org/resource/North_Yorkshire；count=2 / m=http://yago-knowledge.org/resource/Staffordshire；count=2 / m=http://yago-knowledge.org/resource/Cambridge；count=2 / m=http://yago-knowledge.org/resource/Suffolk；count=2 / m=http://yago-knowledge.org/resource/Surrey；count=2 / m=http://yago-knowledge.org/resource/Nottinghamshire；count=2",
+    "answer": "m=http://yago-knowledge.org/resource/Essex; count=6 / m=http://yago-knowledge.org/resource/Norfolk; count=6 / m=http://yago-knowledge.org/resource/Kent; count=4 / m=http://yago-knowledge.org/resource/Derbyshire; count=2 / m=http://yago-knowledge.org/resource/North_Yorkshire; count=2 / m=http://yago-knowledge.org/resource/Staffordshire; count=2 / m=http://yago-knowledge.org/resource/Cambridge; count=2 / m=http://yago-knowledge.org/resource/Suffolk; count=2 / m=http://yago-knowledge.org/resource/Surrey; count=2 / m=http://yago-knowledge.org/resource/Nottinghamshire; count=2",
     "expected": {
       "score": 1.0,
       "method": "structured_record_field_score",
@@ -11846,7 +11846,7 @@
   },
   {
     "question_id": 138,
-    "answer": "m=http://yago-knowledge.org/resource/Essex；count=6 / m=http://yago-knowledge.org/resource/Norfolk；count=6 / m=http://yago-knowledge.org/resource/Kent；count=4 / m=http://yago-knowledge.org/resource/Derbyshire；count=2 / m=http://yago-knowledge.org/resource/North_Yorkshire；count=2 / m=http://yago-knowledge.org/resource/Staffordshire；count=2 / m=http://yago-knowledge.org/resource/Cambridge；count=2 / m=http://yago-knowledge.org/resource/Suffolk；count=2 / m=http://yago-knowledge.org/resource/Surrey；count=2 / m=http://yago-knowledge.org/resource/Nottinghamshire；count=2",
+    "answer": "m=http://yago-knowledge.org/resource/Essex; count=6 / m=http://yago-knowledge.org/resource/Norfolk; count=6 / m=http://yago-knowledge.org/resource/Kent; count=4 / m=http://yago-knowledge.org/resource/Derbyshire; count=2 / m=http://yago-knowledge.org/resource/North_Yorkshire; count=2 / m=http://yago-knowledge.org/resource/Staffordshire; count=2 / m=http://yago-knowledge.org/resource/Cambridge; count=2 / m=http://yago-knowledge.org/resource/Suffolk; count=2 / m=http://yago-knowledge.org/resource/Surrey; count=2 / m=http://yago-knowledge.org/resource/Nottinghamshire; count=2",
     "expected": {
       "score": 1.0,
       "method": "structured_record_field_score",
@@ -12134,7 +12134,7 @@
   },
   {
     "question_id": 140,
-    "answer": "county=http://yago-knowledge.org/resource/Gregg_County,_Texas；lakeCount=40",
+    "answer": "county=http://yago-knowledge.org/resource/Gregg_County,_Texas; lakeCount=40",
     "expected": {
       "score": 1.0,
       "method": "structured_record_field_score",
@@ -12154,7 +12154,7 @@
   },
   {
     "question_id": 140,
-    "answer": "county=http://yago-knowledge.org/resource/Gregg_County,_Texas；lakeCount=40",
+    "answer": "county=http://yago-knowledge.org/resource/Gregg_County,_Texas; lakeCount=40",
     "expected": {
       "score": 1.0,
       "method": "structured_record_field_score",
@@ -41397,7 +41397,7 @@
   },
   {
     "question_id": 459,
-    "answer": "Great-circle distance: 10388.286 km.；Initial bearing from point1 to point2: 9.06°",
+    "answer": "Great-circle distance: 10388.286 km.; Initial bearing from point1 to point2: 9.06°",
     "expected": {
       "score": 1.0,
       "method": "multi_numeric_f1",
@@ -41439,7 +41439,7 @@
   },
   {
     "question_id": 459,
-    "answer": "Great-circle distance: 10388.286 km.；Initial bearing from point1 to point2: 9.06°",
+    "answer": "Great-circle distance: 10388.286 km.; Initial bearing from point1 to point2: 9.06°",
     "expected": {
       "score": 1.0,
       "method": "multi_numeric_f1",
@@ -41501,7 +41501,7 @@
   },
   {
     "question_id": 460,
-    "answer": "Great-circle distance: 8029.759 km.；Initial bearing from point1 to point2: 16.84°",
+    "answer": "Great-circle distance: 8029.759 km.; Initial bearing from point1 to point2: 16.84°",
     "expected": {
       "score": 1.0,
       "method": "multi_numeric_f1",
@@ -41543,7 +41543,7 @@
   },
   {
     "question_id": 460,
-    "answer": "Great-circle distance: 8029.759 km.；Initial bearing from point1 to point2: 16.84°",
+    "answer": "Great-circle distance: 8029.759 km.; Initial bearing from point1 to point2: 16.84°",
     "expected": {
       "score": 1.0,
       "method": "multi_numeric_f1",
@@ -41605,7 +41605,7 @@
   },
   {
     "question_id": 461,
-    "answer": "Great-circle distance: 10185.399 km.；Initial bearing from point1 to point2: 248.55°",
+    "answer": "Great-circle distance: 10185.399 km.; Initial bearing from point1 to point2: 248.55°",
     "expected": {
       "score": 1.0,
       "method": "multi_numeric_f1",
@@ -41647,7 +41647,7 @@
   },
   {
     "question_id": 461,
-    "answer": "Great-circle distance: 10185.399 km.；Initial bearing from point1 to point2: 248.55°",
+    "answer": "Great-circle distance: 10185.399 km.; Initial bearing from point1 to point2: 248.55°",
     "expected": {
       "score": 1.0,
       "method": "multi_numeric_f1",
@@ -41709,7 +41709,7 @@
   },
   {
     "question_id": 462,
-    "answer": "Great-circle distance: 12266.216 km.；Initial bearing from point1 to point2: 110.98°",
+    "answer": "Great-circle distance: 12266.216 km.; Initial bearing from point1 to point2: 110.98°",
     "expected": {
       "score": 1.0,
       "method": "multi_numeric_f1",
@@ -41751,7 +41751,7 @@
   },
   {
     "question_id": 462,
-    "answer": "Great-circle distance: 12266.216 km.；Initial bearing from point1 to point2: 110.98°",
+    "answer": "Great-circle distance: 12266.216 km.; Initial bearing from point1 to point2: 110.98°",
     "expected": {
       "score": 1.0,
       "method": "multi_numeric_f1",
@@ -41813,7 +41813,7 @@
   },
   {
     "question_id": 463,
-    "answer": "Great-circle distance: 2769.648 km.；Initial bearing from point1 to point2: 57.67°",
+    "answer": "Great-circle distance: 2769.648 km.; Initial bearing from point1 to point2: 57.67°",
     "expected": {
       "score": 1.0,
       "method": "multi_numeric_f1",
@@ -41855,7 +41855,7 @@
   },
   {
     "question_id": 463,
-    "answer": "Great-circle distance: 2769.648 km.；Initial bearing from point1 to point2: 57.67°",
+    "answer": "Great-circle distance: 2769.648 km.; Initial bearing from point1 to point2: 57.67°",
     "expected": {
       "score": 1.0,
       "method": "multi_numeric_f1",
@@ -41917,7 +41917,7 @@
   },
   {
     "question_id": 464,
-    "answer": "Great-circle distance: 1594.588 km.；Initial bearing from point1 to point2: 65.54°",
+    "answer": "Great-circle distance: 1594.588 km.; Initial bearing from point1 to point2: 65.54°",
     "expected": {
       "score": 1.0,
       "method": "multi_numeric_f1",
@@ -41959,7 +41959,7 @@
   },
   {
     "question_id": 464,
-    "answer": "Great-circle distance: 1594.588 km.；Initial bearing from point1 to point2: 65.54°",
+    "answer": "Great-circle distance: 1594.588 km.; Initial bearing from point1 to point2: 65.54°",
     "expected": {
       "score": 1.0,
       "method": "multi_numeric_f1",
@@ -42021,20 +42021,20 @@
   },
   {
     "question_id": 465,
-    "answer": "清洗后的时间序列点图层；3 近邻结果；按 age 分级的 PNG/HTML 专题图",
+    "answer": "cleaned time-series point layer; 3-nearest-neighbour result; age-classed PNG/HTML thematic map",
     "expected": {
       "score": 1.0,
       "method": "multi_text_item_f1",
       "details": {
         "expected_items": [
-          "清洗后的时间序列点图层",
-          "3 近邻结果",
-          "按 age 分级的 png/html 专题图"
+          "cleaned time-series point layer",
+          "3-nearest-neighbour result",
+          "age-classed png/html thematic map"
         ],
         "actual_items": [
-          "清洗后的时间序列点图层",
-          "3 近邻结果",
-          "按 age 分级的 png/html 专题图"
+          "cleaned time-series point layer",
+          "3-nearest-neighbour result",
+          "age-classed png/html thematic map"
         ],
         "matched_items": 3,
         "precision": 1.0,
@@ -42053,20 +42053,20 @@
   },
   {
     "question_id": 465,
-    "answer": "清洗后的时间序列点图层；3 近邻结果；按 age 分级的 PNG/HTML 专题图",
+    "answer": "cleaned time-series point layer; 3-nearest-neighbour result; age-classed PNG/HTML thematic map",
     "expected": {
       "score": 1.0,
       "method": "multi_text_item_f1",
       "details": {
         "expected_items": [
-          "清洗后的时间序列点图层",
-          "3 近邻结果",
-          "按 age 分级的 png/html 专题图"
+          "cleaned time-series point layer",
+          "3-nearest-neighbour result",
+          "age-classed png/html thematic map"
         ],
         "actual_items": [
-          "清洗后的时间序列点图层",
-          "3 近邻结果",
-          "按 age 分级的 png/html 专题图"
+          "cleaned time-series point layer",
+          "3-nearest-neighbour result",
+          "age-classed png/html thematic map"
         ],
         "matched_items": 3,
         "precision": 1.0,
@@ -42082,9 +42082,9 @@
       "method": "multi_text_item_f1",
       "details": {
         "expected_items": [
-          "清洗后的时间序列点图层",
-          "3 近邻结果",
-          "按 age 分级的 png/html 专题图"
+          "cleaned time-series point layer",
+          "3-nearest-neighbour result",
+          "age-classed png/html thematic map"
         ],
         "actual_items": [
           "wrong value 123456.789"
@@ -42097,20 +42097,20 @@
   },
   {
     "question_id": 466,
-    "answer": "100 km 缓冲区；分析区叠加结果；覆盖范围专题图",
+    "answer": "100 km buffers; analysis-zone overlay; coverage thematic map",
     "expected": {
       "score": 1.0,
       "method": "multi_text_item_f1",
       "details": {
         "expected_items": [
-          "100 km 缓冲区",
-          "分析区叠加结果",
-          "覆盖范围专题图"
+          "100 km buffers",
+          "analysis-zone overlay",
+          "coverage thematic map"
         ],
         "actual_items": [
-          "100 km 缓冲区",
-          "分析区叠加结果",
-          "覆盖范围专题图"
+          "100 km buffers",
+          "analysis-zone overlay",
+          "coverage thematic map"
         ],
         "matched_items": 3,
         "precision": 1.0,
@@ -42129,20 +42129,20 @@
   },
   {
     "question_id": 466,
-    "answer": "100 km 缓冲区；分析区叠加结果；覆盖范围专题图",
+    "answer": "100 km buffers; analysis-zone overlay; coverage thematic map",
     "expected": {
       "score": 1.0,
       "method": "multi_text_item_f1",
       "details": {
         "expected_items": [
-          "100 km 缓冲区",
-          "分析区叠加结果",
-          "覆盖范围专题图"
+          "100 km buffers",
+          "analysis-zone overlay",
+          "coverage thematic map"
         ],
         "actual_items": [
-          "100 km 缓冲区",
-          "分析区叠加结果",
-          "覆盖范围专题图"
+          "100 km buffers",
+          "analysis-zone overlay",
+          "coverage thematic map"
         ],
         "matched_items": 3,
         "precision": 1.0,
@@ -42158,9 +42158,9 @@
       "method": "multi_text_item_f1",
       "details": {
         "expected_items": [
-          "100 km 缓冲区",
-          "分析区叠加结果",
-          "覆盖范围专题图"
+          "100 km buffers",
+          "analysis-zone overlay",
+          "coverage thematic map"
         ],
         "actual_items": [
           "wrong value 123456.789"
@@ -42173,20 +42173,20 @@
   },
   {
     "question_id": 467,
-    "answer": "标准化并质控的点/面图层；点落面关联结果；分区时间序列数量图",
+    "answer": "standardized and quality-controlled point/polygon layers; point-in-polygon join; zonal time-series count map",
     "expected": {
       "score": 1.0,
       "method": "multi_text_item_f1",
       "details": {
         "expected_items": [
-          "标准化并质控的点/面图层",
-          "点落面关联结果",
-          "分区时间序列数量图"
+          "standardized and quality-controlled point/polygon layers",
+          "point-in-polygon join",
+          "zonal time-series count map"
         ],
         "actual_items": [
-          "标准化并质控的点/面图层",
-          "点落面关联结果",
-          "分区时间序列数量图"
+          "standardized and quality-controlled point/polygon layers",
+          "point-in-polygon join",
+          "zonal time-series count map"
         ],
         "matched_items": 3,
         "precision": 1.0,
@@ -42205,20 +42205,20 @@
   },
   {
     "question_id": 467,
-    "answer": "标准化并质控的点/面图层；点落面关联结果；分区时间序列数量图",
+    "answer": "standardized and quality-controlled point/polygon layers; point-in-polygon join; zonal time-series count map",
     "expected": {
       "score": 1.0,
       "method": "multi_text_item_f1",
       "details": {
         "expected_items": [
-          "标准化并质控的点/面图层",
-          "点落面关联结果",
-          "分区时间序列数量图"
+          "standardized and quality-controlled point/polygon layers",
+          "point-in-polygon join",
+          "zonal time-series count map"
         ],
         "actual_items": [
-          "标准化并质控的点/面图层",
-          "点落面关联结果",
-          "分区时间序列数量图"
+          "standardized and quality-controlled point/polygon layers",
+          "point-in-polygon join",
+          "zonal time-series count map"
         ],
         "matched_items": 3,
         "precision": 1.0,
@@ -42234,9 +42234,9 @@
       "method": "multi_text_item_f1",
       "details": {
         "expected_items": [
-          "标准化并质控的点/面图层",
-          "点落面关联结果",
-          "分区时间序列数量图"
+          "standardized and quality-controlled point/polygon layers",
+          "point-in-polygon join",
+          "zonal time-series count map"
         ],
         "actual_items": [
           "wrong value 123456.789"
@@ -42249,20 +42249,20 @@
   },
   {
     "question_id": 468,
-    "answer": "age IDW 栅格；分区年龄统计表；连续面专题图",
+    "answer": "age IDW raster; zonal age table; continuous-surface thematic map",
     "expected": {
       "score": 1.0,
       "method": "multi_text_item_f1",
       "details": {
         "expected_items": [
-          "age idw 栅格",
-          "分区年龄统计表",
-          "连续面专题图"
+          "age idw raster",
+          "zonal age table",
+          "continuous-surface thematic map"
         ],
         "actual_items": [
-          "age idw 栅格",
-          "分区年龄统计表",
-          "连续面专题图"
+          "age idw raster",
+          "zonal age table",
+          "continuous-surface thematic map"
         ],
         "matched_items": 3,
         "precision": 1.0,
@@ -42281,20 +42281,20 @@
   },
   {
     "question_id": 468,
-    "answer": "age IDW 栅格；分区年龄统计表；连续面专题图",
+    "answer": "age IDW raster; zonal age table; continuous-surface thematic map",
     "expected": {
       "score": 1.0,
       "method": "multi_text_item_f1",
       "details": {
         "expected_items": [
-          "age idw 栅格",
-          "分区年龄统计表",
-          "连续面专题图"
+          "age idw raster",
+          "zonal age table",
+          "continuous-surface thematic map"
         ],
         "actual_items": [
-          "age idw 栅格",
-          "分区年龄统计表",
-          "连续面专题图"
+          "age idw raster",
+          "zonal age table",
+          "continuous-surface thematic map"
         ],
         "matched_items": 3,
         "precision": 1.0,
@@ -42310,9 +42310,9 @@
       "method": "multi_text_item_f1",
       "details": {
         "expected_items": [
-          "age idw 栅格",
-          "分区年龄统计表",
-          "连续面专题图"
+          "age idw raster",
+          "zonal age table",
+          "continuous-surface thematic map"
         ],
         "actual_items": [
           "wrong value 123456.789"
@@ -42325,20 +42325,20 @@
   },
   {
     "question_id": 469,
-    "answer": "丰度插值栅格；分区丰度统计表；丰度专题图",
+    "answer": "abundance interpolation raster; zonal abundance table; abundance thematic map",
     "expected": {
       "score": 1.0,
       "method": "multi_text_item_f1",
       "details": {
         "expected_items": [
-          "丰度插值栅格",
-          "分区丰度统计表",
-          "丰度专题图"
+          "abundance interpolation raster",
+          "zonal abundance table",
+          "abundance thematic map"
         ],
         "actual_items": [
-          "丰度插值栅格",
-          "分区丰度统计表",
-          "丰度专题图"
+          "abundance interpolation raster",
+          "zonal abundance table",
+          "abundance thematic map"
         ],
         "matched_items": 3,
         "precision": 1.0,
@@ -42357,20 +42357,20 @@
   },
   {
     "question_id": 469,
-    "answer": "丰度插值栅格；分区丰度统计表；丰度专题图",
+    "answer": "abundance interpolation raster; zonal abundance table; abundance thematic map",
     "expected": {
       "score": 1.0,
       "method": "multi_text_item_f1",
       "details": {
         "expected_items": [
-          "丰度插值栅格",
-          "分区丰度统计表",
-          "丰度专题图"
+          "abundance interpolation raster",
+          "zonal abundance table",
+          "abundance thematic map"
         ],
         "actual_items": [
-          "丰度插值栅格",
-          "分区丰度统计表",
-          "丰度专题图"
+          "abundance interpolation raster",
+          "zonal abundance table",
+          "abundance thematic map"
         ],
         "matched_items": 3,
         "precision": 1.0,
@@ -42386,9 +42386,9 @@
       "method": "multi_text_item_f1",
       "details": {
         "expected_items": [
-          "丰度插值栅格",
-          "分区丰度统计表",
-          "丰度专题图"
+          "abundance interpolation raster",
+          "zonal abundance table",
+          "abundance thematic map"
         ],
         "actual_items": [
           "wrong value 123456.789"
@@ -42401,20 +42401,20 @@
   },
   {
     "question_id": 470,
-    "answer": "点-分析区关联结果；年龄分区统计表；分区年龄专题图",
+    "answer": "point-to-analysis-zone join; zonal age table; zonal age thematic map",
     "expected": {
       "score": 1.0,
       "method": "multi_text_item_f1",
       "details": {
         "expected_items": [
-          "点-分析区关联结果",
-          "年龄分区统计表",
-          "分区年龄专题图"
+          "point-to-analysis-zone join",
+          "zonal age table",
+          "zonal age thematic map"
         ],
         "actual_items": [
-          "点-分析区关联结果",
-          "年龄分区统计表",
-          "分区年龄专题图"
+          "point-to-analysis-zone join",
+          "zonal age table",
+          "zonal age thematic map"
         ],
         "matched_items": 3,
         "precision": 1.0,
@@ -42433,20 +42433,20 @@
   },
   {
     "question_id": 470,
-    "answer": "点-分析区关联结果；年龄分区统计表；分区年龄专题图",
+    "answer": "point-to-analysis-zone join; zonal age table; zonal age thematic map",
     "expected": {
       "score": 1.0,
       "method": "multi_text_item_f1",
       "details": {
         "expected_items": [
-          "点-分析区关联结果",
-          "年龄分区统计表",
-          "分区年龄专题图"
+          "point-to-analysis-zone join",
+          "zonal age table",
+          "zonal age thematic map"
         ],
         "actual_items": [
-          "点-分析区关联结果",
-          "年龄分区统计表",
-          "分区年龄专题图"
+          "point-to-analysis-zone join",
+          "zonal age table",
+          "zonal age thematic map"
         ],
         "matched_items": 3,
         "precision": 1.0,
@@ -42462,9 +42462,9 @@
       "method": "multi_text_item_f1",
       "details": {
         "expected_items": [
-          "点-分析区关联结果",
-          "年龄分区统计表",
-          "分区年龄专题图"
+          "point-to-analysis-zone join",
+          "zonal age table",
+          "zonal age thematic map"
         ],
         "actual_items": [
           "wrong value 123456.789"
@@ -42972,18 +42972,18 @@
   },
   {
     "question_id": 482,
-    "answer": "净封存量分级 PNG 地图；可交互 HTML 地图",
+    "answer": "net-storage classed PNG map; interactive HTML map",
     "expected": {
       "score": 1.0,
       "method": "multi_text_item_f1",
       "details": {
         "expected_items": [
-          "净封存量分级 png 地图",
-          "可交互 html 地图"
+          "net-storage classed png map",
+          "interactive html map"
         ],
         "actual_items": [
-          "净封存量分级 png 地图",
-          "可交互 html 地图"
+          "net-storage classed png map",
+          "interactive html map"
         ],
         "matched_items": 2,
         "precision": 1.0,
@@ -43002,18 +43002,18 @@
   },
   {
     "question_id": 482,
-    "answer": "净封存量分级 PNG 地图；可交互 HTML 地图",
+    "answer": "net-storage classed PNG map; interactive HTML map",
     "expected": {
       "score": 1.0,
       "method": "multi_text_item_f1",
       "details": {
         "expected_items": [
-          "净封存量分级 png 地图",
-          "可交互 html 地图"
+          "net-storage classed png map",
+          "interactive html map"
         ],
         "actual_items": [
-          "净封存量分级 png 地图",
-          "可交互 html 地图"
+          "net-storage classed png map",
+          "interactive html map"
         ],
         "matched_items": 2,
         "precision": 1.0,
@@ -43029,8 +43029,8 @@
       "method": "multi_text_item_f1",
       "details": {
         "expected_items": [
-          "净封存量分级 png 地图",
-          "可交互 html 地图"
+          "net-storage classed png map",
+          "interactive html map"
         ],
         "actual_items": [
           "wrong value 123456.789"
@@ -43043,7 +43043,7 @@
   },
   {
     "question_id": 483,
-    "answer": "Great-circle distance: 1454.124 km.；Initial bearing from point1 to point2: 250.71°",
+    "answer": "Great-circle distance: 1454.124 km.; Initial bearing from point1 to point2: 250.71°",
     "expected": {
       "score": 1.0,
       "method": "multi_numeric_f1",
@@ -43085,7 +43085,7 @@
   },
   {
     "question_id": 483,
-    "answer": "Great-circle distance: 1454.124 km.；Initial bearing from point1 to point2: 250.71°",
+    "answer": "Great-circle distance: 1454.124 km.; Initial bearing from point1 to point2: 250.71°",
     "expected": {
       "score": 1.0,
       "method": "multi_numeric_f1",
@@ -43147,7 +43147,7 @@
   },
   {
     "question_id": 484,
-    "answer": "Great-circle distance: 791.455 km.；Initial bearing from point1 to point2: 35.36°",
+    "answer": "Great-circle distance: 791.455 km.; Initial bearing from point1 to point2: 35.36°",
     "expected": {
       "score": 1.0,
       "method": "multi_numeric_f1",
@@ -43189,7 +43189,7 @@
   },
   {
     "question_id": 484,
-    "answer": "Great-circle distance: 791.455 km.；Initial bearing from point1 to point2: 35.36°",
+    "answer": "Great-circle distance: 791.455 km.; Initial bearing from point1 to point2: 35.36°",
     "expected": {
       "score": 1.0,
       "method": "multi_numeric_f1",
@@ -43251,7 +43251,7 @@
   },
   {
     "question_id": 485,
-    "answer": "Great-circle distance: 1778.897 km.；Initial bearing from point1 to point2: 344.21°",
+    "answer": "Great-circle distance: 1778.897 km.; Initial bearing from point1 to point2: 344.21°",
     "expected": {
       "score": 1.0,
       "method": "multi_numeric_f1",
@@ -43293,7 +43293,7 @@
   },
   {
     "question_id": 485,
-    "answer": "Great-circle distance: 1778.897 km.；Initial bearing from point1 to point2: 344.21°",
+    "answer": "Great-circle distance: 1778.897 km.; Initial bearing from point1 to point2: 344.21°",
     "expected": {
       "score": 1.0,
       "method": "multi_numeric_f1",
@@ -43355,7 +43355,7 @@
   },
   {
     "question_id": 486,
-    "answer": "Great-circle distance: 2042.763 km.；Initial bearing from point1 to point2: 299.47°",
+    "answer": "Great-circle distance: 2042.763 km.; Initial bearing from point1 to point2: 299.47°",
     "expected": {
       "score": 1.0,
       "method": "multi_numeric_f1",
@@ -43397,7 +43397,7 @@
   },
   {
     "question_id": 486,
-    "answer": "Great-circle distance: 2042.763 km.；Initial bearing from point1 to point2: 299.47°",
+    "answer": "Great-circle distance: 2042.763 km.; Initial bearing from point1 to point2: 299.47°",
     "expected": {
       "score": 1.0,
       "method": "multi_numeric_f1",
@@ -43459,20 +43459,20 @@
   },
   {
     "question_id": 487,
-    "answer": "质控设施点图层；3 近邻结果；净封存量专题图",
+    "answer": "quality-controlled facility point layer; 3-nearest-neighbour result; net-storage thematic map",
     "expected": {
       "score": 1.0,
       "method": "multi_text_item_f1",
       "details": {
         "expected_items": [
-          "质控设施点图层",
-          "3 近邻结果",
-          "净封存量专题图"
+          "quality-controlled facility point layer",
+          "3-nearest-neighbour result",
+          "net-storage thematic map"
         ],
         "actual_items": [
-          "质控设施点图层",
-          "3 近邻结果",
-          "净封存量专题图"
+          "quality-controlled facility point layer",
+          "3-nearest-neighbour result",
+          "net-storage thematic map"
         ],
         "matched_items": 3,
         "precision": 1.0,
@@ -43491,20 +43491,20 @@
   },
   {
     "question_id": 487,
-    "answer": "质控设施点图层；3 近邻结果；净封存量专题图",
+    "answer": "quality-controlled facility point layer; 3-nearest-neighbour result; net-storage thematic map",
     "expected": {
       "score": 1.0,
       "method": "multi_text_item_f1",
       "details": {
         "expected_items": [
-          "质控设施点图层",
-          "3 近邻结果",
-          "净封存量专题图"
+          "quality-controlled facility point layer",
+          "3-nearest-neighbour result",
+          "net-storage thematic map"
         ],
         "actual_items": [
-          "质控设施点图层",
-          "3 近邻结果",
-          "净封存量专题图"
+          "quality-controlled facility point layer",
+          "3-nearest-neighbour result",
+          "net-storage thematic map"
         ],
         "matched_items": 3,
         "precision": 1.0,
@@ -43520,9 +43520,9 @@
       "method": "multi_text_item_f1",
       "details": {
         "expected_items": [
-          "质控设施点图层",
-          "3 近邻结果",
-          "净封存量专题图"
+          "quality-controlled facility point layer",
+          "3-nearest-neighbour result",
+          "net-storage thematic map"
         ],
         "actual_items": [
           "wrong value 123456.789"
@@ -43535,20 +43535,20 @@
   },
   {
     "question_id": 488,
-    "answer": "泄漏设施 50 km 缓冲区；监测区叠加结果；影响区地图",
+    "answer": "50 km buffers around leaking facilities; monitoring-zone overlay; influence-area map",
     "expected": {
       "score": 1.0,
       "method": "multi_text_item_f1",
       "details": {
         "expected_items": [
-          "泄漏设施 50 km 缓冲区",
-          "监测区叠加结果",
-          "影响区地图"
+          "50 km buffers around leaking facilities",
+          "monitoring-zone overlay",
+          "influence-area map"
         ],
         "actual_items": [
-          "泄漏设施 50 km 缓冲区",
-          "监测区叠加结果",
-          "影响区地图"
+          "50 km buffers around leaking facilities",
+          "monitoring-zone overlay",
+          "influence-area map"
         ],
         "matched_items": 3,
         "precision": 1.0,
@@ -43567,20 +43567,20 @@
   },
   {
     "question_id": 488,
-    "answer": "泄漏设施 50 km 缓冲区；监测区叠加结果；影响区地图",
+    "answer": "50 km buffers around leaking facilities; monitoring-zone overlay; influence-area map",
     "expected": {
       "score": 1.0,
       "method": "multi_text_item_f1",
       "details": {
         "expected_items": [
-          "泄漏设施 50 km 缓冲区",
-          "监测区叠加结果",
-          "影响区地图"
+          "50 km buffers around leaking facilities",
+          "monitoring-zone overlay",
+          "influence-area map"
         ],
         "actual_items": [
-          "泄漏设施 50 km 缓冲区",
-          "监测区叠加结果",
-          "影响区地图"
+          "50 km buffers around leaking facilities",
+          "monitoring-zone overlay",
+          "influence-area map"
         ],
         "matched_items": 3,
         "precision": 1.0,
@@ -43596,9 +43596,9 @@
       "method": "multi_text_item_f1",
       "details": {
         "expected_items": [
-          "泄漏设施 50 km 缓冲区",
-          "监测区叠加结果",
-          "影响区地图"
+          "50 km buffers around leaking facilities",
+          "monitoring-zone overlay",
+          "influence-area map"
         ],
         "actual_items": [
           "wrong value 123456.789"
@@ -43611,20 +43611,20 @@
   },
   {
     "question_id": 489,
-    "answer": "2024-06 注入强度栅格；分析区统计表；注入强度专题图",
+    "answer": "2024-06 injection-intensity raster; analysis-zone summary table; injection-intensity thematic map",
     "expected": {
       "score": 1.0,
       "method": "multi_text_item_f1",
       "details": {
         "expected_items": [
-          "2024-06 注入强度栅格",
-          "分析区统计表",
-          "注入强度专题图"
+          "2024-06 injection-intensity raster",
+          "analysis-zone summary table",
+          "injection-intensity thematic map"
         ],
         "actual_items": [
-          "2024-06 注入强度栅格",
-          "分析区统计表",
-          "注入强度专题图"
+          "2024-06 injection-intensity raster",
+          "analysis-zone summary table",
+          "injection-intensity thematic map"
         ],
         "matched_items": 3,
         "precision": 1.0,
@@ -43643,20 +43643,20 @@
   },
   {
     "question_id": 489,
-    "answer": "2024-06 注入强度栅格；分析区统计表；注入强度专题图",
+    "answer": "2024-06 injection-intensity raster; analysis-zone summary table; injection-intensity thematic map",
     "expected": {
       "score": 1.0,
       "method": "multi_text_item_f1",
       "details": {
         "expected_items": [
-          "2024-06 注入强度栅格",
-          "分析区统计表",
-          "注入强度专题图"
+          "2024-06 injection-intensity raster",
+          "analysis-zone summary table",
+          "injection-intensity thematic map"
         ],
         "actual_items": [
-          "2024-06 注入强度栅格",
-          "分析区统计表",
-          "注入强度专题图"
+          "2024-06 injection-intensity raster",
+          "analysis-zone summary table",
+          "injection-intensity thematic map"
         ],
         "matched_items": 3,
         "precision": 1.0,
@@ -43672,9 +43672,9 @@
       "method": "multi_text_item_f1",
       "details": {
         "expected_items": [
-          "2024-06 注入强度栅格",
-          "分析区统计表",
-          "注入强度专题图"
+          "2024-06 injection-intensity raster",
+          "analysis-zone summary table",
+          "injection-intensity thematic map"
         ],
         "actual_items": [
           "wrong value 123456.789"
@@ -43687,18 +43687,18 @@
   },
   {
     "question_id": 490,
-    "answer": "储层压力插值栅格；压力连续面专题图",
+    "answer": "reservoir-pressure interpolation raster; continuous pressure-surface thematic map",
     "expected": {
       "score": 1.0,
       "method": "multi_text_item_f1",
       "details": {
         "expected_items": [
-          "储层压力插值栅格",
-          "压力连续面专题图"
+          "reservoir-pressure interpolation raster",
+          "continuous pressure-surface thematic map"
         ],
         "actual_items": [
-          "储层压力插值栅格",
-          "压力连续面专题图"
+          "reservoir-pressure interpolation raster",
+          "continuous pressure-surface thematic map"
         ],
         "matched_items": 2,
         "precision": 1.0,
@@ -43717,18 +43717,18 @@
   },
   {
     "question_id": 490,
-    "answer": "储层压力插值栅格；压力连续面专题图",
+    "answer": "reservoir-pressure interpolation raster; continuous pressure-surface thematic map",
     "expected": {
       "score": 1.0,
       "method": "multi_text_item_f1",
       "details": {
         "expected_items": [
-          "储层压力插值栅格",
-          "压力连续面专题图"
+          "reservoir-pressure interpolation raster",
+          "continuous pressure-surface thematic map"
         ],
         "actual_items": [
-          "储层压力插值栅格",
-          "压力连续面专题图"
+          "reservoir-pressure interpolation raster",
+          "continuous pressure-surface thematic map"
         ],
         "matched_items": 2,
         "precision": 1.0,
@@ -43744,8 +43744,8 @@
       "method": "multi_text_item_f1",
       "details": {
         "expected_items": [
-          "储层压力插值栅格",
-          "压力连续面专题图"
+          "reservoir-pressure interpolation raster",
+          "continuous pressure-surface thematic map"
         ],
         "actual_items": [
           "wrong value 123456.789"
@@ -43758,20 +43758,20 @@
   },
   {
     "question_id": 491,
-    "answer": "年度/月度关联图层；分析区空间关联结果；月注入量专题图",
+    "answer": "annual/monthly joined layers; analysis-zone spatial join; monthly injection thematic map",
     "expected": {
       "score": 1.0,
       "method": "multi_text_item_f1",
       "details": {
         "expected_items": [
-          "年度/月度关联图层",
-          "分析区空间关联结果",
-          "月注入量专题图"
+          "annual/monthly joined layers",
+          "analysis-zone spatial join",
+          "monthly injection thematic map"
         ],
         "actual_items": [
-          "年度/月度关联图层",
-          "分析区空间关联结果",
-          "月注入量专题图"
+          "annual/monthly joined layers",
+          "analysis-zone spatial join",
+          "monthly injection thematic map"
         ],
         "matched_items": 3,
         "precision": 1.0,
@@ -43790,20 +43790,20 @@
   },
   {
     "question_id": 491,
-    "answer": "年度/月度关联图层；分析区空间关联结果；月注入量专题图",
+    "answer": "annual/monthly joined layers; analysis-zone spatial join; monthly injection thematic map",
     "expected": {
       "score": 1.0,
       "method": "multi_text_item_f1",
       "details": {
         "expected_items": [
-          "年度/月度关联图层",
-          "分析区空间关联结果",
-          "月注入量专题图"
+          "annual/monthly joined layers",
+          "analysis-zone spatial join",
+          "monthly injection thematic map"
         ],
         "actual_items": [
-          "年度/月度关联图层",
-          "分析区空间关联结果",
-          "月注入量专题图"
+          "annual/monthly joined layers",
+          "analysis-zone spatial join",
+          "monthly injection thematic map"
         ],
         "matched_items": 3,
         "precision": 1.0,
@@ -43819,9 +43819,9 @@
       "method": "multi_text_item_f1",
       "details": {
         "expected_items": [
-          "年度/月度关联图层",
-          "分析区空间关联结果",
-          "月注入量专题图"
+          "annual/monthly joined layers",
+          "analysis-zone spatial join",
+          "monthly injection thematic map"
         ],
         "actual_items": [
           "wrong value 123456.789"
@@ -43834,20 +43834,20 @@
   },
   {
     "question_id": 492,
-    "answer": "设施-分析区关联图层；净封存量分区统计表；分区净封存量地图",
+    "answer": "facility-to-analysis-zone join layer; zonal net-storage table; zonal net-storage map",
     "expected": {
       "score": 1.0,
       "method": "multi_text_item_f1",
       "details": {
         "expected_items": [
-          "设施-分析区关联图层",
-          "净封存量分区统计表",
-          "分区净封存量地图"
+          "facility-to-analysis-zone join layer",
+          "zonal net-storage table",
+          "zonal net-storage map"
         ],
         "actual_items": [
-          "设施-分析区关联图层",
-          "净封存量分区统计表",
-          "分区净封存量地图"
+          "facility-to-analysis-zone join layer",
+          "zonal net-storage table",
+          "zonal net-storage map"
         ],
         "matched_items": 3,
         "precision": 1.0,
@@ -43866,20 +43866,20 @@
   },
   {
     "question_id": 492,
-    "answer": "设施-分析区关联图层；净封存量分区统计表；分区净封存量地图",
+    "answer": "facility-to-analysis-zone join layer; zonal net-storage table; zonal net-storage map",
     "expected": {
       "score": 1.0,
       "method": "multi_text_item_f1",
       "details": {
         "expected_items": [
-          "设施-分析区关联图层",
-          "净封存量分区统计表",
-          "分区净封存量地图"
+          "facility-to-analysis-zone join layer",
+          "zonal net-storage table",
+          "zonal net-storage map"
         ],
         "actual_items": [
-          "设施-分析区关联图层",
-          "净封存量分区统计表",
-          "分区净封存量地图"
+          "facility-to-analysis-zone join layer",
+          "zonal net-storage table",
+          "zonal net-storage map"
         ],
         "matched_items": 3,
         "precision": 1.0,
@@ -43895,9 +43895,9 @@
       "method": "multi_text_item_f1",
       "details": {
         "expected_items": [
-          "设施-分析区关联图层",
-          "净封存量分区统计表",
-          "分区净封存量地图"
+          "facility-to-analysis-zone join layer",
+          "zonal net-storage table",
+          "zonal net-storage map"
         ],
         "actual_items": [
           "wrong value 123456.789"
@@ -43910,20 +43910,20 @@
   },
   {
     "question_id": 493,
-    "answer": "CRS 不一致诊断；统一 EPSG:4326 的图层；叠加结果地图",
+    "answer": "mixed-CRS diagnosis; layers standardized to EPSG:4326; overlay map",
     "expected": {
       "score": 1.0,
       "method": "multi_text_item_f1",
       "details": {
         "expected_items": [
-          "crs 不一致诊断",
-          "统一 epsg:4326 的图层",
-          "叠加结果地图"
+          "mixed-crs diagnosis",
+          "layers standardized to epsg:4326",
+          "overlay map"
         ],
         "actual_items": [
-          "crs 不一致诊断",
-          "统一 epsg:4326 的图层",
-          "叠加结果地图"
+          "mixed-crs diagnosis",
+          "layers standardized to epsg:4326",
+          "overlay map"
         ],
         "matched_items": 3,
         "precision": 1.0,
@@ -43942,20 +43942,20 @@
   },
   {
     "question_id": 493,
-    "answer": "CRS 不一致诊断；统一 EPSG:4326 的图层；叠加结果地图",
+    "answer": "mixed-CRS diagnosis; layers standardized to EPSG:4326; overlay map",
     "expected": {
       "score": 1.0,
       "method": "multi_text_item_f1",
       "details": {
         "expected_items": [
-          "crs 不一致诊断",
-          "统一 epsg:4326 的图层",
-          "叠加结果地图"
+          "mixed-crs diagnosis",
+          "layers standardized to epsg:4326",
+          "overlay map"
         ],
         "actual_items": [
-          "crs 不一致诊断",
-          "统一 epsg:4326 的图层",
-          "叠加结果地图"
+          "mixed-crs diagnosis",
+          "layers standardized to epsg:4326",
+          "overlay map"
         ],
         "matched_items": 3,
         "precision": 1.0,
@@ -43971,9 +43971,9 @@
       "method": "multi_text_item_f1",
       "details": {
         "expected_items": [
-          "crs 不一致诊断",
-          "统一 epsg:4326 的图层",
-          "叠加结果地图"
+          "mixed-crs diagnosis",
+          "layers standardized to epsg:4326",
+          "overlay map"
         ],
         "actual_items": [
           "wrong value 123456.789"
@@ -43986,20 +43986,20 @@
   },
   {
     "question_id": 494,
-    "answer": "多级泄漏缓冲区；监测优先级叠加图层；PNG/HTML 优先级图",
+    "answer": "multi-ring leak buffers; monitoring-priority overlay; PNG/HTML priority map",
     "expected": {
       "score": 1.0,
       "method": "multi_text_item_f1",
       "details": {
         "expected_items": [
-          "多级泄漏缓冲区",
-          "监测优先级叠加图层",
-          "png/html 优先级图"
+          "multi-ring leak buffers",
+          "monitoring-priority overlay",
+          "png/html priority map"
         ],
         "actual_items": [
-          "多级泄漏缓冲区",
-          "监测优先级叠加图层",
-          "png/html 优先级图"
+          "multi-ring leak buffers",
+          "monitoring-priority overlay",
+          "png/html priority map"
         ],
         "matched_items": 3,
         "precision": 1.0,
@@ -44018,20 +44018,20 @@
   },
   {
     "question_id": 494,
-    "answer": "多级泄漏缓冲区；监测优先级叠加图层；PNG/HTML 优先级图",
+    "answer": "multi-ring leak buffers; monitoring-priority overlay; PNG/HTML priority map",
     "expected": {
       "score": 1.0,
       "method": "multi_text_item_f1",
       "details": {
         "expected_items": [
-          "多级泄漏缓冲区",
-          "监测优先级叠加图层",
-          "png/html 优先级图"
+          "multi-ring leak buffers",
+          "monitoring-priority overlay",
+          "png/html priority map"
         ],
         "actual_items": [
-          "多级泄漏缓冲区",
-          "监测优先级叠加图层",
-          "png/html 优先级图"
+          "multi-ring leak buffers",
+          "monitoring-priority overlay",
+          "png/html priority map"
         ],
         "matched_items": 3,
         "precision": 1.0,
@@ -44047,9 +44047,9 @@
       "method": "multi_text_item_f1",
       "details": {
         "expected_items": [
-          "多级泄漏缓冲区",
-          "监测优先级叠加图层",
-          "png/html 优先级图"
+          "multi-ring leak buffers",
+          "monitoring-priority overlay",
+          "png/html priority map"
         ],
         "actual_items": [
           "wrong value 123456.789"

@@ -10,7 +10,7 @@ def test_frozen_fas_all_answer_types_match_original_source():
     if not (ROOT / "data/geotooleval.jsonl").exists():
         pytest.skip("Embedded GeoToolEval JSONL is required")
     from agentgs.evaluation.datasets.geotooleval import load_tasks
-    from agentgs.evaluation.metrics.answers import score_answer
+    from agentgs.evaluation.metrics.legacy_answers import score_answer
 
     cases = json.loads((ROOT / "src/tests/fixtures/evaluation/fas.json").read_text("utf-8"))
     tasks = {task.question_id: task for task in load_tasks(ROOT / "data/geotooleval.jsonl")}
@@ -31,7 +31,7 @@ def test_public_task_never_contains_private_reference_data():
         category="DeepEarthTools",
         question="A public question",
         expected_answer="PRIVATE_ANSWER",
-        answer_type="单项文本结果",
+        answer_type="single_text",
         input_resource='{"source_id":1,"gold_answer":"PRIVATE_VALUE"}',
         chain_mode="single",
         gold_chain_text="PRIVATE_CHAIN",

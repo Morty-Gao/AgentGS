@@ -7,10 +7,12 @@ from contextlib import asynccontextmanager
 
 import httpx
 
+from agentgs.client import audit
+from agentgs.client.context import fit_context
 from agentgs.client.errors import ProviderError
 from agentgs.client.models import ChatReply, LLMConfig
 from agentgs.contracts.async_utils import drain, invoke
-from agentgs.messages import Conversation, Message
+from agentgs.messages import Conversation, Message, RuntimeEvent
 
 
 class OpenAICompatibleClient:
@@ -90,7 +92,10 @@ class OpenAICompatibleClient:
             conversation = messages
         else:
             conversation = Conversation(
-                messages=[m if isinstance(m, Message) else Message.from_openai(m) for m in messages]
+                messages=[
+                    m if isinstance(m, (Message, RuntimeEvent)) else Message.from_openai(m)
+                    for m in messages
+                ]
             )
         messages = conversation.to_request_messages()
         name, spec = self.config.configured_model(model)
@@ -124,8 +129,9 @@ class OpenAICompatibleClient:
             if minimax:
                 payload["reasoning_split"] = True
         attempts = provider.max_attempts if settings is None else settings.model_attempts
-        if settings is not None and stage == "tool_argument_generation":
-            attempts = min(attempts, settings.argument_attempts)
+        payload, compacted = fit_context(payload, spec.context_window)
+        if compacted:
+            await audit.record("context_compacted", {"estimator": "utf8_upper_bound"})
         for attempt in range(attempts):
             if self.events:
                 await invoke(
@@ -151,11 +157,20 @@ class OpenAICompatibleClient:
                     else unlimited()
                 )
                 async with scope as reservation:
+                    await audit.record("request", {"attempt": attempt + 1, "payload": payload})
                     response = await self.http.post(
                         provider.base_url.rstrip("/") + "/chat/completions",
                         headers={"Authorization": "Bearer " + provider.api_key.get_secret_value()},
                         json=payload,
                         timeout=provider.timeout_seconds,
+                    )
+                    await audit.record(
+                        "response",
+                        {
+                            "attempt": attempt + 1,
+                            "status_code": response.status_code,
+                            "body": response.text,
+                        },
                     )
                     response.raise_for_status()
                     body = await invoke(response.json)

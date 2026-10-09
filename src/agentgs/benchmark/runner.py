@@ -30,6 +30,8 @@ def _benchmark_identity(
     tool_attempts,
     command_attempts,
     contract_provider,
+    modules=None,
+    ablations=(),
 ):
     input_hash = hashlib.sha256(dataset.source.read_bytes()).hexdigest()
     identity = {
@@ -41,12 +43,20 @@ def _benchmark_identity(
         "allow_rule_planning": allow_rule_planning,
         "algorithm": "geotoolagent-native-function-calling-v1",
         "protocol": "actual_agent_execution",
+        "conversation_schema": 2,
         "effective_runtime": service.settings.model_dump(mode="json"),
         "selected_question_ids": [task.question_id for task in selected],
     }
     code_files = sorted((service.root / "src/agentgs").rglob("*.py"))
     identity["code_sha256"] = hashlib.sha256(
         b"".join(path.read_bytes() for path in code_files)
+    ).hexdigest()
+    identity["public_inputs_sha256"] = hashlib.sha256(
+        json.dumps(
+            [public_input(task).model_dump(mode="json") for task in selected],
+            ensure_ascii=False,
+            sort_keys=True,
+        ).encode()
     ).hexdigest()
     for name in ["config.toml", "llm.toml"]:
         path = service.root / name
@@ -64,6 +74,8 @@ def _benchmark_identity(
     identity["effective_algorithm"] = resolve_algorithm(
         load_algorithm(service.root),
         TaskInput(
+            modules=modules,
+            ablations=list(ablations),
             planning_mode=planning_mode,
             allow_rule_planning=allow_rule_planning,
             plan_attempts=plan_attempts,
@@ -141,6 +153,9 @@ async def run_benchmark(
     tool_attempts=None,
     command_attempts=None,
     contract_provider=None,
+    benchmark_scope=None,
+    modules=None,
+    ablations=(),
 ):
     if planning_mode == "data_only":
         allow_rule_planning = False
@@ -149,6 +164,14 @@ async def run_benchmark(
     selected = [task for task in tasks if ids is None or task.question_id in ids]
     if ids is not None and (missing := set(ids) - {task.question_id for task in tasks}):
         raise ValueError(f"Unknown benchmark question IDs: {sorted(missing)}")
+    from agentgs.config.algorithm import load_algorithm
+    from agentgs.benchmark.scope import select_scope
+
+    selected, access_policy = select_scope(
+        selected, benchmark_scope or load_algorithm(service.root).benchmark_scope, planning_mode=planning_mode
+    )
+    if not selected:
+        raise ValueError("The declared benchmark scope contains no selected tasks")
     identity, configuration = await invoke(
         _benchmark_identity,
         service,
@@ -160,8 +183,11 @@ async def run_benchmark(
         tool_attempts,
         command_attempts,
         contract_provider,
+        modules,
+        ablations,
     )
     await invoke(output.mkdir, parents=True, exist_ok=True)
+    identity["data_access_policy"] = access_policy
     manifest = output / "protocol.json"
     if (
         await invoke(manifest.exists)
@@ -251,6 +277,8 @@ async def run_benchmark(
             await invoke(attempt.mkdir, exist_ok=False)
             request = public_input(
                 task,
+                modules=modules,
+                ablations=ablations,
                 planning_mode=planning_mode,
                 allow_rule_planning=allow_rule_planning,
                 plan_attempts=plan_attempts,
@@ -259,6 +287,7 @@ async def run_benchmark(
                 output_contract=contract_provider.find(task.question)
                 if contract_provider
                 else None,
+                dataset_instructions=getattr(contract_provider, "system_prompt", None),
             )
             await invoke(write_json, attempt / "public_input.json", request.model_dump(mode="json"))
             record = await service.submit(request)

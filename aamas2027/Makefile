@@ -9,7 +9,7 @@ MAIN := main.tex
 OUTDIR := build
 LATEXFLAGS := -pdf -interaction=nonstopmode -halt-on-error -file-line-error -synctex=1 -outdir=$(OUTDIR)
 
-.PHONY: all pdf full supplement word figures compile watch clean distclean rebuild import-assets check-tools help
+.PHONY: all pdf full supplement figures compile watch clean distclean rebuild check-tools help
 
 all: pdf full supplement
 
@@ -23,11 +23,11 @@ supplement: check-tools
 	$(LATEXMK) $(LATEXFLAGS) supplement.tex
 	@printf 'Supplement: $(OUTDIR)/supplement.pdf\n'
 
-word: full
-	python3 scripts/export_word.py
+FIGURE_SCRIPTS := $(wildcard scripts/fig_*.py)
 
+# Redraw every figure into figures/ (SVG + PDF); needs rsvg-convert or inkscape.
 figures:
-	python3 scripts/export_drawio.py
+	@for script in $(FIGURE_SCRIPTS); do python3 $$script || exit 1; done
 
 pdf: check-tools
 	$(LATEXMK) $(LATEXFLAGS) $(MAIN)
@@ -52,11 +52,6 @@ rebuild:
 	$(MAKE) distclean
 	$(MAKE) pdf
 
-# Import an explicitly selected manuscript; no stale source is silently used.
-import-assets:
-	@test -n "$(SOURCE)" || { printf 'Usage: make import-assets SOURCE=/path/to/manuscript.docx\n'; exit 1; }
-	python3 scripts/import_docx_assets.py "$(SOURCE)"
-
 check-tools:
 	@command -v $(LATEXMK) >/dev/null || { printf 'Missing latexmk. Install: sudo apt-get install latexmk\n'; exit 1; }
 	@command -v pdflatex >/dev/null || { printf 'Missing pdflatex. Install: sudo apt-get install texlive-latex-base\n'; exit 1; }
@@ -67,12 +62,10 @@ help:
 	  'make / make pdf / make compile  Compile build/main.pdf and copy to main.pdf (incremental)' \
 	  'make full                      Compile the complete Word translation' \
 	  'make supplement                Compile the anonymous supplementary figures' \
-	  'make word                      Export the complete translation to Word' \
 	  'make all                       Compile all three documents' \
 	  'make watch                     Recompile automatically on changes' \
 	  'make clean                     Remove auxiliary files; keep PDF' \
 	  'make distclean                 Remove generated files, including PDF' \
 	  'make rebuild                   Clean and compile from scratch' \
-	  'make figures                   Export editable diagrams (requires drawio)' \
-	  'make import-assets SOURCE=...  Extract figures from a selected DOCX' \
+	  'make figures                   Redraw figures from scripts/fig_*.py' \
 	  'make help                      Show available commands'

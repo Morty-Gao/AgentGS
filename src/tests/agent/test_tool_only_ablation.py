@@ -21,6 +21,8 @@ from agentgs.contracts.models import TaskInput, TaskSpec, ToolError, ToolResult,
 
 
 def native(name, arguments):
+    if name == "submit_tool_plan" and isinstance(arguments, dict) and set(arguments) == {"tools"}:
+        arguments = {"steps": [{"id": f"s{i}", "tool": tool, "purpose": f"Compute {tool}"} for i, tool in enumerate(arguments["tools"], 1)]}
     return {
         "role": "assistant",
         "content": None,
@@ -138,7 +140,7 @@ async def test_worker_resolves_mode_before_loading_declarations(project, monkeyp
         }
         for messages, _ in client.requests:
             for message in messages:
-                if message["role"] == "developer":
+                if message["role"] in {"user", "tool"}:
                     assert not re.search(
                         r"\b(?:skill|capabilit(?:y|ies))\b", message["content"], re.I
                     )
@@ -221,7 +223,7 @@ async def test_tool_only_rejects_injected_skill_plan_or_bridge_context():
         AgentContext(Tools(), None, Events(), options=AlgorithmSettings()),
         TaskInput(question="Compute a statistic."),
     )
-    stages = ModelStages(state, lambda _: None, "")
+    stages = ModelStages(state, lambda _: None)
     with pytest.raises(ValueError, match="cannot consume a Skill plan"):
         await stages.generate_tools_plan(state.task.question, [], skill_plan={"steps": []})
     with pytest.raises(ValueError, match="must match the resolved task policy"):

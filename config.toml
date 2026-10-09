@@ -3,7 +3,6 @@ planning_mode = "skill_guided"
 allow_rule_planning = false
 plan_attempts = 3
 tool_attempts = 3
-shared_bridge = true
 rs_local_contracts = true
 rs_explicit_references = false
 geosparql_llm = false
@@ -16,3 +15,11 @@ embedding_threads = 4
 embedding_batch_size = 8
 index_path = "data/geotoolkg"
 model_cache = "data/raw/models/fastembed"
+
+[agent.modules]
+planning_structure = "hierarchical"
+predecessor_expansion = true
+capability_completion = true
+directed_bridging = true
+tool_selection = "optimized"
+execution_recovery = true

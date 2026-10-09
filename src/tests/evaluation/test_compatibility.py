@@ -32,7 +32,7 @@ MINERAL = spec(
 )
 
 
-def score(expected, predicted, schema, question="", kind="结构化记录"):
+def score(expected, predicted, schema, question="", kind="structured_record"):
     task = SimpleNamespace(expected_answer=expected, question=question, answer_type=kind)
     return score_compatible(task, predicted, schema)["normalized"]["score"]
 
@@ -216,7 +216,7 @@ class CompatibilityTests(unittest.TestCase):
                 "Example Prospect; (12.340, -56.780); dep_id=999",
                 "site_name: Example Prospect; latitude: 12.34; longitude: -56.78; dep_id: 999",
                 MINERAL,
-                kind="多项文本结果",
+                kind="multi_text",
             ),
             1,
         )
@@ -227,7 +227,7 @@ class CompatibilityTests(unittest.TestCase):
                 "Example Prospect; (12.340, -56.780); dep_id=999",
                 "site_name: Example Prospect; latitude: -56.78; longitude: 12.34; dep_id: 999",
                 MINERAL,
-                kind="多项文本结果",
+                kind="multi_text",
             ),
             1,
         )
@@ -238,7 +238,7 @@ class CompatibilityTests(unittest.TestCase):
                 "Example Prospect; (12.340, -56.780); dep_id=999",
                 "site_name: Example Prospect; latitude: 12.34; longitude: -56.78",
                 MINERAL,
-                kind="多项文本结果",
+                kind="multi_text",
             ),
             0.75,
         )
@@ -249,7 +249,7 @@ class CompatibilityTests(unittest.TestCase):
                 "Example Prospect; (12.340, -56.780); dep_id=999",
                 "site_name: Example; latitude: 12.34; longitude: -56.78; dep_id: 999",
                 MINERAL,
-                kind="多项文本结果",
+                kind="multi_text",
             ),
             1,
         )
@@ -261,19 +261,19 @@ class CompatibilityTests(unittest.TestCase):
                 "site_name: Example Prospect; latitude: 12.34; longitude: -56.78; dep_id: 888",
                 MINERAL,
                 "Look up dep_id=999",
-                kind="多项文本结果",
+                kind="multi_text",
             ),
             1,
         )
 
     def test_E_choice_supported(self):
         self.assertEqual(
-            score("E", "Answer: E", {"allowed_options": list("ABCDE")}, kind="选择题选项"), 1
+            score("E", "Answer: E", {"allowed_options": list("ABCDE")}, kind="choice"), 1
         )
 
     def test_ambiguous_choice_rejected(self):
         self.assertEqual(
-            score("E", "A or E", {"allowed_options": list("ABCDE")}, kind="选择题选项"), 0
+            score("E", "A or E", {"allowed_options": list("ABCDE")}, kind="choice"), 0
         )
 
     def test_correct_rounded_value_accepted(self):
@@ -298,7 +298,7 @@ class CompatibilityTests(unittest.TestCase):
 
     def test_unparseable_reference_requires_review(self):
         task = SimpleNamespace(
-            expected_answer="ambiguous reference", question="", answer_type="结构化记录"
+            expected_answer="ambiguous reference", question="", answer_type="structured_record"
         )
         result = score_compatible(task, "valid_count: 12", OCEAN)
         self.assertIsNone(result["normalized"])

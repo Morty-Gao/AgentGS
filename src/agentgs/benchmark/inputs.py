@@ -38,6 +38,9 @@ def public_input(
     tool_attempts=None,
     command_attempts=None,
     output_contract=None,
+    dataset_instructions=None,
+    modules=None,
+    ablations=(),
 ):
     resource = task.input_resource
     if isinstance(resource, str):
@@ -49,10 +52,17 @@ def public_input(
         question=task.question,
         input_resource=public_resource(resource),
         planning_mode=planning_mode,
+        modules=modules,
+        ablations=list(ablations),
         allow_rule_planning=False if planning_mode == "data_only" else allow_rule_planning,
         plan_attempts=plan_attempts,
         tool_attempts=tool_attempts,
         command_attempts=command_attempts,
-        output_contract=output_contract,
+        output_contract=public_resource(output_contract)
+        if output_contract is not None
+        else ({"answer_format": task.answer_format} if task.answer_format else None),
+        dataset_instructions=(
+            task.dataset_instructions if dataset_instructions is None else dataset_instructions
+        ),
         input_domain="remote_sensing" if task.category == "RemoteSensingTools" else None,
     )

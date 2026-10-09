@@ -150,12 +150,13 @@ async def test_agent_selects_snapshot_skill_and_calls_query(snapshot_project):
                         ],
                     }
                 )
+            from html import unescape
+
+            feedback = next(
+                message["content"] for message in reversed(messages) if message["role"] == "tool"
+            )
             tool_result = json.loads(
-                next(
-                    message["content"]
-                    for message in reversed(messages)
-                    if message["role"] == "tool"
-                )
+                unescape(feedback.split("<tool-result>\n", 1)[1].split("\n</tool-result>", 1)[0])
             )
             assert tool_result["query_match"] == "exact"
             return ChatReply(

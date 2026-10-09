@@ -1,0 +1,136 @@
+# Composable module ablations
+
+Module interventions apply inside `planning_mode="skill_guided"`. `tool_only`
+and `data_only` remain separate baselines. A module intervention submitted with
+either baseline is rejected rather than silently ignored. Use model planning
+(`allow_rule_planning=false`) for module experiments; heuristic routing can
+bypass the decision under study and is rejected for non-default module policies.
+
+## Configuration and entry points
+
+```toml
+[agent]
+planning_mode = "skill_guided"
+allow_rule_planning = false
+
+[agent.modules]
+planning_structure = "hierarchical"
+predecessor_expansion = true
+capability_completion = true
+directed_bridging = true
+tool_selection = "optimized"
+execution_recovery = true
+```
+
+All enabled settings are Full. Presets are composable partial overrides, not
+mutually exclusive runtime modes:
+
+| Preset | Intervention |
+| --- | --- |
+| A1 | `planning_structure="flat_tools"` |
+| A2 | `predecessor_expansion=false` |
+| A3 | `capability_completion=false`, which also suppresses directed bridging |
+| A4 | `directed_bridging=false` |
+| A5 | `tool_selection="first_valid"` |
+| A6 | `execution_recovery=false` |
+| BIPARTITE | `planning_structure="bipartite"` |
+
+```sh
+uv run agentgs run --planning-mode skill_guided \
+  'Compute the requested statistic.' --ablation A2 --ablation A4
+
+uv run agentgs evaluate benchmark --planning-mode skill_guided \
+  --ablation A1 --ablation A6 --output outputs/evaluations/flat-no-recovery
+
+uv run agentgs evaluate benchmark \
+  --modules '{"tool_selection":"first_valid","directed_bridging":false}' \
+  --output outputs/evaluations/fixed-selection-no-bridge
+```
+
+`--modules` also accepts `@file.json`. The same fields are available in
+`TaskInput`, task files and the task submission API:
+
+```json
+{
+  "question": "Compute the requested statistic.",
+  "planning_mode": "skill_guided",
+  "ablations": ["A2", "A4"],
+  "modules": {"execution_recovery": false}
+}
+```
+
+Project defaults are overlaid with task presets and explicit task module values.
+Contradictory presets or an explicit value contradicting a preset are rejected.
+A1 and BIPARTITE select different representations and cannot be combined.
+The existing top-level `shared_bridge`, `predecessor_expansion`,
+`capability_completion`, `tool_selection` (`model`/`first_valid`) and
+`execution_recovery` fields resolve to the same effective policy; contradictory
+flat and nested values are rejected. Prefer the nested configuration.
+
+## Operational boundaries
+
+**A1:** Strategy retrieval, declaration visibility, candidate retrieval and
+validation remain shared. The model receives the strategy declarations and
+admitted capability set as reference information, without an ordered capability
+execution plan or hypergraph context. It directly proposes tool instances.
+Requirement preparation is still available to other enabled modules, so A1 can
+be combined with A2–A6. This is an information-preserving planning control, not
+the declaration-free `tool_only` baseline.
+
+**BIPARTITE:** The same declaration payload is serialized as strategy nodes,
+capability nodes and incidence edges. Each edge retains its workflow position
+and full operation attributes; strategy nodes retain other workflow attributes.
+Membership never implies a data dependency. This is a representation control;
+it does not independently disable completion or bridging. A declaration digest
+allows Full, A1 and BIPARTITE inputs to be compared.
+
+**A2/A3:** Terminal requirements seed each selected strategy. Mandatory
+predecessors are expanded within the declaring strategy, followed by an
+independent support-completion phase. A2 skips the first closure. Enabled
+completion may restore its omitted predecessors; the trace records this
+compensation. A3 keeps gap diagnosis but skips support insertion and bridging.
+A2+A3 exposes omitted dependencies without either automatic insertion phase.
+Model planning can still explicitly include declared necessary operations.
+Initial instances, predecessor additions, support additions and unresolved gaps
+are recorded separately. A single-operation declaration may have no predecessor
+to remove; an enabled intervention does not guarantee a changed plan.
+
+**A4:** Only directed bridge insertion is disabled. Semantic support completion
+and predecessor expansion remain independently configurable.
+
+**A5:** For each proposed execution instance the controller selects the first
+eligible candidate in ascending tool-ID order. The candidate scope is the
+declared operation inside its strategy, restricted to available tools. Ambiguous
+capabilities or strategy scopes fail validation rather than falling back to a
+model preference. Fixed argument and input-binding field names must fit the
+candidate's closed input schema. Declared bridge bindings may pin an exact
+implementation. Generated arguments retain the normal execution-time
+validation. Changing the selected tool preserves instance identity, dependency
+references, fixed arguments and upstream bindings. Repeated instances remain
+separate. The prompt asks for `capability_id` and `skill_id` when this policy is
+enabled.
+
+**A6:** Initial planning, protocol validation, argument generation and input
+binding remain enabled. A failed execution ends the chain and produces an
+incomplete answer; there is no subsequent tool repair or execution-driven
+replanning. Initial planning retries and transport/protocol retry budgets remain
+unchanged. This policy does not redefine `plan_attempts` or `tool_attempts`.
+
+## Evidence and resumption
+
+`provenance.effective_algorithm` records the effective modules and
+`module_resolution`, including requested settings, presets and suppressed
+settings. Execution events include `module_policy`, `planning_representation`,
+`capability_expansion`, fixed-order `tool_selection` decisions and
+`execution_feedback` when recovery is disabled. Stage instructions are routed
+from the effective policy, including native planning-call repair instructions.
+
+Benchmark `protocol.json` includes the resolved policy, and each task's
+`public_input.json` records its requested intervention. Resume validation rejects
+a different policy in the same output directory. Use one output directory per
+combination and keep task IDs, model settings and budgets consistent.
+
+The component and mocked-runtime tests establish routing, scope preservation,
+insertion boundaries and recovery behavior. They do not establish real-model
+answer quality or nonzero module effects on a benchmark subset. Inspect traces
+before treating an experiment as an activated module ablation.

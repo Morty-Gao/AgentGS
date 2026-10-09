@@ -34,10 +34,10 @@ def load_answer_contracts(path: Path):
     """Extract only public fields from the unified dataset; never expose evaluation gold."""
     rows = []
     required = {
-        "题目序号",
-        "题目正文",
-        "固定回答格式",
-        "格式说明",
+        "question_id",
+        "question",
+        "answer_template",
+        "format_notes",
         "question_sha256",
         "answer_format",
     }
@@ -62,14 +62,14 @@ def load_answer_contracts(path: Path):
                     f"GeoToolEval line {line_number} has invalid answer-format settings"
                 )
             if (
-                spec.get("template") != original["固定回答格式"]
-                or spec.get("notes") != original["格式说明"]
+                spec.get("template") != original["answer_template"]
+                or spec.get("notes") != original["format_notes"]
             ):
                 raise ValueError(f"GeoToolEval line {line_number} has inconsistent answer formats")
             rows.append(
                 {
-                    "question_id": original["题目序号"],
-                    "question": original["题目正文"],
+                    "question_id": original["question_id"],
+                    "question": original["question"],
                     "question_sha256": original["question_sha256"],
                     "answer_format": spec,
                 }

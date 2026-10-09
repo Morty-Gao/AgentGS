@@ -78,7 +78,7 @@ def test_generic_tools_cannot_resolve_private_or_replay_data(project, relative):
 def test_scientific_natural_hazard_workbook_remains_accessible(project):
     from agentgs.runtime.tools.context import ToolPaths
 
-    path = project / "data/geotooleval/10.自然灾害与极端地震.xlsx"
+    path = project / "data/geotooleval/10.natural-hazards-and-extreme-earthquakes.xlsx"
     path.parent.mkdir(parents=True, exist_ok=True)
     path.write_text("scientific observations")
     assert ToolPaths.create(project, project / "artifacts").resolve(path) == path

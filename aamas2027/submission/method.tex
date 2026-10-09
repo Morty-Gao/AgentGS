@@ -4,6 +4,6 @@
 Given a natural-language goal $q$ and resources $X$, AgentGS retrieves Skills by task description, domain, and input types. SkillSet stores strategies; GeoSkillKG connects them through shared Capabilities. Applicable Skills guide the Planner to select operations, expand mandatory predecessors, and complete missing operations or connecting branches. When no Skill applies, GeoToolKG supplies candidates for direct tool-call planning. Both routes share execution and verification (Figure~\ref{fig:overview}(a)).
 
 After capability planning, Tool Grounding selects implementations through Capability--Tool mappings, aided by tool associations and an LLM within the candidate scope. The Executor binds resources and successful upstream artifacts. The Judge checks whether results satisfy the goal, returning an answer or failure feedback for recovery of unfinished steps. Verified new compositions can be registered as candidate Skills in SkillSet and GeoSkillKG for subsequent retrieval.
-\input{figures/overview}
+\input{figures/fig_main}
 \input{submission/representation}
 \input{submission/completion}

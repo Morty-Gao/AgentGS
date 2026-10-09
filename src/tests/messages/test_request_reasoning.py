@@ -43,7 +43,6 @@ def conversation():
             {"role": "user", "content": "Current question"},
             assistant(None, "current-a", call_id="a"),
             {"role": "tool", "tool_call_id": "a", "content": "first result"},
-            {"role": "developer", "content": "Continue using the results."},
             assistant(None, "current-b", call_id="b"),
             {"role": "tool", "tool_call_id": "b", "content": "second result"},
         ]
@@ -59,7 +58,7 @@ def test_request_prunes_only_reasoning_before_latest_user(conversation):
         expected[2].pop(key)
     sent = conversation.to_request_messages()
     assert sent == expected
-    for index in (4, 7):
+    for index in (4, 6):
         assert all(key in sent[index] for key in REASONING_FIELDS)
     assert conversation.model_dump_json() == stored
     assert conversation.to_openai()[2]["reasoning_content"] == "old reasoning content"
@@ -77,7 +76,7 @@ def test_serialization_retains_all_reasoning_after_request_preparation(conversat
     ):
         assert restored.to_openai() == complete
         assert restored.to_request_messages() == conversation.to_request_messages()
-        for index in (2, 4, 7):
+        for index in (2, 4, 6):
             assert all(key in restored.to_openai()[index] for key in REASONING_FIELDS)
 
 
@@ -119,7 +118,7 @@ def test_new_user_turn_prunes_all_earlier_reasoning(conversation, content):
 def test_without_user_message_no_reasoning_is_pruned():
     conversation = Conversation.from_openai(
         [
-            {"role": "developer", "content": "Continue"},
+            {"role": "system", "content": "Continue"},
             assistant("Answer", "current"),
         ]
     )
@@ -225,7 +224,7 @@ async def test_agent_preserves_reasoning_across_tools_then_prunes_on_next_user()
     current = next(message for message in requests[1] if message.get("tool_calls"))
     assert not any(key in prior for key in REASONING_FIELDS)
     assert all(key in current for key in REASONING_FIELDS)
-    state.conversation.append(Message(role="user", content="Next question"))
+    state = RunState(context, TaskInput(question="Next question", messages=state.result().messages))
     await state.model("Answer the next question", stage="final_answer_generation")
     assert all(not any(key in message for key in REASONING_FIELDS) for message in requests[2])
     conversation = Conversation(messages=state.result().messages)
@@ -236,8 +235,10 @@ async def test_agent_preserves_reasoning_across_tools_then_prunes_on_next_user()
     ]
     assert [conversation.request_messages(request_id) for request_id in request_ids] == requests
     assert (
-        next(message for message in state.result().messages if message.tool_calls).provider_fields[
-            "reasoning_content"
-        ]
+        next(
+            message
+            for message in state.result().messages
+            if message.role == "assistant" and message.tool_calls
+        ).provider_fields["reasoning_content"]
         == "current reasoning content"
     )

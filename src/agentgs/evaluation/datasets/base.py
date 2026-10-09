@@ -20,6 +20,8 @@ class Example:
     answer_type: str
     input_resource: Any = None
     gold_steps: tuple[dict[str, Any], ...] = ()
+    answer_format: dict[str, Any] | None = None
+    dataset_instructions: str = ""
 
     def __post_init__(self):
         object.__setattr__(self, "gold_steps", tuple(self.gold_steps))

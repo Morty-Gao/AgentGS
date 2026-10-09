@@ -1,4 +1,5 @@
 import json
+from html import unescape
 
 import pytest
 
@@ -11,6 +12,8 @@ from agentgs.contracts.models import TaskInput, ToolError, ToolResult, ToolSpec
 
 
 def function_call(name, arguments, call_id=None):
+    if name == "submit_tool_plan" and isinstance(arguments, dict) and set(arguments) == {"tools"}:
+        arguments = {"steps": [{"id": f"s{i}", "tool": tool, "purpose": f"Compute {tool}"} for i, tool in enumerate(arguments["tools"], 1)]}
     from uuid import uuid4
 
     return {
@@ -138,21 +141,19 @@ async def test_fixed_format_reaches_final_request_through_engine(explicit_contra
         ]
     )
     ctx = context(tools, client)
-    ctx.answer_system_prompt = contracts.system_prompt
-    ctx.answer_contract_lookup = lambda _: contract if not explicit_contract else None
     result = await AgentEngine().run(
         TaskInput(
             question="Compute the requested statistic.",
-            output_contract=contract if explicit_contract else None,
+            output_contract=contract,
+            dataset_instructions=contracts.system_prompt,
         ),
         ctx,
     )
     final_request = client.requests[-1]
-    assert contract["answer_format"]["template"] in final_request[-1]["content"]
-    assert contract["answer_format"]["notes"] in final_request[-1]["content"]
-    assert final_request[-1]["role"] == "developer" and final_request[-1]["content"].startswith(
-        contracts.system_prompt
-    )
+    assert contract["answer_format"]["template"] in unescape(final_request[-1]["content"])
+    assert contract["answer_format"]["notes"] in unescape(final_request[-1]["content"])
+    assert final_request[-1]["role"] == "tool"
+    assert contracts.system_prompt in unescape(final_request[0]["content"])
     assert result.answer == "temperature_anomaly: 2 °C"
     validation = next(
         t for t in result.execution_events() if t["type"] == "final_answer_format_validation"
@@ -259,7 +260,7 @@ async def test_unsupported_numeric_answer_is_preserved_and_marked_incomplete():
     assert result.tool_chain_completed
 
 
-async def test_replanning_reuses_successful_name_prefix_after_three_atomic_failures():
+async def test_replanning_does_not_reuse_unspecified_inputs_by_tool_name():
     class RepairTools(Tools):
         async def execute(self, call):
             self.fail = (
@@ -275,12 +276,10 @@ async def test_replanning_reuses_successful_name_prefix_after_three_atomic_failu
     result = await AgentEngine().run(
         TaskInput(question="Compute the requested statistic."), context(tools, client, False)
     )
-    assert [row.tool for row in tools.calls] == ["RemoteSensingMean"] + [
-        "RemoteSensingDifference"
-    ] * 4
+    assert [row.tool for row in tools.calls] == ["RemoteSensingMean"] + ["RemoteSensingDifference"] * 3 + ["RemoteSensingMean", "RemoteSensingDifference"]
     assert result.tool_chain_completed and result.answer == "2"
     resumed = [row for row in result.execution_events() if row["type"] == "plan_resume"]
-    assert resumed[0]["skipped_successful_prefix"] == ["RemoteSensingMean"]
+    assert not resumed
 
 
 async def test_strict_model_plan_preserves_duplicate_tool_instances():
@@ -292,3 +291,41 @@ async def test_strict_model_plan_preserves_duplicate_tool_instances():
     )
     assert len(tools.calls) == 2 and result.tool_chain_completed
     assert tools.calls[0].id != tools.calls[1].id
+
+
+@pytest.mark.parametrize(
+    "answer,completion",
+    [
+        ("**temperature_anomaly: 2 °C**", "Completed"),
+        ("temperature_anomaly: unknown °C", "Not Completed"),
+        ("temperature_anomaly: UNKNOWN °C", "Not Completed"),
+        ("temperature_anomaly: <value> °C", "Not Completed"),
+    ],
+)
+async def test_answer_format_is_diagnostic_but_unknown_is_incomplete(answer, completion):
+    from pathlib import Path
+
+    from agentgs.runtime.answer_contracts import AnswerContracts
+
+    contracts = AnswerContracts(Path(__file__).resolve().parents[3])
+    contract = next(c for c in contracts.contracts.values() if c["question_id"] == 199)
+    client = Client(
+        [
+            plan_call(["RemoteSensingMean"]),
+            function_call("RemoteSensingMean", {"x": [1, 2, 3]}),
+            answer,
+        ]
+    )
+    ctx = context(Tools(), client)
+    result = await AgentEngine().run(
+        TaskInput(question="Compute the requested statistic.", output_contract=contract),
+        ctx,
+    )
+    assert result.answer == answer
+    assert result.completion_status == completion
+    event = next(
+        e for e in result.execution_events() if e["type"] == "final_answer_format_validation"
+    )
+    assert event["diagnostic_only"]
+    if "**" in answer:
+        assert not event["valid"]

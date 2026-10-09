@@ -392,8 +392,14 @@ async def test_model_dialogue_serialization_and_cancellation_tracking():
         ),
         TaskInput(question="q"),
     )
-    await asyncio.gather(state.model("A", stage="A"), state.model("B", stage="B"))
-    assert any(message["role"] == "assistant" for message in payloads[1])
+    from agentgs.agent.state import ModelProtocolError
+
+    results = await asyncio.gather(
+        state.model("A", stage="A"), state.model("B", stage="B"), return_exceptions=True
+    )
+    assert sum(isinstance(result, ModelProtocolError) for result in results) == 1
+    assert len(payloads) == 1
+    state = RunState(state.context, TaskInput(question="Next", messages=state.result().messages))
     entered.clear()
     task = asyncio.create_task(state.model("C", stage="C"))
     await entered.wait()
@@ -626,7 +632,7 @@ async def test_engine_cancel_during_native_reply_checkpoint_closes_pending_calls
                             "type": "function",
                             "function": {
                                 "name": "submit_tool_plan",
-                                "arguments": '{"tools":["CCSHaversineDistance"]}',
+                                "arguments": '{"steps":[{"id":"s1","tool":"CCSHaversineDistance","purpose":"Compute requested result"}]}',
                             },
                         }
                     ],

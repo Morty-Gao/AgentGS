@@ -11,6 +11,6 @@ Request export retains current-turn reasoning and omits earlier-turn reasoning.
 """
 
 from agentgs.messages.conversation import Conversation
-from agentgs.messages.models import Function, FunctionCall, Message
+from agentgs.messages.models import Function, FunctionCall, LogEntry, Message, RuntimeEvent
 
-__all__ = ["Conversation", "Function", "FunctionCall", "Message"]
+__all__ = ["Conversation", "Function", "FunctionCall", "LogEntry", "Message", "RuntimeEvent"]

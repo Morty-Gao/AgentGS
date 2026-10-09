@@ -7,6 +7,7 @@ from dataclasses import dataclass
 from pathlib import Path
 from typing import Any, Iterable
 
+from agentgs.datasets.geotooleval import ANSWER_SYSTEM_PROMPT
 from agentgs.evaluation.datasets.base import Dataset, Example
 
 CATEGORY_NAMES = {
@@ -23,15 +24,15 @@ CATEGORY_NAMES = {
 }
 
 _REQUIRED_COLUMNS = {
-    "题目序号",
-    "所属类别",
-    "题目正文",
-    "题目答案",
-    "标准工具链调用",
-    "单/多工具链调用",
-    "答案类型",
-    "输入资源",
-    "标准工具调用明细",
+    "question_id",
+    "category_id",
+    "question",
+    "expected_answer",
+    "gold_chain_text",
+    "chain_mode",
+    "answer_type",
+    "input_resource",
+    "gold_steps",
 }
 
 
@@ -101,23 +102,25 @@ def _parse_row(line_number: int, line: str, seen: set[int]) -> EvalTask:
     missing = _REQUIRED_COLUMNS - row.keys()
     if missing:
         raise ValueError(f"GeoToolEval line {line_number} is missing columns: {sorted(missing)}")
-    question_id = int(row["题目序号"])
-    category_id = int(row["所属类别"])
+    question_id = int(row["question_id"])
+    category_id = int(row["category_id"])
     if question_id in seen:
         raise ValueError(f"Duplicate GeoToolEval question id: {question_id}")
     seen.add(question_id)
-    gold_steps = _gold_steps(question_id, row["标准工具调用明细"])
+    gold_steps = _gold_steps(question_id, row["gold_steps"])
     return EvalTask(
         question_id=question_id,
         category_id=category_id,
         category=CATEGORY_NAMES.get(category_id, f"Category{category_id}"),
-        question=_text(row["题目正文"]),
-        expected_answer=_text(row["题目答案"]),
-        answer_type=_text(row["答案类型"]),
-        input_resource=row["输入资源"],
-        chain_mode=_text(row["单/多工具链调用"]),
-        gold_chain_text=_text(row["标准工具链调用"]),
+        question=_text(row["question"]),
+        expected_answer=_text(row["expected_answer"]),
+        answer_type=_text(row["answer_type"]),
+        input_resource=row["input_resource"],
+        chain_mode=_text(row["chain_mode"]),
+        gold_chain_text=_text(row["gold_chain_text"]),
         gold_steps=tuple(gold_steps),
+        answer_format=row.get("answer_format"),
+        dataset_instructions=ANSWER_SYSTEM_PROMPT,
     )
 
 

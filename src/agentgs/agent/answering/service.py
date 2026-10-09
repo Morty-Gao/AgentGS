@@ -18,7 +18,9 @@ class AnsweringService:
     def __init__(self, state, stages):
         self.state, self.stages = state, stages
 
-    async def generate(self, question, output, *, completed=True, tool_attempts_exhausted=False):
+    async def generate(
+        self, question, output, *, completed=True, tool_attempts_exhausted=False, answer_text=None
+    ):
         state = self.state
         completed = completed and not tool_attempts_exhausted
         state.tool_chain_completed = completed
@@ -58,8 +60,12 @@ class AnsweringService:
             )
         try:
             contract = self.stages.find_contract(question)
-            text = await self.stages.generate_output(
-                question, evidence, execution_incomplete=not completed
+            text = (
+                answer_text
+                if answer_text is not None
+                else await self.stages.generate_output(
+                    question, evidence, execution_incomplete=not completed
+                )
             )
             status, answer = (
                 ("Completed" if completed else "Not Completed", text.strip())
@@ -86,21 +92,27 @@ class AnsweringService:
                 suggested=suggested,
             )
             event.pop("evaluation_llm_required", None)
+            state.answer_evidence_status = "consistent" if event["valid"] else "inconsistent"
             event["allow_rule_planning"] = state.context.options.allow_rule_planning
             event["answer_llm_required"] = True
             if contract:
                 format_event = await invoke(check_fixed_answer, answer, contract)
+                format_event["diagnostic_only"] = True
                 await state.record(format_event)
                 event.update(
                     diagnostic_only=True,
-                    completion_policy="geotooleval_fixed_format_" + format_event["version"],
+                    completion_policy="execution_and_answer_presence",
                 )
-                if not format_event["valid"] or format_event["has_unknown"]:
+                if format_event["has_unknown"]:
                     status = "Not Completed"
             elif not event["valid"]:
                 status = "Not Completed"
             if not completed:
                 status = "Not Completed"
+            if state.context.options.planning_mode == "data_only" and not event["valid"]:
+                status = "Not Completed"
+            if state.context.options.planning_mode == "data_only":
+                state.tool_chain_completed = status == "Completed"
             await state.record(event)
             state.answer, state.completion_status, state.answer_generation_status = (
                 answer,
@@ -116,7 +128,7 @@ class AnsweringService:
                     "tool_chain_completed": completed,
                     "answer_generation_status": "success",
                     "strategy": "model_with_evidence_validation",
-                    "model_call_skipped": False,
+                    "model_call_skipped": answer_text is not None,
                 },
             )
             return state.result()

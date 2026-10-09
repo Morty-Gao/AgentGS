@@ -50,7 +50,7 @@ Explore the stored data with the bash tool and collect the measurements the ques
 The evaluation locator below is a hint, not a file listing and not a renamed path.
 
 When the observations are sufficient, stop calling bash and reply with the values you found.
-A later step writes the formatted final answer.
+Return the final answer directly in the task's required format. There is no later formatting step.
 
 Question and public resource locator:
 {question}
@@ -106,7 +106,8 @@ async def explore(question, state, stages, answering):
     first = True
     while used < limit:
         message = await state.model(
-            _instruction(question, first=first, described=described),
+            _instruction(question, first=first, described=described)
+            + f"\nRemaining bash calls: {limit - used}.",
             stage="data_exploration",
             tools=[bash_tool],
             tool_choice="auto",
@@ -114,7 +115,12 @@ async def explore(question, state, stages, answering):
         first = False
         if not message.tool_calls:
             completed = any(result.succeeded for result in state.results)
-            break
+            return await answering.generate(
+                question,
+                json.dumps(transcript, ensure_ascii=False),
+                completed=completed,
+                answer_text=message.content,
+            )
         for call in message.tool_calls:
             if used >= limit:
                 payload = {"status": "error", "error": "bash command budget exhausted"}
@@ -127,11 +133,11 @@ async def explore(question, state, stages, answering):
     evidence = (
         json.dumps(transcript, ensure_ascii=False) if transcript else "No bash commands were run."
     )
+    state.action_budget_exhausted = used >= limit
     return await answering.generate(
         question,
         evidence,
-        completed=completed,
-        tool_attempts_exhausted=used >= limit and not completed,
+        completed=any(result.succeeded for result in state.results),
     )
 
 

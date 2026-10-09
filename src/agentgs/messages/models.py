@@ -1,6 +1,6 @@
 """Provider-independent messages; reasoning is retained, never invented.
 
-The event role is an internal annotation and is excluded from provider requests.
+RuntimeEvent is an independent audit record excluded from provider requests.
 Serialization retains all reasoning. Conversation.to_request_messages() applies
 the user-turn policy to an independent OpenAI-formatted request copy.
 """
@@ -31,7 +31,7 @@ class Message(BaseModel):
     model_config = ConfigDict(extra="forbid", json_schema_serialization_defaults_required=True)
     id: str = Field(default_factory=lambda: uuid4().hex)
     created_at: str = Field(default_factory=lambda: datetime.now(timezone.utc).isoformat())
-    role: Literal["system", "developer", "user", "assistant", "tool", "event"]
+    role: Literal["system", "user", "assistant", "tool"]
     content: str | list[dict[str, Any]] | None = None
     name: str | None = None
     tool_calls: list[FunctionCall] = Field(default_factory=list)
@@ -46,7 +46,9 @@ class Message(BaseModel):
         if isinstance(value, dict):
             value = dict(value)
             if "function_call" in value or value.get("role") == "function":
-                raise ValueError("Deprecated function_call/function messages are unsupported; use tool_calls/tool")
+                raise ValueError(
+                    "Deprecated function_call/function messages are unsupported; use tool_calls/tool"
+                )
             extras = {key: value.pop(key) for key in list(value) if key not in cls.model_fields}
             # A provider may return both reasoning and reasoning_content/details.
             # Keep the explicit reasoning field as well as the normalized value;
@@ -87,8 +89,6 @@ class Message(BaseModel):
         include_reasoning is a conversion option, not a serialization option;
         Conversation.to_request_messages() selects it separately for each turn.
         """
-        if self.role == "event":
-            raise ValueError("Internal events cannot be sent as OpenAI messages")
         result: dict[str, Any] = {"role": self.role, "content": self.content}
         if self.name is not None:
             result["name"] = self.name
@@ -109,3 +109,21 @@ class Message(BaseModel):
             ):
                 result["reasoning"] = self.reasoning
         return deepcopy(result)
+
+
+class RuntimeEvent(BaseModel):
+    """An audit record, never a model message."""
+
+    model_config = ConfigDict(extra="forbid", json_schema_serialization_defaults_required=True)
+    id: str = Field(default_factory=lambda: uuid4().hex)
+    created_at: str = Field(default_factory=lambda: datetime.now(timezone.utc).isoformat())
+    role: Literal["event"] = "event"
+    metadata: dict[str, Any] = Field(default_factory=dict)
+
+
+LogEntry = Message | RuntimeEvent
+
+
+def parse_entry(value: dict[str, Any]) -> LogEntry:
+    kind = RuntimeEvent if value.get("role") == "event" else Message
+    return kind.model_validate(value)

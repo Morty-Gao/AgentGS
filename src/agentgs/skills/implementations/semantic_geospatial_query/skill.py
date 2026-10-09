@@ -14,9 +14,6 @@ class DomainSkill(PromptSkill):
             "river",
             "park",
             "county",
-            "空间查询",
-            "湖泊",
-            "森林",
         ],
         tools=["GeoBigDataExecuteGeoSPARQL"],
     )

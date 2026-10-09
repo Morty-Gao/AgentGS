@@ -127,7 +127,7 @@ def process_socat_grid(path: Path) -> tuple[pd.DataFrame, pd.DataFrame, pd.DataF
     frame["year"] = frame["date"].dt.year.astype(int)
     frame["month"] = frame["date"].dt.month.astype(int)
     samples: list[pd.Series] = []
-    for _, _, min_lon, min_lat, max_lon, max_lat in OCEAN_BOXES:
+    for _, min_lon, min_lat, max_lon, max_lat in OCEAN_BOXES:
         sample_pool = frame[
             frame["longitude"].between(min_lon, max_lon)
             & frame["latitude"].between(min_lat, max_lat)
@@ -140,7 +140,7 @@ def process_socat_grid(path: Path) -> tuple[pd.DataFrame, pd.DataFrame, pd.DataF
     sample_frame = pd.DataFrame(samples).reset_index(drop=True)
     trend_rows: list[dict] = []
     map_rows: list[dict] = []
-    for region_key, region_zh, min_lon, min_lat, max_lon, max_lat in OCEAN_BOXES:
+    for region_key, min_lon, min_lat, max_lon, max_lat in OCEAN_BOXES:
         region = frame[
             frame["longitude"].between(min_lon, max_lon)
             & frame["latitude"].between(min_lat, max_lat)
@@ -173,7 +173,6 @@ def process_socat_grid(path: Path) -> tuple[pd.DataFrame, pd.DataFrame, pd.DataF
         trend_rows.append(
             {
                 "region": region_key,
-                "region_zh": region_zh,
                 "start_year": int(start.year),
                 "end_year": int(end.year),
                 "start_fco2_uatm": float(start.weighted_mean_fco2_uatm),
@@ -210,7 +209,6 @@ def process_socat_grid(path: Path) -> tuple[pd.DataFrame, pd.DataFrame, pd.DataF
         map_rows.append(
             {
                 "region": region_key,
-                "region_zh": region_zh,
                 "year": int(best.year),
                 "month": int(best.month),
                 "grid_cell_count": int(best.grid_cell_count),

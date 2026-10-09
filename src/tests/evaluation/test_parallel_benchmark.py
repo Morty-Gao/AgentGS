@@ -56,9 +56,9 @@ def benchmark_project(project, monkeypatch):
             category=f"Category{i}",
             question=f"Question {i}",
             expected_answer="123",
-            answer_type="单数值结果",
+            answer_type="single_number",
             input_resource="",
-            chain_mode="单工具调用",
+            chain_mode="single_tool",
             gold_chain_text="Tool",
             gold_steps=({"tool_name": "Tool", "arguments": {}},),
         )
@@ -106,6 +106,26 @@ async def test_parallel_width_durable_logs_and_resume(benchmark_project):
     changed.settings.max_concurrent_tasks = 3
     with pytest.raises(ValueError, match="protocol differ"):
         await run_benchmark(changed, dataset, output)
+
+
+async def test_module_combinations_are_recorded_and_isolate_resume(benchmark_project):
+    root, dataset = benchmark_project
+    output = root / "module-combination"
+    service = Service(root)
+    await run_benchmark(service, dataset, output, ablations=["A2", "A3"], modules={"execution_recovery": False})
+    protocol = json.loads((output / "protocol.json").read_text())
+    effective = protocol["effective_algorithm"]
+    assert not effective["modules"]["predecessor_expansion"]
+    assert not effective["modules"]["directed_bridging"]
+    assert not effective["modules"]["execution_recovery"]
+    for record in service.records.values():
+        assert record.spec.input.ablations == ["A2", "A3"]
+        assert record.spec.input.modules.execution_recovery is False
+    resumed = Service(root)
+    await run_benchmark(resumed, dataset, output, ablations=["A2", "A3"], modules={"execution_recovery": False})
+    assert not resumed.records
+    with pytest.raises(ValueError, match="protocol differ"):
+        await run_benchmark(Service(root), dataset, output, ablations=["A2", "A4"])
 
 
 async def test_tool_ablation_protocol_records_effective_overrides(benchmark_project):

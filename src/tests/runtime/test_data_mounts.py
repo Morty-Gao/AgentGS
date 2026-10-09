@@ -22,7 +22,7 @@ def test_mount_manifest_keeps_stored_names_and_omits_answer_keys(tmp_path):
     ):
         path = data / name
         if name.endswith(".jsonl"):
-            path.write_text('{"题目答案":"secret"}\n')
+            path.write_text('{"expected_answer":"secret"}\n')
         else:
             path.mkdir()
             (path / "secret.txt").write_text("secret")
@@ -55,7 +55,7 @@ async def test_bwrap_shows_mounted_data_and_hides_answers(sandbox_project):
     data = root / "sandbox-data"
     (data / "climate").mkdir(parents=True)
     (data / "climate" / "note.txt").write_text("kept\n")
-    (data / "geotooleval.jsonl").write_text('{"题目答案":"secret"}\n')
+    (data / "geotooleval.jsonl").write_text('{"expected_answer":"secret"}\n')
     executor = CodeExecutor(root, root / "code", RuntimeSettings(sandbox="bwrap"))
     work = root / "scratch"
     result = await executor.run_shell(

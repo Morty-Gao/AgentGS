@@ -7,9 +7,10 @@ from uuid import uuid4
 
 from pydantic import Field, model_validator
 
-from agentgs.messages import Conversation, Message
+from agentgs.messages import Conversation, LogEntry
 
 from .base import Model
+from .modules import Ablation, ModuleOverrides
 from .tools import ToolCall, ToolError, ToolResult
 
 
@@ -27,7 +28,8 @@ TERMINAL = {TaskStatus.SUCCEEDED, TaskStatus.FAILED, TaskStatus.CANCELLED}
 
 class TaskInput(Model):
     question: str = ""
-    messages: list[Message] = Field(default_factory=list)
+    messages: list[LogEntry] = Field(default_factory=list)
+    dataset_instructions: str = ""
     calls: list[ToolCall] = Field(default_factory=list)
     parallel_tools: bool = False
     model: str | None = None
@@ -38,10 +40,22 @@ class TaskInput(Model):
     file_path_list: list[str] = Field(default_factory=list)
     output_contract: dict[str, Any] | None = None
     planning_mode: Literal["tool_only", "skill_guided", "data_only"] | None = None
+    modules: ModuleOverrides | None = None
+    ablations: list[Ablation] = Field(default_factory=list)
     allow_rule_planning: bool | None = None
     plan_attempts: int | None = Field(default=None, ge=1)
     tool_attempts: int | None = Field(default=None, ge=1)
     command_attempts: int | None = Field(default=None, ge=1)
+    predecessor_expansion: bool | None = None
+    capability_completion: bool | None = None
+    shared_bridge: bool | None = None
+    tool_selection: Literal["model", "first_valid"] | None = None
+    execution_recovery: bool | None = None
+    candidate_pool: Literal["retrieved", "all_registered"] | None = None
+    routing_hints: bool | None = None
+    binding_assistance: bool | None = None
+    bridge_diagnostics: bool | None = None
+    max_total_tokens: int | None = Field(default=None, ge=1)
     input_domain: str | None = None
 
     @model_validator(mode="after")
@@ -50,7 +64,7 @@ class TaskInput(Model):
         if not self.question.strip():
             for message in reversed(self.messages):
                 if message.role == "user" and isinstance(message.content, str):
-                    self.question = message.content
+                    self.question = message.metadata.get("original_question", message.content)
                     break
         return self
 
@@ -66,9 +80,12 @@ class AgentResult(Model):
     answer: str
     tool_results: list[ToolResult] = Field(default_factory=list)
     usage: list[dict[str, Any]] = Field(default_factory=list)
-    messages: list[Message] = Field(default_factory=list)
+    messages: list[LogEntry] = Field(default_factory=list)
+    conversation_schema: Literal[2] = 2
     completion_status: Literal["Completed", "Not Completed"] = "Completed"
     tool_chain_completed: bool = True
+    action_budget_exhausted: bool = False
+    answer_evidence_status: Literal["consistent", "inconsistent", "unverified"] = "unverified"
     answer_generation_status: str = "success"
     algorithm_id: str = ""
     provenance: dict[str, Any] = Field(default_factory=dict)

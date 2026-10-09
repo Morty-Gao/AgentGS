@@ -1,6 +1,7 @@
 """Native wire protocol, binding, reasoning continuation and failure recovery."""
 
 import json
+from html import unescape
 from uuid import uuid4
 
 import httpx
@@ -45,6 +46,8 @@ class Events:
 
 
 def native(name, arguments, call_id=None, **reasoning):
+    if name == "submit_tool_plan" and isinstance(arguments, dict) and set(arguments) == {"tools"}:
+        arguments = {"steps": [{"id": f"s{i}", "tool": tool, "purpose": f"Compute {tool}"} for i, tool in enumerate(arguments["tools"], 1)]}
     return {
         "role": "assistant",
         "content": None,
@@ -145,7 +148,8 @@ async def test_stages_use_native_calls_and_preserve_every_current_turn_reasoning
     assert result.tool_chain_completed
     for request in payloads:
         assert [m["role"] for m in request["messages"]].count("user") == 1
-        assert request["messages"][-1]["role"] == "developer"
+        assert request["messages"][0]["role"] == "system"
+        assert request["messages"][-1]["role"] in {"user", "tool"}
     assert [p["tool_choice"]["function"]["name"] for p in payloads[:3]] == [
         "submit_tool_plan",
         "RemoteSensingMean",
@@ -180,7 +184,7 @@ async def test_invalid_arguments_are_answered_and_repaired_without_text_fallback
     )
     context, client, payloads, _ = setup(project, [rejected, repaired])
     state = RunState(context, TaskInput(question="Compute the requested statistic."))
-    stages = ModelStages(state, lambda q: None, "")
+    stages = ModelStages(state, lambda q: None)
     try:
         result = await ExecutionService(state, stages).run(
             "RemoteSensingMean", state.task.question, None, ""
@@ -190,7 +194,14 @@ async def test_invalid_arguments_are_answered_and_repaired_without_text_fallback
     assert result.succeeded and len(result.attempts) == 2
     assert next(m for m in payloads[1]["messages"] if m.get("tool_calls")) == rejected
     feedback = next(m for m in payloads[1]["messages"] if m.get("tool_call_id") == "bad")
-    assert json.loads(feedback["content"])["status"] == "error"
+    assert (
+        json.loads(
+            unescape(
+                feedback["content"].split("<tool-result>\n", 1)[1].split("\n</tool-result>", 1)[0]
+            )
+        )["status"]
+        == "error"
+    )
     assert not state.conversation.pending_tool_calls()
     assert len([r for r in state.results if r.succeeded]) == 1
     assert {m.tool_call_id for m in state.conversation.messages if m.role == "tool"} == {
@@ -215,7 +226,7 @@ async def test_provider_protocol_errors_do_not_execute_unplanned_tools(project, 
     context, client, payloads, _ = setup(project, [bad, good])
     state = RunState(context, TaskInput(question="Compute a statistic."))
     try:
-        result = await ExecutionService(state, ModelStages(state, lambda q: None, "")).run(
+        result = await ExecutionService(state, ModelStages(state, lambda q: None)).run(
             "RemoteSensingMean", state.task.question, None, ""
         )
     finally:
@@ -224,9 +235,9 @@ async def test_provider_protocol_errors_do_not_execute_unplanned_tools(project, 
     assert len(state.results) == 1 and state.results[0].call_id == "good"
     assert not state.conversation.pending_tool_calls()
     # No synthetic model calls are introduced to compensate for prose replies.
-    assert [m.to_openai() for m in state.conversation.messages if m.tool_calls] == (
-        [bad, good] if unexpected != "text_only" else [good]
-    )
+    assert [
+        m.to_openai() for m in state.conversation.messages if m.role == "assistant" and m.tool_calls
+    ] == ([bad, good] if unexpected != "text_only" else [good])
 
 
 async def test_invalid_native_plan_is_repaired_and_not_scored_as_domain_execution(project):
@@ -245,7 +256,7 @@ async def test_invalid_native_plan_is_repaired_and_not_scored_as_domain_executio
     context, client, payloads, _ = setup(project, [bad, good])
     state = RunState(context, TaskInput(question="Compute a statistic."))
     try:
-        plan = await ModelStages(state, lambda q: None, "").generate_tools_plan(
+        plan = await ModelStages(state, lambda q: None).generate_tools_plan(
             state.task.question, await context.tool_retriever.retrieve(None)
         )
     finally:
@@ -283,11 +294,14 @@ async def test_final_generation_failure_preserves_native_calls_and_reasoning(pro
     assert len(caught.value.result.tool_results) == 1
     assert caught.value.result.answer_generation_status == "failed"
     result = AgentResult.model_validate_json(snapshots[-1])
-    assert [m.reasoning for m in result.messages if m.reasoning is not None] == [
+    assert [
+        m.reasoning for m in result.messages if m.role == "assistant" and m.reasoning is not None
+    ] == [
         "Plan.",
         "Calculate.",
-        [{"type": "encrypted", "data": "retained"}],
     ]
+    responses = [e for e in result.execution_events() if e["type"] == "model.response"]
+    assert responses[-1]["response"]["reasoning"] == [{"type": "encrypted", "data": "retained"}]
 
 
 def test_complete_catalog_has_typed_native_inputs_and_no_deprecated_entrypoints():

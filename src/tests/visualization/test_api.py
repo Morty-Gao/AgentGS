@@ -25,7 +25,7 @@ def test_submit_events_artifact_and_errors(project):
         assert "trace" not in record["result"]
         messages = client.get(f"/api/tasks/{task_id}/messages").json()
         assert messages == record["result"]["messages"]
-        call = next(m["tool_calls"][0] for m in messages if m["tool_calls"])
+        call = next(m["tool_calls"][0] for m in messages if m.get("tool_calls"))
         result = next(m for m in messages if m["role"] == "tool")
         assert result["tool_call_id"] == call["id"]
         events = client.get("/api/tasks/" + task_id + "/events").text

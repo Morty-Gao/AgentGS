@@ -29,7 +29,10 @@ def tool_executions(value) -> list[dict[str, Any]]:
     call_order = {
         call.id: index
         for index, call in enumerate(
-            call for message in _current_turn(conversation) for call in message.tool_calls
+            call
+            for message in _current_turn(conversation)
+            if message.role == "assistant"
+            for call in message.tool_calls
         )
         if call.function.name != "submit_tool_plan"
     }
@@ -69,7 +72,12 @@ def model_usage(value) -> list[dict[str, Any]]:
         if kind == "model.started":
             requests.setdefault(request_id, {"usage": None, "attempts": None})
             requests[request_id].update(status="started")
-        elif kind in {"model.completed", "model.failed", "model.cancelled"}:
+        elif kind in {
+            "model.completed",
+            "model.failed",
+            "model.cancelled",
+            "model.protocol_failed",
+        }:
             row = requests.setdefault(request_id, {"usage": None, "attempts": None})
             row.update(metadata)
             row["status"] = kind.removeprefix("model.")
@@ -102,7 +110,7 @@ def usage_summary(calls) -> dict[str, Any]:
         total = usage.get("total_tokens") if isinstance(usage, dict) else None
         valid = isinstance(total, int) and not isinstance(total, bool) and total >= 0
         complete = complete and valid and call.get("attempts", 1) == 1
-        complete = complete and call.get("status", "completed") == "completed"
+        complete = complete and call.get("status", "completed") in {"completed", "protocol_failed"}
         if valid:
             totals.append(total)
     return {

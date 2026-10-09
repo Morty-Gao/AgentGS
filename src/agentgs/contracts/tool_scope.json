@@ -114,10 +114,7 @@
     "GeoBearing",
     "GeoDecimalToDMS",
     "GeoWGS84BBoxAreaKm2",
-    "GeoMagnitudeToEnergy",
-    "地震事件地图可视化",
-    "USGS 地震数据获取",
-    "地震数据清洗与分级"
+    "GeoMagnitudeToEnergy"
   ],
   "internal_runtime_operations": [
     "ExecutePython"

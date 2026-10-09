@@ -1,6 +1,7 @@
 """Skill selection policy, distinct from ranking and capability expansion."""
 
 from agentgs.agent.retrieval.scored_skills import WeightedSkillRetriever, extension_eligible
+from agentgs.agent.planning.capabilities import GENERIC_OPERATIONS
 
 
 def select_skill_ids(definitions, query: str, inferred_tools=(), *, mapping_extensions=True):
@@ -24,6 +25,10 @@ def select_skill_ids(definitions, query: str, inferred_tools=(), *, mapping_exte
     candidates = WeightedSkillRetriever(
         skills.values(), mapping_extensions=mapping_extensions
     ).retrieve(query, tool_names=inferred)
+    candidates = [match for match in candidates if (
+        set(match.matched_terms) - GENERIC_OPERATIONS
+        or any(match.score_components.get(key, 0) > 0 for key in ("tool_hint", "domain", "data_type"))
+    )]
     threshold = candidates[0].score * 0.55 if candidates else 0.0
     for match in candidates:
         if match.score < threshold and selected:
@@ -33,6 +38,4 @@ def select_skill_ids(definitions, query: str, inferred_tools=(), *, mapping_exte
         # Preserve the historical soft cap: inferred hints are not truncated.
         if len(selected) >= 3:
             break
-    if not selected and skills:
-        selected.append(next(iter(skills)))
     return selected

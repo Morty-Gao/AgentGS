@@ -10,7 +10,7 @@ import psutil
 
 from agentgs.contracts.async_utils import invoke
 from agentgs.contracts.models import TERMINAL, Event, TaskRecord, TaskStatus, ToolError
-from agentgs.runtime.concurrency import RuntimeCoordinator
+from agentgs.runtime.concurrency import RuntimeCoordinator, worker_identity
 from agentgs.runtime.resources import kill_tree
 
 
@@ -21,6 +21,7 @@ class QueueFull(RuntimeError):
 class TaskStore:
     def __init__(self, root: Path, *, initialize=True):
         self.path = root / "tasks.sqlite3"
+        self.pool = worker_identity()
         self._initialized = False
         self._init_lock = asyncio.Lock()
         if initialize:
@@ -43,6 +44,8 @@ class TaskStore:
             columns = {row[1] for row in db.execute("PRAGMA table_info(controls)")}
             if "worker_identity" not in columns:
                 db.execute("ALTER TABLE controls ADD COLUMN worker_identity REAL")
+            if "owner_pool" not in columns:
+                db.execute("ALTER TABLE controls ADD COLUMN owner_pool TEXT")
             if "state" not in columns:
                 db.execute("ALTER TABLE controls ADD COLUMN state TEXT NOT NULL DEFAULT 'queued'")
                 rows = db.execute(
@@ -53,6 +56,12 @@ class TaskStore:
                     ((json.loads(encoded).get("status", "queued"), key) for key, encoded in rows),
                 )
             db.execute("CREATE INDEX IF NOT EXISTS control_state ON controls(state)")
+            db.execute(
+                "CREATE INDEX IF NOT EXISTS control_pool_state ON controls(owner_pool,state)"
+            )
+            db.execute(
+                "CREATE INDEX IF NOT EXISTS control_active_workers ON controls(owner_pool) WHERE worker_pid IS NOT NULL"
+            )
         self._initialized = True
 
     async def initialize(self):
@@ -161,7 +170,8 @@ class TaskStore:
             with self.connection() as db:
                 db.execute("BEGIN IMMEDIATE")
                 count = db.execute(
-                    "SELECT COUNT(*) FROM controls WHERE state NOT IN ('succeeded','failed','cancelled')"
+                    "SELECT COUNT(*) FROM controls WHERE owner_pool=? AND state IN ('queued','preparing','running')",
+                    (self.pool,),
                 ).fetchone()[0]
                 if count >= capacity:
                     raise QueueFull("Runtime task queue is full")
@@ -169,8 +179,8 @@ class TaskStore:
                     "INSERT INTO tasks VALUES (?,?)", (record.spec.id, record.model_dump_json())
                 )
                 db.execute(
-                    "INSERT INTO controls(task_id,owner_pid,owner_identity) VALUES (?,?,?)",
-                    (record.spec.id, pid, identity),
+                    "INSERT INTO controls(task_id,owner_pid,owner_identity,owner_pool) VALUES (?,?,?,?)",
+                    (record.spec.id, pid, identity, self.pool),
                 )
                 self._emit(db, record.spec.id, "task.queued", {})
 
@@ -221,7 +231,10 @@ class TaskStore:
                     "UPDATE controls SET worker_pid=?,rss=?,worker_identity=? WHERE task_id=?",
                     (pid_value, rss if pid_value else 0, identity, task_id),
                 )
-                return db.execute("SELECT COALESCE(SUM(rss),0) FROM controls").fetchone()[0]
+                return db.execute(
+                    "SELECT COALESCE(SUM(rss),0) FROM controls WHERE owner_pool=? AND worker_pid IS NOT NULL",
+                    (self.pool,),
+                ).fetchone()[0]
 
         return await invoke(update)
 
@@ -233,17 +246,29 @@ class TaskStore:
             with self.connection() as db:
                 db.execute("BEGIN IMMEDIATE")
                 rows = db.execute(
-                    "SELECT c.task_id,c.owner_pid,c.owner_identity,c.worker_pid,c.worker_identity,t.record FROM controls c JOIN tasks t ON t.id=c.task_id WHERE c.state NOT IN ('succeeded','failed','cancelled')"
+                    "SELECT c.task_id,c.owner_pid,c.owner_identity,c.worker_pid,c.worker_identity,t.record FROM controls c JOIN tasks t ON t.id=c.task_id WHERE c.owner_pool=? AND (c.state IN ('queued','preparing','running') OR c.worker_pid IS NOT NULL)",
+                    (self.pool,),
                 ).fetchall()
                 for key, owner, identity, worker, worker_identity, encoded in rows:
                     record = self._decode_record(encoded)
-                    if record.status in TERMINAL or RuntimeCoordinator._alive(owner, identity):
-                        continue
-                    if (
+                    owner_alive = RuntimeCoordinator._alive(owner, identity)
+                    worker_alive = bool(
                         worker
                         and worker_identity
                         and RuntimeCoordinator._alive(worker, worker_identity)
-                    ):
+                    )
+                    if record.status in TERMINAL:
+                        if worker_alive and not owner_alive:
+                            kill_tree(worker)
+                        if not worker_alive or not owner_alive:
+                            db.execute(
+                                "UPDATE controls SET worker_pid=NULL,worker_identity=NULL,rss=0 WHERE task_id=?",
+                                (key,),
+                            )
+                        continue
+                    if owner_alive:
+                        continue
+                    if worker_alive:
                         kill_tree(worker)
                     record.status = TaskStatus.FAILED
                     record.error = ToolError(

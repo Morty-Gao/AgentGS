@@ -308,7 +308,7 @@ def process_opsd(path: Path) -> tuple[pd.DataFrame, pd.DataFrame, pd.DataFrame]:
                 .groupby(["country", "energy_source_level_2"], group_keys=False)
                 .head(8)
             )
-        for country, (capital_lat, capital_lon, capital_en, capital_zh) in CAPITALS.items():
+        for country, (capital_lat, capital_lon, capital_en) in CAPITALS.items():
             country_rows = chunk[chunk["country"] == country]
             for source in _REFERENCE["opsd_capital_sources"]:
                 subset = country_rows[country_rows["energy_source_level_2"] == source]
@@ -325,7 +325,6 @@ def process_opsd(path: Path) -> tuple[pd.DataFrame, pd.DataFrame, pd.DataFrame]:
                 record = {
                     "country": country,
                     "capital_en": capital_en,
-                    "capital_zh": capital_zh,
                     "energy_source": source,
                     "municipality": str(row.get("municipality") or ""),
                     "technology": str(row.get("technology") or ""),
@@ -423,7 +422,7 @@ def process_capacity_timeseries(path: Path) -> tuple[pd.DataFrame, list[dict], l
     final_year = int(year_end["day"].dt.year.max())
     single_rows: list[dict] = []
     growth_rows: list[dict] = []
-    for column, label_en, label_zh in selected_series:
+    for column, label_en in selected_series:
         if column not in year_end.columns:
             continue
         valid = year_end[["day", column]].dropna().copy()
@@ -435,7 +434,6 @@ def process_capacity_timeseries(path: Path) -> tuple[pd.DataFrame, list[dict], l
             {
                 "series": column,
                 "label_en": label_en,
-                "label_zh": label_zh,
                 "year": int(final_record["day"].year),
                 "capacity_mw": float(final_record[column]),
             }
@@ -455,7 +453,6 @@ def process_capacity_timeseries(path: Path) -> tuple[pd.DataFrame, list[dict], l
             {
                 "series": column,
                 "label_en": label_en,
-                "label_zh": label_zh,
                 "start_year": int(start_row["day"].year),
                 "end_year": int(end_row["day"].year),
                 "start_capacity_mw": start_value,

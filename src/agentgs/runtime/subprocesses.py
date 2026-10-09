@@ -1,6 +1,7 @@
 """Cancellation-safe child process lifecycle and bounded output collection."""
 
 import asyncio
+import os
 import signal
 
 from agentgs.contracts.async_utils import drain, invoke
@@ -20,11 +21,15 @@ async def stop(process, *, grace=0):
 
 
 async def spawn(*args, **kwargs):
+    kwargs.setdefault("start_new_session", os.name != "nt")
     creation = asyncio.create_task(asyncio.create_subprocess_exec(*args, **kwargs))
     try:
         return await asyncio.shield(creation)
-    except asyncio.CancelledError:
-        process = await drain(creation)
+    except asyncio.CancelledError as cancelled:
+        try:
+            process = await drain(creation)
+        except Exception:
+            raise cancelled from None
         await drain(asyncio.create_task(stop(process)))
         raise
 

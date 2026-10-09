@@ -10,6 +10,9 @@ class RuntimeSettings(Model):
     max_pending_tasks: int = Field(default=1024, ge=1)
     max_concurrent_model_calls: int = Field(default=8, ge=1, le=128)
     max_concurrent_tool_calls: int = Field(default=4, ge=1, le=128)
+    max_concurrent_sandbox_calls: int = Field(default=2, ge=1, le=128)
+    sandbox_disk_limit_mb: int = Field(default=2048, ge=1)
+    sandbox_max_files: int = Field(default=10000, ge=1)
     model_timeout_seconds: float = Field(default=180, gt=0)
     tool_timeout_seconds: float = Field(default=120, gt=0)
     tool_backend: Literal["process", "thread"] = "thread"

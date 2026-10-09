@@ -1,4 +1,5 @@
 import json
+from html import unescape
 from pathlib import Path
 from types import SimpleNamespace
 
@@ -25,13 +26,13 @@ def test_all_workbook_formats_are_loaded_without_private_fields():
     rows = [json.loads(line) for line in DATASET.read_text().splitlines()]
     assert len(rows) == 603
     for row in rows:
-        contract = contracts.find(row["题目正文"] + RESOURCE_MARKER + "{}")
+        contract = contracts.find(row["question"] + RESOURCE_MARKER + "{}")
         assert contract is not None
         assert set(contract) == {"question_id", "question", "question_sha256", "answer_format"}
-        assert contract["answer_format"]["template"] == row["固定回答格式"]
-        assert contract["answer_format"]["notes"] == row["格式说明"]
-        assert row["固定回答格式"] in contract["answer_format"]["llm_instruction"]
-        assert row["格式说明"] in contract["answer_format"]["llm_instruction"]
+        assert contract["answer_format"]["template"] == row["answer_template"]
+        assert contract["answer_format"]["notes"] == row["format_notes"]
+        assert row["answer_template"] in contract["answer_format"]["llm_instruction"]
+        assert row["format_notes"] in contract["answer_format"]["llm_instruction"]
         assert contract["answer_format"] == row["answer_format"]
         assert contract["question_sha256"] == row["question_sha256"]
     assert contracts.system_prompt == ANSWER_SYSTEM_PROMPT
@@ -86,18 +87,17 @@ async def test_every_question_format_reaches_the_provider_request(incomplete):
             request = public_input(task, output_contract=contracts.find(task.question))
             assert request.output_contract is not None
             state = RunState(context, request)
-            stages = ModelStages(state, lambda _: request.output_contract, contracts.system_prompt)
+            stages = ModelStages(state, lambda _: request.output_contract)
             await stages.generate_output(
                 task.question, "fixture tool evidence", execution_incomplete=incomplete
             )
             messages = payloads[-1]["messages"]
-            assert messages[-1]["role"] == "developer" and messages[-1]["content"].startswith(
-                contracts.system_prompt
-            )
-            prompt = messages[-1]["content"]
+            assert messages[0]["role"] == "system"
+            assert contracts.system_prompt in unescape(messages[0]["content"])
+            prompt = unescape(messages[-1]["content"])
             spec = request.output_contract["answer_format"]
-            assert spec["template"] in prompt
-            assert spec["notes"] in prompt
+            context_text = prompt.split("<task-context>\n", 1)[1].split("\n</task-context>", 1)[0].split("\n\n", 1)[1]
+            assert json.loads(context_text)["output_contract"]["answer_format"] == spec
             assert "fixture tool evidence" in prompt
             assert state.usage[0]["stage"] == "final_answer_generation"
         assert len(payloads) == 603
@@ -111,7 +111,7 @@ def test_formats_load_from_only_the_unified_dataset(tmp_path):
     row = json.loads(DATASET.read_text().splitlines()[0])
     dataset.write_text(json.dumps(row, ensure_ascii=False) + "\n")
     contracts = AnswerContracts(tmp_path)
-    public = contracts.find(row["题目正文"])
+    public = contracts.find(row["question"])
     assert public["answer_format"] == row["answer_format"]
     assert not (tmp_path / "data/answer_formats").exists()
     request = public_input(load_tasks(dataset)[0], output_contract=public)
@@ -121,8 +121,8 @@ def test_formats_load_from_only_the_unified_dataset(tmp_path):
         "question_sha256",
         "answer_format",
     }
-    assert "题目答案" not in request.model_dump_json()
-    assert "标准工具调用明细" not in request.model_dump_json()
+    assert "expected_answer" not in request.model_dump_json()
+    assert "gold_steps" not in request.model_dump_json()
 
 
 def test_missing_embedded_formats_are_explicit(tmp_path):
@@ -157,7 +157,7 @@ def test_selected_unified_dataset_is_used_without_separate_format_files(tmp_path
     (metadata / "geotooleval.json").write_text(
         json.dumps({"version_manifest": {"selected_dataset": "data/selected.jsonl"}})
     )
-    assert AnswerContracts(tmp_path).find(row["题目正文"])["answer_format"] == row["answer_format"]
+    assert AnswerContracts(tmp_path).find(row["question"])["answer_format"] == row["answer_format"]
     dataset.unlink()
     with pytest.raises(FileNotFoundError, match="Selected GeoToolEval dataset"):
         AnswerContracts(tmp_path)

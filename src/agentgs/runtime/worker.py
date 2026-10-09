@@ -18,7 +18,6 @@ from agentgs.config.settings import RuntimeSettings
 from agentgs.contracts.async_utils import invoke
 from agentgs.contracts.models import TaskSpec
 from agentgs.datasets.registry import DatasetRegistry
-from agentgs.runtime.answer_contracts import AnswerContracts
 from agentgs.runtime.artifacts.store import LocalArtifactStore
 from agentgs.runtime.concurrency import RuntimeCoordinator
 from agentgs.runtime.models import ModelExecutor
@@ -41,6 +40,7 @@ class PipeEvents:
 
 
 async def execute(root, work, spec, settings):
+    settings = settings.model_copy(update={"default_rss_limit_mb": spec.rss_limit_mb})
     events = PipeEvents()
     coordinator = RuntimeCoordinator(root)
     options = resolve_algorithm(await invoke(load_algorithm, root), spec.input)
@@ -57,10 +57,7 @@ async def execute(root, work, spec, settings):
         settings=settings,
         coordinator=coordinator,
     )
-    contracts, paths = await asyncio.gather(
-        invoke(AnswerContracts, root),
-        invoke(ToolPaths.create, root, artifacts.root),
-    )
+    paths = await invoke(ToolPaths.create, root, artifacts.root)
     client = None
     try:
         if not spec.input.calls:
@@ -107,7 +104,9 @@ async def execute(root, work, spec, settings):
 
             skills, planner = await asyncio.gather(
                 invoke(builtin_skills),
-                invoke(builtin_planner, rs_local_contracts=options.rs_local_contracts),
+                invoke(builtin_planner, rs_local_contracts=options.rs_local_contracts,
+                       predecessor_expansion=options.predecessor_expansion,
+                       capability_completion=options.capability_completion),
             )
             skill_retriever = KeywordSkillRetriever(skills)
         context = AgentContext(
@@ -121,8 +120,6 @@ async def execute(root, work, spec, settings):
             planner=planner,
             options=options,
             resource_resolver=paths.resolve,
-            answer_contract_lookup=contracts.find,
-            answer_system_prompt=contracts.system_prompt,
             checkpoint=checkpoint,
             code_executor=code,
         )

@@ -11,10 +11,10 @@ import re
 from dataclasses import asdict, dataclass
 
 INVALID_INPUT = re.compile(
-    "^\\s*(?:input\\s+error|invalid\\s+input|parameter\\s+error|输入错误|参数错误)\\s*[:：]", re.I
+    "^\\s*(?:input\\s+error|invalid\\s+input|parameter\\s+error)\\s*:", re.I
 )
 RUNTIME_ERROR = re.compile(
-    "^\\s*(?:runtime\\s+error|execution\\s+error|tool\\s+error|error|执行错误|工具错误)\\s*[:：]",
+    "^\\s*(?:runtime\\s+error|execution\\s+error|tool\\s+error|error)\\s*:",
     re.I,
 )
 

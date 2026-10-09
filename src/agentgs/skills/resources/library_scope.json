@@ -1,5 +1,5 @@
 {
-  "policy": "用户指定只保留旧主项目GeoEval catalog的101工具及其关联Skill/Capability；算法源码基线不切换交付副本。",
+  "policy": "Keep the 101 tools from the previous GeoEval catalog and their related Skills and Capabilities. Do not switch the algorithm source baseline to another delivery copy.",
   "skill_ids": [
     "deep-earth-model-query",
     "earthquake-catalog-analysis",

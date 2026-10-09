@@ -72,13 +72,15 @@ def seatbelt_profile(work, mounts):
         *[str(host) for host, _ in mounts],
     ]
     work = str(Path(work).resolve())
-    read_rules = " ".join(f"(subpath {json.dumps(str(Path(p).resolve()))})" for p in readonly)
+    read_rules = " ".join(
+        f"(subpath {json.dumps(str(Path(p).resolve()), ensure_ascii=False)})" for p in readonly
+    )
     return (
         "(version 1) (deny default) (deny network*) "
         "(allow process*) (allow sysctl-read) (allow mach-lookup) "
         "(allow signal (target self)) "
-        f"(allow file-read* {read_rules} (subpath {json.dumps(work)})) "
-        f"(allow file-write* (subpath {json.dumps(work)}) "
+        f"(allow file-read* {read_rules} (subpath {json.dumps(work, ensure_ascii=False)})) "
+        f"(allow file-write* (subpath {json.dumps(work, ensure_ascii=False)}) "
         '(literal "/dev/null") (literal "/dev/tty"))'
     )
 

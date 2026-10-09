@@ -62,8 +62,10 @@ async def test_shell_uses_venv_and_preserves_work_after_output_truncation(sandbo
     assert second.succeeded and second.data["stdout"] == "42"
     assert second.artifacts
     assert [kind for kind, _ in tools.events.rows] == [
+        "tool.queued",
         "tool.started",
         "tool.completed",
+        "tool.queued",
         "tool.started",
         "tool.completed",
     ]
@@ -160,14 +162,16 @@ async def test_shell_and_direct_python_tool_share_admission_without_nested_deadl
 
 @pytest.mark.parametrize("cancel", [False, True])
 async def test_shell_timeout_and_close_reap_background_children(sandbox_project, cancel):
-    tools = shell_tools(sandbox_project, tool_timeout_seconds=5 if cancel else 0.2)
+    tools = shell_tools(sandbox_project, tool_timeout_seconds=5 if cancel else 0.5)
+    await tools.code_executor.describe_shell(sandbox_project / "data")
+    await tools.coordinator.initialize()
     work = tools.code_executor.work / "shell"
     job = asyncio.create_task(
         tools.execute(
             ToolCall(
                 tool="bash",
                 arguments={
-                    "command": "touch entered; (sleep 0.6; touch leaked) >/dev/null 2>&1 & wait"
+                    "command": "touch entered; (sleep 1.2; touch leaked) >/dev/null 2>&1 & wait"
                 },
             )
         )
@@ -180,7 +184,7 @@ async def test_shell_timeout_and_close_reap_background_children(sandbox_project,
     else:
         result = await job
         assert not result.succeeded and result.error.code == "timeout"
-    await asyncio.sleep(0.7)
+    await asyncio.sleep(1.3)
     assert not (work / "leaked").exists()
     async with tools.coordinator.slot("tools", 1):
         pass

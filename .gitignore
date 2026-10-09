@@ -103,7 +103,13 @@ Desktop.ini
 !/data/ccs.zip
 /data/raw/
 /outputs/
-/forks/
+/forks/*
+!/forks/GeoAgent/
+!/forks/GeoAgent/**
+!/forks/Earth-Agent/
+!/forks/Earth-Agent/**
+/forks/GeoAgent/outputs/
+/forks/Earth-Agent/outputs/
 /tmp/
 
 # Installed external tools and frontend artifacts
@@ -116,3 +122,4 @@ node_modules/
 !scripts/build/**
 /scripts/build/**/__pycache__/
 /scripts/build/**/*.py[cod]
+/model/

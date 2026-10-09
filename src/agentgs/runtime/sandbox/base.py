@@ -4,12 +4,14 @@ import asyncio
 import os
 import shutil
 import sys
+from contextlib import asynccontextmanager
 from pathlib import Path
 from uuid import uuid4
 
 from agentgs.contracts.async_utils import drain, invoke
-from agentgs.contracts.sandbox import SandboxUnavailable
+from agentgs.contracts.sandbox import SandboxResourceLimit, SandboxUnavailable
 from agentgs.runtime.concurrency import RuntimeCoordinator
+from agentgs.runtime.resources import tree_rss
 from agentgs.runtime.sandbox.mounts import OUTPUT_LIMIT, data_mounts
 from agentgs.runtime.sandbox.native import (
     bash_binary,
@@ -17,6 +19,7 @@ from agentgs.runtime.sandbox.native import (
     desktop_env,
     desktop_path,
 )
+from agentgs.runtime.sandbox.storage import check_storage, remove_scratch
 from agentgs.runtime.subprocesses import collect, spawn, stop
 
 
@@ -24,12 +27,20 @@ def shell_runtime_paths():
     paths = [Path("/usr"), Path("/bin"), Path("/lib"), Path("/lib64"), Path(sys.base_prefix)]
     if sys.prefix != sys.base_prefix:
         paths.append(Path(sys.prefix))
+    prefixes = {Path(sys.prefix).resolve(), Path(sys.base_prefix).resolve()}
+    if Path("/") in prefixes:
+        raise SandboxUnavailable("Interpreter prefix must not expose the host root")
     executable = Path(sys.executable).absolute()
     seen = set()
     while executable.is_symlink() and executable not in seen:
+        if len(seen) >= 40:
+            raise SandboxUnavailable("Interpreter alias chain is cyclic or too long")
         seen.add(executable)
         executable = (executable.parent / executable.readlink()).absolute()
-        paths.append(executable.parent.parent)
+        alias = executable.parent.parent
+        paths.append(alias if alias.resolve() in prefixes else executable.parent)
+    if executable in seen:
+        raise SandboxUnavailable("Interpreter alias chain is cyclic or too long")
     return [path for path in dict.fromkeys(paths) if path.exists()]
 
 
@@ -46,7 +57,7 @@ def shell_env():
     }
 
 
-def build_bwrap_command(binary, command, work=None, mounts=(), *, mount_proc=False):
+def build_bwrap_command(binary, command, work=None, mounts=(), *, mount_proc=False, scratch=None):
     argv = [
         binary,
         "--die-with-parent",
@@ -59,13 +70,15 @@ def build_bwrap_command(binary, command, work=None, mounts=(), *, mount_proc=Fal
         "/proc",
         "--dev",
         "/dev",
-        "--tmpfs",
-        "/dev/shm",
-        "--tmpfs",
-        "/tmp",
         "--dir",
         "/data",
     ]
+    if scratch is None:
+        argv.extend(["--tmpfs", "/tmp", "--tmpfs", "/dev/shm"])
+    else:
+        argv.extend(
+            ["--bind", str(scratch / "tmp"), "/tmp", "--bind", str(scratch / "shm"), "/dev/shm"]
+        )
     for path in shell_runtime_paths():
         # Image aliases and interpreter prefixes may point through an NFS root.
         argv.extend(["--ro-bind", str(path.resolve()), str(path)])
@@ -79,7 +92,7 @@ def build_bwrap_command(binary, command, work=None, mounts=(), *, mount_proc=Fal
     return argv
 
 
-def build_shell_command(kind, binary, command, work, mounts, *, mount_proc=False, rootfs=None):
+def build_shell_command(kind, binary, command, work, mounts, *, mount_proc=False, scratch=None):
     if kind != "bwrap":
         raise SandboxUnavailable("Model-authored commands require bwrap; PRoot cannot isolate them")
     return build_bwrap_command(
@@ -88,6 +101,7 @@ def build_shell_command(kind, binary, command, work, mounts, *, mount_proc=False
         work,
         mounts,
         mount_proc=mount_proc,
+        scratch=scratch,
     )
 
 
@@ -103,46 +117,42 @@ class CodeExecutor:
         local = self.root / "tools" / "bin" / name
         return str(local) if local.exists() else shutil.which(name)
 
-    async def run_python(self, code):
-        async with self.coordinator.tool_invocation(
-            self.settings, self.settings.code_timeout_seconds
+    async def run_python(self, code, *, coordinator=None, settings=None, on_started=None):
+        settings = settings or self.settings
+        coordinator = coordinator or self.coordinator
+        async with coordinator.tool_invocation(
+            settings, settings.code_timeout_seconds, sandbox=True
         ):
-            return await self._run_python(code)
+            if on_started is not None:
+                await invoke(on_started)
+            return await self._run_python(code, settings)
 
-    async def _run_python(self, code):
+    async def _run_python(self, code, settings):
         kind, binary, _ = await self._choose_shell_backend()
         work = self.work / uuid4().hex
         await invoke(work.mkdir, parents=True, exist_ok=False)
         await invoke((work / "main.py").write_text, code, encoding="utf-8")
-        if kind == "bwrap":
-            argv = build_bwrap_command(
-                binary,
-                [str(Path(sys.executable).absolute()), "-I", "/work/main.py"],
-                work,
-                mount_proc=self._mount_proc,
+        async with self._scratch_for(work, kind == "bwrap") as scratch:
+            if kind == "bwrap":
+                argv = build_bwrap_command(
+                    binary,
+                    [str(Path(sys.executable).absolute()), "-I", "/work/main.py"],
+                    work,
+                    mount_proc=self._mount_proc,
+                    scratch=scratch,
+                )
+                env = shell_env()
+            else:
+                await invoke((work / ".tmp").mkdir, exist_ok=True)
+                argv = desktop_command(
+                    kind, binary, [sys.executable, "-I", str(work / "main.py")], work, ()
+                )
+                env = desktop_env(work, sys.executable)
+            stdout, stderr, code = await self._execute(
+                argv, work, env, scratch, settings, limited=False
             )
-            env = shell_env()
-        else:
-            await invoke((work / ".tmp").mkdir, exist_ok=True)
-            argv = desktop_command(
-                kind, binary, [sys.executable, "-I", str(work / "main.py")], work, ()
-            )
-            env = desktop_env(work, sys.executable)
-        process = await spawn(
-            *argv,
-            cwd=work,
-            env=env,
-            stdin=asyncio.subprocess.DEVNULL,
-            stdout=asyncio.subprocess.PIPE,
-            stderr=asyncio.subprocess.PIPE,
-            start_new_session=True,
-        )
-        try:
-            stdout, stderr = await collect(process)
-        finally:
-            await drain(asyncio.create_task(stop(process)))
-        if process.returncode:
-            raise RuntimeError(f"Sandbox exited {process.returncode}: {stderr[:2000]}")
+        if code:
+            raise RuntimeError(f"Sandbox exited {code}: {stderr[:2000]}")
         return {
             "stdout": stdout,
             "stderr": stderr,
@@ -172,50 +182,56 @@ class CodeExecutor:
             "work_path": "/work" if namespaced else desktop_path(self.work / "shell"),
         }
 
-    async def run_shell(self, command, *, work, data_root, timeout):
+    async def run_shell(
+        self, command, *, work, data_root, timeout, coordinator=None, settings=None, on_started=None
+    ):
         # Admission, setup and execution all consume the same command deadline.
-        async with self.coordinator.tool_invocation(self.settings, timeout):
-            return await self._run_shell(command, work=work, data_root=data_root)
+        coordinator = coordinator or self.coordinator
+        settings = settings or self.settings
+        async with asyncio.timeout(timeout):
+            work = await invoke(Path(work).resolve)
+            # A queued command in the same persistent workspace consumes no compute slot.
+            async with coordinator.workspace(work):
+                async with coordinator.tool_invocation(settings, timeout, sandbox=True):
+                    if on_started is not None:
+                        await invoke(on_started)
+                    return await self._run_shell(
+                        command, work=work, data_root=data_root, settings=settings
+                    )
 
-    async def _run_shell(self, command, *, work, data_root):
+    async def _run_shell(self, command, *, work, data_root, settings):
         described = await self.describe_shell(data_root)
         await invoke(Path(work).mkdir, parents=True, exist_ok=True)
-        if described["kind"] == "bwrap":
-            argv = build_shell_command(
-                described["kind"],
-                described["binary"],
-                command,
-                work,
-                described["mount_pairs"],
-                mount_proc=described["private_proc"],
+        async with self._scratch_for(work, described["kind"] == "bwrap") as scratch:
+            if described["kind"] == "bwrap":
+                argv = build_shell_command(
+                    described["kind"],
+                    described["binary"],
+                    command,
+                    work,
+                    described["mount_pairs"],
+                    mount_proc=described["private_proc"],
+                    scratch=scratch,
+                )
+                env = shell_env()
+            else:
+                bash = await invoke(bash_binary)
+                if not bash:
+                    raise SandboxUnavailable(
+                        "Desktop demo requires Bash; install Git Bash on Windows"
+                    )
+                await invoke((Path(work) / ".tmp").mkdir, exist_ok=True)
+                argv = desktop_command(
+                    described["kind"],
+                    described["binary"],
+                    [bash, "--noprofile", "--norc", "-c", command],
+                    work,
+                    described["mount_pairs"],
+                )
+                env = desktop_env(work, bash)
+            stdout, stderr, truncated, code = await self._execute(
+                argv, work, env, scratch, settings, limited=True
             )
-            env = shell_env()
-        else:
-            bash = await invoke(bash_binary)
-            if not bash:
-                raise SandboxUnavailable("Desktop demo requires Bash; install Git Bash on Windows")
-            await invoke((Path(work) / ".tmp").mkdir, exist_ok=True)
-            argv = desktop_command(
-                described["kind"],
-                described["binary"],
-                [bash, "--noprofile", "--norc", "-c", command],
-                work,
-                described["mount_pairs"],
-            )
-            env = desktop_env(work, bash)
-        process = await spawn(
-            *argv,
-            cwd=work,
-            env=env,
-            stdin=asyncio.subprocess.DEVNULL,
-            stdout=asyncio.subprocess.PIPE,
-            stderr=asyncio.subprocess.PIPE,
-            start_new_session=True,
-        )
-        try:
-            stdout, stderr, truncated, code = await _capture_limited(process, OUTPUT_LIMIT)
-        finally:
-            await drain(asyncio.create_task(stop(process)))
         return {
             "stdout": stdout,
             "stderr": stderr,
@@ -226,6 +242,79 @@ class CodeExecutor:
                 for key in ("isolation", "data_mount", "network_isolated", "private_proc", "mounts")
             },
         }
+
+    @asynccontextmanager
+    async def _scratch_for(self, work, enabled):
+        scratch = await self._prepare_scratch(work) if enabled else None
+        try:
+            yield scratch
+        finally:
+            if scratch is not None:
+                await drain(asyncio.create_task(invoke(remove_scratch, scratch)))
+
+    async def _prepare_scratch(self, work):
+        scratch = Path(work).parent / (".scratch-" + uuid4().hex)
+
+        def create():
+            scratch.mkdir(parents=True, exist_ok=False)
+            (scratch / "tmp").mkdir()
+            (scratch / "shm").mkdir()
+
+        try:
+            await invoke(create)
+        except BaseException:
+            await drain(asyncio.create_task(invoke(shutil.rmtree, scratch, ignore_errors=True)))
+            raise
+        return scratch
+
+    async def _execute(self, argv, work, env, scratch, settings, *, limited):
+        process = None
+        capture = monitor = None
+        roots = [work] + ([scratch] if scratch is not None else [])
+
+        async def watch_resources():
+            while True:
+                rss = await invoke(tree_rss, process.pid)
+                if rss > settings.default_rss_limit_mb * 1024 * 1024:
+                    raise SandboxResourceLimit(
+                        f"Sandbox process tree exceeds {settings.default_rss_limit_mb} MiB RSS"
+                    )
+                await invoke(check_storage, roots, settings)
+                await asyncio.sleep(0.2)
+
+        async def cleanup():
+            if process is not None:
+                await stop(process)
+            for task in (capture, monitor):
+                if task is not None:
+                    task.cancel()
+            await asyncio.gather(
+                *(t for t in (capture, monitor) if t is not None), return_exceptions=True
+            )
+
+        try:
+            await invoke(check_storage, roots, settings)
+            process = await spawn(
+                *argv,
+                cwd=work,
+                env=env,
+                stdin=asyncio.subprocess.DEVNULL,
+                stdout=asyncio.subprocess.PIPE,
+                stderr=asyncio.subprocess.PIPE,
+                start_new_session=os.name != "nt",
+            )
+            capture = asyncio.create_task(
+                _capture_limited(process, OUTPUT_LIMIT) if limited else collect(process)
+            )
+            monitor = asyncio.create_task(watch_resources())
+            done, _ = await asyncio.wait((capture, monitor), return_when=asyncio.FIRST_COMPLETED)
+            if monitor in done:
+                await monitor
+            output = await capture
+            await invoke(check_storage, roots, settings)
+            return output if limited else (*output, process.returncode)
+        finally:
+            await drain(asyncio.create_task(cleanup()))
 
     async def _choose_shell_backend(self):
         async with self._backend_lock:

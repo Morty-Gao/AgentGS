@@ -138,7 +138,9 @@ def infer_tools(question: str) -> list[str]:
             return ["OceanVerticalProfileDifference"]
         if {"bbox", "region"} <= keyset:
             return ["OceanRegionalMapSummary" if "map" in text else "OceanBBoxArea"]
-    if "自然灾害" in text or ("filters" in locator and "operation" in locator):
+    if "natural-hazard-event-table" in text or (
+        "filters" in locator and "operation" in locator
+    ):
         operation = str(locator.get("operation", "")).casefold()
         chain = ["NaturalHazardLoadEventTable", "NaturalHazardFilterRecords"]
         if operation == "count_records":

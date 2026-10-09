@@ -1,0 +1,82 @@
+"""Evaluate GeoToolEval with the GeoAgent MCTS runner.
+
+Model, endpoint, and request timeout come from llm.toml. The search loop,
+prompts, and tools stay in forks/GeoAgent.
+"""
+
+import sys
+from pathlib import Path
+
+import typer
+
+sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
+
+from _bridge import launch  # noqa: E402
+
+
+def main(
+    project: Path = typer.Option(Path.cwd(), "--project"),
+    output: Path = typer.Option(
+        Path("outputs/evaluations/geoagent/predictions.jsonl"),
+        "--output",
+    ),
+    dataset: Path | None = typer.Option(
+        None, "--dataset", help="Dataset file. Omit to use the prepared GeoToolEval JSONL"
+    ),
+    llm: Path | None = typer.Option(
+        None, "--llm", help="llm.toml path. Omit to use the project file"
+    ),
+    ids: str = typer.Option("", "--ids", help="Comma-separated question ids. Omit to run all"),
+    concurrency: int | None = typer.Option(
+        None,
+        "--concurrency",
+        min=1,
+        max=128,
+        help="Parallel questions. Omit to use llm.toml max_concurrent_requests, otherwise 4",
+    ),
+    rollouts: int = typer.Option(8, "--rollouts", min=1),
+    top_k: int = typer.Option(2, "--top-k", min=1),
+    repairs: int = typer.Option(2, "--repairs", min=0),
+    timeout: float = typer.Option(
+        120.0, "--timeout", min=1, help="Seconds for one generated program"
+    ),
+    retry_failed: bool = typer.Option(
+        False, "--retry-failed", help="Retry failed questions and retain prior attempts"
+    ),
+    retries: int = typer.Option(
+        3,
+        "--retries",
+        min=0,
+        max=10,
+        help="Automatic retries per failed question; 3 means at most 4 attempts",
+    ),
+) -> None:
+    """Run GeoAgent over GeoToolEval and keep one JSONL record per question."""
+    launch(
+        agent="geoagent",
+        fork="GeoAgent",
+        module="run_geotooleval",
+        project=project,
+        output=output,
+        dataset=dataset,
+        llm=llm,
+        ids=ids,
+        concurrency=concurrency,
+        extra=[
+            "--rollouts",
+            str(rollouts),
+            "--top-k",
+            str(top_k),
+            "--repairs",
+            str(repairs),
+            "--timeout",
+            str(timeout),
+            "--retries",
+            str(retries),
+            *(["--retry-failed"] if retry_failed else []),
+        ],
+    )
+
+
+if __name__ == "__main__":
+    typer.run(main)

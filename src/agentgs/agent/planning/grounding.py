@@ -13,6 +13,8 @@ def ground_plan(
     tool_schemas=None,
     tool_next=None,
     artifact_types=None,
+    execution_plan=None,
+    tool_selection="model",
 ):
     available = set(available_tools)
     inferred = list(dict.fromkeys(inferred_tools or plan.get("inferred_tools", [])))
@@ -47,6 +49,17 @@ def ground_plan(
             )
             if selected:
                 chain.append(selected)
+    if tool_selection == "first_valid":
+        for i, name in enumerate(chain):
+            cid = execution_plan.steps[i].capability_id if execution_plan else None
+            matched = [key for key, rows in candidates.items() if any(r["tool_name"] == name for r in rows)]
+            cid = cid or (matched[0] if len(matched) == 1 else None)
+            if cid is None:
+                unavailable.append(f"Ambiguous capability for tool-selection control: {name}")
+                continue
+            eligible = sorted(row["tool_name"] for row in candidates.get(cid, []) if row["available"])
+            if eligible:
+                chain[i] = eligible[0]
     bindings, recovery = [], []
     for step in plan["steps"]:
         sid = step["skill_id"]
@@ -119,6 +132,41 @@ def ground_plan(
         )
         previous = name
     errors = list(unavailable)
+    scope_constraints = plan.get("capability_expansion", {}).get("instances", [])
+    positions = {}
+    for node in scope_constraints:
+        cid = node["capability_id"]
+        choices = graph.capability_tools.get(cid, [])
+        matches = [i for i, name in enumerate(chain) if name in choices]
+        if matches:
+            positions[node["id"]] = matches
+    for node in scope_constraints:
+        if node["id"] not in positions:
+            errors.append(f"Missing required capability: {node['id']}")
+        for dep in node["depends_on"]:
+            if dep not in positions or not any(
+                before < after for before in positions[dep] for after in positions.get(node["id"], [])
+            ):
+                errors.append(f"Unsatisfied capability dependency: {dep} -> {node['id']}")
+    for missing in plan.get("missing_capabilities", []):
+        cid = missing.split("::")[-1]
+        if not any(name in graph.capability_tools.get(cid, []) for name in chain):
+            errors.append(f"Unresolved capability: {missing}")
+    if execution_plan:
+        by_id = {step.id: i for i, step in enumerate(execution_plan.steps)}
+        for i, step in enumerate(execution_plan.steps):
+            executions[i]["instance_id"] = step.id
+            executions[i]["depends_on_tools"] = list(step.depends_on)
+            for dep in step.depends_on:
+                if dep not in by_id or by_id[dep] >= i:
+                    errors.append(f"Invalid execution dependency: {dep} -> {step.id}")
+            executions[i]["dependency_edge_valid"] = all(
+                dep in by_id and by_id[dep] < i for dep in step.depends_on
+            )
+    else:
+        for row in executions:
+            if next_edges and not row["dependency_edge_valid"]:
+                errors.append(f"Undeclared serial tool dependency before {row['tool_name']}")
     if proposed and not chain:
         errors.append("No proposed tool is available in the registry")
     return {
@@ -130,9 +178,11 @@ def ground_plan(
         "validation": {
             "valid": not errors,
             "errors": list(dict.fromkeys(errors)),
-            "schema_checked": bool(schemas),
-            "dependency_edges_checked": bool(next_edges),
-            "capability_graph_checked": bool(candidates),
+            "schema_checked": False,
+            "schemas_available": bool(schemas),
+            "schema_status": "deferred_to_argument_validation",
+            "dependency_edges_checked": bool(execution_plan or next_edges or scope_constraints),
+            "capability_graph_checked": bool(scope_constraints),
             "missing_capabilities": list(plan.get("missing_capabilities", [])),
         },
         "capability_candidates": candidates,

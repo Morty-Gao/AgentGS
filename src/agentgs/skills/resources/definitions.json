@@ -22,9 +22,7 @@
       "SEMUCB-WM1",
       "Moho",
       "lithosphere",
-      "dlnVs",
-      "地球结构",
-      "莫霍"
+      "dlnVs"
     ],
     "goal": {
       "capability": "deep-earth-model-query",
@@ -292,9 +290,7 @@
       "earthquake",
       "USGS",
       "magnitude",
-      "震级",
-      "earthquake catalog",
-      "地震目录"
+      "earthquake catalog"
     ],
     "goal": {
       "capability": "earthquake-catalog-analysis",
@@ -564,9 +560,7 @@
       "event id",
       "USGS event",
       "LITHO1.0",
-      "SEMUCB",
-      "震源",
-      "事件采样"
+      "SEMUCB"
     ],
     "goal": {
       "capability": "earthquake-event-model-sampling",
@@ -837,8 +831,6 @@
       "forest",
       "river",
       "park",
-      "地理语义",
-      "空间查询",
       "locality",
       "localities",
       "county",
@@ -1112,9 +1104,7 @@
       "deposit",
       "commodity",
       "mineral",
-      "critical mineral",
-      "矿产",
-      "矿床"
+      "critical mineral"
     ],
     "goal": {
       "capability": "mineral-deposit-search",
@@ -1385,9 +1375,7 @@
       "deposit records",
       "lithium",
       "copper",
-      "mineral ranking",
-      "关键矿产",
-      "资源排名"
+      "mineral ranking"
     ],
     "goal": {
       "capability": "mineral-resource-ranking",
@@ -1662,10 +1650,7 @@
       "SSP",
       "IPCC",
       "GISTEMP",
-      "deep time",
-      "气候",
-      "温度异常",
-      "情景"
+      "deep time"
     ],
     "goal": {
       "capability": "climate-scenario-analysis",
@@ -1970,9 +1955,7 @@
       "renewable",
       "nearest",
       "distance",
-      "bounding box",
-      "能源设施",
-      "距离"
+      "bounding box"
     ],
     "goal": {
       "capability": "energy-spatial-analysis",
@@ -2254,9 +2237,7 @@
       "capacity growth",
       "renewable consumption",
       "population",
-      "energy transition",
-      "装机容量",
-      "能源转型"
+      "energy transition"
     ],
     "goal": {
       "capability": "energy-capacity-transition",
@@ -2535,9 +2516,7 @@
       "GLODAP",
       "fCO2",
       "TCO2",
-      "ocean carbon",
-      "海洋碳",
-      "海洋观测"
+      "ocean carbon"
     ],
     "goal": {
       "capability": "ocean-carbon-observation",
@@ -2813,9 +2792,7 @@
       "flag",
       "duplicate",
       "profile difference",
-      "surface deep match",
-      "剖面质控",
-      "去重"
+      "surface deep match"
     ],
     "goal": {
       "capability": "ocean-profile-qc",
@@ -3090,9 +3067,7 @@
       "station distance",
       "ocean bbox",
       "regional map",
-      "study area",
-      "海洋空间",
-      "区域地图"
+      "study area"
     ],
     "goal": {
       "capability": "ocean-spatial-analysis",
@@ -3369,9 +3344,7 @@
       "coordinate",
       "DMS",
       "bearing",
-      "distance",
-      "深时坐标",
-      "方位角"
+      "distance"
     ],
     "goal": {
       "capability": "deep-time-coordinate-spatial",
@@ -3653,9 +3626,7 @@
       "validate geometry",
       "nearest neighbor",
       "buffer",
-      "overlay",
-      "地学矢量",
-      "空间叠加"
+      "overlay"
     ],
     "goal": {
       "capability": "deep-time-vector-workflow",
@@ -3966,9 +3937,7 @@
       "raster",
       "zonal statistics",
       "interpolate",
-      "deep-time map",
-      "插值",
-      "分区统计"
+      "deep-time map"
     ],
     "goal": {
       "capability": "deep-time-raster-zonal",
@@ -4265,9 +4234,7 @@
       "facility",
       "DMS",
       "bearing",
-      "distance",
-      "碳捕获",
-      "封存设施"
+      "distance"
     ],
     "goal": {
       "capability": "ccs-coordinate-spatial",
@@ -4552,8 +4519,7 @@
       "leak",
       "buffer",
       "overlay",
-      "MRV",
-      "封存监测"
+      "MRV"
     ],
     "goal": {
       "capability": "ccs-mrv-workflow",
@@ -4868,9 +4834,7 @@
       "injection intensity",
       "reservoir pressure",
       "IDW",
-      "zonal",
-      "CCS插值",
-      "MRV地图"
+      "zonal"
     ],
     "goal": {
       "capability": "ccs-raster-zonal",
@@ -5165,10 +5129,7 @@
       "Landsat",
       "Sentinel",
       "GeoTIFF",
-      "files",
-      "遥感",
-      "影像检索",
-      "波段"
+      "files"
     ],
     "goal": {
       "capability": "remote-sensing-data-discovery",
@@ -5443,9 +5404,7 @@
       "NDSI",
       "NDTI",
       "cloud mask",
-      "thermal",
-      "云掩膜",
-      "指数"
+      "thermal"
     ],
     "goal": {
       "capability": "remote-sensing-preprocessing",
@@ -5767,9 +5726,7 @@
       "sum",
       "ratio",
       "subtract",
-      "raster statistics",
-      "栅格统计",
-      "变化"
+      "raster statistics"
     ],
     "goal": {
       "capability": "remote-sensing-raster-statistics",
@@ -6081,9 +6038,7 @@
       "hotspot",
       "threshold",
       "snow loss",
-      "fire increase",
-      "变化检测",
-      "热点"
+      "fire increase"
     ],
     "goal": {
       "capability": "remote-sensing-change-detection",
@@ -6402,9 +6357,7 @@
       "Sen slope",
       "Mann-Kendall",
       "kurtosis",
-      "coefficient of variation",
-      "趋势",
-      "统计分布"
+      "coefficient of variation"
     ],
     "goal": {
       "capability": "remote-sensing-trend-distribution",
@@ -6682,9 +6635,7 @@
       "EM-DAT",
       "disaster event",
       "deaths",
-      "damage",
-      "灾害事件",
-      "自然灾害"
+      "damage"
     ],
     "goal": {
       "capability": "natural-hazard-table-analytics",

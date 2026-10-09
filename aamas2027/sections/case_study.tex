@@ -3,7 +3,7 @@
 
 We use an illustrative case to show how the system combines capabilities from different Skills, fills missing steps, and forms concrete tool calls. Consider the task: given several remote-sensing rasters of the same region, create and return a pixel-wise mean composite, compute the mean of its valid pixels, state whether that mean exceeds a given reference value, and report the difference. The inputs represent the same variable, their spatial grids are aligned, and the reference value uses the same units as the raster values.
 
-\input{figures/case_study}
+\input{figures/fig_case_study}
 
 \emph{Skill Retrieval} returns only RasterCompose (Skill $A$) and ReferenceCompare (Skill $B$). \emph{Skill Planning} selects InputCheck ($w$) and RasterMean ($u$) from the former, and ScalarDiff ($v$) and SignCheck ($z$) from the latter. InputCheck verifies the variable and spatial-grid requirements. RasterMean produces the mean raster from the validated image list, giving $w\to u$. ScalarDiff returns the difference between the value under comparison and the reference; SignCheck uses that difference to determine whether the value is above, equal to, or below the reference, giving $v\to z$. Hypergraph Composition expands mandatory predecessors declared by the selected strategies and retains provenance and candidate-tool scopes. At this stage, the plan consists of two disconnected fragments: compositing produces a raster file, whereas differencing requires a numerical input. The operation computing the mean of the composite is still missing.
 

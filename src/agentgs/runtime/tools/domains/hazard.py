@@ -27,7 +27,8 @@ def _hazard_table():
             [{key: None if value == "" else value for key, value in row.items()} for row in records]
         )
     return pd.read_excel(
-        paths().root / "data/raw/hazard/10.自然灾害与极端地震.xlsx", sheet_name="Sheet1"
+        paths().root / "data/raw/hazard/10.natural-hazards-and-extreme-earthquakes.xlsx",
+        sheet_name="Sheet1",
     )
 
 
@@ -65,7 +66,7 @@ def _hazard_load(params: dict[str, Any]) -> str:
     table = _hazard_table()
     source = paths().data("hazard", "events.jsonl")
     if not source.is_file():
-        source = paths().root / "data/raw/hazard/10.自然灾害与极端地震.xlsx"
+        source = paths().root / "data/raw/hazard/10.natural-hazards-and-extreme-earthquakes.xlsx"
     return _result(
         source=source,
         sheet="Sheet1",

@@ -9,6 +9,7 @@ from copy import deepcopy
 
 from agentgs.agent.planning.capabilities import CapabilityGraph
 from agentgs.agent.planning.constraints import check_constraints
+from agentgs.agent.planning.module_expansion import expand_requirements
 from agentgs.agent.planning.selection import select_skill_ids
 from agentgs.agent.retrieval.scored_skills import (
     WeightedSkillRetriever,
@@ -61,7 +62,7 @@ def query_profile(query):
         ),
         "has_spatial": bool(
             re.search(
-                r"\b(?:crs|coordinate|bbox|distance|nearest|overlay|zone|map|raster|vector|spatial|extent)\b|空间|坐标|地图|栅格|矢量",
+                r"\b(?:crs|coordinate|bbox|distance|nearest|overlay|zone|map|raster|vector|spatial|extent)\b",
                 clean,
                 re.I,
             )
@@ -106,10 +107,14 @@ class SkillPlanner:
         extension_capabilities=None,
         mapping_extensions=True,
         rs_local_contracts=True,
+        predecessor_expansion=True,
+        capability_completion=True,
     ):
         self.skills = {skill["id"]: deepcopy(skill) for skill in definitions}
         self.mapping_extensions = mapping_extensions
         self.rs_local_contracts = rs_local_contracts
+        self.predecessor_expansion = predecessor_expansion
+        self.capability_completion = capability_completion
         self.graph = CapabilityGraph(
             self.skills.values(), extension_capabilities=extension_capabilities
         )
@@ -122,7 +127,11 @@ class SkillPlanner:
         selected = select_skill_ids(
             self.skills.values(), query, inferred, mapping_extensions=self.mapping_extensions
         )
-        expansion = self.graph.expand(selected, query)
+        expansion = expand_requirements(
+            self.graph, selected, query,
+            predecessor_expansion=self.predecessor_expansion,
+            capability_completion=self.capability_completion,
+        )
         steps, constraints, produced = [], [], []
         for index, sid in enumerate(selected, 1):
             skill = self.skills[sid]
@@ -175,6 +184,7 @@ class SkillPlanner:
             {
                 "query": query,
                 "mode": "skill_guided",
+                "declarations": [deepcopy(self.skills[sid]) for sid in dict.fromkeys([*selected, *expansion["skill_ids"]])],
                 "candidates": [match.as_dict() for match in matches],
                 "steps": steps,
                 "inferred_tools": inferred,
@@ -203,7 +213,8 @@ class SkillPlanner:
         )
 
 
-def builtin_planner(*, mapping_extensions=True, rs_local_contracts=True):
+def builtin_planner(*, mapping_extensions=True, rs_local_contracts=True,
+                    predecessor_expansion=True, capability_completion=True):
     """Assemble the frozen declaration profile without process-global flags."""
     from agentgs.skills.definitions import load_capability_extensions, load_skill_definitions
 
@@ -215,4 +226,6 @@ def builtin_planner(*, mapping_extensions=True, rs_local_contracts=True):
         extension_capabilities=load_capability_extensions(),
         mapping_extensions=mapping_extensions,
         rs_local_contracts=rs_local_contracts,
+        predecessor_expansion=predecessor_expansion,
+        capability_completion=capability_completion,
     )

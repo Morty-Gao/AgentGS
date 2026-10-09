@@ -46,7 +46,7 @@ class Shell:
             "mounts": ["/data/climate"],
         }
 
-    async def run_shell(self, command, *, work, data_root, timeout):
+    async def run_shell(self, command, *, work, data_root, timeout, **kwargs):
         self.commands.append(command)
         return {
             "stdout": "42\n",
@@ -140,7 +140,6 @@ async def test_worker_data_only_skips_skills_and_tool_retrieval(project, monkeyp
         "data_exploration",
         "data_exploration",
         "data_exploration",
-        "final_answer_generation",
     ]
     assert {"skill_retrieval", "skill_plan", "tool_retrieval", "tool_planning"}.isdisjoint(
         {event["type"] for event in result.execution_events()}
@@ -173,7 +172,8 @@ async def test_command_budget_ends_exploration_before_another_model_turn(project
         "data_exploration",
         "final_answer_generation",
     ]
-    assert result.tool_chain_completed is False
+    assert result.action_budget_exhausted
+    assert result.tool_chain_completed is True
     assert result.provenance["effective_algorithm"]["allow_rule_planning"] is False
 
 

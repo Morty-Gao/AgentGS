@@ -7,7 +7,7 @@ A task can require not only statistical and comparison tools but also propagatio
 Figure~\ref{fig:architecture} shows four components: an interactive frontend, an agent orchestration service, knowledge and capability resources, and a tool execution service. Users submit natural-language questions and resources through the frontend. Orchestration retrieves Skills, organizes capabilities and dependencies, completes missing operations, and forms a capability plan. Knowledge and capability resources supply strategies, capability-to-tool mappings, and tool associations. Concrete tools are invoked by the execution service through a unified interface.
 
 After planning, orchestration selects tools satisfying each capability instance's constraints and delegates calls to execution. The execution service accesses interfaces by tool identifier, supplies parameters and resources, and returns results or failure information. Orchestration decides whether to continue or handle failure under \papersection{sec:execution}{3.5}. Answers and feedback return to the frontend, connecting planning, execution, and result presentation within one task.
-\input{figures/architecture}
+\input{figures/fig_architecture}
 
 \subsection{Tool Integration and Data Propagation}
 \label{sec:tool-integration}

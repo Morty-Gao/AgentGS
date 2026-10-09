@@ -14,9 +14,11 @@ from agentgs.agent.execution.artifacts import ArtifactRegistry
 from agentgs.agent.execution.scientific import overlay_scientific_tool_schema
 from agentgs.agent.execution.service import ExecutionService
 from agentgs.agent.planning.geosparql import _heuristic_geosparql_query
+from agentgs.agent.planning.instances import ExecutionPlan, PlanStep, resolve_inputs, reuse_key
 from agentgs.agent.planning.model_stages import ModelStages
 from agentgs.agent.planning.routing.entry import infer_tools, normalize_plan
-from agentgs.agent.state import AgentExecutionError, RunState
+from agentgs.agent.state import AgentExecutionError, ModelProtocolError, RunState
+from agentgs.client.errors import BudgetExceeded
 from agentgs.config.algorithm import AlgorithmSettings, resolve_algorithm
 from agentgs.contracts.async_utils import drain, invoke
 from agentgs.contracts.catalog import load_catalog
@@ -117,11 +119,7 @@ class AgentEngine:
             )
         stages = ModelStages(
             state,
-            lambda q: (
-                task.output_contract
-                or (context.answer_contract_lookup(q) if context.answer_contract_lookup else None)
-            ),
-            context.answer_system_prompt,
+            lambda q: task.output_contract,
         )
         execution = ExecutionService(state, stages)
         answering = AnsweringService(state, stages)
@@ -168,11 +166,16 @@ class AgentEngine:
             from agentgs.agent.planning.skills import builtin_planner
 
             planner = context.planner or await invoke(
-                builtin_planner, rs_local_contracts=options.rs_local_contracts
+                builtin_planner, rs_local_contracts=options.rs_local_contracts,
+                predecessor_expansion=options.predecessor_expansion, capability_completion=options.capability_completion
             )
+            planner = copy(planner)
+            planner.predecessor_expansion = options.modules.predecessor_expansion
+            planner.capability_completion = options.modules.capability_completion
+            await state.emit("module_policy", {"effective": options.modules.model_dump(), **options.module_resolution})
         registry = await invoke(ArtifactRegistry, question)
         scope.set_registry(registry)
-        inferred = [name for name in infer_tools(question) if name in allowed]
+        inferred = [name for name in infer_tools(question) if name in allowed] if options.routing_hints else []
         plan = None
         bridge_report = None
         # Authorized offline GeoQuestions route retains the original early-route position.
@@ -218,16 +221,17 @@ class AgentEngine:
                 completed=result.succeeded,
                 tool_attempts_exhausted=not result.succeeded,
             )
-        if context.tool_retriever is None:
+        if context.tool_retriever is None and options.candidate_pool != "all_registered":
             raise FileNotFoundError(
                 "Frozen tool KG and embedding backend must be prepared for the staged agent"
             )
         total_output = ""
-        resume_prefix = []
+        completed_instances = {}
         last_output = ""
         attempts = options.plan_attempts
         previous_bridge = None
         for attempt in range(attempts):
+            execution_started = False
             try:
                 if skill_guided:
                     if plan is None:
@@ -237,9 +241,12 @@ class AgentEngine:
                     await state.emit(
                         "artifact_registry_init", {"content": registry.compact_context()}
                     )
-                retrieved = await context.tool_retriever.retrieve(
-                    SimpleNamespace(query_str=question)
-                )
+                if options.candidate_pool == "all_registered":
+                    retrieved = [[spec.id, "has the functionality that", spec.description]
+                                 for spec in context.tools.specs()]
+                    retrieved += [[spec.id, "inputs", spec.input_schema] for spec in context.tools.specs()]
+                else:
+                    retrieved = await context.tool_retriever.retrieve(SimpleNamespace(query_str=question))
                 retrieved = await invoke(snapshot_relations, retrieved)
                 available = available_tool_names(retrieved, allowed)
                 await state.emit(
@@ -253,7 +260,7 @@ class AgentEngine:
                         "max_tools": 20,
                     },
                 )
-                if skill_guided:
+                if skill_guided and options.candidate_pool != "all_registered":
                     candidates = planner.graph.candidates(
                         [row["capability_id"] for row in plan.capabilities], names, inferred
                     )
@@ -317,6 +324,9 @@ class AgentEngine:
                                 "source": "resource_inferred_tools",
                             },
                         )
+                instances = proposed if isinstance(proposed, ExecutionPlan) else ExecutionPlan([
+                    PlanStep(id=f"rule_{i}", tool=name, purpose=f"Execute {name}") for i, name in enumerate(proposed, 1)
+                ])
                 if not options.allow_rule_planning:
                     chain = [name for name in proposed if name in set(available)]
                     if not chain:
@@ -358,8 +368,23 @@ class AgentEngine:
                         ):
                             bridge_state[key] = previous_bridge[key]
                     previous_bridge = bridge_state
+                instances = instances.align(chain)
                 if skill_guided:
-                    schemas = await invoke(grounding_schemas, context.tool_retriever, chain)
+                    if options.modules.tool_selection == "first_valid":
+                        from agentgs.agent.planning.module_selection import select_first_valid
+
+                        fixed = {
+                            index: chain[index - 1]
+                            for index in (bridge_state or {}).get("capability_indices", {}).values()
+                            if 0 < index <= len(chain)
+                        }
+                        instances, decisions = select_first_valid(
+                            planner.graph, plan.as_dict(), instances, available,
+                            {spec.id: spec for spec in context.tools.specs()}, fixed_tools=fixed,
+                        )
+                        chain = list(instances)
+                        await state.emit("tool_selection", {"policy": "first_valid", "instances": decisions})
+                    schemas = await invoke(grounding_schemas, context.tool_retriever, chain) if context.tool_retriever else {}
                     grounded = ground_plan(
                         planner.graph,
                         plan.as_dict(),
@@ -368,43 +393,62 @@ class AgentEngine:
                         proposed_chain=chain,
                         tool_schemas=schemas,
                         tool_next=load_catalog()["next"],
+                        execution_plan=instances,
+                        tool_selection="model",
                     )
                     await state.emit("tool_grounding", {"content": grounded})
+                    if not grounded["validation"]["valid"]:
+                        total_output += "\nGrounding rejected: " + json.dumps(grounded["validation"])
+                        raise ValueError("Grounding constraints were not satisfied")
                     chain = grounded["tool_chain"]
+                    instances = instances.align(chain)
                 if not chain:
                     raise RuntimeError("Planning produced no available tool instances")
                 await state.emit("plan.created", {"source": plan_source, "tools": chain})
-                skip = 0
-                while (
-                    skip < len(resume_prefix)
-                    and skip < len(chain)
-                    and resume_prefix[skip] == chain[skip]
-                ):
-                    skip += 1
-                if skip:
-                    await state.emit(
-                        "plan_resume",
-                        {"skipped_successful_prefix": chain[:skip], "resume_index": skip + 1},
-                    )
+                outputs, upstream_keys = {}, {}
                 occurrences = {}
                 current = ""
                 failed = False
                 for index, name in enumerate(chain, 1):
                     occurrence = occurrences.get(name, 0)
                     occurrences[name] = occurrence + 1
-                    if index <= skip:
+                    instance = instances.steps[index - 1]
+                    explicit_inputs = resolve_inputs(instance, outputs)
+                    cache_key = reuse_key(instance, upstream_keys, question)
+                    if cache_key and cache_key in completed_instances:
+                        cached = completed_instances[cache_key]
+                        outputs[instance.id] = json.loads(cached.output)
+                        upstream_keys[instance.id] = cache_key
+                        current = cached.output
+                        await state.emit("plan_resume", {"instance_id": instance.id, "reuse_key": cache_key,
+                                                         "tool_name": name, "physical_execution": False})
                         continue
                     step = {
                         "execution_index": index,
                         "occurrence_index": occurrence,
                         "occurrence_count": chain.count(name),
                         "tool_chain": chain,
+                        "instance": instance.model_dump(mode="json"),
+                        "resolved_inputs": explicit_inputs,
                     }
                     if bridge_state and index in bridge_state["step_bindings"]:
                         step["shared_bridge"] = {"state": bridge_state, "execution_index": index}
+                    execution_started = True
                     result = await execution.run(
-                        name, question, registry, total_output, current, step
+                        name, question, registry, total_output, current, step,
+                        initial_arguments=explicit_inputs,
                     )
+                    if result.succeeded:
+                        try:
+                            decoded = json.loads(result.output)
+                        except ValueError:
+                            decoded = {"text": result.output}
+                        outputs[instance.id] = decoded
+                        def numeric_tree(value):
+                            return isinstance(value, (int, float, bool)) or (isinstance(value, list) and all(numeric_tree(v) for v in value)) or (isinstance(value, dict) and all(numeric_tree(v) for v in value.values()))
+                        if cache_key and numeric_tree(decoded) and json.loads(result.final_input) == explicit_inputs:
+                            completed_instances[cache_key] = result
+                            upstream_keys[instance.id] = cache_key
                     last_output = result.render_for_agent()
                     total_output += last_output
                     current = result.output
@@ -423,18 +467,17 @@ class AgentEngine:
                         record_shared_bridge_execution(bridge_state, index, result, registry)
                     if not result.succeeded:
                         failed = True
-                        resume_prefix = chain[: index - 1]
                         await state.emit(
-                            "execution_feedback", {"status": "replanning", "tool_name": name}
+                            "execution_feedback", {"status": "replanning" if options.execution_recovery else "recovery_disabled", "tool_name": name}
                         )
                         break
                 if failed:
-                    if attempt + 1 < attempts:
+                    if options.execution_recovery and attempt + 1 < attempts:
                         continue
                     return await answering.generate(
                         question, total_output, completed=False, tool_attempts_exhausted=True
                     )
-                if bridge_state:
+                if bridge_state and options.bridge_diagnostics:
                     await run_shared_bridge_comparisons(
                         bridge_state,
                         tool_runner=execution.comparison,
@@ -443,11 +486,14 @@ class AgentEngine:
                     )
                 # Successful chains are never rerun because final generation or validation failed.
                 return await answering.generate(question, total_output)
-            except FinalAnswerGenerationError:
+            except (FinalAnswerGenerationError, ModelProtocolError, BudgetExceeded):
                 raise
             except Exception as exc:
                 if getattr(exc, "status_code", None) in (401, 403):
                     raise
+                if not options.execution_recovery and execution_started:
+                    await state.emit("execution_feedback", {"status": "recovery_disabled", "error_type": type(exc).__name__})
+                    return await answering.generate(question, total_output, completed=False, tool_attempts_exhausted=True)
                 await state.emit(
                     "plan_retry", {"attempt": attempt + 1, "error_type": type(exc).__name__}
                 )
@@ -483,5 +529,15 @@ class AgentEngine:
         )
         if report["enabled"]:
             await state.emit("shared_capability_bridge_search", {"content": report})
+        selected = list(dict.fromkeys(row["skill_id"] for row in plan.steps))
+        selected += [sid for sid in plan.capability_expansion.get("skill_ids", []) if sid not in selected]
+        plan.declarations = [deepcopy(planner.skills[sid]) for sid in selected]
+        from agentgs.agent.planning.module_context import planning_context
+
+        representation = planning_context(plan.as_dict(), state.context.options.modules.planning_structure)
+        await state.emit("planning_representation", {
+            "structure": representation["representation"],
+            "declaration_sha256": representation["declaration_sha256"],
+        })
         await self._record_skill(state, plan)
         return plan, report

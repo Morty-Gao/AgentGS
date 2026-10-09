@@ -34,7 +34,7 @@ async def test_llm_tool_loop_without_live_provider(project):
                                 "type": "function",
                                 "function": {
                                     "name": "submit_tool_plan",
-                                    "arguments": '{"tools":["DeepEarthQueryUSGSCatalog"]}',
+                                    "arguments": '{"steps":[{"id":"s1","tool":"DeepEarthQueryUSGSCatalog","purpose":"Compute requested result"}]}',
                                 },
                             }
                         ],

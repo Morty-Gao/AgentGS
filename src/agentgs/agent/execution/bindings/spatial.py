@@ -103,14 +103,14 @@ def apply(state):
     if state.tool_name.endswith("RenderMap"):
         field_rules = (
             (
-                ("net stored", "net-stored", "co2_net_stored_tonnes", "净封存"),
+                ("net stored", "net-stored", "co2_net_stored_tonnes"),
                 "co2_net_stored_tonnes",
             ),
-            (("injection", "注入"), "co2_injected_tonnes"),
-            (("reservoir pressure", "pressure", "压力"), "avg_reservoir_pressure_MPa"),
-            (("abundance", "丰度"), "abundance"),
-            (("geological age", "by age", "age field", "年龄"), "age"),
-            (("zone", "分区"), "zone_id"),
+            (("injection",), "co2_injected_tonnes"),
+            (("reservoir pressure", "pressure"), "avg_reservoir_pressure_MPa"),
+            (("abundance",), "abundance"),
+            (("geological age", "by age", "age field"), "age"),
+            (("zone",), "zone_id"),
         )
         lowered_question = state.clean_question.casefold()
         for phrases, field in field_rules:

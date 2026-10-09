@@ -20,7 +20,7 @@ class SampleDataset(Dataset):
                 category="Demo",
                 question="What is 2?",
                 expected_answer="2",
-                answer_type="单数值结果",
+                answer_type="single_number",
                 input_resource={"source_id": 1, "gold_answer": "PRIVATE"},
                 gold_steps=({"tool_name": "T", "arguments": {"x": 1}},),
             )

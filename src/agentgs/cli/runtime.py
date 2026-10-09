@@ -16,11 +16,18 @@ class SandboxMode(StrEnum):
     DISABLED = "disabled"
 
 
+class ToolBackend(StrEnum):
+    PROCESS = "process"
+    THREAD = "thread"
+
+
 Concurrency = Annotated[
     int | None, typer.Option("--concurrency", min=1, max=128, help="Maximum concurrent tasks")
 ]
 ModelConcurrency = Annotated[int | None, typer.Option("--model-concurrency", min=1, max=128)]
 ToolConcurrency = Annotated[int | None, typer.Option("--tool-concurrency", min=1, max=128)]
+SandboxConcurrency = Annotated[int | None, typer.Option("--sandbox-concurrency", min=1, max=128)]
+SandboxDiskLimit = Annotated[int | None, typer.Option("--sandbox-disk-limit-mb", min=1)]
 QueueCapacity = Annotated[int | None, typer.Option("--queue-capacity", min=1)]
 ModelTimeout = Annotated[float | None, typer.Option("--model-timeout", min=0.001)]
 ToolTimeout = Annotated[float | None, typer.Option("--tool-timeout", min=0.001)]
@@ -50,6 +57,10 @@ WorkerPython = Annotated[
     Path | None,
     typer.Option("--worker-python", help="Worker Python path, relative to project or absolute"),
 ]
+ToolBackendOption = Annotated[
+    ToolBackend | None,
+    typer.Option("--tool-backend", help="Scientific tool execution backend"),
+]
 
 
 def runtime_settings(
@@ -66,14 +77,20 @@ def runtime_settings(
     queue_capacity: int | None = None,
     model_timeout: float | None = None,
     tool_timeout: float | None = None,
+    tool_backend: str | None = None,
+    sandbox_concurrency: int | None = None,
+    sandbox_disk_limit_mb: int | None = None,
 ) -> RuntimeSettings:
     values = RuntimeSettings().model_dump()
     overrides = {
         "max_concurrent_model_calls": model_concurrency,
         "max_concurrent_tool_calls": tool_concurrency,
+        "max_concurrent_sandbox_calls": sandbox_concurrency,
+        "sandbox_disk_limit_mb": sandbox_disk_limit_mb,
         "max_pending_tasks": queue_capacity,
         "model_timeout_seconds": model_timeout,
         "tool_timeout_seconds": tool_timeout,
+        "tool_backend": tool_backend,
         "max_concurrent_tasks": concurrency,
         "default_timeout_seconds": timeout,
         "default_rss_limit_mb": rss_limit_mb,

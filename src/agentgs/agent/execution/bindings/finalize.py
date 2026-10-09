@@ -26,7 +26,7 @@ def apply(state):
             "rs_auto_consecutive_batch": state.rs_auto_consecutive_batch,
             "rs_requires_composite": bool(
                 re.search(
-                    "\\b(?:average|mean)\\s+(?:raster|image|map)\\b|\\bcomposit\\w*\\b|平均图|合成图",
+                    "\\b(?:average|mean)\\s+(?:raster|image|map)\\b|\\bcomposit\\w*\\b",
                     state.clean_question,
                     re.I,
                 )
