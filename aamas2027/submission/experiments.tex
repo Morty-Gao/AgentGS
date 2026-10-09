@@ -1,42 +1,36 @@
 \section{Experiments}
 \label{sec:experiments}
-\subsection{Setup and Main Results}
-The main experiment covers all 603 GeoToolEval records; ablations use a fixed 57-record subset. Results use mean FAS with failures and partial-credit cases retained. AgentGS uses GPT-5.6 Terra, and main results are computed from its first complete run. GeoAgent and Earth-Agent use the same backbone. Language-model baselines answer directly: DeepSeek V4 Pro, GPT-5.6 Terra, GPT-5.4, Qwen-Plus, and GeoGPT.
+We compare answers and tool-workflow consistency while distinguishing configuration differences from attributable module effects. The illustrative case explains the mechanism and does not substitute for generalization or runtime-cost experiments.
 
+\subsection{Setup and Main Results}
+The main experiment covers all 603 GeoToolEval records; configuration comparisons use a fixed 57-record subset. FAS, TSF1, and TOS average per-task scores with failures retained. AgentGS uses GPT-5.6 Terra; main FAS values come from its first complete run, retaining partial credit. GeoAgent and EarthAgent use the same backbone. Direct-answer baselines are DeepSeek V4 Pro, GPT-5.6 Terra, GPT-5.4, Qwen-Plus, and GeoGPT. Process metrics compare successful calls from the three agents in the same tool environment against the same reference chains; direct-answer models have no tool traces.
 \input{tables/main_results}
 
-Table~\ref{tab:main-results} reports mean FAS of 0.8731 for AgentGS, compared with 0.7804 for GeoAgent and 0.3137 for direct answers from the same GPT-5.6 Terra backbone. AgentGS also outperforms the other evaluated language-model baselines. Its single-step, two- to three-step, and at-least-four-step scores are 0.9425, 0.7557, and 0.6167, respectively. Figure~\ref{fig:performance} shows overall and domain results. Longer chains are concentrated in remote sensing, so domain and chain-length effects overlap and should be interpreted jointly.
+AgentGS obtains FAS of 0.8731 versus GeoAgent's 0.7804 and direct GPT-5.6 Terra's 0.3137 (Table~\ref{tab:main-results}). Its present end-to-end run over 603 records yields TSF1/TOS of 0.9170/\allowbreak 0.9166, including execution failures and incomplete final answers. The table reports 0.8663/\allowbreak 0.7911 for GeoAgent and 0.1182/\allowbreak 0.1390 for EarthAgent. These scores measure reference-tool coverage and relative order; correct inputs, artifacts, and scientific results require additional checks.
 
+Single-step, two- to three-step, and at-least-four-step FAS values are 0.9425, 0.7557, and 0.6167. On 119 two- to three-step records, TSF1/TOS are 0.9779/\allowbreak 0.9832; on 60 longer records, they are 0.8013/\allowbreak 0.7785. Lower long-chain process scores indicate remaining coverage and ordering difficulties. Longer chains are concentrated in remote sensing, so domain and chain-length effects overlap (Figure~\ref{fig:performance}).
 \input{figures/performance}
 
 \subsection{External Evaluation on GeoBenchX}
 \label{sec:external-evaluation}
-We evaluate AgentGS on GeoBenchX~\cite{krechetova2025geobenchx} using its official tools and dedicated Skills and Capabilities. These definitions organize operations, input/output requirements, strategy dependencies, and tool mappings for the new environment.
-
-The evaluation uses \drafttodo{task count} tasks and compares AgentGS with \drafttodo{baseline name}. The respective backbones are \drafttodo{AgentGS model/version} and \drafttodo{baseline model/version}, with \drafttodo{matched experimental conditions}. The judge is \drafttodo{judge model and aggregation}. Scores of 0, 1, and 2 indicate mismatch, partial match, and match against reference solutions. We report mean score and full-match rate separately from GeoToolEval FAS.
-
+We integrate official GeoBenchX tools~\cite{krechetova2025geobenchx} and construct dedicated Skills, Capabilities, dependencies, and mappings. AgentGS and the official ReAct baseline are each reported on 202 tasks using GPT-5.6 Terra. That model is also the single judge: 0, 1, and 2 denote mismatch, partial match, and match to reference solutions. Mean score and full-match rate are separate from GeoToolEval FAS.
 \input{tables/external_results}
 
-AgentGS obtains a mean score of \drafttodo{AgentGS score}, versus \drafttodo{baseline score}, and full-match rates of \drafttodo{AgentGS percentage} and \drafttodo{baseline percentage}, respectively (Table~\ref{tab:external-results}). \drafttodo{Add the differences and principal conclusion supported by the completed results.}
+AgentGS scores 1.3762 versus 1.1980 for ReAct, a difference of 0.1782 points; full-match rates are 62.87\% versus 53.47\%, a difference of 9.40 percentage points. Although task counts are supplied, exact task membership and consistent experimental conditions still require verification before interpreting these differences as transfer evidence.
 
-\subsection{Ablation Study}
+\subsection{Ablation Configuration Comparisons}
 \label{sec:ablations}
-The fixed subset covers all ten domains and comprises 22 single-step, 20 two- to three-step, and 15 at-least-four-step records; multistep tasks account for 61.40\%. Each configuration changes one mechanism and is compared with the full method on this same subset.
+The subset covers all ten domains, with 22 single-step, 20 two- to three-step, and 15 longer records; multistep tasks comprise 61.40\%. The design uses Full on the same subset as reference, but actual intervention scopes are limited: A1 is a partial control, A2's intended ablation was not activated, and A5 changes only part of ranking. Differences therefore do not uniformly represent controlled single-module effects.
 
-\paragraph{Planning and predecessor expansion.}
-A1 plans directly at the tool level while retaining the same strategy, dependency, and tool information. A2 retains initial capability selection and dependency declarations but disables automatic expansion of mandatory predecessors. Subsequent completion may restore omitted predecessors, so analysis also records plan changes and compensatory insertions.
-
-\paragraph{Capability completion.}
-A3 retains gap diagnosis but disables automatic insertion of supporting capabilities, including bridging. A4 disables only directed bridging, retaining other completion mechanisms. Both examine required-operation coverage, dependency satisfaction, and actual use of upstream artifacts.
-
-\paragraph{Selection and recovery.}
-A5 retains capability requirements, candidate scopes, and execution validation but selects the first legal tool in a predefined order. A6 disables local recovery after execution failure, retaining planning, grounding, and input binding before the first attempt.
-
+A1 is designed to plan at the tool level with the same strategies, dependencies, and tools. A2 is designed to disable mandatory-predecessor expansion while retaining selection and dependency declarations; completion may compensate for omissions. A3 retains gap diagnosis but disables supporting-capability insertion, including bridging. A4 disables only bridging. A5 is designed to choose the first valid tool in a fixed order while retaining requirements, scopes, and validation. A6 disables local recovery, retaining planning, grounding, and binding before the first attempt.
 \input{tables/ablation}
+\input{tables/ablation_process}
 
-Table~\ref{tab:ablation} shows that direct tool-level planning (A1) reduces overall and multistep FAS by 25.82 and 24.74 percentage points, respectively. Disabling predecessor expansion (A2) or independent completion (A3) reduces overall FAS by 24.43 or 23.94 points and multistep FAS by 27.43 or 26.88 points. The larger multistep declines support explicitly organizing prerequisites and completing missing operations before implementation selection.
+A1's FAS decreases from Full are 16.39/\allowbreak 12.38 percentage points; A2's are 16.27/\allowbreak 12.38 and A3's are 17.63/\allowbreak 15.31 (Table~\ref{tab:ablation}). Multistep decreases are smaller in all three cases. The partial A1 control and inactive A2 ablation prevent direct attribution to hierarchical planning or predecessor expansion. The comparison does not show greater multistep effects for predecessor expansion or independent completion.
 
-Disabling bridging alone (A4) reduces overall and multistep FAS by 2.27 and 4.20 points, indicating an incremental benefit beyond other completion mechanisms. Disabling recovery (A6) reduces these scores by 4.15 and 7.20 points, showing the value of retaining successful prefixes and recovering failed steps. In contrast, removing selection optimization (A5) slightly increases overall FAS from 0.6387 to 0.6415 while reducing multistep FAS from 0.5333 to 0.5184. This supports a multistep benefit but does not establish a consistent overall improvement.
+A4's overall/multistep decreases are 2.27/\allowbreak 4.20 points; A6's are 4.15/\allowbreak 7.20. Attribution to bridging or recovery requires inserted branches, failure/recovery traces, and consistent conditions. A5 increases overall FAS from 0.6387 to 0.6415 but lowers multistep FAS from 0.5333 to 0.5184, giving different directions for its partial ranking change.
+
+Full TSF1/TOS are 0.9249/\allowbreak 0.9392 overall and 0.8862/\allowbreak 0.8952 on 35 multistep records (Table~\ref{tab:ablation-process}). Full uses the supplementary experiment; A1--A6 use formal worksheet records. All six have lower overall and multistep process scores. Multistep changes from Full are $-7.15$/\allowbreak $-6.57$ points for A1, $-5.60$/\allowbreak $-3.64$ for A2, and $-4.98$/\allowbreak $-5.14$ for A3. A4 changes by $-6.13$/\allowbreak $-3.00$ and has lower TSF1 but higher TOS than A3. A5 changes by $-7.29$/\allowbreak $-5.38$, reflecting partial ranking adjustment. A6 changes by $-12.10$/\allowbreak $-9.67$, with a larger coverage decrease. These are configuration differences; parameters, artifact consumption, and module effects require traces and scrutiny of data provenance.
 
 \subsection{Illustrative Case Study}
 \label{sec:case-study}
@@ -46,7 +40,7 @@ Skill Retrieval returns RasterCompose ($A$) and ReferenceCompare ($B$). Planning
 
 \begin{figure*}[t]
 \centering
-\includegraphics[width=0.64\textwidth]{case_study.png}
+\includegraphics[width=0.64\textwidth]{case_study.pdf}
 \caption{Illustrative cross-Skill completion. Selected fragments $w\to u$ and $v\to z$ are connected through inactive Skill $C$'s $u\to m\to v$ branch. The resulting five-step workflow is grounded in tools with explicit artifact propagation.}
 \label{fig:case-study}
 \Description{A mean-composite task is planned using two Skills, completed using valid-pixel mean statistics from a third Skill, and executed as input validation, compositing, statistics, differencing, and sign comparison.}

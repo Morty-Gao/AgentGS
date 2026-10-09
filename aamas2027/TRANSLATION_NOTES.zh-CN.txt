@@ -1,84 +1,72 @@
-AgentGS 英文翻译与 AAMAS 2027 排版说明
+AgentGS 融合优化稿 → 英文稿更新说明
+更新日期：2026-10-09
 
-交付文件
-1. main.tex / build/main.pdf：为会议篇幅整理的英文投稿正文草稿。
-   当前 PDF 共 8 页，正文及图表截至第 7 页，第 8 页仅包含参考文献。
-   GeoBenchX 已按用户要求保留评测章节、结果表和待填字段。
-2. full.tex / build/full.pdf：完整英文译稿，共 13 页。
-   保留中文初稿的正文、算法、公式、实验表格、原始图像及未填写项目。
-   这是完整翻译留档，不应作为“扩展论文”充当会议补充材料。
-3. supplement.tex / build/supplement.pdf：补充的系统架构、界面和表示示意，共 4 页。
-   核心方法、桥接条件、实验设置及主要结果均保留在 main.tex。
-4. build/AgentGS-LaTeX.zip：可在本地或 Overleaf 编辑的完整 LaTeX 工程。
-5. build/AgentGS-supplement.zip：仅包含补充材料 PDF，可在复核后作为补充材料文件使用。
+本次依据
+中文正文：D:\gaosong\Desktop\AgentGS-revisebycjx(5)_融合优化稿_20261009.docx
+按接受修订视图读取正文、公式、表格和文献；不修改中文原稿。
+本次已在 aamas2027 原位置覆盖完整英文稿、凝练投稿稿、补充材料及生成文件。
+仓库根目录 AgentGS-English.docx 同步覆盖。
 
-编译
-在仓库根目录执行：make -C aamas2027 all
-只编译投稿正文：make -C aamas2027
-完整翻译：make -C aamas2027 full
-补充材料：make -C aamas2027 supplement
-Overleaf：上传并解压 LaTeX 工程，选择 main.tex 作为主文件，使用 pdfLaTeX。
-查看完整译稿时将主文件改成 full.tex；补充材料改成 supplement.tex。
-main.tex 的正文位于 submission/，full.tex 的正文位于 sections/。
-两版共用参考文献和大部分表格；修改共用文件会同时影响两版。
+文件入口
+full.tex / build/full.pdf：完整英文审阅稿，保留最新中文稿的七个主章节。
+main.tex / build/main.pdf：凝练匿名投稿稿，系统实现详图在补充材料中。
+supplement.tex / build/supplement.pdf：系统架构、界面和详细示意案例。
+build/AgentGS-English.docx：完整英文稿的可编辑 Word。
+build/AgentGS-LaTeX.zip：更新后的 LaTeX 源文件、图件及导出脚本。
+build/AgentGS-supplement.zip：补充材料 PDF。
+figures/source/*.drawio：上一轮用户提供的五份可编辑图件的本地副本。
 
-翻译依据与处理方式
-使用 AgentGS-revisebycjx.docx 的最终修订视图：纳入插入内容，排除删除内容。
-源文件含 374 处插入修订和 104 处删除修订，原 Word 文件保持不变。
-完整译稿的 DOCX paragraph 注释指向源文档正文段落，从 000 开始计数。
-逐段对照与源文件 SHA256 保存在 build/source/；原始公式 XML 也在那里保留。
-引言和相关工作已按当前 Word 重译，保留最新论证次序和贡献次序。
-保留原文完整英文标题，统一 Earth-Agent、GPT-5.6 Terra 等名称的书写。
-“显著胜过”采用 substantially outperforms，避免暗示原稿未报告的统计显著性检验。
-Skill、Capability、Tool 的定义及约束、恢复预算、失败处理和实例局限均保留。
-两个表示公式及 FAS 公式从 Word 数学对象转换为等价 LaTeX；数学内容不作改写。
-正文中重复的空标题“3 AgentGS...”并入紧接着的表示章节，章节编号由 LaTeX 生成。
-603 按后文定义统一表述为 evaluation records，并保留 9 道跨主题重复题的说明。
-原稿全部已给出的实验数值、表格计数、消融幅度及模型名称保持不变。
-全文保留源文献表中的 19 项；源正文未再引用的 4 项用 nocite 保留。
-投稿版仅排印实际引用的文献。BibTeX 采用仓库已有元数据，未新增参考文献。
-五张原图按原字节提取。补充材料用 LaTeX 覆盖界面截图中的本机目录，原图不被改写。
+主要更新
+1. 以新版为准，更新摘要、引言贡献、相关工作、方法、系统实现、基准介绍和结果分析。
+   第3节标题采用 Overview of AgentGS，保留3.1—3.6结构。
+2. 主结果表填入 AgentGS TSF1/TOS=0.9170/0.9166，
+   GeoAgent=0.8663/0.7911，EarthAgent=0.1182/0.1390。
+   链长分组补入2—3步0.9779/0.9832，至少4步0.8013/0.7785。
+3. 消融A1—A3的总体/多步FAS更新为0.4748/0.4095、0.4760/0.4095、0.4624/0.3802，
+   ΔFAS更新为16.39、16.27、17.63个百分点，相关正文差值同步替换。
+4. Full流程指标补入总体0.9249/0.9392、多步0.8862/0.8952，并更新变化量。
+   保留Full指标来自补充实验、A1—A6来自正式57题表单的来源区别。
+5. 依据新稿保留A1部分对照、A2消融未激活、A5部分排序调整的限定。
+   摘要、引言、实验和结论均不再沿用旧版对所有模块独立因果贡献的表述。
+6. GeoBenchX两组均写明202题，保留原稿对实际任务范围及一致实验条件需核对的限定。
+7. 删除新版不再引用的缺失桥接图占位；完整稿图号依次为1总体图、2架构、3界面、
+   4实验表现、5案例。
+8. 最新DOCX中的五张内嵌图与(4).docx逐一字节哈希相同，继续使用上轮drawio矢量导出。
+   保留PNG用于Word、PDF用于LaTeX；本次未修改图形或桌面原图。
+9. 修正Word导出器对LaTeX可选换行提示的处理，确保成对分数不会漏掉第二个数值。
 
-GeoBenchX 数据填写位置
-主要文字：submission/experiments.tex 的 External Evaluation on GeoBenchX 小节。
-完整译稿对应文字：sections/experiments.tex 的同名小节；填写时同时更新。
-结果表：tables/external_results.tex（两版共用）。
-需填写任务数量、基线名称、两种方法的底座模型与版本、实际一致的比较条件、
-裁判模型及评分汇总规则、平均分、满分匹配率、差值以及有实际结果支持的结论。
-结果表 Mean score 为 0–2 的评分；Full-match rate 的单位为百分比。
-根据用户说明，实验结果已经具备，TBD/TODO 仅是等待作者填入的数据字段。
+源稿中的表述冲突及处理
+1. 表2已填写GeoAgent/EarthAgent流程指标，但随后正文仍说这些指标“尚待补充”。
+   英文稿按表2报告数值，删除该过时待补句；不自行推断基线数据的实验来源。
+2. GeoBenchX设置段已给出两组202题，下一段仍说实际任务范围待明确。
+   英文稿区分题数与具体题目成员/一致条件：报告202题，同时保留后者仍需核对的限定。
+3. 分层表示段对“成员关系”与初步顺序的描述略含糊。英文明确成员关系说明能力集合，
+   实际顺序还需展开依赖条件，不将集合顺序直接作为执行约束。
+4. 科学智能体引言引用仍为空【】，中文[20]与参考文献表条目不一致。
+   空缺处沿用已有SciToolAgent/Earth-Agent引用；Earth-Agent统一关联参考文献中已有条目。
 
-原稿中其余待完善项目
-1. main.tex、full.tex、supplement.tex 的 acmSubmissionID 仍为 TBD，应填同一 OpenReview 编号。
-   当前为 anonymous 匿名评审模式，作者与单位不需要出现在送审 PDF 中。
-2. 原稿算法引用式（3），但没有提供该式；full.tex 保留明显占位。
-   投稿版算法直接引用正文列出的五项检查，不额外编造公式。
-3. 原稿引用图 2，但未提供图像；完整译稿保留图框占位。
-   投稿版通过桥接条件与算法描述完整机制，未保留空白图框。
-4. 原稿提到补充材料 I 的逐项基准对比，但未提供对比内容。
-   full.tex 保留说明和占位；当前 supplement.tex 不宣称包含该未提供的比较。
-5. 实验开头提到未见能力组合、工具替换的泛化实验和运行成本，但未提供对应结果。
-   full.tex 标记待补；投稿正文只报告已提供的主实验与消融，并在结论保留未来验证方向。
-6. 原始分领域性能图含 AgentGS (Tool Only) 曲线，其设置在源正文中未充分说明。
-   原图保留，正式投稿前可核对图例与实验设置是否一致。
-7. 展示的分层均值按任务数加权约为 0.8731667，与整体显示值 0.8731 有舍入差异。
-   两者可以由各分组四舍五入解释；未据此擅自修改任何数值。
+仍未提供的内容
+算法步骤4仍引用不存在的桥接资格式（3）：完整稿保留公式占位，凝练稿引用正文五项检查。
+补充材料I的逐项基准比较仍未提供：完整稿保留明确待补说明。
+实验数据图仍包含AgentGS (Tool Only)曲线，正文未充分定义该设置，未擅自删除或重绘。
+泛化、新Skill跨任务复用收益及运行成本均没有新增实验结果，英文不将机制案例作为验证。
+作者与单位、投稿编号仍沿用匿名稿占位。
 
-模板与验证
-aamas.cls、ACM-Reference-Format.bst 和许可图均与仓库官方模板压缩包一致。
-使用 sigconf 双栏、anonymous 匿名模式及模板原有会议/版权信息。
-未更改官方类文件、字号、边距、行距或列表间距来满足篇幅要求。
-新增 CCS 分类为 Intelligent agents 和 Planning and scheduling，可由作者调整。
-核对的官方要求：主赛道正文最多 8 页，参考文献可另加页，补充材料为不超过 25 MB 的单个 ZIP。
-来源（核对日期 2026-10-08）：
-https://warwick.ac.uk/fac/sci/dcs/aamas2027/guidelines-and-policies/instructions/
-三份文稿均成功编译，最终引用无未定义项，图表已排在参考文献之前。
-本机 TeX Live 2023 对未修改的官方示例也产生 incomplete ifx 提示；译稿有同一提示。
-正文版和全文有约 1–2 pt 的竖直盒提示，未见文字或图表裁切；没有横向文字溢出。
-这里完成的是翻译、排版和源文数字核对，没有重新运行或独立复核论文实验。
+排版和验证
+沿用现有AAMAS类文件、会议元信息、匿名设置及参考文献样式。
+本次未修改模板字号、页边距或行距，也未重新查验会议规则。
+main.pdf共9页：正文与图表8页，参考文献第9页。
+full.pdf共14页；supplement.pdf共4页。
+三个PDF均成功编译，无未定义引用、横向文字溢出或竖直盒溢出，已抽查关键图表页。
+Word包含5张数据表、5张源图和原生数学对象。
+五张源表的110个数值单元格（含44个任务计数和66个小数结果）与LaTeX和Word逐行一致。
+源清单、段落映射及核对记录在build/source/中，均对应本次源文件SHA256。
+本次不重跑实验，不将原稿实验结论视为已独立验证。
+现有TeX Live与模板仍有incomplete ifx及PDF版本提示；这些不影响本次成功生成文件。
 
-Word 译文版本
-仓库根目录 AgentGS-English.docx 为完整英文译文的可编辑 Word 版本。
-采用 A4 单栏审阅排版，保留公式、原始图像、图表编号、七步算法、19 项文献及 GeoBenchX 待填字段。
-公式使用 Word 原生数学对象；正文引用编号与 full.pdf 一致。
-重新生成：make -C aamas2027 word（需安装 Pandoc）。
+重新生成
+make -C aamas2027 all：编译三份PDF。
+make -C aamas2027 word：生成并覆盖仓库根目录AgentGS-English.docx。
+make -C aamas2027 figures：从drawio副本导出，需drawio CLI与合适字体。
+make -C aamas2027 import-assets SOURCE=/path/to/file.docx：显式选择源稿导入图像与清单。
+import-assets会覆盖PNG；make figures可恢复与PDF一致的图件导出。

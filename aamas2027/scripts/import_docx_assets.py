@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Extract the initial manuscript's unmodified images and source inventory."""
+"""Extract a selected manuscript's images and accepted-revision inventory."""
 
 import argparse
 import hashlib
@@ -40,9 +40,7 @@ def main():
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument(
         "source",
-        nargs="?",
         type=Path,
-        default=PAPER_ROOT.parent / "AgentGS-revisebycjx.docx",
     )
     args = parser.parse_args()
     figures = PAPER_ROOT / "figures"

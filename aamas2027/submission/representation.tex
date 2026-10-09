@@ -1,30 +1,19 @@
-\section{Hierarchical Representation}
+\subsection{Hierarchical Representation and Skill Hypergraphs}
 \label{sec:representation}
-Given a natural-language goal $q$, resources $X$, and registered sets of Skills $S$, Capabilities $C$, and Tools $T$, AgentGS first constructs a capability plan and then selects concrete implementations. Shared capability identifiers connect strategies and tools, while instances retain strategy provenance, input roles, and candidate-tool scopes.
+A \emph{Skill} is a reusable task strategy with an objective, applicable inputs, expected artifacts, capability steps, constraints, validation requirements, and recovery policies. Each step specifies a Capability, mandatory predecessors, optional or mandatory status, and permitted tools. Task-relevant local steps can be selected without importing the entire strategy. New Skills package composed workflows without creating new Capability definitions or Tool implementations.
 
-\subsection{Skills, Capabilities, and Tools}
-A \emph{Skill} describes a reusable task strategy: its objective, applicable inputs, expected artifacts, capability steps, constraints, validation requirements, and recovery policies. Each step specifies a Capability identifier, mandatory predecessors, mandatory or optional status, and candidate tools. Planning selects the required steps rather than importing every optional operation.
+A \emph{Capability} defines a shared operation: its function, input and output types, preconditions, postconditions, and candidate tools. Sharing does not remove strategy-specific constraints; deep-time and carbon-storage Skills may share raster analysis while permitting different implementations. A \emph{Tool} is a callable interface with an identifier, parameter schema, input/output definitions, and runtime information. Concrete resources and artifacts are bound during execution. Skill--Capability membership and Capability--Tool mappings are many-to-many; mappings additionally record operation and parameter constraints.
 
-A \emph{Capability} defines an operation shared across strategies, including its function, input/output types, preconditions, postconditions, and candidate tools. Capability--Tool mappings additionally record concrete operations and parameter constraints. Multiple Skills may reference one Capability, and multiple Tools may implement it. A Tool may implement several capabilities, such as returning both an extreme value and its index. Shared capabilities do not make tools arbitrarily interchangeable: deep-time and carbon-storage strategies may both reference raster analysis while permitting different implementations.
-
-A \emph{Tool} is a callable interface with an identifier, parameter schema, input/output definitions, and runtime information. Concrete files, values, and upstream artifacts are bound during execution. Skill--Capability membership and Capability--Tool implementation relationships are both many-to-many.
-
-The task-specific capability plan is
+The task-specific plan uses capability instances:
 \begin{equation}
-P = (V,D_d,D_c,\beta), \qquad v_i=(c_i,s_i,r_i).
+P=(V,D_d,D_c,\beta),\qquad v_i=(c_i,s_i,r_i).
 \label{eq:plan}
 \end{equation}
-Here, $V$ contains capability instances; $c_i$, $s_i$, and $r_i$ identify the operation, source strategy, and step/input role, respectively. $D_d$ and $D_c$ record data and control dependencies, and $\beta$ binds resources or upstream artifacts. Operations on different input objects remain distinct instances, even when they use the same tool. The current implementation does not fully support dynamically creating repeated capability instances for multiple objects.
+Here, $c_i$, $s_i$, and $r_i$ identify the operation, source strategy, and step/input role. $D_d$ and $D_c$ record data and control dependencies, and $\beta$ binds resources or upstream artifacts. Operations on different objects remain distinct instances even when they use the same tool.
 
-\subsection{Skill Hypergraphs and Provenance}
-The skill hypergraph uses Capabilities as nodes and the capability set of each Skill as a hyperedge:
+The skill hypergraph connects registered Skills through shared Capabilities:
 \begin{equation}
-H=(C,E), \qquad E=\{e_s:s\in S\}, \qquad e_s\subseteq C.
+H=(C,E),\qquad E=\{e_s:s\in S\},\qquad e_s\subseteq C.
 \label{eq:hypergraph}
 \end{equation}
-For example, Skills containing $\{a,b\}$ and $\{b,c\}$ share node $b$, providing a connection for composition. Membership alone does not impose execution order. Direction is represented separately by $d=(s,U,c)$: within Skill $s$, operation $c$ requires \emph{all} predecessors in $U$. Retaining the source Skill prevents sharing from automatically importing another strategy's prerequisites. Conditional ordering applies only when both steps are selected and adds no prerequisite steps.
-
-Composition expands selected capabilities and their declared prerequisites. Completion retrieves connecting branches and inserts those satisfying constraints. Explicit Skill-compatibility relations delimit compatibility-based search; directed bridging separately searches inactive Skills for branches between current plan endpoints.
-
-\subsection{Constrained Implementations}
-GeoToolKG records tool domains, functions, inputs, outputs, provenance, and recommended transitions. These associations guide retrieval; executable workflows additionally require parameter, artifact, prerequisite, and scientific-applicability checks. ToolGraph records bidirectional Capability--Tool mappings and their operation/parameter constraints. After capability completion, AgentGS filters mapped tools by availability and instance scope, then evaluates their schemas and declared semantic types. Actual artifacts are bound and validated during execution. Execution dependencies follow explicit Skill declarations and completion results.
+Capabilities are nodes and each Skill's capability set is a hyperedge. Skills containing $\{a,b\}$ and $\{b,c\}$ share $b$. Membership alone does not determine execution order; dependency conditions must be expanded. A provenance-bearing relation $d=(s,U,c)$ specifies that $c$ requires all predecessors in $U$ within Skill $s$.

@@ -1,68 +1,68 @@
-% DOCX paragraph 107.
 \section{GeoToolEval: Design and Construction}
 \label{sec:benchmark}
 
-% DOCX paragraph 108.
-We construct GeoToolEval to evaluate tool use and multistep workflow orchestration in geoscientific tasks. Each evaluation record combines a natural-language question, input resources, reference tool invocations, and a reference answer. The benchmark integrates existing geoscientific question-answering resources and computational and analytical tasks derived from scientific data, supporting final-answer evaluation and execution-process analysis.
+Geoscientific tool invocations often have data dependencies. In raster compositing and statistics, for example, statistics must consume the composite; reading the original rasters instead does not complete the requested analysis, even if every call succeeds. Addressing the evaluation needs in Section~\ref{sec:related-evaluation}, GeoToolEval associates a question, input resources, reference calls, and a reference answer within each record, linking answer evaluation and execution-process analysis to the same task.
 
-% DOCX paragraph 109.
 \subsection{Evaluation Objectives and Design Principles}
 \label{sec:benchmark-principles}
 
-% DOCX paragraph 110.
-GeoToolEval examines whether agents select applicable operations, satisfy interstep dependencies, and use input data to produce verifiable results. Single-step tasks assess data location, parameter determination, and basic tool use. Multistep tasks examine the organization of multiple operations, transitions between steps, and use of intermediate results. Both categories are included to distinguish basic invocation performance from performance under workflow-orchestration requirements.
+GeoToolEval examines whether agents select required operations, satisfy dependencies, and use supplied data to produce verifiable results. Single-step tasks assess data location, parameter determination, and basic tool use; multistep tasks additionally require operation ordering and use of preceding outputs. Answer evaluation measures reference agreement, while process metrics and execution records provide different evidence about omitted operations, satisfied invocation dependencies, and actual artifact consumption.
 
-% DOCX paragraph 111.
-Task themes follow the ten geoscientific research directions discussed in the introduction, with concrete tasks determined by available data resources and executable operations. The number retained in each theme depends on available resources and screening outcomes. Domain groupings describe task backgrounds, whereas reference-chain length describes workflow composition under the current tool interfaces. These groupings support analyses by domain and invocation-chain length, respectively.
+Themes correspond to the ten research directions in the introduction. Tasks are determined by available resources, identifiable analytical objects, and executable operations; theme sizes depend on resources and screening. Domain groups describe task backgrounds, and reference-chain lengths describe external-call requirements under the current interfaces.
 
-% DOCX paragraph 112.
 \subsection{Data Sources and Task Construction}
 \label{sec:benchmark-construction}
 
-% DOCX paragraph 113.
 GeoToolEval is constructed in two ways: selecting tasks from existing question-answer records, and designing questions with reference answers computed from scientific data. For existing resources, the geoscientific big-data analysis theme contains 40 tasks selected from GeoQuestions1089 that concern physical geographic objects and spatial-analysis operations. The remote-sensing theme contains 49 tasks selected from Earth-Bench's 248 tasks, retaining the original questions, choices, and reference answers while adapting the tool calls to our interfaces. Critical-mineral and climate-change tasks are selected by theme from existing \nolinkurl{habitable_earth_dataset} question files. Their underlying data include USGS MRDS, paleoclimate reconstructions, NASA GISTEMP, and SSP warming summary tables.
 
-% DOCX paragraph 114.
 Data-derived tasks are designed around clearly identifiable objects, variables, and computational relationships, with reference results determined through the corresponding processing and calculations. Three-dimensional Earth-structure tasks use LITHO1.0, SEMUCB-WM1, and the USGS earthquake catalog. Energy-resource tasks use mineral, power-facility, installed-capacity time-series, and population data. Tasks concerning the ocean carbon cycle use SOCAT, GLODAP, and SNAPO-CO$_2$ observations. Data for the deep-time biosphere, carbon capture and storage, and natural-disaster statistics come from BioDeepTime, synthetic SCCS-OFPOSDU data, and local disaster-event tables, respectively. Table~\ref{tab:benchmark} identifies EM-DAT as the source of the disaster-event records.
 
-% DOCX paragraph 115.
 Tasks from different sources use a common record format containing the question, input resources, reference answer, answer type, and reference tool calls. Questions specify the required analysis and returned content; input resources identify the data or objects; reference answers support outcome evaluation. Reference calls are defined from the source task's operational requirements, map operations to registered tools, and record tool names, parameters, and relevant input/output information. Tasks taken from existing benchmarks retain source question identifiers or resource locators. Data-derived tasks retain data-location fields, derivation records, and computational scripts to document how reference results were obtained.
 
-% DOCX paragraph 116.
 A reference chain represents one way to complete a task through the current interfaces. Different tool wrappers can require different numbers of calls for the same task: one tool may encapsulate multiple processing operations in a single invocation. We therefore group tasks by their reference-chain length after adaptation to our interfaces, rather than directly adopting single-tool or multitool labels from source datasets.
 
-% DOCX paragraph 117.
 \subsection{Task Composition and Complexity Strata}
 \label{sec:benchmark-composition}
 
-% DOCX paragraphs 118--120 and table 1.
 GeoToolEval contains 603 evaluation records. Table~\ref{tab:benchmark} summarizes their sources and reference-chain lengths. Of these records, 424 require one reference call, 119 require two or three, and 60 require at least four. The 179 multistep records account for 29.68\% of the benchmark.
 
 \input{tables/benchmark}
 
-% DOCX paragraph 121.
 A step denotes one reference tool invocation and does not directly measure the number of scientific operations or scientific difficulty. For example, the energy-resource and ocean-carbon themes use task-level wrappers that may perform several internal processing operations in one call. Grouping by chain length therefore describes the number of calls an agent must orchestrate under the current tool packaging. Interpretation must also consider the interfaces and actual execution traces.
 
-% DOCX paragraph 122.
 The critical-mineral and climate-change themes share nine cross-theme questions, which are included in both themes. Thus, 603 denotes the number of evaluation records in this version, rather than 603 distinct questions.
 
-% DOCX paragraph 123.
 \subsection{Evaluation Metrics and Quality Control}
 \label{sec:metrics}
 
-% DOCX paragraph 124.
-We evaluate outcomes using the Final Answer Score (FAS), which ranges from zero to one and retains partial-credit scores. Scoring depends on answer type: multiple-choice answers are compared after choice normalization; dates and identifiers use corresponding matching rules; scalar numerical answers use numerical tolerances; multiple numerical values and multiple text items are scored by their matches; and structured answers are compared field by field. Empty answers receive zero.
+We evaluate final answers and tool execution separately. Final Answer Score (FAS) measures agreement with reference answers, Tool Selection F1 (TSF1) measures coverage of required tools and excess calls, and Tool Order Score (TOS) measures agreement between successful-call order and the reference workflow. All three per-task scores lie in $[0,1]$ and are reported separately. FAS retains partial credit. Scoring depends on answer type: multiple-choice answers are compared after choice normalization; dates and identifiers use corresponding matching rules; scalar numerical answers use numerical tolerances; multiple numerical values and multiple text items are scored by their matches; and structured answers are compared field by field. Empty answers receive zero.
 
-% DOCX paragraphs 125--127.
 For an evaluation set containing $N$ records, mean FAS is
 \begin{equation}
   \overline{FAS} = \frac{1}{N}\sum_{i = 1}^{N}{FAS}_{i}
   \label{eq:fas}
 \end{equation}
-The main experiment uses $N=603$. Domain and chain-length groups are averaged within their corresponding record sets, with failures retained. This is a task-level micro-average, distinct from a domain-balanced macro-average or the fraction of tasks receiving full credit.
+The main experiment uses $N=603$, with equal weight for every record and failures retained. Domain and chain-length groups average their respective record sets. This is a task-level micro-average, distinct from a domain-balanced macro-average or the fraction of tasks receiving full credit.
 
-% DOCX paragraph 128.
-Quality control addresses source traceability, record completeness, consistency of reference invocations, and sample execution checks. Construction materials retain source questions or data locators and verify correspondence among question fields, tool names, and call details. Data-derived tasks provide computational scripts and intermediate results for recalculation, while existing question-answer tasks retain source answers for comparison. Sample executions check whether data reading and tool invocation behave as expected; their validation scope is recorded separately from final-answer evaluation across the full benchmark.
 
-% DOCX paragraph 129.
-Final-answer scores and execution-process analyses are reported separately. FAS measures agreement between outputs and reference results. Assessing operation selection, input binding, and use of intermediate artifacts additionally requires actual parameters, tool outputs, and execution traces. Reference chains provide a comparison basis; a different but valid invocation order is not automatically treated as incorrect.
+\paragraph{Tool Selection F1 (TSF1).}
+For task $i$, let $G_i$ be the reference tool-call sequence and $A_i$ the actual successful-call sequence in execution order. To compute TSF1, both are treated as multisets retaining call multiplicity. Calls are matched one to one by tool name, and $m_i$ denotes the number of matches:
+\begin{equation}
+  \mathrm{TSF1}_i = \frac{2m_i}{|G_i|+|A_i|}.
+  \label{eq:tsf1}
+\end{equation}
+This equals the harmonic mean of selection precision $m_i/|A_i|$ and recall $m_i/|G_i|$. Repeated calls to the same tool are counted separately, so omitted tools, irrelevant tools, and repeated successful invocations affect the score. TSF1 is zero when no invocation succeeds. Failed calls are excluded from the successful sequence, but failed tasks remain in the evaluation set.
+
+\paragraph{Tool Order Score (TOS).}
+TOS uses the longest common subsequence of $G_i$ and $A_i$:
+\begin{equation}
+  \mathrm{TOS}_i = \frac{\mathrm{LCS}(G_i,A_i)}{|G_i|}.
+  \label{eq:tos}
+\end{equation}
+Here, $\mathrm{LCS}(G_i,A_i)$ is the largest number of tools matching in the same relative order. For a reference sequence read--filter--count and a successful sequence read--count--filter, TSF1 is 1 but TOS is $2/3$. Selecting every tool and preserving its order are therefore distinct evaluation objectives. Extra calls do not directly lower TOS, so TSF1 must also be considered when assessing excess invocations. TOS is zero when no invocation succeeds.
+
+TSF1 and TOS use the same per-task averaging scheme as FAS: the main experiment averages all 603 records, while domain groups, chain-length groups, and ablations average their respective records. Failures are retained. Ablation scores do not summarize performance on all 603 records. We report the three metrics separately without combining them into a new overall score.
+
+Quality control addresses source traceability, record completeness, consistency of reference invocations, and sample execution checks. Construction materials retain source questions or data locators and verify correspondence among question fields, tool names, and call details. Data-derived tasks provide computational scripts and intermediate results for recalculation, while existing question-answer tasks retain source answers for comparison. Sample executions check whether data reading and tool invocation behave as expected; their validation scope is recorded separately from final-answer evaluation across the full benchmark. Sample executability does not establish correctness on all tasks.
+
+FAS evaluates final-answer agreement, while TSF1 and TOS compare tool composition and relative order. Even when tool names and order match, parameters or artifact consumption can be wrong; process metrics alone therefore do not establish analytical correctness. Inputs, outputs, and execution records must also be inspected. A reference chain is only one solution under the current interfaces and does not exclude other valid tools or orders. Workflow differences require analysis of operations, data dependencies, and computational results; TSF1 or TOS alone should not determine task failure.

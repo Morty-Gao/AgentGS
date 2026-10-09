@@ -1,0 +1,18 @@
+\begin{table*}[t]
+\caption{Ablation process metrics. Multistep scores cover the 35 subset records with at least two reference calls. Each column averages per-task scores over its corresponding records. Full uses the supplementary 57-task experiment; A1--A6 use per-task records from the formal 57-task worksheet.}
+\label{tab:ablation-process}
+\centering
+\begin{tabularx}{\textwidth}{@{}Xrrrr@{}}
+\toprule
+Configuration & Mean TSF1 & Mean TOS & Multistep TSF1 & Multistep TOS \\
+\midrule
+Full method & 0.9249 & 0.9392 & 0.8862 & 0.8952 \\
+A1: Direct tool-level planning & 0.8599 & 0.8778 & 0.8147 & 0.8295 \\
+A2: No predecessor expansion & 0.8694 & 0.8958 & 0.8302 & 0.8588 \\
+A3: No independent completion & 0.8732 & 0.8865 & 0.8364 & 0.8438 \\
+A4: No directed bridging & 0.8603 & 0.8997 & 0.8249 & 0.8652 \\
+A5: No tool-selection optimization & 0.8503 & 0.8851 & 0.8133 & 0.8414 \\
+A6: No execution recovery & 0.8208 & 0.8588 & 0.7652 & 0.7985 \\
+\bottomrule
+\end{tabularx}
+\end{table*}

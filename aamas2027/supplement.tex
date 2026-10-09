@@ -18,6 +18,7 @@
 
 % Visible draft placeholders; replace each item when the missing material is ready.
 \newcommand{\drafttodo}[1]{\textbf{[TODO: #1]}}
+\newcommand{\papersection}[2]{Section~#2 of the main paper}
 
 % Official AAMAS 2027 copyright metadata.
 \makeatletter
@@ -60,7 +61,7 @@ on Autonomous Agents and Multiagent Systems (AAMAS 2027)}{3--7 May 2027}{Hanoi, 
 \ccsdesc[300]{Computing methodologies~Planning and scheduling}
 
 \begin{abstract}
-Additional system architecture, interface, and representation illustrations for AgentGS.
+Additional system architecture, interface, and case-study details for AgentGS.
 \end{abstract}
 % DOCX paragraph 004.
 \keywords{LLM Agents, Compositional Planning, Tool Orchestration, Skill Hypergraph, Scientific Agent}
@@ -68,8 +69,7 @@ Additional system architecture, interface, and representation illustrations for 
 \begin{document}
 \maketitle
 \input{sections/system}
-\section{Additional Representation Illustration}
-The hierarchical representation distinguishes shared capabilities, strategy dependencies, and concrete implementations. Figure~\ref{fig:overview} illustrates these relationships, cross-Skill completion, and the planning--execution workflow. The core representation and completion conditions are given in the main paper; this illustration provides additional context.
-\input{figures/overview}
+\section{Detailed Illustrative Case}
+\input{sections/case_study}
 \FloatBarrier
 \end{document}

@@ -1,0 +1,17 @@
+\section{Overview of AgentGS}
+\label{sec:method}
+\subsection{Overall Workflow}
+AgentGS uses a Skill--Capability--Tool hierarchy. It first selects reusable Skills for the task, identifies the required operations and dependencies, and then chooses concrete tools. Figure~\ref{fig:overview}(a) shows Skill retrieval, capability planning and completion, tool grounding and execution, result verification, and Skill writeback.
+
+Given a question $q$ and task resources $X$, the system retrieves relevant Skills from GeoSkillKG. If an applicable Skill is found, the Yes branch leads to the Planner, which constructs a capability chain. Otherwise, the No branch retrieves relevant tools directly from GeoToolKG. Both routes lead to a common execution and verification process.
+
+With applicable Skills, the Planner selects the capabilities needed for the task and expands their mandatory predecessors to form capability plan $P$. Missing Capability Completion checks whether these operations cover the task requirements and whether consecutive steps can be connected. If necessary operations are missing, the system searches other Skills for connecting branches and inserts those satisfying the constraints.
+
+Only after the capability plan is established does Tool Grounding select implementations through Capability--Tool mappings. GeoToolKG supplies tool functions, interfaces, and associations, and an LLM assists in determining the invocation chain. The Executor prepares parameters, executes tools, and passes task resources and intermediate artifacts from successful preceding steps to later operations.
+
+The Judge checks whether the Result satisfies the task requirements. If so, the system summarizes the computed results and artifacts into the Answer. Failed invocations or unmet requirements are returned to the Planner, which adjusts unfinished steps under the recovery rules.
+
+If a task produces a new capability chain, the verified workflow can be packaged as a candidate Skill. After checking and registration, it is written to SkillSet, and its hyperedge is added to GeoSkillKG, supporting retrieval and reuse in subsequent tasks. The following subsections describe the representation, capability planning and completion, execution, and verification mechanisms.
+\input{figures/overview}
+\input{sections/representation}
+\input{sections/completion}

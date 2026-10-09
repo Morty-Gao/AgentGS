@@ -1,37 +1,26 @@
-% DOCX paragraph 058.
-\section{Hypergraph Completion and Plan Grounding}
-\label{sec:completion}
-
-% DOCX paragraph 059.
-Building on the capabilities and dependencies supplied by the hierarchy, the completion algorithm identifies missing operations in the current plan and searches for additional branches that satisfy the constraints. The system first determines required capabilities and expands their mandatory dependencies, then fills missing operations, and finally chooses concrete tool implementations. All stages communicate through the capability plan $P$, preserving the strategy provenance of both instances and dependencies.
-
-% DOCX paragraph 060.
-\subsection{Initial Selection and Scoped Composition}
+\subsection{Strategy Retrieval and Initial Capability Planning}
 \label{sec:initial-selection}
+Initial capability planning determines which strategies apply to the task and which of their operations should be executed. It outputs plan $P$ for subsequent completion and tool selection, retaining the selected capabilities' provenance and usage constraints.
 
-% DOCX paragraph 061.
-Initial capability planning consists of strategy retrieval and capability selection. The system retrieves relevant Skills using the task description, domain, and input types. It selects strategies according to applicability and requirement coverage, and selects the capabilities needed for the task without automatically including every optional step. An LLM may assist selection within the candidate Skills; invalid outputs trigger a fallback to rules. The selected capabilities provide the starting point for dependency expansion and missing-capability completion.
+The system retrieves candidate Skills using the task description, domain, and input types, then selects strategies by applicability and requirement coverage. It includes only operations needed by the task, rather than all optional steps. An LLM assists selection within the candidate Skills. Retrieval supplies workflow knowledge, and capability selection turns it into a task-specific operation set.
 
-% DOCX paragraph 062.
-\emph{Hypergraph Composition} organizes the initially selected capabilities and their mandatory predecessors into $P$, using dependencies declared by the selected Skills. It retains each instance's strategy provenance, candidate-tool scope, and input references. \emph{Missing Capability Completion} then checks whether the plan omits required operations and whether existing operations have the necessary inputs and available implementations. On detecting a gap, the system searches for supporting capabilities, adds them to the plan, and checks again for satisfied prerequisites and conflicts with existing dependencies.
+Selecting target operations alone does not establish a complete plan, because some require preceding results. Hypergraph Composition expands mandatory predecessors using the selected Skills' dependency declarations and organizes them into $P$. This supplies prerequisites explicitly declared within the selected strategies; remaining gaps after composition across strategies are handled in the next stage.
 
-% DOCX paragraph 063.
-The search scope depends on the gap. When a required operation is missing, the system searches activated Skills and Skills directly compatible with them. When an existing operation has an unsatisfied input dependency, it may search multiple hops along explicitly declared Skill-compatibility relations. Directed bridging offers another route: it searches inactive Skills for branches connecting endpoints in the current plan, as described next.
+\subsection{Missing-Capability Completion and Directed Bridging}
+\label{sec:completion}
+Even after predecessor expansion, a plan may omit task requirements or fail to connect local workflows from different strategies. Completion searches registered strategy knowledge for supporting operations and connecting branches while retaining the original constraints, providing the operations and dependencies required for tool selection.
 
-% DOCX paragraph 064.
-\subsection{Directed Bridging with a Fixed Active Boundary}
-\label{sec:bridging}
+Missing Capability Completion checks for omitted operations, required inputs, and available implementations. On finding a gap, it adds supporting capabilities and rechecks mandatory predecessors and conflicts with existing dependencies. Completion therefore considers both task requirements and whether an inserted operation can connect to the current workflow.
 
-% DOCX paragraph 065.
-Suppose the current plan selects Skills $A$ and $B$, but lacks a connecting operation. If an inactive Skill $C$ contains a path $u\to m\to v$, where $u$ and $v$ are selected capabilities of $A$ and $B$, the system considers this path as a candidate and inserts only the required intermediate capability $m$.
+Search scope depends on the gap. For uncovered task operations, the system searches activated Skills and directly compatible Skills. For unsatisfied input dependencies of existing operations, it can search multiple hops along explicit Skill-compatibility relations. When connecting steps between selected local workflows are missing, directed bridging searches inactive Skills for reusable directed branches.
 
-% DOCX paragraph 066.
-Directed bridging retrieves reusable connecting branches from inactive Skills to complete the current capability plan. Let $u$ in activated Skill $A$ lie on the output boundary of its current local workflow, and let $v$ in activated Skill $B$ lie on the input boundary: $u$ has no successor among $A$'s activated dependencies, and $v$ has no predecessor among $B$'s activated dependencies. If inactive Skill $C$ declares a directed path $u\to m\to v$, the system treats it as a candidate bridge and considers inserting $m$ without importing $C$'s entire workflow.
+\paragraph{Directed bridging with a fixed active boundary.}
+Bridging connects two selected workflows. For example, one fragment may produce a composite raster while another needs a numerical value for reference comparison, requiring an intervening operation that extracts a raster statistic. If Skills $A$ and $B$ are selected and inactive Skill $C$ declares the connection, the system can reuse $C$'s local steps without importing its entire workflow.
 
-% DOCX paragraph 067.
-The search uses the active capability set at its start as a fixed reference. Each candidate path must come from one inactive Skill and contain at least one inactive intermediate capability. Membership relations first identify Skills containing both endpoints. The algorithm then enumerates directed simple paths along their explicit dependencies or applicable conditional-ordering relations. Capability co-occurrence and list order do not establish direction. A candidate is excluded if the current plan already contains an indirect data path from $u$ to $v$; a direct connection alone does not exclude it. The remaining candidates must pass joint-prerequisite, type-compatibility, tool-availability, cycle, and ambiguity checks before insertion is attempted. Newly inserted capabilities are not used to recursively extend this round of bridge search.
+Let $u$ be an output-boundary capability of activated Skill $A$ and $v$ an input-boundary capability of activated Skill $B$, relative to their activated local dependencies: $u$ has no activated successor in $A$, and $v$ has no activated predecessor in $B$. A directed path $u\to m\to v$ declared by inactive Skill $C$ is a candidate bridge, where $m$ represents the intermediate capability to insert.
 
-% DOCX paragraph 068.
+Each candidate path must come from one inactive Skill and contain at least one inactive intermediate capability. Hypergraph membership first locates Skills containing both endpoints; explicit dependencies or applicable conditional-ordering relations then determine directed simple paths. Co-occurrence and step-list order do not establish direction. An existing indirect data path from $u$ to $v$ excludes a candidate; a direct connection alone does not. Candidates must additionally pass the following checks before insertion is attempted.
+
 A candidate branch must satisfy the following checks before the system attempts to add it:
 \begin{enumerate}
   \item \textbf{Explicit execution direction.} The order of each pair of adjacent capabilities must be supported by an explicit dependency or an applicable conditional-ordering relation.
@@ -41,8 +30,7 @@ A candidate branch must satisfy the following checks before the system attempts 
   \item \textbf{Acyclic dependencies.} Adding a branch must not introduce a cycle, and the joint insertion of multiple candidate branches must also preserve acyclicity.
 \end{enumerate}
 
-% DOCX paragraph 069.
-For an ordered endpoint pair, automatic insertion is allowed only when exactly one valid candidate branch exists. Multiple candidates trigger an ambiguity report and stop automatic completion for that pair. On insertion, the system preserves the entry instance's original dependencies and candidate tools, and updates the exit instance's dependencies, tool scope, and input bindings according to the branch. It then recomposes the plan. A branch is rejected if recomposition introduces a new capability outside the branch or leaves a mandatory dependency unsatisfied. Algorithm~\ref{alg:bridging} summarizes this procedure. Figure~\ref{fig:bridging} illustrates typical accepted and rejected cases (\drafttodo{figure not supplied in the source}).
+For an ordered endpoint pair, automatic insertion is allowed only when exactly one valid candidate branch exists. Multiple candidates trigger an ambiguity report and stop automatic completion for that pair. On insertion, the system preserves the entry instance's original dependencies and candidate tools, and updates the exit instance's dependencies, tool scope, and input bindings according to the branch. It then recomposes the plan. A branch is rejected if recomposition introduces a new capability outside the branch or leaves a mandatory dependency unsatisfied. Algorithm~\ref{alg:bridging} summarizes this procedure.
 
 % The source refers to equation (3), but supplies no equation. Missing-source placeholder; no eligibility formula is supplied.
 \begin{equation}
@@ -50,7 +38,6 @@ For an ordered endpoint pair, automatic insertion is allowed only when exactly o
   \label{eq:bridge}
 \end{equation}
 
-% DOCX paragraphs 070--079.
 \begin{algorithm}[t]
 \caption{Directed Bridging from a Single Provider}
 \label{alg:bridging}
@@ -67,29 +54,24 @@ For an ordered endpoint pair, automatic insertion is allowed only when exactly o
 \end{algorithmic}
 \end{algorithm}
 
-\input{figures/bridging}
 
-% DOCX paragraph 080.
-\subsection{Tool Selection and Plan Execution}
+\subsection{Tool Grounding, Execution, and Failure Recovery}
 \label{sec:execution}
+The completed plan specifies operations and dependencies but is not directly executable. Tool grounding maps operations to callable interfaces; execution binds concrete inputs and propagates intermediate results. If a call fails, recovery handles the current step according to its failure state.
 
-% DOCX paragraph 081.
-\paragraph{Tool Grounding and Tool Execution.}
-Tool Grounding filters candidates according to capability requirements, instance provenance, and retry constraints. An LLM may assist selection within the candidate scope when needed. Tool Execution preferentially uses rules to bind task resources, parameter values, and upstream artifacts to tool inputs, with LLM assistance when necessary. Upstream artifacts must originate from successful preceding steps and have matching types; binding failure blocks the current invocation. The final answer is generated from structured execution results, with an LLM organizing its wording when required.
+Tool selection uses two kinds of knowledge. GeoToolKG records domains, functions, inputs, outputs, provenance, and recommended transitions among tools. These associations guide retrieval and possible combinations; actual executability additionally depends on parameter requirements and artifact compatibility. ToolGraph records bidirectional Capability--Tool mappings with concrete operations and parameter constraints. It identifies implementations of each capability, whereas Tool--Tool relationships in GeoToolKG recommend transitions. The system filters tools by instance scope and availability, then evaluates their parameter schemas and declared semantic input/output types.
 
-% DOCX paragraph 082.
-\paragraph{Failure Recovery.}
-After a tool failure, the system locally recovers the current capability instance while retaining successful preceding steps to avoid repeated execution. By default, it permits at most three attempts per tool and one local tool substitution. A substitute must implement the same capability, belong to the instance's permitted candidate scope, and pass fresh checks for parameter and upstream-artifact compatibility. The system does not automatically replay calls with uncertain outcomes, partial execution, or outputs violating the schema. Recovery is confined to the existing capability plan; if continuing requires a new capability, subsequent steps are suspended.
+\paragraph{Parameter binding and recovery.}
+Tool Grounding filters implementations by capability requirements, instance provenance, and retry constraints, with LLM assistance within the candidate scope when necessary. Once a tool is selected, Tool Execution preferentially binds task resources, parameter values, and upstream artifacts through rules. Inputs must have matching types, and artifacts must originate from successful preceding steps. Binding failure blocks the call to avoid using unsuitable data.
 
-% DOCX paragraph 083.
-\subsection{Packaging Composed Workflows as Reusable Skills}
+Failure Recovery locally handles the failed capability instance while retaining successful preceding steps and results. Defaults permit at most three attempts per tool and one local substitution. A substitute must implement the same capability, lie within the instance's permitted scope, and pass fresh parameter and upstream-artifact checks. Calls with uncertain outcomes, partial execution, or schema-invalid outputs are not automatically replayed.
+
+\subsection{Result Verification and Skill Writeback}
 \label{sec:skill-packaging}
+Verification determines whether the results address the task and whether the answer is supported by execution evidence. Skill writeback stores verified capability compositions for later reuse. These stages respectively support completion of the current task and strategy reuse in subsequent tasks.
 
-% DOCX paragraph 084.
-After successful execution and result verification, the system organizes the capability workflow into a candidate Skill. It records the task objective, applicable inputs, expected artifacts, capability steps, and dependencies, and preserves each step's candidate-tool scope and necessary constraints. Concrete file paths, reference values, and intermediate-artifact references are converted into input roles that can be rebound, allowing the strategy to operate on new task resources.
+The final answer is generated from structured execution results, with an LLM organizing its wording. The system separately records tool execution status, answer generation, and task completion, checking task requirements against results and artifacts from successful calls. Satisfied requirements yield an answer; failures or unmet requirements return to the Planner for adjustment under the recovery rules. If execution is incomplete, the LLM must identify obtained results and unfinished operations.
 
-% DOCX paragraph 085.
-Candidate Skills are organized around capability instances and their dependencies. When the same Capability acts on different input objects, those operations remain distinct steps. Operations taken from different original Skills retain their provenance and usage constraints. Forming a candidate Skill does not automatically relax these constraints or make composed capabilities arbitrarily interchangeable.
+After successful execution and verification, a new capability workflow can be organized as a candidate Skill recording the objective, applicable inputs, expected artifacts, steps, dependencies, permitted tools, and necessary constraints. Steps are based on capability instances and their dependencies: operations on different input objects remain distinct, and operations drawn from different original Skills retain their provenance and usage constraints. Packaging the combination does not make its operations arbitrarily interchangeable.
 
-% DOCX paragraph 086.
-Once registered, a candidate Skill can participate in subsequent strategy retrieval and capability planning. Reuse still requires checking applicability to the new task, selecting required steps, binding resources, and determining concrete tools. Successful execution provides evidence for one instance of the workflow, but does not establish applicability to other inputs or tasks. The effectiveness of reuse across tasks requires further validation.
+After consistency checks, the candidate is registered in SkillSet and its hyperedge is added to GeoSkillKG. Subsequent tasks can retrieve it, but reuse still requires checking applicability, selecting steps, binding new resources, and determining implementations.

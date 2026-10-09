@@ -1,6 +1,5 @@
-% DOCX paragraphs 153--153, table 4.
 \begin{table*}[t]
-  \caption{Ablation results on the fixed 57-record subset. $\Delta$FAS is the full method's mean FAS minus the corresponding configuration's mean FAS, in percentage points; positive values indicate lower performance than the full method.}
+  \caption{Configuration comparisons on the fixed 57-record subset. A1 is a partial control, A2 did not activate the intended ablation, and A5 changes only part of tool ranking. $\Delta$FAS is the full method's mean FAS minus the corresponding configuration's mean FAS, in percentage points; positive values indicate lower performance than the full method.}
   \label{tab:ablation}
   \centering
   \begin{tabularx}{\textwidth}{@{}Xrrr@{}}
@@ -8,9 +7,9 @@
     Configuration & Mean FAS & Multistep FAS & $\Delta$FAS (pp) \\
     \midrule
     Full method & 0.6387 & 0.5333 & --- \\
-    A1: Direct tool-level planning & 0.3805 & 0.2859 & 25.82 \\
-    A2: No predecessor expansion & 0.3944 & 0.2590 & 24.43 \\
-    A3: No independent completion & 0.3993 & 0.2645 & 23.94 \\
+    A1: Direct tool-level planning & 0.4748 & 0.4095 & 16.39 \\
+    A2: No predecessor expansion & 0.4760 & 0.4095 & 16.27 \\
+    A3: No independent completion & 0.4624 & 0.3802 & 17.63 \\
     A4: No directed bridging & 0.6160 & 0.4913 & 2.27 \\
     A5: No tool-selection optimization & 0.6415 & 0.5184 & $-0.28$ \\
     A6: No execution recovery & 0.5972 & 0.4613 & 4.15 \\

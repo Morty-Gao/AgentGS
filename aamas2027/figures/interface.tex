@@ -1,4 +1,3 @@
-% DOCX paragraphs 104--106, image 3.
 \begin{figure*}[t]
   \centering
   \ifdefined\anonymizeinterface
@@ -6,7 +5,7 @@
     % The original raster remains unchanged for the faithful full translation.
     \begin{tikzpicture}
       \node[anchor=south west,inner sep=0] (screen) at (0,0)
-        {\includegraphics[width=\textwidth]{interface.png}};
+        {\includegraphics[width=\textwidth]{interface.pdf}};
       \begin{scope}[x={(screen.south east)},y={(screen.north west)}]
         \fill[white] (0.792,0.562) rectangle (0.984,0.823);
         \node[align=center,font=\small,text width=0.16\textwidth]
@@ -14,7 +13,7 @@
       \end{scope}
     \end{tikzpicture}
   \else
-    \includegraphics[width=\textwidth]{interface.png}
+    \includegraphics[width=\textwidth]{interface.pdf}
   \fi
   \caption{Task dialogue and process inspection in AgentGS. The left panel shows the task, answer, and execution records. The upper right shows one tool call's input/output and execution feedback; the lower right shows part of the complete execution log.}
   \label{fig:interface}

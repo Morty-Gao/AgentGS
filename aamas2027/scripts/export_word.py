@@ -62,6 +62,11 @@ def prepare_latex():
     labels = dict(re.findall(r"\\newlabel\{([^}]+)\}\{\{([^}]+)\}", aux))
     citations = dict(re.findall(r"\\bibcite\{([^}]+)\}\{\{(\d+)\}", aux))
     full = expand(ROOT / "full.tex")
+    # This TeX line-break hint has no Word equivalent. Pandoc otherwise treats
+    # the following score as an argument and drops it from the exported text.
+    full = full.replace(r"\allowbreak", "")
+    # Word uses the matching PNG exports; LaTeX uses the vector PDFs.
+    full = re.sub(r"(\\includegraphics(?:\[[^]]*\])?\{[^}]+)\.pdf\}", r"\1.png}", full)
     full = re.sub(r"(?<!\\)%[^\n]*", "", full)
     title = group(full, full.index("{", full.index(r"\title[")))[0]
     abstract = re.search(r"\\begin\{abstract\}(.*?)\\end\{abstract\}", full, re.S)[1]
@@ -71,6 +76,7 @@ def prepare_latex():
     for name in ("bibliographystyle", "bibliography", "nocite", "Description"):
         body = commands(body, name, 1, lambda _: "")
     body = commands(body, "paragraph", 1, lambda x: r"\textbf{" + x + "} ")
+    body = commands(body, "papersection", 2, lambda key, _: "Section " + labels[key])
 
     def float_block(match):
         kind, content = match[1], match[2]
@@ -122,7 +128,7 @@ def prepare_latex():
 
     bbl = (ROOT / "build/full.bbl").read_text()
     entries = re.split(r"\\bibitem\[[^]]*\]%?\s*\{([^}]+)\}", bbl)[1:]
-    assert len(entries) == 38
+    assert len(entries) % 2 == 0
     references = []
     for key, text in zip(entries[0::2], entries[1::2]):
         text = text.split(r"\end{thebibliography}")[0]
@@ -189,9 +195,15 @@ def format_document(path):
     section = document.find(f".//{{{W}}}sectPr")
     child(section, "pgSz", {"w": 11906, "h": 16838})
     child(section, "pgMar", {"top": 1134, "bottom": 1134, "left": 1134, "right": 1134, "header": 567, "footer": 567, "gutter": 0})
-    widths = [[2313, 4145, 795, 795, 795, 795], [7400, 2238], [4500, 2569, 2569], [5200, 1500, 1700, 1238]]
+    widths = [
+        [2313, 4145, 795, 795, 795, 795],
+        [4900, 1579, 1579, 1580],
+        [4500, 2569, 2569],
+        [5200, 1500, 1700, 1238],
+        [4000, 1409, 1409, 1410, 1410],
+    ]
     tables = document.findall(f".//{{{W}}}tbl")
-    assert len(tables) == 4
+    assert len(tables) == len(widths)
     for index, (table, columns) in enumerate(zip(tables, widths)):
         child(child(table, "tblPr"), "tblW", {"w": sum(columns), "type": "dxa"})
         for node, width in zip(table.findall(f"{{{W}}}tblGrid/{{{W}}}gridCol"), columns):
@@ -234,14 +246,13 @@ def main():
     reference_doc(reference)
     result = subprocess.check_output(["pandoc", str(tex), "-f", "latex", "-t", "json"])
     ast = json.loads(result)
-    counts = [0, 0]
+    counts = [0] * 6
     for block in ast["blocks"]:
         if block["t"] == "Header":
             level, attributes, inlines = block["c"]
             if inlines != [{"t": "Str", "c": "Abstract"}] and inlines != [{"t": "Str", "c": "References"}]:
                 counts[level - 1] += 1
-                if level == 1:
-                    counts[1] = 0
+                counts[level:] = [0] * (len(counts) - level)
                 prefix = ".".join(map(str, counts[:level]))
                 block["c"][2] = [{"t": "Str", "c": prefix}, {"t": "Space"}] + inlines
     ast_path = work / "english-word.json"

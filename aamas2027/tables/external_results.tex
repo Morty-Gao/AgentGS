@@ -1,15 +1,14 @@
-% DOCX paragraphs 147--147, table 3. No results were supplied.
 \begin{table}[t]
-  \caption{AgentGS and baseline results on GeoBenchX. TBD entries are reserved for the completed evaluation data.}
-  \label{tab:external-results}
-  \centering
-  \begin{tabularx}{\columnwidth}{@{}Xrr@{}}
-    \toprule
-    Method & Mean score & Full-match \\
-           & $(0$--$2)\uparrow$ & rate $(\%)\uparrow$ \\
-    \midrule
-    Baseline (TBD) & \textbf{TBD} & \textbf{TBD} \\
-    AgentGS & \textbf{TBD} & \textbf{TBD} \\
-    \bottomrule
-  \end{tabularx}
+\caption{Evaluation results on GeoBenchX. Both methods use GPT-5.6 Terra.}
+\label{tab:external-results}
+\centering
+\begin{tabularx}{\columnwidth}{@{}Xrr@{}}
+\toprule
+Method & Mean score & Full-match \\
+ & $(0$--$2)\uparrow$ & rate $(\%)\uparrow$ \\
+\midrule
+ReAct & 1.1980 & 53.47 \\
+AgentGS & \textbf{1.3762} & \textbf{62.87} \\
+\bottomrule
+\end{tabularx}
 \end{table}

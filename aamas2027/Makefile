@@ -9,7 +9,7 @@ MAIN := main.tex
 OUTDIR := build
 LATEXFLAGS := -pdf -interaction=nonstopmode -halt-on-error -file-line-error -synctex=1 -outdir=$(OUTDIR)
 
-.PHONY: all pdf full supplement word compile watch clean distclean rebuild import-assets check-tools help
+.PHONY: all pdf full supplement word figures compile watch clean distclean rebuild import-assets check-tools help
 
 all: pdf full supplement
 
@@ -26,9 +26,13 @@ supplement: check-tools
 word: full
 	python3 scripts/export_word.py
 
+figures:
+	python3 scripts/export_drawio.py
+
 pdf: check-tools
 	$(LATEXMK) $(LATEXFLAGS) $(MAIN)
-	@printf 'PDF: $(OUTDIR)/main.pdf\n'
+	cp "$(OUTDIR)/main.pdf" main.pdf
+	@printf 'PDF: main.pdf\n'
 
 # Continuously rebuild when source files change; Ctrl+C stops watching.
 watch: check-tools
@@ -41,15 +45,17 @@ clean: check-tools
 # Remove generated files, including the compiled PDF.
 distclean: check-tools
 	$(LATEXMK) -C -outdir=$(OUTDIR) $(MAIN)
+	rm -f main.pdf
 
 # Recursive calls keep cleaning and compiling sequential, even with make -j.
 rebuild:
 	$(MAKE) distclean
 	$(MAKE) pdf
 
-# Re-extract the original manuscript's images without modifying their content.
+# Import an explicitly selected manuscript; no stale source is silently used.
 import-assets:
-	python3 scripts/import_docx_assets.py
+	@test -n "$(SOURCE)" || { printf 'Usage: make import-assets SOURCE=/path/to/manuscript.docx\n'; exit 1; }
+	python3 scripts/import_docx_assets.py "$(SOURCE)"
 
 check-tools:
 	@command -v $(LATEXMK) >/dev/null || { printf 'Missing latexmk. Install: sudo apt-get install latexmk\n'; exit 1; }
@@ -58,7 +64,7 @@ check-tools:
 
 help:
 	@printf '%s\n' \
-	  'make / make pdf / make compile  Compile build/main.pdf (incremental)' \
+	  'make / make pdf / make compile  Compile build/main.pdf and copy to main.pdf (incremental)' \
 	  'make full                      Compile the complete Word translation' \
 	  'make supplement                Compile the anonymous supplementary figures' \
 	  'make word                      Export the complete translation to Word' \
@@ -67,5 +73,6 @@ help:
 	  'make clean                     Remove auxiliary files; keep PDF' \
 	  'make distclean                 Remove generated files, including PDF' \
 	  'make rebuild                   Clean and compile from scratch' \
-	  'make import-assets             Extract figures from the original DOCX' \
+	  'make figures                   Export editable diagrams (requires drawio)' \
+	  'make import-assets SOURCE=...  Extract figures from a selected DOCX' \
 	  'make help                      Show available commands'

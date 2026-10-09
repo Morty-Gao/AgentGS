@@ -1,65 +1,30 @@
-% DOCX paragraph 039.
-\section{Hierarchical Representation for Task Composition}
+\subsection{Hierarchical Representation and Skill Hypergraphs}
 \label{sec:representation}
+AgentGS represents strategies, reusable operations, and implementations as Skills, Capabilities, and Tools. This separation supports operation reuse and preservation of constraints. Figure~\ref{fig:overview}(b) shows their relationships.
 
-% DOCX paragraph 040.
-The planner takes a natural-language goal $q$, task resources $X$, and registered sets $S$, $C$, and $T$, corresponding to Skills, Capabilities, and Tools. Planning first constructs a task plan containing capability instances and their dependencies, then selects an available tool and binds invocation parameters for each instance. Reusing an operation requires preserving its dependencies and applicability conditions; selecting an alternative tool requires ensuring that it implements the same operation. We connect strategies and implementations through shared capability identifiers, while retaining each instance's Skill provenance, input roles, and candidate-tool scope. Figure~\ref{fig:overview} shows the relationship among hierarchical representation, capability completion, and tool execution.
+\paragraph{Skill.}
+A Skill describes a reusable strategy for a class of tasks: its objective, applicable inputs, expected artifacts, capability steps, constraints, validation requirements, and recovery policies. Each step references a Capability and specifies mandatory predecessors, mandatory or optional status, and permitted tools. The system selects task-relevant local steps rather than executing the entire strategy unchanged. Generating a new Skill means organizing a newly composed capability workflow into a strategy description; this does not create new Capability definitions or Tool implementations.
 
-% DOCX paragraph 041.
-\subsection{Shared Operations and Strategy Context}
-\label{sec:shared-operations}
+\paragraph{Capability.}
+A Capability describes an operation shared across strategies, including its function, input/output types, preconditions, postconditions, and candidate tools. For example, deep-time geoscience and carbon-storage strategies can share a raster-analysis capability while permitting different tools. Sharing an operation therefore preserves its strategy-specific usage constraints. Capability--Tool mappings record concrete implementations and parameter constraints to distinguish tools with similar functions. A Capability can have multiple implementing Tools, and a Tool can implement multiple Capabilities.
 
-% DOCX paragraph 042.
-\paragraph{A Skill is a reusable task strategy.}
-Each Skill describes its task objective, applicable inputs, expected artifacts, and required capability steps, together with constraints, validation requirements, and recovery policies. Each step references a Capability identifier and specifies its required predecessors, whether it is mandatory or optional, and its candidate-tool scope. A Skill therefore describes a capability workflow containing mandatory and optional steps, from which operations and tool implementations can be selected according to task requirements. Generating a new Skill in this work means organizing a composed capability workflow into a new strategy description. The new content primarily consists of combinations of existing capabilities and their dependencies; it does not create new Capability definitions or Tool implementations.
+\paragraph{Tool.}
+A Tool is a callable interface for computation or data processing. Its registration includes an identifier, parameter schema, input/output definitions, and runtime information. Concrete files, values, and upstream artifacts are bound during execution.
 
-% DOCX paragraph 043.
-\paragraph{A Capability defines an operation shared across strategies.}
-Each Capability specifies its function, input/output types, preconditions, postconditions, and candidate tools in a common form. Multiple Skills can reference it, and different Tools can implement it. Mappings between Capabilities and Tools record the concrete operation and parameter constraints, distinguishing implementations with similar functions. A single Tool may also implement multiple capabilities, such as returning both an extreme value and its index. For example, deep-time geoscience and carbon-storage strategies may both reference a raster-analysis capability while restricting it to different candidate-tool sets. Sharing a capability does not imply unrestricted substitution of tools across strategies.
+Skill--Capability membership and Capability--Tool implementation relationships are both many-to-many. The former identifies the operations in a strategy; the latter identifies candidate implementations. Actual tool selection and executability additionally depend on the task, capability-instance constraints, and runtime conditions.
 
-% DOCX paragraph 044.
-\paragraph{A Tool is a callable interface implementing an operation.}
-Its registration includes a tool identifier, parameter schema, input/output definitions, and runtime information. Files, numerical values, and upstream artifacts required by an invocation are bound during execution. Both Skill--Capability membership and Capability--Tool implementation relationships are many-to-many. The former records the capability composition of a strategy; the latter supports tool selection after a capability plan has been formed. Whether a tool is selected and executable still depends on task requirements, instance constraints, and runtime conditions.
-
-% DOCX paragraphs 045--047, including equation (1).
-This separation allows the system to establish operations and dependencies before choosing concrete implementations. The same Capability can be reused by different Skills, but each instance retains the source Skill's prerequisites and specifies its input objects and candidate-tool scope. A task-specific capability plan is represented as
+This representation establishes an operational workflow while retaining each reused capability's constraints. A task plan uses capability instances to record the identity, provenance, and input role of each operation:
 \begin{equation}
-  P = (V,D_d,D_c,\beta), \qquad v_i=(c_i,s_i,r_i).
-  \label{eq:plan}
+P=(V,D_d,D_c,\beta),\qquad v_i=(c_i,s_i,r_i).
+\label{eq:plan}
 \end{equation}
-Here, $V$ is the set of capability instances, $c_i$ identifies the capability, $s_i$ records its strategy provenance, and $r_i$ identifies the step and its input role. $D_d$ and $D_c$ record data and control dependencies, respectively, and $\beta$ binds resources or upstream artifacts. Operations on different input objects are represented by distinct capability instances, even when they use the same tool; functional equivalence alone does not justify merging them. The current implementation does not yet fully support dynamically creating repeated capability instances for multiple objects.
+Here, $V$ contains capability instances; $c_i$ identifies the operation, $s_i$ records its source strategy, and $r_i$ identifies the step and input role. $D_d$ and $D_c$ record data and control dependencies, while $\beta$ binds inputs to task resources or upstream artifacts. The plan thus specifies both execution order and the data consumed by later steps. Operations on different input objects remain distinct instances, even when they use the same tool; functional similarity alone does not justify merging them.
 
-% DOCX paragraph 048.
-\subsection{Skill Hypergraphs and Dependencies with Provenance}
-\label{sec:hypergraph}
-
-% DOCX paragraphs 049--050, including equation (2).
-The skill hypergraph is constructed from registered Skill workflows. Capabilities are its nodes, and the set of capabilities contained in each Skill forms a hyperedge:
+Shared Capabilities connect different Skills. A skill hypergraph built from registered Skills represents Capabilities as nodes and each Skill's capability set as a hyperedge:
 \begin{equation}
-  H=(C,E), \qquad E=\{e_s:s\in S\}, \qquad e_s\subseteq C.
-  \label{eq:hypergraph}
+H=(C,E),\qquad E=\{e_s:s\in S\},\qquad e_s\subseteq C.
+\label{eq:hypergraph}
 \end{equation}
+For example, Skills $S_1$ and $S_2$ containing $\{a,b\}$ and $\{b,c\}$ share node $b$. Membership identifies the operations contained in a Skill, but execution order additionally requires expanding the conditions governing their dependencies. Execution prerequisites are represented separately by the provenance-bearing relation $d=(s,U,c)$: within Skill $s$, operation $c$ requires all predecessors in $U$.
 
-% DOCX paragraph 051.
-For example, Skill $S_1$ contains $\{a,b\}$ and Skill $S_2$ contains $\{b,c\}$. Both reference the shared node $b$, avoiding duplicate definitions and providing a connection for composition across Skills. Membership hyperedges describe Skill--Capability membership. Execution direction is specified separately by a provenance-bearing relation $d=(s,U,c)$: in Skill $s$, capability $c$ requires \emph{all} predecessors in $U$, rather than any one of them. The plan retains the source Skill of each dependency, preventing capability sharing from automatically importing prerequisites from other Skills. Conditional ordering applies only when both steps are selected and does not introduce additional prerequisites.
-
-% DOCX paragraph 052.
-Composition constructs a plan from selected capabilities and their prerequisites. Completion retrieves connecting branches from other Skills and incorporates those that pass constraint checks. Explicit Skill-compatibility relations limit the search scope for compatibility-based completion. Directed bridging searches inactive Skills for directed branches connecting endpoints in the current plan; its search conditions are given in Section~\ref{sec:completion}. Membership describes capability composition, compatibility limits completion scope, and dependencies specify execution prerequisites. The ordering of members within a hyperedge is not an execution constraint.
-
-% DOCX paragraph 053 and embedded image 1.
-\input{figures/overview}
-
-% DOCX paragraph 054.
-\subsection{From Capability Plans to Constrained Implementations}
-\label{sec:implementations}
-
-% DOCX paragraph 055.
-\paragraph{GeoToolKG describes tool associations.}
-It records each tool's domain, function, inputs, outputs, and provenance, along with recommended invocation transitions, including recommended successors and their corresponding predecessor relationships. These associations support tool retrieval and composition. Forming an executable workflow additionally requires checking parameters, artifact compatibility, prerequisites, and scientific applicability.
-
-% DOCX paragraph 056.
-\paragraph{ToolGraph maps capabilities to implementations.}
-It records bidirectional relationships between Capabilities and candidate Tools, with the concrete operation and parameter constraints stored on each mapping. ToolGraph describes Capability--Tool implementation relationships, whereas Tool--Tool relations in GeoToolKG describe recommended transitions. The system first constructs and completes a capability plan. It then filters the mapped tools for availability and membership in each instance's candidate scope, and evaluates them using parameter schemas and declared semantic input/output types. Concrete artifacts are bound and validated during execution. Execution dependencies are jointly determined by explicit Skill declarations and capability-completion results.
-
-% DOCX paragraph 057.
-The hierarchy connects task requirements, operation dependencies, and candidate tools, providing the basis for capability composition and missing-capability completion.
+The hierarchy connects strategies, shared operations, and implementations while retaining the conditions under which operations are reused. Planning uses this information to determine the current workflow; completion uses it to assess whether missing steps can be connected.
