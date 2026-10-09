@@ -9,8 +9,7 @@ from collections import Counter, defaultdict
 from pathlib import Path
 
 import numpy as np
-from _study import DEFAULT_STUDY, file_hash, load_study, worker_only, write_json
-from run import entries
+from _study import DEFAULT_STUDY, entries, file_hash, load_study, write_json
 
 from agentgs.evaluation.analysis.conversation import as_conversation, tool_executions
 
@@ -225,10 +224,11 @@ def read_cell(directory, study, cell, required_entries, ids):
 def main():
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--study", type=Path, default=DEFAULT_STUDY)
-    parser.add_argument("--suite", choices=["pilot", "primary", "all"], default="primary")
+    parser.add_argument(
+        "--suite", choices=["pilot", "primary", "interaction", "all"], default="primary"
+    )
     parser.add_argument("--require-complete", action="store_true")
     args = parser.parse_args()
-    worker_only()
     directory = args.study.resolve()
     study = load_study(directory, check_source=False)
     selection = json.loads((directory / "selection.json").read_text())

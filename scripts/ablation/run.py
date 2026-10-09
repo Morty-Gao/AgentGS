@@ -15,11 +15,11 @@ from _study import (
     ROOT,
     data_inventory,
     digest,
+    entries,
     file_hash,
     load_study,
     request_for,
     source_snapshot,
-    worker_only,
     write_json,
 )
 
@@ -32,37 +32,19 @@ from agentgs.evaluation.datasets.geotooleval import GeoToolEvalDataset
 from agentgs.runtime.answer_contracts import AnswerContracts
 from agentgs.runtime.service import TaskService
 
+_evaluate = None
+
 
 def scorer():
-    spec = importlib.util.spec_from_file_location(
-        "module_study_scorer", ROOT / "scripts/evaluation/agentgs/score.py"
-    )
-    module = importlib.util.module_from_spec(spec)
-    spec.loader.exec_module(module)
-    return module.evaluate
-
-
-def entries(study, suite, cells, repeats):
-    if suite == "pilot":
-        rows = [
-            {"cell": row["cell"], "repeat": 0, "suite": "pilot", "run_id": row["cell"] + "/pilot"}
-            for row in study["schedule"]
-            if row["suite"] == "primary" and row["repeat"] == 1
-        ]
-    else:
-        rows = [row for row in study["schedule"] if suite == "all" or row["suite"] == suite]
-    if cells:
-        unknown = set(cells) - {row["cell"] for row in rows}
-        if unknown:
-            raise ValueError(
-                f"Cells are unavailable in this suite (A4 is deferred): {sorted(unknown)}"
-            )
-        rows = [row for row in rows if row["cell"] in cells]
-    if repeats:
-        rows = [row for row in rows if row["repeat"] in repeats]
-    if not rows:
-        raise ValueError("The requested schedule is empty")
-    return rows
+    global _evaluate
+    if _evaluate is None:
+        spec = importlib.util.spec_from_file_location(
+            "module_study_scorer", ROOT / "scripts/evaluation/agentgs/score.py"
+        )
+        module = importlib.util.module_from_spec(spec)
+        spec.loader.exec_module(module)
+        _evaluate = module.evaluate
+    return _evaluate
 
 
 def execute_cell(study, directory, entry):
@@ -193,7 +175,6 @@ def main():
     )
     if not args.execute:
         return
-    worker_only()
     if data_inventory(Path(study["root"])) != study["data_inventory"]:
         raise ValueError("Prepared data changed since selection; prepare a fresh study")
     for entry in chosen:

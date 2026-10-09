@@ -4,16 +4,19 @@ from __future__ import annotations
 
 import hashlib
 import json
+import math
 import os
-import socket
+import random
 from pathlib import Path
 
 from agentgs.benchmark.inputs import public_input
 from agentgs.config.algorithm import load_algorithm, resolve_algorithm
+from agentgs.config.paths import project_root
 from agentgs.contracts.models import TaskInput
 from agentgs.contracts.models.modules import ModuleSettings, resolve_modules
 
-ROOT = Path(__file__).resolve().parents[2]
+ROOT = project_root(Path(__file__))
+DESIGN = Path(__file__).resolve().parent / "design.json"
 DEFAULT_STUDY = ROOT / "outputs/ablations/module-mechanism-study"
 
 
@@ -35,11 +38,8 @@ def write_json(path, value):
     temporary.replace(path)
 
 
-def worker_only():
-    if "worker" not in socket.gethostname():
-        raise SystemExit(
-            "Run on a currently discovered CPU worker; use on_cpu_worker.sh. No local fallback."
-        )
+def load_design():
+    return json.loads(DESIGN.read_text())
 
 
 def source_snapshot(root):
@@ -122,3 +122,57 @@ def load_study(directory, *, check_source=True):
 
 def chain_group(row):
     return "single" if len(row.gold_steps) == 1 else "short" if len(row.gold_steps) <= 3 else "long"
+
+
+def build_schedule(design, cells):
+    """Shuffle each suite once, then rotate that order across repetitions.
+
+    Rotation keeps later repetitions from always starting on the same cell.
+    Question order is chosen when a cell runs and stays shared across cells.
+    """
+    schedule = []
+    for suite in ("primary", "interaction"):
+        order = [cell["id"] for cell in cells if cell["suite"] == suite]
+        if not order:
+            continue
+        random.Random(design["schedule_seed"] + (suite == "interaction")).shuffle(order)
+        width = len(order)
+        step = math.ceil(width / design["repetitions"])
+        for repeat in range(1, design["repetitions"] + 1):
+            offset = (repeat - 1) * step % width
+            for cell in order[offset:] + order[:offset]:
+                schedule.append(
+                    {
+                        "cell": cell,
+                        "repeat": repeat,
+                        "suite": suite,
+                        "run_id": f"{cell}/repeat-{repeat:02d}",
+                    }
+                )
+    return schedule
+
+
+def entries(study, suite, cells, repeats):
+    """Return frozen schedule rows for one invocation.
+
+    Pilot reuses the primary repeat-1 cell order on the 10-question panel and
+    stores repeat 0, so those runs stay outside the repeated main estimates.
+    """
+    if suite == "pilot":
+        rows = [
+            {"cell": row["cell"], "repeat": 0, "suite": "pilot", "run_id": row["cell"] + "/pilot"}
+            for row in study["schedule"]
+            if row["suite"] == "primary" and row["repeat"] == 1
+        ]
+    else:
+        rows = [row for row in study["schedule"] if suite == "all" or row["suite"] == suite]
+    if cells:
+        unknown = set(cells) - {row["cell"] for row in rows}
+        if unknown:
+            raise ValueError(f"Cells are not scheduled in suite {suite}: {sorted(unknown)}")
+        rows = [row for row in rows if row["cell"] in cells]
+    if repeats:
+        rows = [row for row in rows if row["repeat"] in repeats]
+    if not rows:
+        raise ValueError("The requested schedule is empty")
+    return rows

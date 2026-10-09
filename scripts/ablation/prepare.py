@@ -4,8 +4,6 @@ from __future__ import annotations
 
 import argparse
 import json
-import math
-import random
 from collections import Counter, defaultdict
 from copy import copy
 from pathlib import Path
@@ -13,13 +11,14 @@ from pathlib import Path
 from _study import (
     DEFAULT_STUDY,
     ROOT,
+    build_schedule,
     chain_group,
     data_inventory,
     digest,
     effective_policy,
     file_hash,
+    load_design,
     source_snapshot,
-    worker_only,
     write_json,
 )
 
@@ -176,13 +175,12 @@ def main():
     )
     parser.add_argument("--model", help="llm.toml model key; required when several models are configured")
     args = parser.parse_args()
-    worker_only()
     directory = args.study.resolve()
     if directory.exists() and any(directory.iterdir()):
         raise SystemExit(
             "Study directory is not empty. Use a fresh directory; frozen designs are not overwritten."
         )
-    design = json.loads((ROOT / "scripts/ablation/design.json").read_text())
+    design = load_design()
     before = source_snapshot(ROOT)
     tasks = GeoToolEvalDataset(args.source).load()
     if len({row.category_id for row in tasks}) != 10:
@@ -258,21 +256,7 @@ def main():
     for cell in cells:
         if cell["id"] == "A4":
             cell["suite"] = "primary" if eligibility["A4"]["accepted_tasks"] else "deferred"
-    schedule = []
-    for suite in ("primary", "interaction"):
-        order = [cell["id"] for cell in cells if cell["suite"] == suite]
-        random.Random(design["schedule_seed"] + (suite == "interaction")).shuffle(order)
-        for repeat in range(1, design["repetitions"] + 1):
-            offset = (repeat - 1) * math.ceil(len(order) / design["repetitions"]) % len(order)
-            for cell in order[offset:] + order[:offset]:
-                schedule.append(
-                    {
-                        "cell": cell,
-                        "repeat": repeat,
-                        "suite": suite,
-                        "run_id": f"{cell}/repeat-{repeat:02d}",
-                    }
-                )
+    schedule = build_schedule(design, cells)
     raw = {
         json.loads(line)["question_id"]: line
         for line in args.source.read_text(encoding="utf-8-sig").splitlines()

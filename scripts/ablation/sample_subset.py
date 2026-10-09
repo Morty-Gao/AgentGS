@@ -13,7 +13,18 @@ import json
 import random
 from pathlib import Path
 
-REPO = Path(__file__).resolve().parents[2]
+
+def _repository_root(start: Path) -> Path:
+    candidate = start.expanduser().resolve()
+    if candidate.is_file():
+        candidate = candidate.parent
+    for parent in (candidate, *candidate.parents):
+        if (parent / "pyproject.toml").is_file():
+            return parent
+    raise ValueError(f"No pyproject.toml found above {candidate}")
+
+
+REPO = _repository_root(Path(__file__))
 
 FIELD_NAMES = {
     1: "DeepEarthTools",

@@ -11,7 +11,18 @@ import sys
 import urllib.request
 from pathlib import Path
 
-REPO = Path(__file__).resolve().parents[2]
+
+def _repository_root(start: Path) -> Path:
+    candidate = start.expanduser().resolve()
+    if candidate.is_file():
+        candidate = candidate.parent
+    for parent in (candidate, *candidate.parents):
+        if (parent / "pyproject.toml").is_file():
+            return parent
+    raise ValueError(f"No pyproject.toml found above {candidate}")
+
+
+REPO = _repository_root(Path(__file__))
 sys.path.insert(0, str(REPO / "src"))
 MANIFESTS = Path(__file__).with_name("manifests")
 USED_SOURCES = {}

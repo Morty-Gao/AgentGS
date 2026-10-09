@@ -18,7 +18,18 @@ from uuid import uuid4
 
 import httpx
 
-ROOT = Path(__file__).resolve().parents[2]
+
+def _repository_root(start: Path) -> Path:
+    candidate = start.expanduser().resolve()
+    if candidate.is_file():
+        candidate = candidate.parent
+    for parent in (candidate, *candidate.parents):
+        if (parent / "pyproject.toml").is_file():
+            return parent
+    raise ValueError(f"No pyproject.toml found above {candidate}")
+
+
+ROOT = _repository_root(Path(__file__))
 _output = contextvars.ContextVar("fork_tool_output", default=None)
 _receipts = contextvars.ContextVar("fork_tool_receipts", default=None)
 _checkpoint = contextvars.ContextVar("fork_checkpoint", default=None)

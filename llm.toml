@@ -87,6 +87,23 @@ default_effort = "max"
 [models.deepseek.capabilities]
 tool_calling = true
 
+[providers.ds2]
+base_url = "http://10.102.209.46:30010/v1"
+api_key = "local-no-key"
+timeout_seconds = 600
+max_concurrent_requests = 48
+
+[models.ds2]
+provider = "ds2"
+model = "deepseek-v4.1-flash"
+context_window = 1048576
+max_output_tokens = 32768
+supported_efforts = ["max", "xhigh", "high", "low"]
+default_effort = "high"
+
+[models.ds2.capabilities]
+tool_calling = true
+
 [providers.terra]
 base_url = "${LLM_BASE_URL}/v1"
 api_key = "${LLM_API_KEY}"

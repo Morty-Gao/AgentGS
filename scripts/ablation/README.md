@@ -38,8 +38,8 @@ a fresh Full; results from different library snapshots cannot be paired.
 ## Deterministic selection of 60 tasks
 
 `prepare.py` audits all 603 tasks without model requests or scientific execution.
-It preserves the existing random subset and sampler; the study has its own
-frozen `inputs/study60.jsonl`.
+`sample_subset.py` still draws a separate uniform panel. This study does not
+read that file; it freezes its own `inputs/study60.jsonl`.
 
 1. Allocate six tasks to each of the ten domains.
 2. In a mixed domain keep one single-step control, prefer up to three chains
@@ -111,30 +111,36 @@ time to avoid different treatment cells competing for the same service quota.
 
 ## Commands
 
-Run through a currently discovered CPU worker; the wrapper never allocates a pod
-or falls back to the development machine. It applies the lab proxy environment.
-If that proxy fails, follow the project's documented personal-proxy fallback;
-do not silently change endpoints during a study.
+Run the Python entry points with the project interpreter. These scripts do not
+discover machines, open SSH sessions, or change proxies. Use an environment
+that already has the project dependencies, prepared data, and model endpoint,
+and keep that endpoint fixed for the whole frozen study.
 
 ```sh
-# Offline audit, deterministic selection and immutable freeze. No model calls.
-bash scripts/ablation/on_cpu_worker.sh prepare.py
+# Separate uniform field sample. This study does not read its output.
+uv run python scripts/ablation/sample_subset.py
 
-# Preview only; --execute is necessary for real model requests.
-bash scripts/ablation/on_cpu_worker.sh run.py --suite pilot
+# Offline audit, deterministic selection and immutable freeze. No model calls.
+uv run python scripts/ablation/prepare.py
+
+# Preview only. --execute is required before any model request.
+uv run python scripts/ablation/run.py --suite pilot
 
 # Execute the pilot, then inspect complete results before main runs.
-bash scripts/ablation/on_cpu_worker.sh run.py --suite pilot --execute
-bash scripts/ablation/on_cpu_worker.sh summarize.py --suite pilot --require-complete
+uv run python scripts/ablation/run.py --suite pilot --execute
+uv run python scripts/ablation/summarize.py --suite pilot --require-complete
 
-bash scripts/ablation/on_cpu_worker.sh run.py --suite primary --execute
-bash scripts/ablation/on_cpu_worker.sh summarize.py --suite primary --require-complete
-bash scripts/ablation/on_cpu_worker.sh run.py --suite interaction --execute
-bash scripts/ablation/on_cpu_worker.sh summarize.py --suite all --require-complete
+uv run python scripts/ablation/run.py --suite primary --execute
+uv run python scripts/ablation/summarize.py --suite primary --require-complete
+uv run python scripts/ablation/run.py --suite interaction --execute
+uv run python scripts/ablation/summarize.py --suite all --require-complete
 
 # Resume a specific cell/repetition, preserving completed and failed outcomes.
-bash scripts/ablation/on_cpu_worker.sh run.py --suite primary --cell A5 --repeat 2 --execute
+uv run python scripts/ablation/run.py --suite primary --cell A5 --repeat 2 --execute
 ```
+
+`summarize.py` accepts `pilot`, `primary`, `interaction`, and `all`. Contrasts
+against Full need the primary cells, so report interactions with `--suite all`.
 
 Default directory: `outputs/ablations/module-mechanism-study`. Use `--study` on
 all commands to choose another directory. Preparation refuses to overwrite a
