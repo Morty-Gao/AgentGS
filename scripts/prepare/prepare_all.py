@@ -12,7 +12,6 @@ DOMAINS = (
     "gem",
     "deep_earth",
     "geotoolkg",
-    "answer_formats",
     "geoquestions",
     "mineral",
     "climate",

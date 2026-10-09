@@ -21,7 +21,7 @@ python3 scripts/prepare/prepare_gem.py
 .venv/bin/python scripts/prepare/prepare_ocean.py --offline
 ```
 
-总入口顺序执行 `prepare_gem.py`、`prepare_deep_earth.py`、`prepare_geotoolkg.py`、`prepare_answer_formats.py`、`prepare_geoquestions.py`、`prepare_mineral.py`、`prepare_climate.py`、`prepare_energy.py`、`prepare_ocean.py`、`prepare_biodeeptime.py`、`prepare_ccs.py`、`prepare_remote_sensing.py`、`prepare_hazard.py`。
+总入口顺序执行 `prepare_gem.py`、`prepare_deep_earth.py`、`prepare_geotoolkg.py`、`prepare_geoquestions.py`、`prepare_mineral.py`、`prepare_climate.py`、`prepare_energy.py`、`prepare_ocean.py`、`prepare_biodeeptime.py`、`prepare_ccs.py`、`prepare_remote_sensing.py`、`prepare_hazard.py`。
 
 - `--output-root`：接收 `data/` 整理结果的项目根目录，默认本仓库。
 - `--cache-root`：原始缓存，默认本仓库 `data/raw/`。
@@ -43,11 +43,10 @@ ZIP 包放在 `data/<数据集>.zip`。对应 prepare 脚本负责展开到 `dat
 
 | 数据集 | 整理结果 | 默认准备方式 |
 | --- | --- | --- |
-| GeoToolEval | `data/geotooleval.jsonl` | 用户提供的原记录，保留 603 题、全部原字段 |
+| GeoToolEval | `data/geotooleval.jsonl` | 保留 603 题、11 个原始字段及 `question_sha256`、`answer_format` 运行字段；直接读取，无需准备 |
 | GEM 原始观测 | `data/gem.jsonl.gz`，展开为 `data/gem.jsonl` | 完整保留原工作簿各工作表、行序、单元格值及公式缓存；Git 保存压缩 JSONL |
 | 矿产 | `data/mineral.csv` | 从 MRDS 按原 8,000 个记录 ID 选择 |
 | 灾害 | `data/hazard.jsonl` | 额外保留的原灾害附件完整记录，10,764 行、47 列 |
-| 回答格式 | `data/answer_formats/` | 从 GeoToolEval 公开问题、格式和说明生成 |
 | GeoQuestions | `data/geoquestions/` | 从上游原文件生成 40 条问题和查询结果 JSONL |
 | 深地 | `data/deep_earth/` | 保留现有模型采样、USGS 目录及来源说明 |
 | KG | `data/geotoolkg/` | 保留原索引 JSON 和导入说明 |
@@ -64,9 +63,11 @@ ZIP 包放在 `data/<数据集>.zip`。对应 prepare 脚本负责展开到 `dat
 
 ## Git 与校验
 
-Git 放行 GeoToolEval、GEM 压缩 JSONL、原灾害记录、BioDeepTime 原子集/区界、CCS 原空间资产、深地输入、KG JSON，以及 `data/metadata/geotooleval.json` 的原附件来源说明。对应多文件输入的 ZIP 形式也允许保留。可生成的矿产、气候、能源、海洋、GeoQuestions、回答格式、遥感包与准备清单均被忽略；`data/raw/` 始终被忽略。
+Git 放行 GeoToolEval、GEM 压缩 JSONL、原灾害记录、BioDeepTime 原子集/区界、CCS 原空间资产、深地输入、KG JSON，以及 `data/metadata/geotooleval.json` 的原附件来源说明。对应多文件输入的 ZIP 形式也允许保留。可生成的矿产、气候、能源、海洋、GeoQuestions、遥感包与准备清单均被忽略；`data/raw/` 始终被忽略。
 
 GeoToolEval 其他工作表内容与来源清单统一保存在 `data/metadata/geotooleval.json`，主数据集仍只有一个 JSONL。资源定位兼容记录为 `data/metadata/resources.json`，用于把原题资源路径映射到新布局。
+
+回答格式直接保存在 GeoToolEval 每条记录的 `answer_format` 字段中，运行时只提取题目、题号、题目哈希和格式配置。英文通用提示词位于 `src/agentgs/datasets/geotooleval.py`；不再生成或维护 `data/answer_formats/`。
 
 各领域清单为 `data/metadata/prepare_<领域>.json`，总清单为 `prepare_all.json`。清单记录实际源哈希、处理代码/参数哈希和结果哈希。成功返回 0；缺输入返回 2，标记 partial；处理异常返回非零。总入口继续其他领域，保留各项失败状态。
 

@@ -39,7 +39,7 @@ tools/envs/reproduction/bin/python scripts/prepare/prepare_all.py --offline
 tools/envs/reproduction/bin/python scripts/prepare/prepare_all.py --source-root data
 ```
 
-各入口命名为 `prepare_<领域>.py`，总入口为 `prepare_all.py`；回答格式和 GeoQuestions 固定 40 条数据也由独立准备脚本生成并被 Git 忽略。矿产从 MRDS 按原 8,000 个记录 ID 重建，海洋和能源从原始文件计算，遥感保留固定 49 个目录的原始影像内容。GISTEMP 年表由 NASA 原始月表生成；World Bank 旧原始文件缺失时直接从当前 API ZIP 重建。来源更新允许改变科学结果，每次记录实际源文件哈希。BioDeepTime 原子集/手工区界、CCS 手工空间资产及原灾害表仍需要提供原输入。路径、来源与可选的显式快照恢复模式见 [prepare/README.md](scripts/prepare/README.md)。
+各入口命名为 `prepare_<领域>.py`，总入口为 `prepare_all.py`；GeoQuestions 固定 40 条数据由独立准备脚本生成并被 Git 忽略。回答格式直接保存在 `data/geotooleval.jsonl` 中，无需额外准备。矿产从 MRDS 按原 8,000 个记录 ID 重建，海洋和能源从原始文件计算，遥感保留固定 49 个目录的原始影像内容。GISTEMP 年表由 NASA 原始月表生成；World Bank 旧原始文件缺失时直接从当前 API ZIP 重建。来源更新允许改变科学结果，每次记录实际源文件哈希。BioDeepTime 原子集/手工区界、CCS 手工空间资产及原灾害表仍需要提供原输入。路径、来源与可选的显式快照恢复模式见 [prepare/README.md](scripts/prepare/README.md)。
 
 Git 保留 GeoToolEval、GEM 压缩 JSONL、固定数据参考资料、暂不能完整重建的少量原始资产、深地固定输入以及用户提供的冻结 KG JSON。可生成的处理结果、公开原始下载、大型模型及缓存均被忽略；来源哈希与选择参数放在准备脚本的 `manifests/`。数据准备通过不等同于真实模型端到端实验通过。
 
@@ -64,11 +64,11 @@ tools/envs/reproduction/bin/python -m agentgs evaluate benchmark --output output
 
 默认续跑保留失败结果；需要重试失败题时显式加 `--retry-failed`，原 attempt 仍保留。若中断后留下 `.run.lock`，先确认 `launch.json` 的执行进程已退出，再移除该锁；运行中的目录不得并发续跑。十领域抽样与本次全量实验分别保留，均不作为旧 harness 所有模式完全等价的证据。
 
-用户确认的最新版 `GeoToolEval_固定回答格式.xlsx` 已一次性转换为 `data/geotooleval.jsonl`，包含 603 题、11 个原始字段，完整保留“固定回答格式”和“格式说明”；全部单元格值与类型已逐字段核对。原文件 SHA256、领域题数、输出哈希及另外两个工作表的内容统一保存在 `data/metadata/geotooleval.json`（保留公式文本及缓存值，不执行公式）。主数据及来源说明均可由 Git 跟踪，不保留转换脚本或工作簿副本。
+用户确认的最新版 `GeoToolEval_固定回答格式.xlsx` 已一次性转换为 `data/geotooleval.jsonl`，包含 603 题、11 个原始字段，完整保留“固定回答格式”和“格式说明”；全部单元格值与类型已逐字段核对。每条记录额外包含 `question_sha256` 和 `answer_format`，供运行时直接提取公开回答要求；不再维护独立的回答格式文件。英文通用提示词保存在 `src/agentgs/datasets/geotooleval.py`。原文件 SHA256、领域题数、输出哈希及另外两个工作表的内容统一保存在 `data/metadata/geotooleval.json`（保留公式文本及缓存值，不执行公式）。主数据及来源说明均可由 Git 跟踪，不保留转换脚本或工作簿副本。
 
 ## 最新数据与算法版本
 
-内嵌数据以用户最后上传的 `GeoToolEval_固定回答格式.xlsx` 为准。与前次上传相比，新增两列回答格式字段，75 题的标准工具调用明细发生变化；原题文本、答案及其他原始字段一致。来源与变更记录保存在 `data/metadata/geotooleval.json`。工作簿中的格式列按原文保留，独立的版本化回答合同仍由各自的运行配置选择。
+内嵌数据以用户最后上传的 `GeoToolEval_固定回答格式.xlsx` 为准。与前次上传相比，新增两列回答格式字段，75 题的标准工具调用明细发生变化；原题文本、答案及其他原始字段一致。来源与变更记录保存在 `data/metadata/geotooleval.json`。工作簿中的格式列按原文保留，运行时和评测读取同一个 JSONL，回答格式配置与公开列一致性及题目哈希在加载时校验。
 
 GeoQuestions 只按公开 numeric source_id 或提交的 SPARQL 结构定位物化结果，符号 topic 不充当 ID。查询匹配保留原权重、阈值和歧义规则，未匹配返回失败。结果标记 `derived_lookup`、`answer_lookup=true`，不声称执行了 RDF 端点。
 
@@ -172,7 +172,6 @@ tools/envs/reproduction/bin/python -m agentgs ui serve
 tools/envs/reproduction/bin/python -m pytest -q
 .venv/bin/ruff check src scripts
 .venv/bin/ruff format --check src scripts
-tools/envs/reproduction/bin/python scripts/evaluation/replay_reference_scores.py
 ```
 
 历史基线采集、工具覆盖和 worker 辅助验收脚本已移除；既有对照记录与测试 fixture 保留。生产代码不依赖旧源码目录。

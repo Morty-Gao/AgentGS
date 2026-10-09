@@ -56,9 +56,10 @@ class ModelExecutor:
 
     async def aclose(self):
         self._closed = True
+        caller = asyncio.current_task()
 
         async def close():
-            tasks = [task for task in self._tasks if task is not asyncio.current_task()]
+            tasks = [task for task in self._tasks if task is not caller]
             for task in tasks:
                 task.cancel()
             await asyncio.gather(*tasks, return_exceptions=True)

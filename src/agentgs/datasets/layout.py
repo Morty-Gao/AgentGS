@@ -7,8 +7,6 @@ PREPARED_FILES = {
     "geotooleval/dataset_manifest.json": "geotooleval_manifest.json",
     "geotooleval/workbook_metadata.jsonl": "geotooleval_workbook_metadata.jsonl",
     "geotooleval/version_manifest.json": "geotooleval_version_manifest.json",
-    "answer_formats/geotooleval_fixed.jsonl": "geotooleval_answer_formats.jsonl",
-    "answer_formats/geotooleval_fixed_system.txt": "geotooleval_answer_system.txt",
     "geoquestions1089/processed/geobigdata_snapshot.json": "geoquestions_queries.jsonl",
     "geoquestions1089/processed/questions_40.jsonl": "geoquestions_questions.jsonl",
     "geoquestions1089/processed/manifest.json": "geoquestions_manifest.json",
@@ -90,8 +88,6 @@ PREPARED_FILES.update(
         "usgs/usgs_2010_2020_m7.csv": "deep_earth/usgs_source.csv",
         "processed/habitable/metal_minerals_subset.csv": "mineral.csv",
         "processed/hazard/events.jsonl": "hazard.jsonl",
-        "answer_formats/geotooleval_fixed.jsonl": "answer_formats/geotooleval.jsonl",
-        "answer_formats/geotooleval_fixed_system.txt": "answer_formats/system.txt",
         "processed/resource_manifest.json": "metadata/resources.json",
         "processed/assets/schema_crosswalk.csv": "ccs/schema_crosswalk.csv",
     }
@@ -136,7 +132,6 @@ DATASET_DIRECTORIES = {
         "ccs",
         "deep_earth",
         "geotoolkg",
-        "answer_formats",
     ]
 }
 DATASET_DIRECTORIES.update({"geoquestions": "geoquestions", "remote_sensing": "earthbench"})

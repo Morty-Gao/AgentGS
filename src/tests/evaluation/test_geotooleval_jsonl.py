@@ -76,15 +76,13 @@ def test_benchmark_selects_embedded_jsonl_instead_of_old_workbook(tmp_path):
 def test_compatibility_contracts_use_prepared_metadata_instead_of_dataset_depth(project):
     metadata = project / "data/metadata"
     metadata.mkdir()
-    formats = project / "data/answer_formats"
-    formats.mkdir()
-    path = formats / "compatibility.jsonl"
+    path = metadata / "compatibility.jsonl"
     path.write_text("{}")
     (metadata / "geotooleval.json").write_text(
         json.dumps(
             {
                 "version_manifest": {
-                    "compatibility_contracts": "data/answer_formats/compatibility.jsonl"
+                    "compatibility_contracts": "data/metadata/compatibility.jsonl"
                 },
             }
         )

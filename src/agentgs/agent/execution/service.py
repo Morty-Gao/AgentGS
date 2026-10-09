@@ -94,11 +94,13 @@ class ExecutionService:
         *,
         initial_arguments=None,
     ):
-        row = get_tool_spec(name)
+        row = await invoke(get_tool_spec, name)
         if row is None or name not in self.specs:
             raise ValueError(f"Tool is outside the registered scope: {name}")
-        info = overlay_scientific_tool_schema(
-            name, {"input_format": row["Input"], "output_format": row["Output"]}
+        info = await invoke(
+            overlay_scientific_tool_schema,
+            name,
+            {"input_format": row["Input"], "output_format": row["Output"]},
         )
         scientific = requires_scientific_argument_generation(name)
         bridge = bool((execution_context or {}).get("shared_bridge"))

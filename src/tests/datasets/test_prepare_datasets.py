@@ -206,33 +206,6 @@ def test_default_preparation_never_falls_back_to_repository_snapshots(domain, tm
     assert report["files"] == {}
 
 
-def test_generated_answer_contracts_preserve_public_formats(tmp_path):
-    report = restore("answer_formats", tmp_path)
-    assert report["status"] == "complete"
-    rows = [
-        json.loads(line)
-        for line in (tmp_path / "data/answer_formats/geotooleval.jsonl").read_text().splitlines()
-    ]
-    originals = [
-        json.loads(line) for line in (ROOT / "data/geotooleval.jsonl").read_text().splitlines()
-    ]
-    assert len(rows) == len(originals) == 603
-    for row, original in zip(rows, originals, strict=True):
-        assert set(row) == {"question_id", "question", "question_sha256", "answer_format"}
-        assert row["question_id"] == original["题目序号"]
-        assert row["question"] == original["题目正文"]
-        assert row["answer_format"]["template"] == original["固定回答格式"]
-        assert row["answer_format"]["notes"] == original["格式说明"]
-    # Repeated records and precision must survive regeneration.
-    by_id = {r["question_id"]: r["answer_format"] for r in rows}
-    assert by_id[1]["decimals"] == 2
-    assert by_id[287]["decimals"] == 3
-    assert by_id[137]["repeat_lines"] == [0]
-    assert by_id[137]["max_records"] == 5
-    assert "repeat_lines" not in by_id[465]
-    assert by_id[495]["allowed_options"] == ["A", "B", "C", "D"]
-
-
 def test_geoquestions_regenerates_the_pinned_replay(tmp_path):
     from agentgs.datasets.geoquestions import snapshot_profile
 
@@ -248,7 +221,6 @@ def test_geoquestions_regenerates_the_pinned_replay(tmp_path):
 
 def test_generated_data_are_ignored_and_original_assets_remain_visible():
     generated = [
-        "data/answer_formats/geotooleval.jsonl",
         "data/geoquestions/queries.jsonl",
         "data/mineral.csv",
         "data/gem.jsonl",
@@ -261,7 +233,11 @@ def test_generated_data_are_ignored_and_original_assets_remain_visible():
         "data/raw/climate/NASA_GISTEMP_current.csv",
     ]
     result = subprocess.run(
-        ["git", "check-ignore", "--no-index", *generated], cwd=ROOT, capture_output=True, text=True, check=True
+        ["git", "check-ignore", "--no-index", *generated],
+        cwd=ROOT,
+        capture_output=True,
+        text=True,
+        check=True,
     )
     assert result.stdout.splitlines() == generated
     from agentgs.datasets.layout import RETAINED_FILES
@@ -277,7 +253,9 @@ def test_generated_data_are_ignored_and_original_assets_remain_visible():
         "data/metadata/geotooleval.json",
     ]
     for original in originals:
-        result = subprocess.run(["git", "check-ignore", "--no-index", original], cwd=ROOT, capture_output=True)
+        result = subprocess.run(
+            ["git", "check-ignore", "--no-index", original], cwd=ROOT, capture_output=True
+        )
         assert result.returncode == 1
 
 

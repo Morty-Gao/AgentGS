@@ -2,7 +2,7 @@
   "dataset_manifest": {
     "schema_version": 1,
     "dataset": "GeoToolEval",
-    "selected_dataset": "data/geotooleval/GeoToolEval.jsonl",
+    "selected_dataset": "data/geotooleval.jsonl",
     "source": {
       "filename": "GeoToolEval_固定回答格式.xlsx",
       "sha256": "b6bfad29ed77141da1142c8080103c2dc16dc686687ca213517945c62fec9802",
@@ -35,7 +35,7 @@
       "9": 49,
       "10": 60
     },
-    "representation": "One original worksheet row per JSONL object; all original Chinese column names and cell values preserved, including fixed answer formats",
+    "representation": "One original worksheet row per JSONL object; all original Chinese column names and cell values preserved, including fixed answer formats; question_sha256 and answer_format added for runtime use",
     "auxiliary_sheets": [
       {
         "name": "类别统计",
@@ -456,8 +456,16 @@
       }
     },
     "prepared_files": {
-      "geotooleval.jsonl": "62d3437eb64283c2359cfd4df66195b1de046b5e51fe169d7d7700c213fb6fbe",
+      "geotooleval.jsonl": "43fb7c1817e98da6ad590c869bb2dbcac3e91aa4a4d1454a42d5f5f527045949",
       "geotooleval_workbook_metadata.jsonl": "6c583f96a1ca381abbe3bc6d07a1639395bdad4c77599c64a364ff358189bcb5"
+    },
+    "runtime_schema": {
+      "additional_fields": [
+        "question_sha256",
+        "answer_format"
+      ],
+      "original_dataset_sha256": "62d3437eb64283c2359cfd4df66195b1de046b5e51fe169d7d7700c213fb6fbe",
+      "system_prompt": "agentgs.datasets.geotooleval.ANSWER_SYSTEM_PROMPT"
     }
   },
   "workbook_metadata": [

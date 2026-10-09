@@ -319,12 +319,14 @@ async def test_queue_bound_and_admission_deadline(project, monkeypatch):
     try:
         first = await service.submit(request)
         await wait_until(lambda: bool(service.processes))
-        second = await service.submit(request, timeout_seconds=0.05)
+        second = await service.submit(request)
         with pytest.raises(QueueFull):
             await service.submit(request)
-        record = await service.wait(second.spec.id)
+        await service.cancel(second.spec.id)
+        expired = await service.submit(request, timeout_seconds=0.05)
+        record = await service.wait(expired.spec.id)
         assert record.error.code == "timeout"
-        assert not (project / "outputs/tasks" / second.spec.id).exists()
+        assert not (project / "outputs/tasks" / expired.spec.id).exists()
         waiter = asyncio.create_task(service.wait(first.spec.id))
         await asyncio.sleep(0.01)
         waiter.cancel()
@@ -604,3 +606,61 @@ async def test_transport_close_cancels_inflight_requests_and_rejects_new_calls()
     assert active == 0 and not client._tasks
     with pytest.raises(RuntimeError, match="closed"):
         await client.chat([])
+
+
+async def test_engine_cancel_during_native_reply_checkpoint_closes_pending_calls(project):
+    from agentgs.agent.base import AgentContext
+    from agentgs.agent.engine import AgentEngine
+    from agentgs.messages import Conversation
+
+    entered = asyncio.Event()
+    saved = []
+
+    class Client:
+        async def chat(self, *args, **kwargs):
+            return ChatReply(
+                message={
+                    "role": "assistant",
+                    "tool_calls": [
+                        {
+                            "id": "plan",
+                            "type": "function",
+                            "function": {
+                                "name": "submit_tool_plan",
+                                "arguments": '{"tools":["CCSHaversineDistance"]}',
+                            },
+                        }
+                    ],
+                }
+            )
+
+    class Retriever:
+        async def retrieve(self, query):
+            return [["CCSHaversineDistance", "has the functionality that", "Compute a distance"]]
+
+    async def checkpoint(result):
+        saved.append(result)
+        if Conversation(messages=result.messages).pending_tool_calls():
+            entered.set()
+            await asyncio.sleep(10)
+
+    tools = executor(project)
+    context = AgentContext(
+        tools,
+        tools.artifacts,
+        Events(),
+        client=Client(),
+        tool_retriever=Retriever(),
+        checkpoint=checkpoint,
+    )
+    task = asyncio.create_task(AgentEngine().run(TaskInput(question="distance"), context))
+    await asyncio.wait_for(entered.wait(), 2)
+    task.cancel()
+    with pytest.raises(asyncio.CancelledError):
+        await task
+    assert not Conversation(messages=saved[-1].messages).pending_tool_calls()
+    assert saved[-1].completion_status == "Not Completed"
+    assert any(
+        message.role == "tool" and message.metadata.get("status") == "cancelled"
+        for message in saved[-1].messages
+    )

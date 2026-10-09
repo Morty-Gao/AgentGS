@@ -17,7 +17,7 @@ from agentgs.agent.planning.model_stages import ModelStages
 from agentgs.agent.planning.routing.entry import infer_tools, normalize_plan
 from agentgs.agent.state import AgentExecutionError, RunState
 from agentgs.config.algorithm import AlgorithmSettings, resolve_algorithm
-from agentgs.contracts.async_utils import invoke
+from agentgs.contracts.async_utils import drain, invoke
 from agentgs.contracts.catalog import load_catalog
 from agentgs.contracts.remote_sensing import contract_scope
 from agentgs.contracts.resources import RESOURCE_MARKER, resource_access
@@ -73,6 +73,13 @@ class AgentEngine:
         context = copy(context)
         context.options = resolve_algorithm(context.options or AlgorithmSettings(), task)
         state = RunState(context, task)
+        try:
+            return await self._run_task(task, context, state)
+        except asyncio.CancelledError:
+            await drain(asyncio.create_task(state.cancel()))
+            raise
+
+    async def _run_task(self, task, context, state):
         # Explicit structured requests use the same tool schemas without a model.
         if task.calls:
             await state.emit(
@@ -230,7 +237,7 @@ class AgentEngine:
                 retrieved = await context.tool_retriever.retrieve(
                     SimpleNamespace(query_str=question)
                 )
-                retrieved = snapshot_relations(retrieved)
+                retrieved = await invoke(snapshot_relations, retrieved)
                 available = available_tool_names(retrieved, allowed)
                 await state.emit(
                     "tool_retrieval",
@@ -262,7 +269,7 @@ class AgentEngine:
                             additions += await invoke(
                                 context.tool_retriever.get_tool_subgraph, name, depth=1, limit=1000
                             )
-                    retrieved = list(retrieved) + snapshot_relations(additions)
+                    retrieved = list(retrieved) + await invoke(snapshot_relations, additions)
                     available = list(dict.fromkeys(available + expanded))
                     await state.emit(
                         "tool_graph_retrieval",

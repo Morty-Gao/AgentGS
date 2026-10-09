@@ -43,6 +43,16 @@ class TaskStore:
             columns = {row[1] for row in db.execute("PRAGMA table_info(controls)")}
             if "worker_identity" not in columns:
                 db.execute("ALTER TABLE controls ADD COLUMN worker_identity REAL")
+            if "state" not in columns:
+                db.execute("ALTER TABLE controls ADD COLUMN state TEXT NOT NULL DEFAULT 'queued'")
+                rows = db.execute(
+                    "SELECT c.task_id,t.record FROM controls c JOIN tasks t ON t.id=c.task_id"
+                ).fetchall()
+                db.executemany(
+                    "UPDATE controls SET state=? WHERE task_id=?",
+                    ((json.loads(encoded).get("status", "queued"), key) for key, encoded in rows),
+                )
+            db.execute("CREATE INDEX IF NOT EXISTS control_state ON controls(state)")
         self._initialized = True
 
     async def initialize(self):
@@ -58,6 +68,9 @@ class TaskStore:
             db.execute(
                 "INSERT INTO tasks VALUES (?,?) ON CONFLICT(id) DO UPDATE SET record=excluded.record",
                 (record.spec.id, record.model_dump_json()),
+            )
+            db.execute(
+                "UPDATE controls SET state=? WHERE task_id=?", (record.status.value, record.spec.id)
             )
 
     async def save(self, record):
@@ -147,8 +160,9 @@ class TaskStore:
         def insert():
             with self.connection() as db:
                 db.execute("BEGIN IMMEDIATE")
-                rows = db.execute("SELECT record FROM tasks").fetchall()
-                count = sum(self._decode_record(row[0]).status not in TERMINAL for row in rows)
+                count = db.execute(
+                    "SELECT COUNT(*) FROM controls WHERE state NOT IN ('succeeded','failed','cancelled')"
+                ).fetchone()[0]
                 if count >= capacity:
                     raise QueueFull("Runtime task queue is full")
                 db.execute(
@@ -219,7 +233,7 @@ class TaskStore:
             with self.connection() as db:
                 db.execute("BEGIN IMMEDIATE")
                 rows = db.execute(
-                    "SELECT c.task_id,c.owner_pid,c.owner_identity,c.worker_pid,c.worker_identity,t.record FROM controls c JOIN tasks t ON t.id=c.task_id"
+                    "SELECT c.task_id,c.owner_pid,c.owner_identity,c.worker_pid,c.worker_identity,t.record FROM controls c JOIN tasks t ON t.id=c.task_id WHERE c.state NOT IN ('succeeded','failed','cancelled')"
                 ).fetchall()
                 for key, owner, identity, worker, worker_identity, encoded in rows:
                     record = self._decode_record(encoded)
@@ -239,7 +253,7 @@ class TaskStore:
                         "UPDATE tasks SET record=? WHERE id=?", (record.model_dump_json(), key)
                     )
                     db.execute(
-                        "UPDATE controls SET worker_pid=NULL,worker_identity=NULL,rss=0 WHERE task_id=?",
+                        "UPDATE controls SET worker_pid=NULL,worker_identity=NULL,rss=0,state='failed' WHERE task_id=?",
                         (key,),
                     )
                     self._emit(db, key, "task.failed", {"error": record.error.model_dump()})

@@ -146,3 +146,37 @@ def test_ablation_options_reach_benchmark(project, monkeypatch, rules):
     assert received[0]["planning_mode"] == "tool_only"
     assert received[0]["allow_rule_planning"] is rules
     assert received[0]["plan_attempts"] == 2 and received[0]["tool_attempts"] == 4
+
+
+def test_separate_invocation_limits_are_forwarded_to_real_worker(project):
+    arguments = [
+        "run",
+        "--project",
+        str(project),
+        "--tool",
+        "DeepEarthQueryUSGSCatalog",
+        "--arguments",
+        '{"min_magnitude":8}',
+        "--model-concurrency",
+        "3",
+        "--tool-concurrency",
+        "2",
+        "--queue-capacity",
+        "5",
+        "--model-timeout",
+        "4",
+        "--tool-timeout",
+        "3",
+    ]
+    result = CliRunner().invoke(app, arguments)
+    assert result.exit_code == 0, result.output
+    record = json.loads(result.output)
+    request = json.loads(
+        (project / "outputs/tasks" / record["spec"]["id"] / "request.json").read_text()
+    )
+    settings = request["runtime"]
+    assert settings["max_concurrent_model_calls"] == 3
+    assert settings["max_concurrent_tool_calls"] == 2
+    assert settings["max_pending_tasks"] == 5
+    assert settings["model_timeout_seconds"] == 4
+    assert settings["tool_timeout_seconds"] == 3

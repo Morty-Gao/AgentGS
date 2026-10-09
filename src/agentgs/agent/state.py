@@ -51,6 +51,20 @@ class RunState:
     def execution_events(self):
         return self.conversation.execution_events()
 
+    async def cancel(self):
+        """Close native invocations even when cancellation interrupts binding."""
+        for call in self.conversation.pending_tool_calls():
+            self.conversation.finish_tool(
+                call.id, json.dumps({"status": "cancelled"}), status="cancelled"
+            )
+        for row in self.usage:
+            if row["status"] == "started":
+                row["status"] = "cancelled"
+        self.completion_status = "Not Completed"
+        if self.answer_generation_status == "not_started":
+            self.answer_generation_status = "cancelled"
+        await self.emit("run.cancelled", {})
+
     async def record(self, event):
         event = dict(event)
         self.conversation.record_event(event.pop("type"), event)

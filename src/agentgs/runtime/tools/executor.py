@@ -34,9 +34,10 @@ class LocalToolExecutor:
     ):
         self.datasets, self.artifacts, self.events = datasets, artifacts, events
         self.registry = builtin_tools()
+        self._builtin_handlers = {name: item.handler for name, item in self.registry.items()}
         self.internal = internal_operations() if allow_internal_operations else {}
         self.code_executor = code_executor
-        self.settings = settings or RuntimeSettings(tool_backend="thread")
+        self.settings = settings or RuntimeSettings()
         self.coordinator = coordinator or RuntimeCoordinator(datasets.root.parent)
         self._active = set()
         self._closed = False
@@ -136,7 +137,14 @@ class LocalToolExecutor:
             if self.code_executor is None:
                 raise SandboxUnavailable("No code executor is configured")
             return await self.code_executor.run_python(params.code)
-        if self.settings.tool_backend == "process" and item.process_safe:
+        unchanged_handler = self._builtin_handlers.get(call.tool) is item.handler
+        unchanged_dispatch = getattr(self._domain, "__func__", None) is LocalToolExecutor._domain
+        if (
+            self.settings.tool_backend == "process"
+            and item.process_safe
+            and unchanged_handler
+            and unchanged_dispatch
+        ):
             from agentgs.contracts.models import ToolCall
             from agentgs.contracts.remote_sensing import enabled
 
