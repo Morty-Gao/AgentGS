@@ -182,13 +182,14 @@ def main(domain: str) -> None:
             else None
         )
         if domain == "gem" and args.workbook:
-            from _gem import convert_workbook
+            from _gem import compress_jsonl, convert_workbook
 
             workbook = args.workbook.resolve()
             record_source("import/gem/" + workbook.name, workbook)
             target = convert_workbook(workbook, output_root / "data/gem.jsonl")
+            compressed = compress_jsonl(target, output_root / "data/gem.jsonl.gz")
             outputs, missing, notes = (
-                [target],
+                [compressed, target],
                 [],
                 ["All workbook sheets, cell values and cached formulas exported."],
             )

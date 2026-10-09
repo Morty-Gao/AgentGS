@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import csv
+import gzip
 import hashlib
 import json
 import math
@@ -175,11 +176,12 @@ def write_csv(path: Path, rows: list[dict], fieldnames: list[str] | None = None)
 
 
 def iter_gip_rows(path: Path, sheet_name: str) -> Iterable[list[object | None]]:
-    if path.suffix != ".jsonl":
+    if not str(path).endswith((".jsonl", ".jsonl.gz")):
         yield from iter_xlsx_rows(path, sheet_name)
         return
     found = False
-    with path.open(encoding="utf-8") as stream:
+    opener = gzip.open if path.suffix == ".gz" else open
+    with opener(path, "rt", encoding="utf-8") as stream:
         for line in stream:
             if not line.strip():
                 continue
@@ -298,7 +300,7 @@ def process_opsd(path: Path) -> tuple[pd.DataFrame, pd.DataFrame, pd.DataFrame]:
             item["facility_count"] += int(row["count"])
             item["capacity_mw"] += float(row["sum"])
         selected = chunk[
-            chunk["energy_source_level_2"].isin(["Solar", "Wind", "Hydro", "Bioenergy"])
+            chunk["energy_source_level_2"].isin(_REFERENCE["opsd_landmark_sources"])
         ].copy()
         if not selected.empty:
             candidates.append(
@@ -308,7 +310,7 @@ def process_opsd(path: Path) -> tuple[pd.DataFrame, pd.DataFrame, pd.DataFrame]:
             )
         for country, (capital_lat, capital_lon, capital_en, capital_zh) in CAPITALS.items():
             country_rows = chunk[chunk["country"] == country]
-            for source in ("Solar", "Wind"):
+            for source in _REFERENCE["opsd_capital_sources"]:
                 subset = country_rows[country_rows["energy_source_level_2"] == source]
                 if subset.empty:
                     continue

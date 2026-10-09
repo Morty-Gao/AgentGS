@@ -10,8 +10,11 @@ from collections import Counter
 from pathlib import Path
 from typing import Any, Iterable
 
+from agentgs.evaluation.conversation import as_conversation, conversation_usage, tool_executions
 from agentgs.evaluation.datasets.geotooleval import load_tasks
 from agentgs.messages import Conversation, Message
+
+SCORING_PROTOCOL = "geotooleval-conversation-v2"
 
 DEFAULT_TOKEN_BUDGET_PER_GOLD_STEP = 10000
 _IGNORED_ARGUMENT_KEYS = {"_output_keys"}
@@ -144,12 +147,19 @@ def _lcs_alignment(expected: list[str], actual: list[str]) -> list[tuple[int, in
 
 def _parse_output_dict(raw_output: Any) -> dict[str, Any]:
     if isinstance(raw_output, dict):
-        return raw_output
-    try:
-        parsed = json.loads(str(raw_output or ""))
-    except json.JSONDecodeError:
+        parsed = raw_output
+    else:
+        try:
+            parsed = json.loads(str(raw_output or ""))
+        except json.JSONDecodeError:
+            return {}
+    if not isinstance(parsed, dict):
         return {}
-    return parsed if isinstance(parsed, dict) else {}
+    # Explicit TaskInput.calls return a serialized ToolResult; model-driven
+    # execution returns its raw domain payload. Both represent the same evidence.
+    if {"call_id", "tool", "succeeded", "data"} <= parsed.keys():
+        return parsed["data"] if isinstance(parsed["data"], dict) else {}
+    return parsed
 
 
 def _effective_expected_arguments(
@@ -198,16 +208,16 @@ def _tool_selection_scores(
 def score_task(
     *,
     gold_steps: list[dict[str, Any]],
-    messages: list[Message | dict[str, Any]],
+    messages: Conversation | dict[str, Any] | list[Message | dict[str, Any]],
     answer_score: float,
-    token_usage: dict[str, Any] | None,
+    token_usage: dict[str, Any] | list[dict[str, Any]] | None = None,
     token_budget_per_gold_step: int = DEFAULT_TOKEN_BUDGET_PER_GOLD_STEP,
 ) -> dict[str, Any]:
     """Score one task on the 0-100 accuracy, token-cost and final scales."""
     gold_steps = list(gold_steps or [])
     gold_tools = [str(step.get("tool_name") or "") for step in gold_steps]
-    events = Conversation(messages=messages).execution_events()
-    attempts = [event for event in events if event.get("type") == "tool_call"]
+    conversation = as_conversation(messages)
+    attempts = tool_executions(conversation)
     successful = [event for event in attempts if event.get("status") == "success"]
     actual_tools = [str(event.get("tool_name") or "") for event in successful]
     precision, recall, tsf1, matched_success = _tool_selection_scores(gold_tools, actual_tools)
@@ -230,8 +240,9 @@ def score_task(
         and math.isclose(tos, 1.0)
         and math.isclose(pas, 1.0)
         and (matched_success == len(gold_steps))
+        and not conversation.pending_tool_calls()
     )
-    token_usage = token_usage if isinstance(token_usage, dict) else {}
+    token_usage = conversation_usage(conversation, token_usage)
     usage_complete = token_usage.get("usage_complete") is True
     total_tokens = int(token_usage.get("total_tokens") or 0)
     token_budget = max(1, int(token_budget_per_gold_step)) * max(1, len(gold_steps))
@@ -251,6 +262,7 @@ def score_task(
         final_score = 0.85 * accuracy_score + 0.15 * cost_score
     tce = 0.0 if not task_success else min(1.0, len(gold_steps) / max(len(attempts), 1))
     return {
+        "protocol": SCORING_PROTOCOL,
         "fas": round(fas, 6),
         "tool_precision": round(precision, 6),
         "tool_recall": round(recall, 6),
@@ -261,6 +273,7 @@ def score_task(
         "pas": round(pas, 6),
         "matched_successful_calls": matched_success,
         "physical_tool_call_attempts": len(attempts),
+        "pending_function_calls": len(conversation.pending_tool_calls()),
         "ecr": round(ecr, 6),
         "accuracy_score": round(accuracy_score, 4),
         "task_success_gate": task_success,
@@ -308,6 +321,7 @@ def aggregate_scores(samples: list[dict[str, Any]]) -> dict[str, Any]:
         for field in fields
     }
     return {
+        "protocol": SCORING_PROTOCOL,
         "aggregation": "macro average over represented GeoToolEval domains",
         "domain_count": len({int(sample["category_id"]) for sample in samples}),
         "sample_count": len(samples),

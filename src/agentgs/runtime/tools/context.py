@@ -122,8 +122,8 @@ def task_cache(maxsize=None):
 
 
 @contextmanager
-def tool_context(root, outputs, artifact_root=None):
-    token = _current.set(ToolPaths.create(root, outputs, artifact_root))
+def tool_context(root, outputs, artifact_root=None, *, prepared=None):
+    token = _current.set(prepared or ToolPaths.create(root, outputs, artifact_root))
     try:
         yield paths()
     finally:

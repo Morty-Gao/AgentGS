@@ -27,7 +27,7 @@ class EvalTask:
     question: str
     expected_answer: str
     answer_type: str
-    input_resource: str
+    input_resource: Any
     chain_mode: str
     gold_chain_text: str
     gold_steps: tuple[dict[str, Any], ...]
@@ -91,7 +91,7 @@ def load_tasks(dataset_path: Path) -> list[EvalTask]:
                     question=text(row["题目正文"]),
                     expected_answer=text(row["题目答案"]),
                     answer_type=text(row["答案类型"]),
-                    input_resource=text(row["输入资源"]),
+                    input_resource=row["输入资源"],
                     chain_mode=text(row["单/多工具链调用"]),
                     gold_chain_text=text(row["标准工具链调用"]),
                     gold_steps=tuple(gold_steps),
@@ -105,4 +105,7 @@ def load_tasks(dataset_path: Path) -> list[EvalTask]:
 def build_agent_question(task: EvalTask) -> str:
     if not task.input_resource:
         return task.question
-    return f"{task.question}\n\nEvaluation input resource (authoritative benchmark locator; use it exactly when relevant, but retrieve and select the registered tools yourself): {task.input_resource}"
+    resource = task.input_resource
+    if not isinstance(resource, str):
+        resource = json.dumps(resource, ensure_ascii=False)
+    return f"{task.question}\n\nEvaluation input resource (authoritative benchmark locator; use it exactly when relevant, but retrieve and select the registered tools yourself): {resource}"

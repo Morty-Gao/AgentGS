@@ -285,7 +285,7 @@ async def test_dialogue_continues_history_with_parallel_calls_and_reasoning():
             )
         if not message.tool_calls:
             state.answer = message.content
-            state.save()
+            await state.save()
     result = state.result()
     assert [m["content"] for m in requests[0]] == [
         "Previous question",
@@ -304,7 +304,7 @@ async def test_dialogue_continues_history_with_parallel_calls_and_reasoning():
     assert "trace" not in json.loads(snapshots[-1])
 
 
-def test_benchmark_derives_calls_from_messages_with_frozen_scoring_policy():
+def test_benchmark_derives_successes_and_retries_from_messages():
     from agentgs.evaluation.metrics.tools import score_task
 
     conversation = Conversation()
@@ -319,8 +319,9 @@ def test_benchmark_derives_calls_from_messages_with_frozen_scoring_policy():
         token_usage={"usage_complete": True, "total_tokens": 10},
     )
     assert scored["tsf1"] == 1
-    assert scored["physical_tool_call_attempts"] == 1
-    assert scored["ecr"] == 1
+    assert scored["physical_tool_call_attempts"] == 2
+    assert scored["ecr"] == 0.5
+    assert scored["tce"] == 0.5
 
 
 async def test_checkpoint_error_does_not_break_tool_message_pairing():

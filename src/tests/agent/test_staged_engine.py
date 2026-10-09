@@ -12,9 +12,19 @@ from agentgs.contracts.models import TaskInput, ToolError, ToolResult, ToolSpec
 
 def function_call(name, arguments, call_id=None):
     from uuid import uuid4
-    return {"role": "assistant", "content": None, "reasoning_content": "fixture reasoning",
-            "tool_calls": [{"id": call_id or uuid4().hex, "type": "function",
-                            "function": {"name": name, "arguments": json.dumps(arguments)}}]}
+
+    return {
+        "role": "assistant",
+        "content": None,
+        "reasoning_content": "fixture reasoning",
+        "tool_calls": [
+            {
+                "id": call_id or uuid4().hex,
+                "type": "function",
+                "function": {"name": name, "arguments": json.dumps(arguments)},
+            }
+        ],
+    }
 
 
 def plan_call(names):
@@ -75,7 +85,9 @@ class Client:
         value = next(self.replies)
         if isinstance(value, Exception):
             raise value
-        return ChatReply(message=value if isinstance(value, dict) else {"role": "assistant", "content": value})
+        return ChatReply(
+            message=value if isinstance(value, dict) else {"role": "assistant", "content": value}
+        )
 
 
 class StageClient:
@@ -84,7 +96,9 @@ class StageClient:
             value = plan_call(self.plan)
         elif stage == "tool_argument_generation":
             name = kwargs["tool_choice"]["function"]["name"]
-            value = function_call(name, {"x": [1, 2, 3]} if name == "RemoteSensingMean" else {"a": 3, "b": 1})
+            value = function_call(
+                name, {"x": [1, 2, 3]} if name == "RemoteSensingMean" else {"a": 3, "b": 1}
+            )
         else:
             value = {"role": "assistant", "content": "IsCompleted:Completed\nFinalAnswer:2"}
         return ChatReply(message=value)
@@ -99,7 +113,11 @@ def context(tools, client, strict=True):
         None,
         client,
         tool_retriever=KG(),
-        options=AlgorithmSettings(planning_mode="tool_only", require_llm=strict),
+        options=AlgorithmSettings(
+            planning_mode="tool_only",
+            allow_rule_planning=not strict,
+            plan_attempts=1 if strict else 3,
+        ),
     )
 
 
@@ -110,28 +128,35 @@ async def test_fixed_format_reaches_final_request_through_engine(explicit_contra
     from agentgs.runtime.answer_contracts import AnswerContracts
 
     contracts = AnswerContracts(Path(__file__).resolve().parents[3])
-    contract = next(
-        c for c in contracts.contracts.values() if c["question_id"] == 199
-    )
+    contract = next(c for c in contracts.contracts.values() if c["question_id"] == 199)
     tools = Tools()
-    client = Client([
-        plan_call(["RemoteSensingMean"]),
-        function_call("RemoteSensingMean", {"x": [1, 2, 3]}),
-        "temperature_anomaly: 2 °C",
-    ])
+    client = Client(
+        [
+            plan_call(["RemoteSensingMean"]),
+            function_call("RemoteSensingMean", {"x": [1, 2, 3]}),
+            "temperature_anomaly: 2 °C",
+        ]
+    )
     ctx = context(tools, client)
     ctx.answer_system_prompt = contracts.system_prompt
     ctx.answer_contract_lookup = lambda _: contract if not explicit_contract else None
     result = await AgentEngine().run(
-        TaskInput(question="Compute the requested statistic.",
-                  output_contract=contract if explicit_contract else None), ctx
+        TaskInput(
+            question="Compute the requested statistic.",
+            output_contract=contract if explicit_contract else None,
+        ),
+        ctx,
     )
     final_request = client.requests[-1]
     assert contract["answer_format"]["template"] in final_request[-1]["content"]
     assert contract["answer_format"]["notes"] in final_request[-1]["content"]
-    assert final_request[-1]["role"] == "developer" and final_request[-1]["content"].startswith(contracts.system_prompt)
+    assert final_request[-1]["role"] == "developer" and final_request[-1]["content"].startswith(
+        contracts.system_prompt
+    )
     assert result.answer == "temperature_anomaly: 2 °C"
-    validation = next(t for t in result.execution_events() if t["type"] == "final_answer_format_validation")
+    validation = next(
+        t for t in result.execution_events() if t["type"] == "final_answer_format_validation"
+    )
     assert validation["valid"]
 
 
@@ -149,7 +174,7 @@ async def test_staged_plan_argument_answer_preserves_model_text():
     )
     assert result.answer == "2" and result.completion_status == "Completed"
     assert [row["stage"] for row in result.usage] == [
-        "skill_tool_planning",
+        "tool_planning",
         "tool_argument_generation",
         "final_answer_generation",
     ]
@@ -183,7 +208,11 @@ async def test_final_authentication_error_preserves_status_for_benchmark_abort()
 
     tools = Tools()
     client = Client(
-        [plan_call(["RemoteSensingMean"]), function_call("RemoteSensingMean", {"x": [1, 2, 3]}), ProviderError(401)]
+        [
+            plan_call(["RemoteSensingMean"]),
+            function_call("RemoteSensingMean", {"x": [1, 2, 3]}),
+            ProviderError(401),
+        ]
     )
     with pytest.raises(AgentExecutionError) as caught:
         await AgentEngine().run(

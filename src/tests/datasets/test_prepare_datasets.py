@@ -251,6 +251,7 @@ def test_generated_data_are_ignored_and_original_assets_remain_visible():
         "data/answer_formats/geotooleval.jsonl",
         "data/geoquestions/queries.jsonl",
         "data/mineral.csv",
+        "data/gem.jsonl",
         "data/climate/gistemp_annual.csv",
         "data/energy/gip_renewable_points.csv",
         "data/ocean/socat_region_trends.csv",
@@ -260,16 +261,23 @@ def test_generated_data_are_ignored_and_original_assets_remain_visible():
         "data/raw/climate/NASA_GISTEMP_current.csv",
     ]
     result = subprocess.run(
-        ["git", "check-ignore", *generated], cwd=ROOT, capture_output=True, text=True, check=True
+        ["git", "check-ignore", "--no-index", *generated], cwd=ROOT, capture_output=True, text=True, check=True
     )
     assert result.stdout.splitlines() == generated
-    for original in [
+    from agentgs.datasets.layout import RETAINED_FILES
+    from agentgs.datasets.references import REFERENCE_FILES
+
+    originals = ["data/" + name for names in RETAINED_FILES.values() for name in names]
+    originals += ["data/" + name for name in REFERENCE_FILES]
+    originals += [
         "data/geotooleval.jsonl",
         "data/biodeeptime/zones.geojson",
         "data/hazard.jsonl",
         "data/geotoolkg/index_store.json",
-    ]:
-        result = subprocess.run(["git", "check-ignore", original], cwd=ROOT, capture_output=True)
+        "data/metadata/geotooleval.json",
+    ]
+    for original in originals:
+        result = subprocess.run(["git", "check-ignore", "--no-index", original], cwd=ROOT, capture_output=True)
         assert result.returncode == 1
 
 

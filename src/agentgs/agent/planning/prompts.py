@@ -56,8 +56,20 @@ Answer presentation:
 """
 
 
-
-def generate_tools_plan_template(question, tools_retrieved, previous_answer="", skill_plan_context=""):
+def generate_tools_plan_template(
+    question,
+    tools_retrieved,
+    previous_answer="",
+    *,
+    tool_hints="",
+    skill_plan_context=None,
+):
+    guidance = ""
+    if skill_plan_context is not None:
+        guidance = (
+            "\nFollow the selected Skill capabilities and their declared constraints.\n"
+            "Skill/capability constraints:\n" + skill_plan_context + "\n"
+        )
     return f"""
 You are the tool planner for a geoscience task. Submit the ordered tool execution
 instances using submit_tool_plan. This planning function does not execute any
@@ -66,7 +78,7 @@ scientific tool. Choose only registered tools in the supplied candidate context.
 Preserve these planning rules:
 - Each list entry is one physical execution. Preserve repeated tool names for
   distinct entities, periods, scenes or cohorts; never merge independent instances.
-- Follow producer/consumer dependencies and the selected Skill capabilities.
+- Follow producer/consumer dependencies in the supplied tool relationships.
   Include required validation, algebra, aggregation and rendering intermediates.
 - Start with dedicated table-load or file-discovery tools when raw source assets
   need discovery and the graph declares those pipelines.
@@ -88,6 +100,8 @@ Retrieved tools and relationships:
 Previous execution results and feedback:
 {previous_answer}
 
-Skill/capability constraints:
-{skill_plan_context}
+Tool-level routing hints (suggestions, not an execution plan):
+{tool_hints}
+Choose the execution instances yourself, including repetitions for distinct inputs.
+{guidance}
 """

@@ -11,10 +11,15 @@ from agentgs.cli.runtime import (
     AllowProot,
     CodeTimeout,
     Concurrency,
+    ModelConcurrency,
+    ModelTimeout,
+    QueueCapacity,
     RssLimit,
     Sandbox,
     SandboxMode,
     Timeout,
+    ToolConcurrency,
+    ToolTimeout,
     TotalRssLimit,
     WorkerPython,
     runtime_settings,
@@ -69,6 +74,11 @@ def run(
     sandbox: Sandbox = SandboxMode.AUTO,
     allow_proot: AllowProot = False,
     worker_python: WorkerPython = None,
+    model_concurrency: ModelConcurrency = None,
+    tool_concurrency: ToolConcurrency = None,
+    queue_capacity: QueueCapacity = None,
+    model_timeout: ModelTimeout = None,
+    tool_timeout: ToolTimeout = None,
 ):
     """Run a question or a typed tool call. Explicit calls require no LLM credentials."""
     root = project_root(project)
@@ -104,10 +114,15 @@ def run(
                 sandbox,
                 allow_proot,
                 worker_python,
+                model_concurrency,
+                tool_concurrency,
+                queue_capacity,
+                model_timeout,
+                tool_timeout,
             ),
         )
         try:
-            record = service.submit(task)
+            record = await service.submit(task)
             return await service.wait(record.spec.id)
         finally:
             await service.close()
@@ -120,7 +135,7 @@ def run(
 
 @task_app.command("list")
 def list_tasks(project: Path = typer.Option(Path.cwd(), "--project")):
-    rows = TaskStore(project_root(project) / "outputs" / "runtime").list()
+    rows = TaskStore(project_root(project) / "outputs" / "runtime").list_sync()
     table = Table("Task", "Status", "Question")
     for row in rows:
         table.add_row(row.spec.id, row.status.value, row.spec.input.question[:70])
@@ -129,7 +144,7 @@ def list_tasks(project: Path = typer.Option(Path.cwd(), "--project")):
 
 @task_app.command("show")
 def show_task(task_id: str, project: Path = typer.Option(Path.cwd(), "--project")):
-    emit(TaskStore(project_root(project) / "outputs" / "runtime").get(task_id))
+    emit(TaskStore(project_root(project) / "outputs" / "runtime").get_sync(task_id))
 
 
 @task_app.command("cancel")
@@ -253,6 +268,11 @@ def evaluate_command(
     sandbox: Sandbox = SandboxMode.AUTO,
     allow_proot: AllowProot = False,
     worker_python: WorkerPython = None,
+    model_concurrency: ModelConcurrency = None,
+    tool_concurrency: ToolConcurrency = None,
+    queue_capacity: QueueCapacity = None,
+    model_timeout: ModelTimeout = None,
+    tool_timeout: ToolTimeout = None,
 ):
     from agentgs.evaluation.runner import evaluate, load_cases
 
@@ -270,6 +290,11 @@ def evaluate_command(
                 sandbox,
                 allow_proot,
                 worker_python,
+                model_concurrency,
+                tool_concurrency,
+                queue_capacity,
+                model_timeout,
+                tool_timeout,
             ),
         )
         try:
@@ -287,7 +312,23 @@ def benchmark_command(
     ids: str = typer.Option("", "--ids"),
     retry_failed: bool = typer.Option(False, "--retry-failed"),
     planning_mode: str = typer.Option("skill_guided", "--planning-mode"),
-    require_llm: bool = typer.Option(True, "--require-llm/--allow-rule-routing"),
+    allow_rule_planning: bool = typer.Option(
+        False,
+        "--allow-rule-planning/--no-rule-planning",
+        help="Allow heuristic plan routing, fallback and rewriting; model calls still occur",
+    ),
+    plan_attempts: int | None = typer.Option(
+        None,
+        "--plan-attempts",
+        min=1,
+        help="Total planning attempts, including replanning",
+    ),
+    tool_attempts: int | None = typer.Option(
+        None,
+        "--tool-attempts",
+        min=1,
+        help="Argument/execution attempts per tool instance",
+    ),
     concurrency: Concurrency = None,
     timeout: Timeout = None,
     rss_limit_mb: RssLimit = None,
@@ -296,8 +337,13 @@ def benchmark_command(
     sandbox: Sandbox = SandboxMode.AUTO,
     allow_proot: AllowProot = False,
     worker_python: WorkerPython = None,
+    model_concurrency: ModelConcurrency = None,
+    tool_concurrency: ToolConcurrency = None,
+    queue_capacity: QueueCapacity = None,
+    model_timeout: ModelTimeout = None,
+    tool_timeout: ToolTimeout = None,
 ):
-    """Run actual Agent requests with frozen FAS/flow metrics; preserve every attempt."""
+    """Run actual Agent requests with conversation metrics; preserve every attempt."""
     from agentgs.evaluation.benchmark import run_benchmark
     from agentgs.evaluation.datasets.version import benchmark_dataset
     from agentgs.runtime.answer_contracts import AnswerContracts
@@ -317,6 +363,11 @@ def benchmark_command(
                 sandbox,
                 allow_proot,
                 worker_python,
+                model_concurrency,
+                tool_concurrency,
+                queue_capacity,
+                model_timeout,
+                tool_timeout,
             ),
         )
         try:
@@ -327,7 +378,9 @@ def benchmark_command(
                 ids=chosen,
                 retry_failed=retry_failed,
                 planning_mode=planning_mode,
-                require_llm=require_llm,
+                allow_rule_planning=allow_rule_planning,
+                plan_attempts=plan_attempts,
+                tool_attempts=tool_attempts,
                 contract_provider=AnswerContracts(root),
             )
         finally:
@@ -354,6 +407,7 @@ def score_benchmark(
         predictions,
         root / output,
         allow_partial=allow_partial,
+        project=root,
     )
     emit({key: value for key, value in report.items() if key != "results"})
 
@@ -371,6 +425,11 @@ def serve(
     sandbox: Sandbox = SandboxMode.AUTO,
     allow_proot: AllowProot = False,
     worker_python: WorkerPython = None,
+    model_concurrency: ModelConcurrency = None,
+    tool_concurrency: ToolConcurrency = None,
+    queue_capacity: QueueCapacity = None,
+    model_timeout: ModelTimeout = None,
+    tool_timeout: ToolTimeout = None,
 ):
     import uvicorn
 
@@ -385,6 +444,11 @@ def serve(
         sandbox,
         allow_proot,
         worker_python,
+        model_concurrency,
+        tool_concurrency,
+        queue_capacity,
+        model_timeout,
+        tool_timeout,
     )
     uvicorn.run(create_app(project_root(project), settings=settings), host=host, port=port)
 

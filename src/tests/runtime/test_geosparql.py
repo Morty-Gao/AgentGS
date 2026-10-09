@@ -97,7 +97,7 @@ async def test_worker_replays_without_endpoint_and_persists_artifacts(
     monkeypatch.setenv("GEOSPARQL_ENDPOINT", "http://127.0.0.1:1/unavailable")
     service = TaskService(snapshot_project)
     try:
-        task = service.submit(
+        task = await service.submit(
             TaskInput(
                 calls=[ToolCall(tool="GeoBigDataExecuteGeoSPARQL", arguments={"source_id": 591})]
             )
@@ -121,8 +121,8 @@ async def test_agent_selects_snapshot_skill_and_calls_query(snapshot_project):
             self.selected = []
 
         def emit(self, kind, payload):
-            if kind == "skill.selected":
-                self.selected.append(payload["skill_id"])
+            if kind == "skill_plan":
+                self.selected.extend(step["skill_id"] for step in payload["content"]["steps"])
 
     class Client:
         def __init__(self):
@@ -131,7 +131,7 @@ async def test_agent_selects_snapshot_skill_and_calls_query(snapshot_project):
         async def chat(self, messages, **kwargs):
             self.calls += 1
             if self.calls == 1:
-                assert "pinned GeoQuestions/YAGO2geo materialized results" in messages[0]["content"]
+                assert kwargs["tools"][0]["function"]["name"] == "GeoBigDataExecuteGeoSPARQL"
                 return ChatReply(
                     message={
                         "role": "assistant",
@@ -150,18 +150,42 @@ async def test_agent_selects_snapshot_skill_and_calls_query(snapshot_project):
                         ],
                     }
                 )
-            tool_result = json.loads(messages[-1]["content"])
-            assert tool_result["source_type"] == "derived_lookup"
-            assert tool_result["data"]["query_match"] == "exact"
-            return ChatReply(message={"role": "assistant", "content": "Frozen snapshot retrieved."})
+            tool_result = json.loads(
+                next(
+                    message["content"]
+                    for message in reversed(messages)
+                    if message["role"] == "tool"
+                )
+            )
+            assert tool_result["query_match"] == "exact"
+            return ChatReply(
+                message={
+                    "role": "assistant",
+                    "content": "IsCompleted:Completed\nFinalAnswer:Frozen snapshot retrieved.",
+                }
+            )
 
     events = Events()
     artifacts = LocalArtifactStore(snapshot_project / "artifacts")
     tools = LocalToolExecutor(DatasetRegistry(snapshot_project), artifacts, events)
     skills = builtin_skills()
+    from agentgs.config.algorithm import AlgorithmSettings
+
     result = await AgentEngine().run(
-        TaskInput(question="GeoQuestions park area in Essex", algorithm="prototype"),
-        AgentContext(tools, artifacts, events, skills, KeywordSkillRetriever(skills), Client()),
+        TaskInput(
+            question="GeoQuestions park area in Essex", input_resource="yago2geo_original_rdf"
+        ),
+        AgentContext(
+            tools,
+            artifacts,
+            events,
+            skills,
+            KeywordSkillRetriever(skills),
+            Client(),
+            options=AlgorithmSettings(
+                planning_mode="skill_guided", geosparql_llm=True, allow_rule_planning=True
+            ),
+        ),
     )
     assert events.selected == ["semantic-geospatial-query"]
     assert result.tool_results[0].data["source_id"] == 591

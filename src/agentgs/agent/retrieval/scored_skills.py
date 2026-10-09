@@ -5,17 +5,14 @@ are algorithm decisions, not tuning opportunities during this refactor. Flags
 are explicit inputs rather than process-global environment reads.
 """
 
-import json
 import math
 import re
 from collections import Counter
 
 from agentgs.agent.retrieval.skills import SkillMatch
+from agentgs.contracts.resources import RESOURCE_MARKER as RESOURCE_MARKER
+from agentgs.contracts.resources import split_question_resource as split_resource
 
-RESOURCE_MARKER = (
-    "Evaluation input resource (authoritative benchmark locator; use it exactly when "
-    "relevant, but retrieve and select the registered tools yourself):"
-)
 STOPWORDS = frozenset(
     "a an and are as at be been by each for from has have how in into is it of on or "
     "that the their there these this those to was were what when where which who with".split()
@@ -24,16 +21,6 @@ SEMANTIC_TERMS = frozenset(
     "beach canal coast county district forest island lake lagoon locality municipality "
     "park reserve river spatial stream townland village water".split()
 )
-
-
-def split_resource(query: str) -> tuple[str, object]:
-    if RESOURCE_MARKER not in query:
-        return query.strip(), None
-    body, raw = query.rsplit(RESOURCE_MARKER, 1)
-    try:
-        return body.strip(), json.loads(raw.strip())
-    except json.JSONDecodeError:
-        return body.strip(), raw.strip()
 
 
 def lexical_tokens(value: str) -> set[str]:

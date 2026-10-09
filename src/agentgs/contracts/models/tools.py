@@ -21,6 +21,7 @@ class ToolCall(Model):
     id: str = Field(default_factory=lambda: uuid4().hex, pattern=r"^[A-Za-z0-9_-]{1,128}$")
     tool: str
     arguments: dict[str, Any] = Field(default_factory=dict)
+    depends_on: list[str] = Field(default_factory=list)
     _runtime_arguments: dict[str, Any] = PrivateAttr(default_factory=dict)
 
 

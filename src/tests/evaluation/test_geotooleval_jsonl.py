@@ -3,7 +3,7 @@ import json
 import pytest
 
 from agentgs.evaluation.datasets.geotooleval import build_agent_question, load_tasks
-from agentgs.evaluation.datasets.version import benchmark_dataset
+from agentgs.evaluation.datasets.version import benchmark_dataset, compatibility_contracts
 from agentgs.evaluation.metrics.tools import load_gold_tasks
 
 
@@ -71,3 +71,25 @@ def test_benchmark_selects_embedded_jsonl_instead_of_old_workbook(tmp_path):
         json.dumps({"version_manifest": {"selected_workbook": "old.xlsx"}})
     )
     assert benchmark_dataset(tmp_path) == tmp_path / "data/geotooleval.jsonl"
+
+
+def test_compatibility_contracts_use_prepared_metadata_instead_of_dataset_depth(project):
+    metadata = project / "data/metadata"
+    metadata.mkdir()
+    formats = project / "data/answer_formats"
+    formats.mkdir()
+    path = formats / "compatibility.jsonl"
+    path.write_text("{}")
+    (metadata / "geotooleval.json").write_text(
+        json.dumps(
+            {
+                "version_manifest": {
+                    "compatibility_contracts": "data/answer_formats/compatibility.jsonl"
+                },
+            }
+        )
+    )
+    assert compatibility_contracts(project / "data/geotooleval.jsonl") == path
+    path.unlink()
+    with pytest.raises(FileNotFoundError, match="Selected compatibility contracts"):
+        compatibility_contracts(project / "data/geotooleval.jsonl")

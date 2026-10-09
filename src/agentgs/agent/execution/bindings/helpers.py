@@ -7,7 +7,9 @@ import re
 from pathlib import Path
 from typing import Any, Iterable
 
-RESOURCE_MARKER = "Evaluation input resource (authoritative benchmark locator; use it exactly when relevant, but retrieve and select the registered tools yourself):"
+from agentgs.contracts.resources import RESOURCE_MARKER as RESOURCE_MARKER
+from agentgs.contracts.resources import split_question_resource as split_question_resource
+
 _INVALID_VALUES = (None, "", "*", "null", "None")
 _MONTH_NUMBERS = {
     "january": 1,
@@ -23,18 +25,6 @@ _MONTH_NUMBERS = {
     "november": 11,
     "december": 12,
 }
-
-
-def split_question_resource(question: str) -> tuple[str, Any]:
-    if RESOURCE_MARKER not in question:
-        return (question.strip(), None)
-    clean_question, raw_resource = question.rsplit(RESOURCE_MARKER, 1)
-    raw_resource = raw_resource.strip()
-    try:
-        resource = json.loads(raw_resource)
-    except (json.JSONDecodeError, TypeError):
-        resource = raw_resource
-    return (clean_question.strip(), resource)
 
 
 def _parse_generated(value: str) -> dict[str, Any]:

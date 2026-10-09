@@ -19,22 +19,48 @@ def as_conversation(
 def tool_executions(value) -> list[dict[str, Any]]:
     """Completed domain invocations, including failed/repaired calls.
 
-    Planning calls and nested comparison branches are not task executions.
+    Only the current user turn is scored. Planning calls and nested comparison
+    branches are not task executions. Parallel replies use invocation order,
+    rather than the order in which tools happen to finish.
     Conversation resolves call IDs and prefers runtime-bound tool_input metadata
     while retaining the original function arguments in the message log.
     """
-    return [
+    conversation = as_conversation(value)
+    call_order = {
+        call.id: index
+        for index, call in enumerate(
+            call for message in _current_turn(conversation) for call in message.tool_calls
+        )
+        if call.function.name != "submit_tool_plan"
+    }
+    # Event annotations can contain historical tool_call-shaped payloads. Only
+    # assistant/tool message pairs establish an actual invocation.
+    dialogue = Conversation(messages=[m for m in conversation.messages if m.role != "event"])
+    events = [
         event
-        for event in as_conversation(value).execution_events()
-        if event.get("type") in {"tool_call", "tool_retry"}
+        for event in dialogue.execution_events()
+        if event.get("type") in {"tool_call", "tool_retry"} and event.get("call_id") in call_order
     ]
+    return sorted(events, key=lambda event: call_order[event["call_id"]])
+
+
+def _current_turn(conversation):
+    start = next(
+        (
+            i
+            for i in range(len(conversation.messages) - 1, -1, -1)
+            if conversation.messages[i].role == "user"
+        ),
+        0,
+    )
+    return conversation.messages[start:]
 
 
 def model_usage(value) -> list[dict[str, Any]]:
     """One usage row per request, preserving failed and unfinished requests."""
     conversation = as_conversation(value)
     requests = {}
-    for message in conversation.messages:
+    for message in _current_turn(conversation):
         metadata = message.metadata
         request_id = metadata.get("request_id")
         if not request_id:
@@ -43,10 +69,10 @@ def model_usage(value) -> list[dict[str, Any]]:
         if kind == "model.started":
             requests.setdefault(request_id, {"usage": None, "attempts": None})
             requests[request_id].update(status="started")
-        elif kind in {"model.completed", "model.failed"}:
+        elif kind in {"model.completed", "model.failed", "model.cancelled"}:
             row = requests.setdefault(request_id, {"usage": None, "attempts": None})
             row.update(metadata)
-            row["status"] = "completed" if kind == "model.completed" else "failed"
+            row["status"] = kind.removeprefix("model.")
         elif message.role == "assistant":
             # Also supports a checkpoint taken after the reply but before its
             # model.completed annotation has been written.
@@ -60,7 +86,9 @@ def usage_summary(calls) -> dict[str, Any]:
     if isinstance(calls, dict):
         complete = calls.get("usage_complete") is True
         total = calls.get("total_tokens")
-        complete = complete and isinstance(total, int) and not isinstance(total, bool) and total >= 0
+        complete = (
+            complete and isinstance(total, int) and not isinstance(total, bool) and total >= 0
+        )
         return {
             "usage_complete": complete,
             "total_tokens": total if complete else None,

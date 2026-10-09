@@ -1,11 +1,13 @@
 """Required final model generation and non-mutating, versioned evidence checks."""
 
+import asyncio
 import json
 
 from agentgs.agent.answering.evidence.legacy_validation import validate_final_answer
 from agentgs.agent.answering.formats import check_fixed_answer
 from agentgs.agent.answering.validation import validate_returned_evidence
 from agentgs.agent.planning.parsing import extract_answer_parts
+from agentgs.contracts.async_utils import invoke
 
 
 class FinalAnswerGenerationError(RuntimeError):
@@ -71,10 +73,11 @@ class AnsweringService:
                 for event in state.execution_events()
                 if event.get("type") == "tool_call" and event.get("status") == "success"
             ]
-            suggested, diagnostic = validate_final_answer(
-                question, answer, outputs, completed=completed
+            suggested, diagnostic = await invoke(
+                validate_final_answer, question, answer, outputs, completed=completed
             )
-            answer, event = validate_returned_evidence(
+            answer, event = await invoke(
+                validate_returned_evidence,
                 question,
                 answer,
                 outputs,
@@ -82,11 +85,12 @@ class AnsweringService:
                 legacy=diagnostic,
                 suggested=suggested,
             )
-            event["evaluation_llm_required"] = state.context.options.require_llm
+            event.pop("evaluation_llm_required", None)
+            event["allow_rule_planning"] = state.context.options.allow_rule_planning
             event["answer_llm_required"] = True
             if contract:
-                format_event = check_fixed_answer(answer, contract)
-                state.record(format_event)
+                format_event = await invoke(check_fixed_answer, answer, contract)
+                await state.record(format_event)
                 event.update(
                     diagnostic_only=True,
                     completion_policy="geotooleval_fixed_format_" + format_event["version"],
@@ -97,13 +101,13 @@ class AnsweringService:
                 status = "Not Completed"
             if not completed:
                 status = "Not Completed"
-            state.record(event)
+            await state.record(event)
             state.answer, state.completion_status, state.answer_generation_status = (
                 answer,
                 status,
                 "success",
             )
-            state.emit(
+            await state.emit(
                 "final_answer_generation",
                 {
                     "status": status,
@@ -116,9 +120,15 @@ class AnsweringService:
                 },
             )
             return state.result()
+        except asyncio.CancelledError:
+            state.answer_generation_status = "cancelled"
+            await state.emit(
+                "final_answer_generation", {"status": "cancelled", "answer_route": route}
+            )
+            raise
         except Exception as exc:
             state.answer_generation_status = "failed"
-            state.emit(
+            await state.emit(
                 "final_answer_generation",
                 {
                     "status": "failed",

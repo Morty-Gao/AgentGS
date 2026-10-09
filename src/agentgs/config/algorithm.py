@@ -1,4 +1,4 @@
-"""Explicit versions of the historical algorithm switches and budgets."""
+"""Planning policy and independent model, plan and tool recovery budgets."""
 
 import tomllib
 from pathlib import Path
@@ -6,12 +6,14 @@ from typing import Literal
 
 from pydantic import Field
 
-from agentgs.contracts.models import Model
+from agentgs.contracts.models import Model, TaskInput
 
 
 class AlgorithmSettings(Model):
     planning_mode: Literal["tool_only", "skill_guided"] = "tool_only"
-    require_llm: bool = False
+    allow_rule_planning: bool = False
+    plan_attempts: int = Field(default=3, ge=1)
+    tool_attempts: int = Field(default=3, ge=1)
     shared_bridge: bool = True
     rs_local_contracts: bool = True
     rs_explicit_references: bool = False
@@ -33,3 +35,15 @@ def load_algorithm(root: Path):
     path = root / "config.toml"
     raw = tomllib.loads(path.read_text()) if path.exists() else {}
     return AlgorithmSettings.model_validate(raw.get("agent", {}))
+
+
+def resolve_algorithm(options: AlgorithmSettings, task: TaskInput) -> AlgorithmSettings:
+    """Resolve task overrides before building mode-specific runtime services."""
+    values = options.model_dump()
+    for name in ("planning_mode", "allow_rule_planning", "plan_attempts", "tool_attempts"):
+        value = getattr(task, name, None)
+        if value is not None:
+            values[name] = value
+    if values["planning_mode"] == "tool_only":
+        values["shared_bridge"] = False
+    return AlgorithmSettings.model_validate(values)

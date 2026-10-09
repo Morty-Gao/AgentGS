@@ -19,6 +19,13 @@ class SandboxMode(StrEnum):
 Concurrency = Annotated[
     int | None, typer.Option("--concurrency", min=1, max=128, help="Maximum concurrent tasks")
 ]
+ModelConcurrency = Annotated[int | None, typer.Option("--model-concurrency", min=1, max=128)]
+ToolConcurrency = Annotated[int | None, typer.Option("--tool-concurrency", min=1, max=128)]
+QueueCapacity = Annotated[int | None, typer.Option("--queue-capacity", min=1)]
+ModelTimeout = Annotated[float | None, typer.Option("--model-timeout", min=0.001)]
+ToolTimeout = Annotated[float | None, typer.Option("--tool-timeout", min=0.001)]
+
+
 Timeout = Annotated[
     float | None, typer.Option("--timeout", min=0.001, help="Task timeout in seconds")
 ]
@@ -51,9 +58,19 @@ def runtime_settings(
     sandbox: SandboxMode,
     allow_proot: bool,
     worker_python: Path | None,
+    model_concurrency: int | None = None,
+    tool_concurrency: int | None = None,
+    queue_capacity: int | None = None,
+    model_timeout: float | None = None,
+    tool_timeout: float | None = None,
 ) -> RuntimeSettings:
     values = RuntimeSettings().model_dump()
     overrides = {
+        "max_concurrent_model_calls": model_concurrency,
+        "max_concurrent_tool_calls": tool_concurrency,
+        "max_pending_tasks": queue_capacity,
+        "model_timeout_seconds": model_timeout,
+        "tool_timeout_seconds": tool_timeout,
         "max_concurrent_tasks": concurrency,
         "default_timeout_seconds": timeout,
         "default_rss_limit_mb": rss_limit_mb,

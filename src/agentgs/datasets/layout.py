@@ -97,7 +97,7 @@ PREPARED_FILES.update(
     }
 )
 RETAINED_FILES = {
-    "gem": ["gem.jsonl"],
+    "gem": ["gem.jsonl.gz"],
     "biodeeptime": [
         "biodeeptime/observations.csv",
         "biodeeptime/series.csv",

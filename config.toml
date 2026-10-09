@@ -1,6 +1,8 @@
 [agent]
 planning_mode = "skill_guided"
-require_llm = false
+allow_rule_planning = false
+plan_attempts = 3
+tool_attempts = 3
 shared_bridge = true
 rs_local_contracts = true
 rs_explicit_references = false

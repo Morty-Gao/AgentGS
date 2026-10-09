@@ -5,12 +5,14 @@ from __future__ import annotations
 import json
 import logging
 import re
+import threading
 from concurrent.futures import ThreadPoolExecutor, as_completed
 from pathlib import Path
 from types import SimpleNamespace
 from typing import Any, Dict, List, Set
 
 from agentgs.agent.retrieval.graph import GraphStore, get_top_k_embeddings
+from agentgs.contracts.async_utils import invoke
 
 logger = logging.getLogger(__name__)
 Embedding = list[float]
@@ -21,14 +23,17 @@ class LazyToolRetriever:
 
     def __init__(self, factory):
         self.factory, self.instance = factory, None
+        self._lock = threading.RLock()
 
     def _get(self):
-        if self.instance is None:
-            self.instance = self.factory()
-        return self.instance
+        with self._lock:
+            if self.instance is None:
+                self.instance = self.factory()
+            return self.instance
 
     async def retrieve(self, query):
-        return await self._get().retrieve(query)
+        instance = await invoke(self._get)
+        return await invoke(instance.retrieve, query)
 
     def get_tool_subgraph(self, *args, **kwargs):
         return self._get().get_tool_subgraph(*args, **kwargs)
@@ -160,6 +165,9 @@ class KGToolRetriever:
         return embeddings
 
     async def retrieve(self, query_bundle: Any):
+        return await invoke(self._retrieve, query_bundle)
+
+    def _retrieve(self, query_bundle: Any):
         query_embedding = self._embed_model.get_text_embedding(query_bundle.query_str)
         all_rel_texts = list(self._index_struct.embedding_dict.keys())
         fun_rel_texts = self.extract_function_triple(all_rel_texts, function_name="functionality")

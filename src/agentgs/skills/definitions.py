@@ -22,7 +22,12 @@ def load_capability_extensions() -> dict:
     )
 
 
-def load_tool_scope() -> dict:
-    return json.loads(
-        files("agentgs.skills.resources").joinpath("tool_scope.json").read_text("utf-8")
+def load_library_scope() -> dict:
+    from agentgs.contracts.catalog import load_tool_scope
+
+    return (
+        json.loads(
+            files("agentgs.skills.resources").joinpath("library_scope.json").read_text("utf-8")
+        )
+        | load_tool_scope()
     )

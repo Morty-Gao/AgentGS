@@ -11,6 +11,7 @@ from agentgs.config.settings import RuntimeSettings
 from agentgs.contracts.models import TERMINAL, TaskInput
 from agentgs.messages import Message
 from agentgs.runtime.service import TaskService
+from agentgs.runtime.storage.store import QueueFull
 
 TERMINAL_NAMES = {status.value for status in TERMINAL}
 
@@ -27,32 +28,35 @@ def create_app(root: Path, settings: RuntimeSettings | None = None):
     def service(request):
         return request.app.state.tasks
 
-    def find(request, task_id):
+    async def find(request, task_id):
         try:
-            return service(request).get(task_id)
+            return await service(request).get(task_id)
         except KeyError:
             raise HTTPException(404, "Unknown task") from None
 
     @app.get("/api/tasks")
-    def tasks(request: Request):
-        return service(request).list()
+    async def tasks(request: Request):
+        return await service(request).list()
 
     @app.post("/api/tasks", status_code=202)
     async def submit(task: TaskInput, request: Request):
-        return service(request).submit(task)
+        try:
+            return await service(request).submit(task)
+        except QueueFull as exc:
+            raise HTTPException(429, str(exc)) from None
 
     @app.get("/api/tasks/{task_id}")
-    def get(task_id: str, request: Request):
-        return find(request, task_id)
+    async def get(task_id: str, request: Request):
+        return await find(request, task_id)
 
     @app.get("/api/tasks/{task_id}/messages", response_model=list[Message])
-    def messages(task_id: str, request: Request):
-        record = find(request, task_id)
+    async def messages(task_id: str, request: Request):
+        record = await find(request, task_id)
         return record.result.messages if record.result else []
 
     @app.post("/api/tasks/{task_id}/cancel")
     async def cancel(task_id: str, request: Request):
-        find(request, task_id)
+        await find(request, task_id)
         try:
             return await service(request).cancel(task_id)
         except ValueError as exc:
@@ -60,17 +64,17 @@ def create_app(root: Path, settings: RuntimeSettings | None = None):
 
     @app.get("/api/tasks/{task_id}/events")
     async def events(task_id: str, request: Request, after: int = 0):
-        find(request, task_id)
+        await find(request, task_id)
         header = request.headers.get("last-event-id", "")
         cursor = max(after, int(header)) if header.isdigit() else after
 
         async def stream():
             nonlocal cursor
             while not await request.is_disconnected():
-                for event in service(request).events(task_id, cursor):
+                for event in await service(request).events(task_id, cursor):
                     cursor = event.sequence
                     yield f"id: {cursor}\ndata: {event.model_dump_json()}\n\n"
-                if find(request, task_id).status in TERMINAL:
+                if (await find(request, task_id)).status in TERMINAL:
                     break
                 yield ": heartbeat\n\n"
                 await asyncio.sleep(0.4)
@@ -80,8 +84,8 @@ def create_app(root: Path, settings: RuntimeSettings | None = None):
         )
 
     @app.get("/api/tasks/{task_id}/artifacts/{artifact_id}")
-    def artifact(task_id: str, artifact_id: str, request: Request):
-        record = find(request, task_id)
+    async def artifact(task_id: str, artifact_id: str, request: Request):
+        record = await find(request, task_id)
         refs = (
             [a for result in record.result.tool_results for a in result.artifacts]
             if record.result

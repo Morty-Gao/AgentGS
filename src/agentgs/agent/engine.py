@@ -4,7 +4,7 @@ from __future__ import annotations
 
 import asyncio
 import json
-from copy import deepcopy
+from copy import copy, deepcopy
 from types import SimpleNamespace
 
 from agentgs.agent.answering.service import AnsweringService, FinalAnswerGenerationError
@@ -12,23 +12,15 @@ from agentgs.agent.execution import scope
 from agentgs.agent.execution.artifacts import ArtifactRegistry
 from agentgs.agent.execution.scientific import overlay_scientific_tool_schema
 from agentgs.agent.execution.service import ExecutionService
-from agentgs.agent.planning.bridge import (
-    complete_shared_capability_bridges,
-    ground_or_reject_shared_bridge_chain,
-    record_shared_bridge_execution,
-)
-from agentgs.agent.planning.bridge_comparison import run_shared_bridge_comparisons
 from agentgs.agent.planning.geosparql import _heuristic_geosparql_query
-from agentgs.agent.planning.grounding import ground_plan
 from agentgs.agent.planning.model_stages import ModelStages
 from agentgs.agent.planning.routing.entry import infer_tools, normalize_plan
-from agentgs.agent.planning.skills import builtin_planner
-from agentgs.agent.retrieval.scored_skills import RESOURCE_MARKER
 from agentgs.agent.state import AgentExecutionError, RunState
-from agentgs.config.algorithm import AlgorithmSettings
+from agentgs.config.algorithm import AlgorithmSettings, resolve_algorithm
+from agentgs.contracts.async_utils import invoke
 from agentgs.contracts.catalog import load_catalog
 from agentgs.contracts.remote_sensing import contract_scope
-from agentgs.contracts.resources import resource_access
+from agentgs.contracts.resources import RESOURCE_MARKER, resource_access
 
 
 class MutablePlan(SimpleNamespace):
@@ -78,32 +70,35 @@ def snapshot_relations(relations):
 
 class AgentEngine:
     async def run(self, task, context):
-        context.options = context.options or AlgorithmSettings()
-        if task.planning_mode is not None:
-            context.options = context.options.model_copy(
-                update={"planning_mode": task.planning_mode}
-            )
-        if task.require_llm is not None:
-            context.options = context.options.model_copy(update={"require_llm": task.require_llm})
+        context = copy(context)
+        context.options = resolve_algorithm(context.options or AlgorithmSettings(), task)
         state = RunState(context, task)
         # Explicit structured requests use the same tool schemas without a model.
         if task.calls:
-            state.emit(
+            await state.emit(
                 "plan.created",
                 {"source": "explicit_calls", "tools": [call.tool for call in task.calls]},
             )
-            for call in task.calls:
-                result = await state.execute(call)
-                state.save()
-                if not result.succeeded:
+            if task.parallel_tools or any(call.depends_on for call in task.calls):
+                results = await state.execute_many(task.calls)
+                failed = next((result for result in results if not result.succeeded), None)
+                if failed:
                     raise AgentExecutionError(
-                        f"{result.error.code}: {result.error.message}", state.result()
+                        f"{failed.error.code}: {failed.error.message}", state.result()
                     )
+            else:
+                for call in task.calls:
+                    result = await state.execute(call)
+                    await state.save()
+                    if not result.succeeded:
+                        raise AgentExecutionError(
+                            f"{result.error.code}: {result.error.message}", state.result()
+                        )
             state.answer = json.dumps([result.data for result in state.results], ensure_ascii=False)
             state.tool_chain_completed = True
             state.completion_status = "Completed"
             state.answer_generation_status = "not_requested"
-            state.save()
+            await state.save()
             return state.result()
         if not task.question.strip() or context.client is None:
             raise ValueError("Question mode requires a question and configured model client")
@@ -123,9 +118,11 @@ class AgentEngine:
         execution = ExecutionService(state, stages)
         answering = AnsweringService(state, stages)
         permission = scope._permitted.set(context.options.rs_explicit_references)
-        from agentgs.agent.planning.bridge import _bridge_enabled
+        bridge_token = None
+        if context.options.planning_mode == "skill_guided":
+            from agentgs.agent.planning.bridge import _bridge_enabled
 
-        bridge_token = _bridge_enabled.set(context.options.shared_bridge)
+            bridge_token = _bridge_enabled.set(context.options.shared_bridge)
         try:
             with (
                 contract_scope(context.options.rs_local_contracts),
@@ -136,32 +133,45 @@ class AgentEngine:
         except Exception as exc:
             if isinstance(exc, AgentExecutionError):
                 raise
-            state.save()
+            await state.save()
             raise AgentExecutionError(
                 str(exc), state.result(), getattr(exc, "status_code", None)
             ) from exc
         finally:
             scope._permitted.reset(permission)
-            _bridge_enabled.reset(bridge_token)
+            if bridge_token is not None:
+                _bridge_enabled.reset(bridge_token)
 
     async def _staged(self, question, state, stages, execution, answering):
         context, task, options = state.context, state.task, state.context.options
         names = [spec.id for spec in context.tools.specs()]
         allowed = set(names)
-        planner = context.planner or builtin_planner(rs_local_contracts=options.rs_local_contracts)
-        registry = ArtifactRegistry(question)
+        skill_guided = options.planning_mode == "skill_guided"
+        planner = None
+        if skill_guided:
+            from agentgs.agent.planning.bridge import (
+                ground_or_reject_shared_bridge_chain,
+                record_shared_bridge_execution,
+            )
+            from agentgs.agent.planning.bridge_comparison import run_shared_bridge_comparisons
+            from agentgs.agent.planning.grounding import ground_plan
+            from agentgs.agent.planning.skills import builtin_planner
+
+            planner = context.planner or await invoke(
+                builtin_planner, rs_local_contracts=options.rs_local_contracts
+            )
+        registry = await invoke(ArtifactRegistry, question)
         scope.set_registry(registry)
         inferred = [name for name in infer_tools(question) if name in allowed]
-        skill_guided = options.planning_mode == "skill_guided"
         plan = None
         bridge_report = None
         # Authorized offline GeoQuestions route retains the original early-route position.
-        if "GeoBigDataExecuteGeoSPARQL" in inferred and not options.require_llm:
+        if "GeoBigDataExecuteGeoSPARQL" in inferred and options.allow_rule_planning:
             if skill_guided:
-                plan, bridge_report = self._skill_layer(
+                plan, bridge_report = await self._skill_layer(
                     question, ["GeoBigDataExecuteGeoSPARQL"], names, planner, state
                 )
-                state.emit(
+                await state.emit(
                     "tool_grounding",
                     {
                         "content": ground_plan(
@@ -173,7 +183,7 @@ class AgentEngine:
                         )
                     },
                 )
-            state.emit(
+            await state.emit(
                 "schema_route",
                 {
                     "source": "compact_geosparql_query_planner",
@@ -182,9 +192,16 @@ class AgentEngine:
             )
             seed = None
             if not options.geosparql_llm:
-                seed = {"query": _heuristic_geosparql_query(question), "dataset": "YAGO2geo_original_RDF"}
-            state.emit("plan.created", {"source": "schema_route", "tools": ["GeoBigDataExecuteGeoSPARQL"]})
-            result = await execution.run("GeoBigDataExecuteGeoSPARQL", question, registry, "", initial_arguments=seed)
+                seed = {
+                    "query": _heuristic_geosparql_query(question),
+                    "dataset": "YAGO2geo_original_RDF",
+                }
+            await state.emit(
+                "plan.created", {"source": "schema_route", "tools": ["GeoBigDataExecuteGeoSPARQL"]}
+            )
+            result = await execution.run(
+                "GeoBigDataExecuteGeoSPARQL", question, registry, "", initial_arguments=seed
+            )
             return await answering.generate(
                 question,
                 result.render_for_agent(),
@@ -198,20 +215,24 @@ class AgentEngine:
         total_output = ""
         resume_prefix = []
         last_output = ""
-        attempts = 1 if options.require_llm else 3
+        attempts = options.plan_attempts
         previous_bridge = None
         for attempt in range(attempts):
             try:
                 if skill_guided:
                     if plan is None:
-                        plan, bridge_report = self._skill_layer(question, [], names, planner, state)
-                    state.emit("artifact_registry_init", {"content": registry.compact_context()})
+                        plan, bridge_report = await self._skill_layer(
+                            question, [], names, planner, state
+                        )
+                    await state.emit(
+                        "artifact_registry_init", {"content": registry.compact_context()}
+                    )
                 retrieved = await context.tool_retriever.retrieve(
                     SimpleNamespace(query_str=question)
                 )
                 retrieved = snapshot_relations(retrieved)
                 available = available_tool_names(retrieved, allowed)
-                state.emit(
+                await state.emit(
                     "tool_retrieval",
                     {
                         "query": question,
@@ -238,19 +259,19 @@ class AgentEngine:
                     additions = []
                     for name in expanded:
                         if not any(row[0] == name for row in retrieved):
-                            additions += context.tool_retriever.get_tool_subgraph(
-                                name, depth=1, limit=1000
+                            additions += await invoke(
+                                context.tool_retriever.get_tool_subgraph, name, depth=1, limit=1000
                             )
                     retrieved = list(retrieved) + snapshot_relations(additions)
                     available = list(dict.fromkeys(available + expanded))
-                    state.emit(
+                    await state.emit(
                         "tool_graph_retrieval",
                         {"capability_candidates": candidates, "available_tools": available},
                     )
-                schema_route = skill_guided and not options.require_llm and bool(inferred)
+                schema_route = skill_guided and options.allow_rule_planning and bool(inferred)
                 if schema_route:
                     proposed = list(inferred)
-                    state.emit(
+                    await state.emit(
                         "schema_route",
                         {
                             "source": "structured_resource_and_tool_schema",
@@ -263,22 +284,22 @@ class AgentEngine:
                             question,
                             retrieved,
                             total_output,
-                            {
-                                "skill_plan": plan.as_dict() if plan else {},
-                                "schema_routing_hints": inferred,
-                                "hint_policy": "Hints identify compatible capabilities; instantiate repeated calls from distinct entity/temporal cohorts.",
-                            },
+                            planning_mode=options.planning_mode,
+                            skill_plan=plan.as_dict() if skill_guided else None,
+                            tool_hints=inferred,
                         )
-                        state.emit("plan", {"source": "native_function_call", "tools": proposed})
+                        await state.emit(
+                            "plan", {"source": "native_function_call", "tools": proposed}
+                        )
                     except Exception as exc:
-                        if options.require_llm:
+                        if not options.allow_rule_planning:
                             raise
                         proposed = list(
                             dict.fromkeys(name for name in inferred if name in available)
                         )
                         if not proposed:
                             raise
-                        state.emit(
+                        await state.emit(
                             "plan_model_fallback",
                             {
                                 "reason": type(exc).__name__,
@@ -286,19 +307,17 @@ class AgentEngine:
                                 "source": "resource_inferred_tools",
                             },
                         )
-                if options.require_llm:
+                if not options.allow_rule_planning:
                     chain = [name for name in proposed if name in set(available)]
                     if not chain:
-                        raise ValueError(
-                            "Required LLM planning returned no registered executable tool"
-                        )
-                    plan_source = "actual_llm_plan_registered_filter_only"
+                        raise ValueError("Model planning returned no registered executable tool")
+                    plan_source = "model_plan_registered_filter_only"
                 else:
                     chain, plan_source = normalize_plan(proposed, inferred, available)
                 chain = [name for name in chain if name in set(available)]
-                if not chain and available and not options.require_llm:
+                if not chain and available and options.allow_rule_planning:
                     chain = available[:1]
-                state.emit(
+                await state.emit(
                     "plan_validation",
                     {
                         "source": plan_source,
@@ -310,12 +329,12 @@ class AgentEngine:
                 if not chain:
                     continue
                 bridge_state = None
-                if plan is not None and bridge_report and bridge_report.get("accepted"):
+                if skill_guided and bridge_report and bridge_report.get("accepted"):
                     chain, bridge_state, rejection = ground_or_reject_shared_bridge_chain(
                         chain, plan, bridge_report
                     )
                     if rejection:
-                        state.emit("shared_bridge_grounding_rejected", rejection)
+                        await state.emit("shared_bridge_grounding_rejected", rejection)
                     if (
                         bridge_state
                         and previous_bridge
@@ -330,7 +349,7 @@ class AgentEngine:
                             bridge_state[key] = previous_bridge[key]
                     previous_bridge = bridge_state
                 if skill_guided:
-                    schemas = grounding_schemas(context.tool_retriever, chain)
+                    schemas = await invoke(grounding_schemas, context.tool_retriever, chain)
                     grounded = ground_plan(
                         planner.graph,
                         plan.as_dict(),
@@ -340,11 +359,11 @@ class AgentEngine:
                         tool_schemas=schemas,
                         tool_next=load_catalog()["next"],
                     )
-                    state.emit("tool_grounding", {"content": grounded})
+                    await state.emit("tool_grounding", {"content": grounded})
                     chain = grounded["tool_chain"]
                 if not chain:
-                    raise RuntimeError("Skill grounding produced no available tool instances")
-                state.emit("plan.created", {"source": plan_source, "tools": chain})
+                    raise RuntimeError("Planning produced no available tool instances")
+                await state.emit("plan.created", {"source": plan_source, "tools": chain})
                 skip = 0
                 while (
                     skip < len(resume_prefix)
@@ -353,7 +372,7 @@ class AgentEngine:
                 ):
                     skip += 1
                 if skip:
-                    state.emit(
+                    await state.emit(
                         "plan_resume",
                         {"skipped_successful_prefix": chain[:skip], "resume_index": skip + 1},
                     )
@@ -379,8 +398,10 @@ class AgentEngine:
                     last_output = result.render_for_agent()
                     total_output += last_output
                     current = result.output
-                    registry.ingest_tool_output(name, f"tool_step_{index:02d}", result.output)
-                    state.emit(
+                    await invoke(
+                        registry.ingest_tool_output, name, f"tool_step_{index:02d}", result.output
+                    )
+                    await state.emit(
                         "artifact_update",
                         {
                             "tool_name": name,
@@ -393,7 +414,7 @@ class AgentEngine:
                     if not result.succeeded:
                         failed = True
                         resume_prefix = chain[: index - 1]
-                        state.emit(
+                        await state.emit(
                             "execution_feedback", {"status": "replanning", "tool_name": name}
                         )
                         break
@@ -417,7 +438,9 @@ class AgentEngine:
             except Exception as exc:
                 if getattr(exc, "status_code", None) in (401, 403):
                     raise
-                state.emit("plan_retry", {"attempt": attempt + 1, "error_type": type(exc).__name__})
+                await state.emit(
+                    "plan_retry", {"attempt": attempt + 1, "error_type": type(exc).__name__}
+                )
                 if attempt + 1 < attempts:
                     await asyncio.sleep(1)
         return await answering.generate(
@@ -426,12 +449,12 @@ class AgentEngine:
             completed=False,
         )
 
-    def _record_skill(self, state, plan):
-        state.emit(
+    async def _record_skill(self, state, plan):
+        await state.emit(
             "skill_retrieval", {"query": plan.query, "top_k": 5, "candidates": plan.candidates}
         )
-        state.emit("skill_plan", {"content": plan.as_dict()})
-        state.emit(
+        await state.emit("skill_plan", {"content": plan.as_dict()})
+        await state.emit(
             "capability_expansion",
             {
                 "content": plan.capability_expansion,
@@ -439,12 +462,16 @@ class AgentEngine:
                 "missing_capabilities": plan.missing_capabilities,
             },
         )
-        state.emit("geo_constraint_check", {"constraints": plan.constraints})
+        await state.emit("geo_constraint_check", {"constraints": plan.constraints})
 
-    def _skill_layer(self, question, inferred, names, planner, state):
-        plan = MutablePlan(**planner.plan(question, inferred))
-        report = complete_shared_capability_bridges(plan, list(planner.skills.values()), names)
+    async def _skill_layer(self, question, inferred, names, planner, state):
+        from agentgs.agent.planning.bridge import complete_shared_capability_bridges
+
+        plan = MutablePlan(**(await invoke(planner.plan, question, inferred)))
+        report = await invoke(
+            complete_shared_capability_bridges, plan, list(planner.skills.values()), names
+        )
         if report["enabled"]:
-            state.emit("shared_capability_bridge_search", {"content": report})
-        self._record_skill(state, plan)
+            await state.emit("shared_capability_bridge_search", {"content": report})
+        await self._record_skill(state, plan)
         return plan, report

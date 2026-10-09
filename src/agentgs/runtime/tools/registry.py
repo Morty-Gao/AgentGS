@@ -1,13 +1,13 @@
 from dataclasses import dataclass
 from functools import partial
-from typing import Callable
+from typing import Any, Awaitable, Callable
 
 from pydantic import Field
 
+from agentgs.contracts.catalog import load_tool_scope
 from agentgs.contracts.models import Model, ToolSpec
 from agentgs.contracts.tool_inputs import tool_input_models
 from agentgs.runtime.tools.domains.geosparql import SnapshotQuery, replay_query
-from agentgs.skills.definitions import load_tool_scope
 
 
 class CodeInput(Model):
@@ -18,8 +18,9 @@ class CodeInput(Model):
 class RegisteredTool:
     spec: ToolSpec
     input_type: type
-    handler: Callable | None
+    handler: Callable[..., Any | Awaitable[Any]] | None
     source_type: str = "raw_compute"
+    process_safe: bool = False
 
 
 def builtin_tools():
@@ -68,6 +69,7 @@ def builtin_tools():
             source_type="derived_lookup"
             if lookup or name == "GeoBigDataExecuteGeoSPARQL"
             else "raw_compute",
+            process_safe=True,
         )
     return result
 

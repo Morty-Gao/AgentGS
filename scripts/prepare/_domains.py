@@ -24,7 +24,7 @@ from agentgs.datasets.layout import prepared_name
 
 
 def answer_formats(root, cache, offline, source_root):
-    from agentgs.agent.answering.formats import validate_contract_rows
+    from agentgs.contracts.answer_formats import validate_contract_rows
 
     source = source_root / "geotooleval.jsonl"
     rows = []
@@ -238,10 +238,12 @@ def energy(root, cache, offline, source_root):
     selections = read_manifest("selections.json")
     gem = source_root / "gem.jsonl"
     if not gem.is_file():
+        gem = source_root / "gem.jsonl.gz"
+    if not gem.is_file():
         raise FileNotFoundError(
             f"Retained GEM dataset is missing: {gem}; run prepare_gem.py --workbook PATH"
         )
-    record_source("retained/gem.jsonl", gem)
+    record_source("prepared/" + gem.name, gem)
     summary, top, facilities = parser.process_gip(gem)
     minerals = parser.process_mrds(mrds_source(cache, offline))
     opsd, landmarks, capitals = parser.process_opsd(
@@ -552,11 +554,11 @@ def geotoolkg(root, cache, offline, source_root):
 
 
 def gem(root, cache, offline, source_root):
-    return (
-        existing_assets("gem", source_root, root),
-        [],
-        ["Retained complete workbook records in JSONL."],
-    )
+    from _formats import normalize_file
+
+    outputs = existing_assets("gem", source_root, root)
+    outputs.append(normalize_file(outputs[0], root / "data/gem.jsonl"))
+    return outputs, [], ["Retained compressed JSONL expanded into readable data/gem.jsonl."]
 
 
 BUILDERS = {

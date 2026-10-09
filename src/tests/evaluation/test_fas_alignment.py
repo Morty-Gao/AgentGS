@@ -13,9 +13,7 @@ def test_frozen_fas_all_answer_types_match_original_source():
     from agentgs.evaluation.metrics.answers import score_answer
 
     cases = json.loads((ROOT / "src/tests/fixtures/evaluation/fas.json").read_text("utf-8"))
-    tasks = {
-        task.question_id: task for task in load_tasks(ROOT / "data/geotooleval.jsonl")
-    }
+    tasks = {task.question_id: task for task in load_tasks(ROOT / "data/geotooleval.jsonl")}
     assert len(tasks) == 603
     for case in cases:
         # The oracle is JSON; numeric detail pairs are tuples in the Python scorer.

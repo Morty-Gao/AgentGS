@@ -1,4 +1,4 @@
-"""Frozen GeoToolEval metrics, public inputs and append-only experiment attempts."""
+"""Conversation-based GeoToolEval scoring and append-only experiment attempts."""
 
 import asyncio
 import hashlib
@@ -9,11 +9,14 @@ import time
 from datetime import datetime, timezone
 from pathlib import Path
 
+from agentgs.contracts.async_utils import invoke
 from agentgs.contracts.models import TaskInput
+from agentgs.evaluation.conversation import as_conversation, conversation_usage
+from agentgs.evaluation.conversation import usage_summary as usage_summary
 from agentgs.evaluation.datasets.geotooleval import load_tasks
+from agentgs.evaluation.datasets.version import compatibility_contracts
 from agentgs.evaluation.metrics.answers import score_answer
-from agentgs.evaluation.metrics.tools import aggregate_scores, score_task
-from agentgs.messages import Conversation
+from agentgs.evaluation.metrics.tools import SCORING_PROTOCOL, aggregate_scores, score_task
 
 PRIVATE_KEYS = frozenset(
     {
@@ -24,6 +27,8 @@ PRIVATE_KEYS = frozenset(
         "expected_answer",
         "reference_answer",
         "reference_tools",
+        "expected_tools",
+        "gold_chain_text",
     }
 )
 
@@ -38,52 +43,43 @@ def public_resource(value):
     return value
 
 
-def public_input(task, *, planning_mode="skill_guided", require_llm=True, output_contract=None):
-    try:
-        resource = json.loads(task.input_resource) if task.input_resource else None
-    except ValueError:
-        resource = task.input_resource
+def public_input(
+    task,
+    *,
+    planning_mode="skill_guided",
+    allow_rule_planning=False,
+    plan_attempts=None,
+    tool_attempts=None,
+    output_contract=None,
+):
+    resource = task.input_resource
+    if isinstance(resource, str):
+        try:
+            resource = json.loads(resource) if resource else None
+        except ValueError:
+            pass
     return TaskInput(
         question=task.question,
         input_resource=public_resource(resource),
         planning_mode=planning_mode,
-        require_llm=require_llm,
+        allow_rule_planning=allow_rule_planning,
+        plan_attempts=plan_attempts,
+        tool_attempts=tool_attempts,
         output_contract=output_contract,
         input_domain="remote_sensing" if task.category == "RemoteSensingTools" else None,
     )
-
-
-def usage_summary(calls):
-    usages = [call.get("usage") for call in calls or []]
-    complete = (
-        bool(usages)
-        and all(
-            isinstance(usage, dict) and usage.get("total_tokens") is not None for usage in usages
-        )
-        and all(call.get("attempts", 1) == 1 for call in calls or [])
-    )
-    return {
-        "usage_complete": complete,
-        "total_tokens": sum(
-            int(usage.get("total_tokens") or 0) for usage in usages if isinstance(usage, dict)
-        )
-        if complete
-        else None,
-        "reported_tokens": sum(
-            int(usage.get("total_tokens") or 0) for usage in usages if isinstance(usage, dict)
-        ),
-    }
 
 
 def score_prediction(task, answer, messages=(), usage=None):
     final = score_answer(task, answer)
     scores = score_task(
         gold_steps=list(task.gold_steps),
-        messages=list(messages),
+        messages=as_conversation(messages),
         answer_score=final["score"],
         token_usage=usage,
     )
     return {
+        "scoring_protocol": SCORING_PROTOCOL,
         "question_id": task.question_id,
         "category_id": task.category_id,
         "category": task.category,
@@ -104,6 +100,7 @@ def summarize(rows, total=603):
         else None
     )
     return {
+        "scoring_protocol": SCORING_PROTOCOL,
         "submitted": len(rows),
         "expected": total,
         "complete": len(rows) == total and len(grouped) == 10,
@@ -120,52 +117,56 @@ def summarize(rows, total=603):
 
 def write_json(path, value):
     path.parent.mkdir(parents=True, exist_ok=True)
-    tmp = path.with_suffix(path.suffix + ".part")
+    from uuid import uuid4
+
+    tmp = path.with_suffix(path.suffix + "." + uuid4().hex + ".part")
     tmp.write_text(
-        json.dumps(value, ensure_ascii=False, allow_nan=False, indent=2, default=str) + "\n"
+        json.dumps(value, ensure_ascii=False, allow_nan=False, indent=2, default=str) + "\n",
+        encoding="utf-8",
     )
     tmp.replace(path)
 
 
-def score_predictions(dataset, predictions, output, *, allow_partial=False):
+def score_predictions(dataset, predictions, output, *, allow_partial=False, project=None):
     tasks = {task.question_id: task for task in load_tasks(dataset)}
     rows = []
     seen = set()
+    records = []
     for line in predictions.read_text("utf-8-sig").splitlines():
         if not line.strip():
             continue
         record = json.loads(line)
+        if not isinstance(record, dict):
+            raise ValueError("Each prediction must be an object")
+        if record.get("trace") and "messages" not in record and "conversation" not in record:
+            raise ValueError(
+                "Trace-only predictions are unsupported; provide Conversation messages"
+            )
         qid = int(record.get("question_id", record.get("case_id")))
         if qid in seen or qid not in tasks:
             raise ValueError("Duplicate or unknown prediction ID")
         seen.add(qid)
+        records.append(record)
+        conversation = record.get("conversation", record.get("messages", []))
         rows.append(
             score_prediction(
                 tasks[qid],
                 record.get("final_answer", record.get("answer", "")),
-                record.get("messages", []),
+                conversation,
                 record.get("token_usage", record.get("usage")),
             )
         )
     if not allow_partial and seen != set(tasks):
         raise ValueError("Complete benchmark scoring requires every frozen task ID")
     report = summarize(rows, len(tasks))
-    manifest = dataset.parent / "version_manifest.json"
-    if manifest.exists():
-        metadata = json.loads(manifest.read_text())
-        root = dataset.parent.parent.parent
-        path = root / metadata["compatibility_contracts"]
+    path = compatibility_contracts(dataset, project=project)
+    if path is not None:
         formats = {
             row["question_id"]: row["answer_format"]
             for row in (json.loads(line) for line in path.read_text().splitlines() if line.strip())
         }
         from agentgs.evaluation.metrics.compatibility import VERSION, score_compatible
 
-        records = [
-            json.loads(line)
-            for line in predictions.read_text("utf-8-sig").splitlines()
-            if line.strip()
-        ]
         compatibility = [
             {
                 "question_id": int(record.get("question_id", record.get("case_id"))),
@@ -179,43 +180,40 @@ def score_predictions(dataset, predictions, output, *, allow_partial=False):
         ]
         report["compatibility"] = {
             "protocol": VERSION,
-            "format_version": "1.1",
             "results": compatibility,
-            "note": "Separate historical compatibility scores; frozen FAS and composite metrics above are unchanged.",
+            "note": "Separate historical compatibility scores; answer FAS and conversation metrics above are unchanged.",
         }
     write_json(output, report)
     return report
 
 
-async def run_benchmark(
+def _benchmark_identity(
     service,
-    dataset: Path,
-    output: Path,
-    *,
-    ids=None,
-    retry_failed=False,
-    planning_mode="skill_guided",
-    require_llm=True,
-    contract_provider=None,
+    dataset,
+    selected,
+    planning_mode,
+    allow_rule_planning,
+    plan_attempts,
+    tool_attempts,
+    contract_provider,
 ):
-    tasks = load_tasks(dataset)
-    selected = [task for task in tasks if ids is None or task.question_id in ids]
-    input_hash = hashlib.sha256(dataset.read_bytes()).hexdigest()
+    input_hash = (lambda: hashlib.sha256(dataset.read_bytes()).hexdigest())()
     identity = {
-        "schema_version": 2,
+        "schema_version": 4,
+        "scoring_protocol": SCORING_PROTOCOL,
+        "message_protocol": "openai_tool_calls",
         "dataset_sha256": input_hash,
         "planning_mode": planning_mode,
-        "require_llm": require_llm,
+        "allow_rule_planning": allow_rule_planning,
         "algorithm": "geotoolagent-native-function-calling-v1",
         "protocol": "actual_agent_execution",
         "effective_runtime": service.settings.model_dump(mode="json"),
         "selected_question_ids": [task.question_id for task in selected],
     }
-    # Code and non-secret configuration determine an experiment's identity.
     code_files = sorted((service.root / "src/agentgs").rglob("*.py"))
-    identity["code_sha256"] = hashlib.sha256(
-        b"".join(path.read_bytes() for path in code_files)
-    ).hexdigest()
+    identity["code_sha256"] = (
+        lambda: hashlib.sha256(b"".join((path.read_bytes() for path in code_files))).hexdigest()
+    )()
     for name in ["config.toml", "llm.toml"]:
         path = service.root / name
         identity[name + "_sha256"] = (
@@ -228,21 +226,108 @@ async def run_benchmark(
         name: model.model_dump(mode="json") for name, model in configuration.models.items()
     }
     identity["roles"] = configuration.roles
+    from agentgs.config.algorithm import load_algorithm, resolve_algorithm
+
+    identity["effective_algorithm"] = resolve_algorithm(
+        load_algorithm(service.root),
+        TaskInput(
+            planning_mode=planning_mode,
+            allow_rule_planning=allow_rule_planning,
+            plan_attempts=plan_attempts,
+            tool_attempts=tool_attempts,
+        ),
+    ).model_dump(mode="json")
+    from importlib.resources import files
+
+    resources = {
+        "tool_catalog": files("agentgs.contracts").joinpath("catalog.json"),
+        "tool_scope": files("agentgs.contracts").joinpath("tool_scope.json"),
+    }
+    if planning_mode == "skill_guided":
+        declarations = files("agentgs.skills.resources")
+        resources.update(
+            skill_definitions=declarations.joinpath("definitions.json"),
+            capability_extensions=declarations.joinpath("capability_extensions.json"),
+        )
+    identity["planning_resources_sha256"] = {
+        name: hashlib.sha256(resource.read_bytes()).hexdigest()
+        for name, resource in resources.items()
+    }
+    if contract_provider is not None:
+        identity["answer_contracts_sha256"] = hashlib.sha256(
+            json.dumps(
+                {
+                    "contracts": {
+                        task.question_id: contract_provider.find(task.question) for task in selected
+                    },
+                    "system_prompt": getattr(contract_provider, "system_prompt", ""),
+                },
+                ensure_ascii=False,
+                sort_keys=True,
+            ).encode("utf-8")
+        ).hexdigest()
     identity["providers"] = {
         name: {
             "protocol": provider.protocol,
             "base_url_sha256": hashlib.sha256(provider.base_url.encode()).hexdigest(),
             "timeout_seconds": provider.timeout_seconds,
+            "max_attempts": provider.max_attempts,
+            "output_token_parameter": provider.output_token_parameter,
+            "max_concurrent_requests": provider.max_concurrent_requests,
+            "requests_per_minute": provider.requests_per_minute,
+            "tokens_per_minute": provider.tokens_per_minute,
         }
         for name, provider in configuration.providers.items()
     }
-    output.mkdir(parents=True, exist_ok=True)
+    return (identity, configuration)
+
+
+async def run_benchmark(
+    service,
+    dataset: Path,
+    output: Path,
+    *,
+    ids=None,
+    retry_failed=False,
+    planning_mode="skill_guided",
+    allow_rule_planning=False,
+    plan_attempts=None,
+    tool_attempts=None,
+    contract_provider=None,
+):
+    tasks = await invoke(load_tasks, dataset)
+    selected = [task for task in tasks if ids is None or task.question_id in ids]
+    if ids is not None and (missing := set(ids) - {task.question_id for task in tasks}):
+        raise ValueError(f"Unknown benchmark question IDs: {sorted(missing)}")
+    identity, configuration = await invoke(
+        _benchmark_identity,
+        service,
+        dataset,
+        selected,
+        planning_mode,
+        allow_rule_planning,
+        plan_attempts,
+        tool_attempts,
+        contract_provider,
+    )
+    await invoke(output.mkdir, parents=True, exist_ok=True)
     manifest = output / "protocol.json"
-    if manifest.exists() and json.loads(manifest.read_text()) != identity:
+    if (
+        await invoke(manifest.exists)
+        and await invoke(lambda: json.loads(manifest.read_text())) != identity
+    ):
         raise ValueError(
             "Code, model configuration, inputs or protocol differ; use a new run directory"
         )
-    write_json(manifest, identity)
+    for task in selected:
+        current = output / "tasks" / f"{task.question_id:04d}" / "result.json"
+        if await invoke(current.exists):
+            previous = await invoke(lambda: json.loads(current.read_text(encoding="utf-8")))
+            if previous.get("scores", {}).get("protocol") != SCORING_PROTOCOL:
+                raise ValueError(
+                    "Saved scores use a different scoring protocol; use a new run directory"
+                )
+    await invoke(write_json, manifest, identity)
     lock = output / ".run.lock"
     fd = os.open(lock, os.O_CREAT | os.O_EXCL | os.O_WRONLY)
     os.write(fd, str(os.getpid()).encode())
@@ -254,12 +339,18 @@ async def run_benchmark(
     pending = []
     monitor = None
 
-    def log_event(kind, **fields):
+    def _log_event(kind, **fields):
         event = {"time": datetime.now(timezone.utc).isoformat(), "type": kind, **fields}
         line = json.dumps(event, ensure_ascii=False, allow_nan=False)
         with (output / "experiment.events.jsonl").open("a", encoding="utf-8") as stream:
             stream.write(line + "\n")
         print(line, flush=True)
+
+    log_lock = asyncio.Lock()
+
+    async def log_event(kind, **fields):
+        async with log_lock:
+            await invoke(_log_event, kind, **fields)
 
     def progress():
         nonlocal peak_running
@@ -280,16 +371,16 @@ async def run_benchmark(
     async def heartbeat():
         while True:
             status = progress()
-            write_json(output / "progress.json", status)
-            log_event("benchmark.progress", **status)
+            await invoke(write_json, output / "progress.json", status)
+            await log_event("benchmark.progress", **status)
             await asyncio.sleep(10)
 
     try:
         for task in selected:
             folder = output / "tasks" / f"{task.question_id:04d}"
             current = folder / "result.json"
-            if current.exists():
-                previous = json.loads(current.read_text())
+            if await invoke(current.exists):
+                previous = await invoke(lambda: json.loads(current.read_text(encoding="utf-8")))
                 if not retry_failed or previous["status"] == "succeeded":
                     completed[task.question_id] = previous
                     continue
@@ -303,25 +394,28 @@ async def run_benchmark(
             nonlocal stopped_for_auth
             folder = output / "tasks" / f"{task.question_id:04d}"
             current = folder / "result.json"
-            folder.mkdir(parents=True, exist_ok=True)
-            number = len(list(folder.glob("attempt_*"))) + 1
+            await invoke(folder.mkdir, parents=True, exist_ok=True)
+            number = await invoke(lambda: len(list(folder.glob("attempt_*"))) + 1)
             attempt = folder / f"attempt_{number:03d}"
-            attempt.mkdir(exist_ok=False)
+            await invoke(attempt.mkdir, exist_ok=False)
             request = public_input(
                 task,
                 planning_mode=planning_mode,
-                require_llm=require_llm,
+                allow_rule_planning=allow_rule_planning,
+                plan_attempts=plan_attempts,
+                tool_attempts=tool_attempts,
                 output_contract=contract_provider.find(task.question)
                 if contract_provider
                 else None,
             )
-            write_json(attempt / "public_input.json", request.model_dump(mode="json"))
-            record = service.submit(request)
-            write_json(
+            await invoke(write_json, attempt / "public_input.json", request.model_dump(mode="json"))
+            record = await service.submit(request)
+            await invoke(
+                write_json,
                 attempt / "submission.json",
                 {"question_id": task.question_id, "task_id": record.spec.id, "attempt": number},
             )
-            log_event(
+            await log_event(
                 "benchmark.task_submitted",
                 question_id=task.question_id,
                 category=task.category,
@@ -329,20 +423,24 @@ async def run_benchmark(
                 attempt=number,
             )
             result = await service.wait(record.spec.id)
-            write_json(attempt / "task_record.json", result.model_dump(mode="json"))
-            with (attempt / "events.jsonl").open("w", encoding="utf-8") as stream:
-                for event in service.events(record.spec.id):
-                    stream.write(event.model_dump_json() + "\n")
-            work = service.root / "outputs/tasks" / record.spec.id
-            if (work / "stderr.log").exists():
-                shutil.copy2(work / "stderr.log", attempt / "stderr.log")
-            answer = result.result.answer if result.result else ""
-            messages = result.result.messages if result.result else []
-            (attempt / "messages.jsonl").write_text(
-                Conversation(messages=messages).to_jsonl(), encoding="utf-8"
+            await invoke(write_json, attempt / "task_record.json", result.model_dump(mode="json"))
+            events = await service.events(record.spec.id)
+            await invoke(
+                lambda: (attempt / "events.jsonl").write_text(
+                    "".join(event.model_dump_json() + "\n" for event in events), encoding="utf-8"
+                )
             )
-            tokens = usage_summary(result.result.usage if result.result else [])
-            scored = score_prediction(task, answer, messages, tokens)
+            work = service.root / "outputs/tasks" / record.spec.id
+            if await invoke((work / "stderr.log").exists):
+                await invoke(shutil.copy2, work / "stderr.log", attempt / "stderr.log")
+            answer = result.result.answer if result.result else ""
+            conversation = as_conversation(result.result.messages if result.result else [])
+            await invoke(conversation.save, attempt / "conversation.json")
+            await invoke(
+                (attempt / "messages.jsonl").write_text, conversation.to_jsonl(), encoding="utf-8"
+            )
+            tokens = conversation_usage(conversation, result.result.usage if result.result else [])
+            scored = await invoke(score_prediction, task, answer, conversation, tokens)
             row = {
                 **scored,
                 "status": result.status.value,
@@ -350,13 +448,20 @@ async def run_benchmark(
                 "final_answer": answer,
                 "attempt": number,
                 "error": result.error.model_dump() if result.error else None,
-                "messages": [message.model_dump(mode="json") for message in messages],
+                "messages": conversation.model_dump(mode="json")["messages"],
+                "completion_status": result.result.completion_status if result.result else None,
+                "tool_chain_completed": result.result.tool_chain_completed
+                if result.result
+                else None,
+                "answer_generation_status": result.result.answer_generation_status
+                if result.result
+                else None,
                 "token_usage": tokens,
             }
-            write_json(attempt / "score.json", row)
-            write_json(current, row)
+            await invoke(write_json, attempt / "score.json", row)
+            await invoke(write_json, current, row)
             completed[task.question_id] = row
-            log_event(
+            await log_event(
                 "benchmark.task_finished",
                 question_id=task.question_id,
                 task_id=record.spec.id,
@@ -366,7 +471,7 @@ async def run_benchmark(
                 completed=len(completed),
                 token_usage=tokens,
             )
-            write_json(output / "progress.json", progress())
+            await invoke(write_json, output / "progress.json", progress())
             # Authentication failures cannot be repaired by rerunning more tasks.
             if result.error and (
                 "HTTP 401" in result.error.message or "HTTP 403" in result.error.message
@@ -384,7 +489,7 @@ async def run_benchmark(
                 finally:
                     queue.task_done()
 
-        log_event(
+        await log_event(
             "benchmark.started",
             selected=len(selected),
             pending=len(pending),
@@ -404,32 +509,41 @@ async def run_benchmark(
                 if not job.done():
                     job.cancel()
             await asyncio.gather(*workers, return_exceptions=True)
-        log_event("benchmark.finished", **progress())
+        await log_event("benchmark.finished", **progress())
     finally:
         if monitor is not None:
             monitor.cancel()
             await asyncio.gather(monitor, return_exceptions=True)
-        rows = [
-            json.loads(path.read_text())
-            for path in sorted((output / "tasks").glob("*/result.json"))
-        ]
-        report = summarize(rows, len(tasks))
-        report["execution"] = progress()
-        write_json(output / "summary.json", report)
-        with (output / "predictions.jsonl").open("w", encoding="utf-8") as stream:
-            for row in rows:
-                stream.write(
-                    json.dumps(
-                        {
-                            "question_id": row["question_id"],
-                            "final_answer": row["final_answer"],
-                            "status": row["status"],
-                            "messages": row.get("messages", []),
-                            "token_usage": row.get("token_usage"),
-                        },
-                        ensure_ascii=False,
+
+        def export():
+            selected_ids = {task.question_id for task in selected}
+            rows = [
+                json.loads(path.read_text())
+                for path in sorted((output / "tasks").glob("*/result.json"))
+                if int(path.parent.name) in selected_ids
+            ]
+            report = summarize(rows, len(tasks))
+            report["execution"] = progress()
+            write_json(output / "summary.json", report)
+            with (output / "predictions.jsonl").open("w", encoding="utf-8") as stream:
+                for row in rows:
+                    stream.write(
+                        json.dumps(
+                            {
+                                "question_id": row["question_id"],
+                                "final_answer": row["final_answer"],
+                                "status": row["status"],
+                                "messages": row.get("messages", []),
+                                "token_usage": row.get("token_usage"),
+                            },
+                            ensure_ascii=False,
+                        )
+                        + "\n"
                     )
-                    + "\n"
-                )
-        lock.unlink(missing_ok=True)
+            return report
+
+        try:
+            report = await invoke(export)
+        finally:
+            await invoke(lock.unlink, missing_ok=True)
     return report

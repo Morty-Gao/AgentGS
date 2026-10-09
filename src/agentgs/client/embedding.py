@@ -1,5 +1,6 @@
 """Original FastEmbed encodings over a locally prepared, fingerprinted model cache."""
 
+import threading
 from pathlib import Path
 
 
@@ -18,8 +19,13 @@ class LocalEmbedding:
             batch_size,
         )
         self.model = None
+        self._lock = threading.RLock()
 
     def _model(self):
+        with self._lock:
+            return self._load_model()
+
+    def _load_model(self):
         if self.model is None:
             if not self.cache.is_dir():
                 raise FileNotFoundError(f"Frozen embedding cache missing: {self.cache}")
@@ -42,9 +48,11 @@ class LocalEmbedding:
         return self.model
 
     def get_text_embedding(self, text):
-        vector = next(iter(self._model().embed([text], batch_size=self.batch_size)))
-        return [float(value) for value in vector.tolist()]
+        with self._lock:
+            vector = next(iter(self._model().embed([text], batch_size=self.batch_size)))
+            return [float(value) for value in vector.tolist()]
 
     def get_query_embedding(self, text):
-        vector = next(iter(self._model().query_embed([text])))
-        return [float(value) for value in vector.tolist()]
+        with self._lock:
+            vector = next(iter(self._model().query_embed([text])))
+            return [float(value) for value in vector.tolist()]

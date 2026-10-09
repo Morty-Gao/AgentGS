@@ -262,6 +262,8 @@ def validate_returned_evidence(
     event = {
         "type": "final_answer_validation",
         "status": "passed" if valid else "failed",
+        # Preserve the frozen component oracle's metadata. The runtime service
+        # removes this historical marker and records the actual planning policy.
         "evaluation_llm_required": True,
         "validator_version": VERSION,
         "valid": valid,

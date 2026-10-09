@@ -111,3 +111,38 @@ def test_invalid_runtime_options_are_rejected_before_task_submission(project, op
     result = CliRunner().invoke(app, ["run", "--project", str(project), *options])
     assert result.exit_code == 2
     assert not (project / "outputs").exists()
+
+
+@pytest.mark.parametrize("rules", [False, True])
+def test_ablation_options_reach_benchmark(project, monkeypatch, rules):
+    from agentgs.evaluation import benchmark
+    from agentgs.evaluation.datasets import version
+
+    received = []
+
+    async def run_benchmark(service, dataset, output, **kwargs):
+        received.append(kwargs)
+        return {}
+
+    monkeypatch.setattr(benchmark, "run_benchmark", run_benchmark)
+    monkeypatch.setattr(version, "benchmark_dataset", lambda root: root / "dataset.jsonl")
+    result = CliRunner().invoke(
+        app,
+        [
+            "evaluate",
+            "benchmark",
+            "--project",
+            str(project),
+            "--planning-mode",
+            "tool_only",
+            "--plan-attempts",
+            "2",
+            "--tool-attempts",
+            "4",
+            "--allow-rule-planning" if rules else "--no-rule-planning",
+        ],
+    )
+    assert result.exit_code == 0, result.output
+    assert received[0]["planning_mode"] == "tool_only"
+    assert received[0]["allow_rule_planning"] is rules
+    assert received[0]["plan_attempts"] == 2 and received[0]["tool_attempts"] == 4

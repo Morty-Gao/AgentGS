@@ -24,7 +24,23 @@ async def test_llm_tool_loop_without_live_provider(project):
 
         async def chat(self, messages, **kwargs):
             self.requests.append(list(messages))
-            if len(self.requests) == 1:
+            if kwargs["stage"] == "tool_planning":
+                return ChatReply(
+                    message={
+                        "role": "assistant",
+                        "tool_calls": [
+                            {
+                                "id": "plan-1",
+                                "type": "function",
+                                "function": {
+                                    "name": "submit_tool_plan",
+                                    "arguments": '{"tools":["DeepEarthQueryUSGSCatalog"]}',
+                                },
+                            }
+                        ],
+                    }
+                )
+            if kwargs["stage"] == "tool_argument_generation":
                 return ChatReply(
                     message={
                         "role": "assistant",
@@ -41,8 +57,26 @@ async def test_llm_tool_loop_without_live_provider(project):
                         ],
                     }
                 )
-            assert messages[-1]["role"] == "tool"
-            return ChatReply(message={"role": "assistant", "content": "Catalog queried."})
+            assert any(message["role"] == "tool" for message in messages)
+            return ChatReply(
+                message={"role": "assistant", "content": "IsCompleted:Completed\nFinalAnswer:2"}
+            )
+
+    class Retriever:
+        async def retrieve(self, query):
+            return [
+                [
+                    "DeepEarthQueryUSGSCatalog",
+                    "has the functionality that",
+                    "Query a local earthquake catalog",
+                ]
+            ]
+
+        def get_tool_subgraph(self, *args, **kwargs):
+            return []
+
+        def get_tool_info(self, *args):
+            return {}
 
     events = Events()
     artifacts = LocalArtifactStore(project / "artifacts")
@@ -50,14 +84,22 @@ async def test_llm_tool_loop_without_live_provider(project):
     skills = builtin_skills()
     client = Client()
     result = await AgentEngine().run(
-        TaskInput(question="earthquake catalog", algorithm="prototype"),
-        AgentContext(tools, artifacts, events, skills, KeywordSkillRetriever(skills), client),
+        TaskInput(question="earthquake catalog"),
+        AgentContext(
+            tools,
+            artifacts,
+            events,
+            skills,
+            KeywordSkillRetriever(skills),
+            client,
+            tool_retriever=Retriever(),
+        ),
     )
     assert result.tool_results[0].data["count"] == 2
     assert result.usage[0]["usage"] is None
-    assert any(kind == "skill.selected" for kind, _ in events.rows)
+    assert any(kind == "tool.started" for kind, _ in events.rows)
     schemas = tools.specs()
-    from agentgs.skills.definitions import load_tool_scope
+    from agentgs.contracts.catalog import load_tool_scope
 
     assert {s.id for s in schemas} == set(load_tool_scope()["tool_ids"])
     assert not tools.internal

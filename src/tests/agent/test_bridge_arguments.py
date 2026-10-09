@@ -37,15 +37,38 @@ async def execute(project, name, upstream, generated, context, question):
     class Stages:
         calls = []
 
-        async def generate_tool_call(self, name, question, registry, context, input_contract, output_contract, feedback, history):
+        async def generate_tool_call(
+            self,
+            name,
+            question,
+            registry,
+            context,
+            input_contract,
+            output_contract,
+            feedback,
+            history,
+        ):
             self.calls.append(feedback)
             value = generated[len(self.calls) - 1]
             if isinstance(value, Exception):
                 raise value
-            from agentgs.messages import Message
             from uuid import uuid4
-            message = Message.from_openai({"role": "assistant", "reasoning_content": "preserve reference operand",
-                "tool_calls": [{"id": uuid4().hex, "type": "function", "function": {"name": name, "arguments": value}}]})
+
+            from agentgs.messages import Message
+
+            message = Message.from_openai(
+                {
+                    "role": "assistant",
+                    "reasoning_content": "preserve reference operand",
+                    "tool_calls": [
+                        {
+                            "id": uuid4().hex,
+                            "type": "function",
+                            "function": {"name": name, "arguments": value},
+                        }
+                    ],
+                }
+            )
             state.conversation.append(message)
             return message
 
@@ -53,7 +76,14 @@ async def execute(project, name, upstream, generated, context, question):
     artifacts = LocalArtifactStore(project / "artifacts")
     tools = LocalToolExecutor(DatasetRegistry(project), artifacts, events)
     state = RunState(
-        AgentContext(tools, artifacts, events, {}, None, options=AlgorithmSettings()),
+        AgentContext(
+            tools,
+            artifacts,
+            events,
+            {},
+            None,
+            options=AlgorithmSettings(planning_mode="skill_guided"),
+        ),
         TaskInput(question=question),
     )
     stages = Stages()

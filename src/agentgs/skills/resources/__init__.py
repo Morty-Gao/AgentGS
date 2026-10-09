@@ -1,1 +1,1 @@
-"""Unmodified Skill declarations, capability extensions and tool scope."""
+"""Skill declarations, capability extensions and library selection metadata."""

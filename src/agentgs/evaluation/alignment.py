@@ -8,17 +8,17 @@ import hashlib
 import json
 
 from agentgs.agent.answering.validation import validate_returned_evidence
-from agentgs.agent.execution.feedback import assess_tool_execution
 from agentgs.agent.planning.candidate_context import build_candidate_context
 from agentgs.agent.planning.capabilities import CapabilityGraph
 from agentgs.agent.planning.grounding import ground_plan
 from agentgs.agent.planning.selection import select_skill_ids
 from agentgs.agent.planning.skills import SkillPlanner, builtin_planner
 from agentgs.agent.retrieval.scored_skills import WeightedSkillRetriever
+from agentgs.contracts.tool_feedback import assess_tool_execution
 from agentgs.skills.definitions import (
     load_capability_extensions,
+    load_library_scope,
     load_skill_definitions,
-    load_tool_scope,
 )
 
 
@@ -182,7 +182,7 @@ def alignment_report(contract, snapshot):
         or snapshot["selection_sha256"] != contract["baseline"]["selection"]["sha256"]
     ):
         raise ValueError("Snapshot belongs to a different algorithm baseline")
-    scope = load_tool_scope()
+    scope = load_library_scope()
     if (
         set(snapshot["tool_graph"]["tool_to_capabilities"]) != set(scope["tool_ids"])
         or [s["id"] for s in snapshot["library"]] != scope["skill_ids"]

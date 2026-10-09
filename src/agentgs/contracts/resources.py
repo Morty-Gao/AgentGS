@@ -1,11 +1,30 @@
 """Injected resource access for algorithm code; no scheduler or runtime imports."""
 
+import json
 from contextlib import contextmanager
 from contextvars import ContextVar
 from pathlib import Path
 from typing import Any, Callable, Iterator
 
 ResourceResolver = Callable[[Any], Path | None]
+
+RESOURCE_MARKER = (
+    "Evaluation input resource (authoritative benchmark locator; use it exactly when "
+    "relevant, but retrieve and select the registered tools yourself):"
+)
+
+
+def split_question_resource(question: str) -> tuple[str, Any]:
+    """Separate caller-supplied public resources from the question text."""
+    if RESOURCE_MARKER not in question:
+        return question.strip(), None
+    body, raw = question.rsplit(RESOURCE_MARKER, 1)
+    try:
+        resource = json.loads(raw.strip())
+    except json.JSONDecodeError:
+        resource = raw.strip()
+    return body.strip(), resource
+
 
 _resolver: ContextVar[ResourceResolver | None] = ContextVar("agent_resource_resolver", default=None)
 

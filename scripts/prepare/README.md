@@ -13,7 +13,7 @@
 .venv/bin/python scripts/prepare/prepare_ocean.py --offline
 ```
 
-总入口顺序执行 `prepare_deep_earth.py`、`prepare_geotoolkg.py`、`prepare_answer_formats.py`、`prepare_geoquestions.py`、`prepare_mineral.py`、`prepare_climate.py`、`prepare_energy.py`、`prepare_ocean.py`、`prepare_biodeeptime.py`、`prepare_ccs.py`、`prepare_remote_sensing.py`、`prepare_hazard.py`。
+总入口顺序执行 `prepare_gem.py`、`prepare_deep_earth.py`、`prepare_geotoolkg.py`、`prepare_answer_formats.py`、`prepare_geoquestions.py`、`prepare_mineral.py`、`prepare_climate.py`、`prepare_energy.py`、`prepare_ocean.py`、`prepare_biodeeptime.py`、`prepare_ccs.py`、`prepare_remote_sensing.py`、`prepare_hazard.py`。
 
 - `--output-root`：接收 `data/` 整理结果的项目根目录，默认本仓库。
 - `--cache-root`：原始缓存，默认本仓库 `data/raw/`。
@@ -36,6 +36,7 @@ ZIP 包放在 `data/<数据集>.zip`。对应 prepare 脚本负责展开到 `dat
 | 数据集 | 整理结果 | 默认准备方式 |
 | --- | --- | --- |
 | GeoToolEval | `data/geotooleval.jsonl` | 用户提供的原记录，保留 603 题、全部原字段 |
+| GEM 原始观测 | `data/gem.jsonl.gz`，展开为 `data/gem.jsonl` | 完整保留原工作簿各工作表、行序、单元格值及公式缓存；Git 保存压缩 JSONL |
 | 矿产 | `data/mineral.csv` | 从 MRDS 按原 8,000 个记录 ID 选择 |
 | 灾害 | `data/hazard.jsonl` | 额外保留的原灾害附件完整记录，10,764 行、47 列 |
 | 回答格式 | `data/answer_formats/` | 从 GeoToolEval 公开问题、格式和说明生成 |
@@ -51,12 +52,14 @@ ZIP 包放在 `data/<数据集>.zip`。对应 prepare 脚本负责展开到 `dat
 
 表格统一为 UTF-8 CSV，换行符为 LF；空间数据使用 GeoJSON，复杂记录使用 JSONL，索引和来源说明使用 JSON。重新序列化保留行、列、数值与区界，不强制旧附件的 BOM 或换行字节。
 
-公共来源下载到 `data/raw/<来源>/`，模型缓存为 `data/raw/models/fastembed/`。GEM 优先读取 March 2026 II 工作簿，缺失时读取 `gem/` 下最近修改的 XLSX；需要提供可用工作簿。World Bank 旧缓存缺失时读取当前 API ZIP，按内容寻找指标 CSV。NASA 年表从当前原始月表的 J-D 列生成，仅保留完整年度值。
+公共来源下载到 `data/raw/<来源>/`，模型缓存为 `data/raw/models/fastembed/`。能源准备直接读取 `data/gem.jsonl` 或 `data/gem.jsonl.gz`，不依赖 XLSX。首次导入新附件时运行 `prepare_gem.py --workbook data/raw/gem/文件名.xlsx`；平时 `prepare_gem.py` 校验并展开 Git 保留的压缩 JSONL。World Bank 旧缓存缺失时读取当前 API ZIP，按内容寻找指标 CSV。NASA 年表从当前原始月表的 J-D 列生成，仅保留完整年度值。
 
 ## Git 与校验
 
-Git 放行 GeoToolEval、原灾害记录、BioDeepTime 原子集/区界、CCS 原空间资产、深地输入、KG JSON，以及 `data/metadata/geotooleval.json` 的原附件来源说明。对应多文件输入的 ZIP 形式也允许保留。可生成的矿产、气候、能源、海洋、GeoQuestions、回答格式、遥感包与准备清单均被忽略；`data/raw/` 始终被忽略。
+Git 放行 GeoToolEval、GEM 压缩 JSONL、原灾害记录、BioDeepTime 原子集/区界、CCS 原空间资产、深地输入、KG JSON，以及 `data/metadata/geotooleval.json` 的原附件来源说明。对应多文件输入的 ZIP 形式也允许保留。可生成的矿产、气候、能源、海洋、GeoQuestions、回答格式、遥感包与准备清单均被忽略；`data/raw/` 始终被忽略。
 
 GeoToolEval 其他工作表内容与来源清单统一保存在 `data/metadata/geotooleval.json`，主数据集仍只有一个 JSONL。资源定位兼容记录为 `data/metadata/resources.json`，用于把原题资源路径映射到新布局。
 
 各领域清单为 `data/metadata/prepare_<领域>.json`，总清单为 `prepare_all.json`。清单记录实际源哈希、处理代码/参数哈希和结果哈希。成功返回 0；缺输入返回 2，标记 partial；处理异常返回非零。总入口继续其他领域，保留各项失败状态。
+
+固定参考资料已从 src 移到 data：`data/reference/energy.json` 保存首都坐标、区域、国家/能源类型/关键矿产分类和容量序列选择；`ocean.json` 保存海洋区域；`geography.json` 保存地球半径；`data/geoquestions/profile.json` 保存固定查询名单及来源指纹。这些都是 Git 必须保留的输入。prepare 会复制这些参考文件并记录哈希；计算公式、质控算法、协议常量和路径映射仍由代码维护。

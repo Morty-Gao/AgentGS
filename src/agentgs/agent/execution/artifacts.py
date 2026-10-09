@@ -1,4 +1,4 @@
-"""Typed artifact tracking for Skill-guided GeoToolAgent execution.
+"""Typed artifact tracking shared by both Agent planning modes.
 
 The registry is intentionally independent of GeoToolEval question identifiers.  It
 discovers resources from ordinary locators, records producer/consumer provenance,

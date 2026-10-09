@@ -221,5 +221,15 @@
       "Germany offshore wind",
       "德国海上风电"
     ]
+  ],
+  "opsd_landmark_sources": [
+    "Solar",
+    "Wind",
+    "Hydro",
+    "Bioenergy"
+  ],
+  "opsd_capital_sources": [
+    "Solar",
+    "Wind"
   ]
 }

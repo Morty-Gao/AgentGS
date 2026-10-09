@@ -1,3 +1,4 @@
+import subprocess
 from pathlib import Path
 
 import pytest
@@ -13,6 +14,13 @@ def sandbox_project(project):
     binary = Path(__file__).parents[3] / "tools" / "bin" / "bwrap"
     if not binary.exists():
         pytest.skip("Local bwrap integration dependency missing")
+    probe = subprocess.run(
+        [str(binary), "--unshare-all", "--ro-bind", "/", "/", "/usr/bin/true"],
+        capture_output=True,
+        timeout=5,
+    )
+    if probe.returncode:
+        pytest.skip("Host does not permit the bwrap integration sandbox")
     (project / "tools" / "bin").mkdir(parents=True)
     (project / "tools" / "bin" / "bwrap").symlink_to(binary.resolve())
     return project
@@ -38,7 +46,7 @@ async def test_no_sandbox_never_runs_unprotected(project):
 async def test_rss_limit_is_enforced(sandbox_project):
     service = TaskService(sandbox_project, RuntimeSettings())
     try:
-        task = service.submit(
+        task = await service.submit(
             TaskInput(
                 calls=[
                     ToolCall(

@@ -2,8 +2,8 @@
 
 from pathlib import Path
 
-from agentgs.agent.answering.formats import _decode_contracts, canonical_question
 from agentgs.config.paths import data_resource
+from agentgs.contracts.answer_formats import _decode_contracts, canonical_question
 
 
 class AnswerContracts:

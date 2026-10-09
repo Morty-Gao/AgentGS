@@ -6,7 +6,7 @@
 
 101 项工具均有实际处理函数，已在科学复现环境逐项执行成功。100 项科学工具使用同一输入与旧源码对照一致；GeoQuestions 按用户授权保留 40 条物化结果的 source_id / 查询结构匹配协议，另有 125 项独立回放对照。已迁入能源、海洋共享解析器、空间/栅格科学操作及相应数据定位。
 
-默认 Agent 已连接 Skill 检索、KG 检索、规划、桥接、grounding、参数绑定、原子反馈、重规划、成功前缀复用、最终模型回答和非修改性验证。原 function-calling 原型仅在显式选择 `algorithm=prototype` 时使用。24 项 Skill 是动态能力声明，不代表 24 条固定工具链。
+默认 Agent 已连接 Skill 检索、KG 检索、规划、桥接、grounding、参数绑定、原子反馈、重规划、成功前缀复用、最终模型回答和非修改性验证。规划通过标准 function call 提交 `submit_tool_plan`，每个科学工具使用独立的 JSON 参数 schema；已移除 `algorithm=prototype` 入口。24 项 Skill 是动态能力声明，不代表 24 条固定工具链。
 
 已验收的独立对照包括 341 项确定性组件决策、16 项原 KG/SDK 检索、298 项参数绑定、65 组科学结果和产物、2,412 项原 FAS 分数。保存实验答案的 28 组 original / compatibility 复评一致。真实 TaskService/worker 已验证失败恢复、六步空间链和跨领域产物传递。
 
@@ -41,7 +41,7 @@ tools/envs/reproduction/bin/python scripts/prepare/prepare_all.py --source-root 
 
 各入口命名为 `prepare_<领域>.py`，总入口为 `prepare_all.py`；回答格式和 GeoQuestions 固定 40 条数据也由独立准备脚本生成并被 Git 忽略。矿产从 MRDS 按原 8,000 个记录 ID 重建，海洋和能源从原始文件计算，遥感保留固定 49 个目录的原始影像内容。GISTEMP 年表由 NASA 原始月表生成；World Bank 旧原始文件缺失时直接从当前 API ZIP 重建。来源更新允许改变科学结果，每次记录实际源文件哈希。BioDeepTime 原子集/手工区界、CCS 手工空间资产及原灾害表仍需要提供原输入。路径、来源与可选的显式快照恢复模式见 [prepare/README.md](scripts/prepare/README.md)。
 
-Git 保留 GeoToolEval、暂不能完整重建的少量原始资产、深地固定输入以及用户提供的冻结 KG JSON。可生成的处理结果、公开原始下载、大型模型及缓存均被忽略；来源哈希与选择参数放在准备脚本的 `manifests/`。数据准备通过不等同于真实模型端到端实验通过。
+Git 保留 GeoToolEval、GEM 压缩 JSONL、固定数据参考资料、暂不能完整重建的少量原始资产、深地固定输入以及用户提供的冻结 KG JSON。可生成的处理结果、公开原始下载、大型模型及缓存均被忽略；来源哈希与选择参数放在准备脚本的 `manifests/`。数据准备通过不等同于真实模型端到端实验通过。
 
 用户提供的 `geotoolkg.zip` 和 `fastembed.zip` 已恢复到 `config.toml` 声明的 `data/geotoolkg/` 与 `data/raw/models/fastembed/`。索引覆盖全部 101 个工具，缓存模型离线生成 384 维向量；十领域检索通过，抽查五条索引关系的重新编码向量与原向量完全一致。来源包和逐文件 SHA-256 保存在 `data/geotoolkg/import_manifest.json`。轻量 KG JSON 可纳入 Git，大型 embedding 权重仍为本地资源；部署到其他机器时需迁移该缓存。
 
@@ -74,6 +74,35 @@ GeoQuestions 只按公开 numeric source_id 或提交的 SPARQL 结构定位物�
 
 `config.toml` 的 `[agent]` 管理算法开关、预算与检索路径；`llm.toml` 独立存储模型调用信息（provider、model 和角色映射）；运行资源与沙箱通过 CLI 参数指定；`.env` 保存本机连接信息并被 Git 忽略。模型模式需要 `LLM_BASE_URL`（含 `/v1`）、`LLM_API_KEY`、`LLM_MODEL`。用量缺失、失败或中断时保留 unknown，成本和综合分不可据此补零。
 
+## 工具规划消融
+
+`planning_mode="tool_only"` 使用同一 AgentEngine，按 SciToolAgent 的分阶段结构执行：工具 KG 检索 → 模型提交工具链 → 逐步生成参数、执行并修复 → 模型回答。该模式不加载 Skill 定义、Capability 扩展或 planner，不使用能力补全、共享桥接、Skill grounding 或对应提示，规划阶段记录为 `tool_planning`。工具范围由 `contracts/tool_scope.json` 独立声明；任务级模式覆盖在 worker 初始化之前解析。
+
+两组共享 101 个工具、标准 function call、KG 检索、工具级领域 seed/提示、公开资源绑定、产物追踪、单工具修复、重规划、回答格式和评分。工具级规则不读取 Skill/Capability 声明。消融测量整个 Skill/Capability 规划层及其候选扩展、补全和桥接的收益；这是在 AgentGS 框架内对齐 SciToolAgent 的工具层基线，不是旧代码的严格复现。
+
+旧 `require_llm` 参数已移除，配置和任务 JSON 使用以下字段；问答模式始终需要模型，参数和最终回答始终由模型生成。
+
+| 参数 | 默认值 | 含义 |
+| --- | --- | --- |
+| `allow_rule_planning` | `false` | 是否允许规则直接路由、规划失败回退或修正工具链；不控制模型是否调用 |
+| `plan_attempts` | `3` | 整链规划总次数，包括执行失败后的重规划；与规则开关独立 |
+| `tool_attempts` | `3` | 每个工具实例的参数与执行修复总次数 |
+| `argument_attempts` | `3` | 原生规划调用的协议修复预算及参数请求的传输重试上限 |
+| `model_attempts` | `4` | 模型请求的传输重试预算 |
+
+旧 `require_llm=true` 的规划策略对应 `allow_rule_planning=false`；旧 `require_llm=false` 对应 `allow_rule_planning=true`。本次默认统一关闭规则规划；若要保留旧配置的规则辅助，需要显式开启。规划次数单独指定，不再因为关闭规则规划而降为一次。`shared_bridge` 在工具模式下有效值固定为 `false`。
+
+正式对比只改变模式，使用相同题目、模型和预算，并分别保存到新实验目录：
+
+```bash
+tools/envs/reproduction/bin/python -m agentgs evaluate benchmark --planning-mode skill_guided --no-rule-planning --plan-attempts 3 --tool-attempts 3 --output outputs/evaluations/full-new
+tools/envs/reproduction/bin/python -m agentgs evaluate benchmark --planning-mode tool_only --no-rule-planning --plan-attempts 3 --tool-attempts 3 --output outputs/evaluations/tool-only-new
+```
+
+日志监督脚本也支持上述模式和预算参数。实验协议记录实际生效的任务覆盖、恢复预算及工具/规划声明哈希；每个 AgentResult 的 `provenance.effective_algorithm` 保存有效配置。旧参数、源码或协议的实验不能混入新目录续跑。
+
+运行时存储对历史任务做只读字段转换，保留旧规则策略及原规划预算，历史结果仍可查看；转换不会覆盖原数据库记录，也不会接受旧参数作为新的任务输入。
+
 ## 启动与示例
 
 `run`、`evaluate run`、`evaluate benchmark` 和 `ui serve` 使用以下运行参数，不读取运行配置文件。未传参数时使用代码默认值：
@@ -81,7 +110,12 @@ GeoQuestions 只按公开 numeric source_id 或提交的 SPARQL 结构定位物�
 | CLI 参数 | 默认值 | 用途 |
 | --- | --- | --- |
 | `--concurrency` | 2 | 最大并发任务数（1–128） |
-| `--timeout` | 300 | 每题超时秒数 |
+| `--model-concurrency` | 8 | 同一项目内并发模型 HTTP 请求上限 |
+| `--tool-concurrency` | 4 | 同一项目内并发工具执行上限 |
+| `--queue-capacity` | 1024 | 已接收但尚未结束的任务上限，满时 API 返回 429 |
+| `--model-timeout` | 180 | 单次模型调用总期限，包含排队、重试和退避（秒） |
+| `--tool-timeout` | 120 | 单次工具调用总期限，包含排队和计算（秒） |
+| `--timeout` | 300 | 每题总期限，包含排队、准备和执行（秒） |
 | `--rss-limit-mb` | 1024 | 每题 RSS 内存上限（MB） |
 | `--max-total-rss-mb` | 4096 | 全部 worker 的 RSS 总预算（MB） |
 | `--code-timeout` | 20 | 代码步骤超时秒数 |
@@ -90,6 +124,36 @@ GeoQuestions 只按公开 numeric source_id 或提交的 SPARQL 结构定位物�
 | `--worker-python` | 自动选择 | 指定 worker Python 的绝对路径或项目相对路径 |
 
 显式设置并发或每题 RSS 上限时，未指定的总 RSS 预算会自动提高到至少“并发 × 每题 RSS”；显式指定 `--max-total-rss-mb` 则使用该值。worker 默认优先使用项目的科学复现环境，缺失时使用当前 Python。
+
+任务、模型和工具的额度通过 `outputs/runtime/coordination.sqlite3` 共享。相同项目根目录的多个 runtime 实例和 worker 使用同一额度，活动实例必须使用一致的并发配置；跨实例可以查询、等待和取消任务。科学内置工具默认通过独立子进程计算，超时或取消时回收进程树。同步扩展 handler 在线程中执行，异步 handler 直接等待；线程中的同步函数取消后会等待其退出，因此需要硬终止的计算应使用进程后端。
+
+Python 运行时 API 的提交、查询和事件读取均需要 `await`，可以用异步上下文管理器关闭服务：
+
+```python
+from pathlib import Path
+from agentgs.config.settings import RuntimeSettings
+from agentgs.contracts.models import TaskInput, ToolCall
+from agentgs.runtime.service import TaskService
+
+async def run_example():
+    settings = RuntimeSettings(max_concurrent_tasks=4, max_concurrent_tool_calls=2)
+    async with TaskService(Path.cwd(), settings) as runtime:
+        request = TaskInput(
+            parallel_tools=True,
+            calls=[
+                ToolCall(id="mean", tool="RemoteSensingMean", arguments={"x": [1, 3]}),
+                ToolCall(id="temperature", tool="RemoteSensingKelvinToCelsius", arguments={"kelvin": 273.15}),
+            ],
+        )
+        record = await runtime.submit(request)
+        result = await runtime.wait(record.spec.id)
+        events = await runtime.events(record.spec.id)
+        return result, events
+```
+
+`parallel_tools=true` 允许显式调用中的独立步骤并发；`ToolCall.depends_on` 用调用 ID 声明依赖，依赖失败时不执行下游。循环依赖和未知 ID 在执行前拒绝。现有问答工具链仍按已规划的数据依赖顺序执行，模型返回参数的原生 Function Calling 协议保持不变。每个调用独立登记产物，并发批次逐个保存已完成结果，中断后保留部分结果与调用记录。
+
+`llm.toml` 的 provider 可配置 `max_concurrent_requests`、`requests_per_minute` 和 `tokens_per_minute`；每次 HTTP 重试也受约束，退避期间不占请求额度。TPM 使用保守的输入估计和最大输出预算预留，有用量回执时按实际 `total_tokens` 结算，没有回执时保留预留值。
 
 显式工具调用无需模型密钥：
 
@@ -114,6 +178,10 @@ tools/envs/reproduction/bin/python scripts/evaluation/replay_reference_scores.py
 历史基线采集、工具覆盖和 worker 辅助验收脚本已移除；既有对照记录与测试 fixture 保留。生产代码不依赖旧源码目录。
 
 已有预测可以离线评分；原 FAS、复合指标及历史兼容层分别报告：
+
+评测以 `Conversation` 为对话记录，执行信息通过 `execution_events()` 从标准 `tool_calls` / `tool_call_id` 消息关系解析。每次 benchmark 尝试保存 `conversation.json` 和 `messages.jsonl`，保留原始参数、运行时绑定参数、reasoning 和模型请求事件。离线预测可提供 `messages` 列表或完整 `conversation` 对象；仅有旧 `trace` 的预测需要先取得原始消息。
+
+当前执行评分协议为 `geotooleval-conversation-v2`：只统计当前用户轮次的领域调用，包含失败重试，排除规划调用和对照分支；并行回复按调用声明顺序评估。参数按实际执行输入评分，模型用量优先从对话中的请求记录推导；请求未完成、失败或重试用量不完整时，成本分和综合分保持未知。答案 FAS 规则保留。新协议实验使用新目录，旧实验可通过保存的消息离线重评分。
 
 ```bash
 tools/envs/reproduction/bin/python -m agentgs evaluate score predictions.jsonl --allow-partial --output outputs/evaluations/scored.json
@@ -164,3 +232,5 @@ tools/envs/reproduction/bin/python -m agentgs evaluate benchmark --output output
 这组抽样属于工程回归。GeoQuestions Q106经授权读取官方物化答案和参考查询，不能用作独立未知答案/RDF几何推理成绩；海洋Q347读取10行benchmark派生缓存，来源是原SOCAT数据而非私有标签，但未在运行时重算完整原网格。Q61/Q106此前用于调试，格式文件也包含上游事后诊断修订，10题满分不代表严格留出集泛化准确率。
 
 通用科学资源解析已拒绝访问评测标签/历史评分、回答格式文件及Geo回放数据目录；专用Geo快照工具保留已授权访问，真实自然灾害表保持可读。实际样题未发现访问这些私有文件，此边界仍不是完整OS沙箱。
+
+GEM 工作簿已完整转为 `data/gem.jsonl.gz` 并由 Git 保留；`prepare_gem.py` 展开到 `data/gem.jsonl`，能源准备直接读取 JSONL。新工作簿可用 `.venv/bin/python scripts/prepare/prepare_gem.py --workbook data/raw/gem/文件名.xlsx` 导入。固定查询名单、区域和地理参考值位于 `data/geoquestions/profile.json` 与 `data/reference/`，由 Git 管理。

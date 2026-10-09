@@ -13,6 +13,9 @@ class Provider(Model):
     timeout_seconds: float = Field(default=120, gt=0)
     max_attempts: int = Field(default=3, ge=1, le=5)
     output_token_parameter: str = "max_tokens"
+    max_concurrent_requests: int | None = Field(default=None, ge=1)
+    requests_per_minute: int | None = Field(default=None, ge=1)
+    tokens_per_minute: int | None = Field(default=None, ge=1)
 
 
 class Capabilities(Model):
@@ -68,3 +71,5 @@ class ModelClient(Protocol):
         stage: str = "tool_calling",
         settings: Any = None,
     ) -> ChatReply: ...
+
+    async def aclose(self) -> None: ...

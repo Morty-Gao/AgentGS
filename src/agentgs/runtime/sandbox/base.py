@@ -3,8 +3,10 @@ import os
 import shutil
 import sys
 from pathlib import Path
+from uuid import uuid4
 
-from agentgs.runtime.resources import kill_tree
+from agentgs.contracts.async_utils import drain, invoke
+from agentgs.runtime.subprocesses import collect, spawn, stop
 
 
 class SandboxUnavailable(RuntimeError):
@@ -20,18 +22,23 @@ class CodeExecutor:
         return str(local) if local.exists() else shutil.which(name)
 
     async def run_python(self, code):
+        async with asyncio.timeout(self.settings.code_timeout_seconds):
+            return await self._run_python(code)
+
+    async def _run_python(self, code):
         if os.name == "nt":
             raise SandboxUnavailable(
                 "Native Windows code isolation is not implemented; run this task in WSL"
             )
-        self.work.mkdir(parents=True, exist_ok=True)
-        script = self.work / "main.py"
-        script.write_text(code)
+        work = self.work / uuid4().hex
+        await invoke(work.mkdir, parents=True, exist_ok=False)
+        script = work / "main.py"
+        await invoke(script.write_text, code)
         python = str(Path(sys.executable).resolve())
         backend = self.settings.sandbox
-        bwrap = self.locate("bwrap")
+        bwrap = await invoke(self.locate, "bwrap")
         if bwrap and backend in {"auto", "bwrap"}:
-            probe = await asyncio.create_subprocess_exec(
+            probe = await spawn(
                 bwrap,
                 "--unshare-all",
                 "--ro-bind",
@@ -46,12 +53,12 @@ class CodeExecutor:
                 "/usr/bin/true",
                 stdout=asyncio.subprocess.DEVNULL,
                 stderr=asyncio.subprocess.DEVNULL,
+                start_new_session=True,
             )
             try:
                 await asyncio.wait_for(probe.wait(), 5)
-            except asyncio.TimeoutError:
-                probe.kill()
-                await probe.wait()
+            finally:
+                await drain(asyncio.create_task(stop(probe)))
             if probe.returncode != 0:
                 if backend == "bwrap":
                     raise SandboxUnavailable("bwrap functional probe failed")
@@ -76,7 +83,7 @@ class CodeExecutor:
             command.extend(
                 [
                     "--bind",
-                    str(self.work),
+                    str(work),
                     "/work",
                     "--chdir",
                     "/work",
@@ -98,7 +105,7 @@ class CodeExecutor:
                 "-w",
                 "/work",
                 "-b",
-                str(self.work) + ":/work",
+                str(work) + ":/work",
             ]
             command.extend(["-b", "/dev", "-b", "/proc"])
             for path in [Path("/usr"), Path("/lib"), Path("/lib64"), Path(sys.base_prefix)]:
@@ -111,33 +118,19 @@ class CodeExecutor:
                 "No configured code sandbox is available; install bwrap (or explicitly opt in to PRoot)"
             )
         env = {"PATH": "/usr/bin:/bin", "HOME": "/tmp", "LANG": "C.UTF-8"}
-        process = await asyncio.create_subprocess_exec(
+        process = await spawn(
             *command,
-            cwd=self.work,
+            cwd=work,
             env=env,
             stdout=asyncio.subprocess.PIPE,
             stderr=asyncio.subprocess.PIPE,
             start_new_session=True,
         )
 
-        # Bounded streaming avoids buffering arbitrarily large code output.
-        async def read(stream):
-            output = bytearray()
-            while block := await stream.read(8192):
-                output.extend(block)
-                if len(output) > 1024 * 1024:
-                    raise ValueError("Code output exceeded 1 MiB")
-            return output.decode(errors="replace")
-
         try:
-            stdout, stderr, _ = await asyncio.wait_for(
-                asyncio.gather(read(process.stdout), read(process.stderr), process.wait()),
-                self.settings.code_timeout_seconds,
-            )
-        except BaseException:
-            kill_tree(process.pid)
-            await process.wait()
-            raise
+            stdout, stderr = await collect(process)
+        finally:
+            await drain(asyncio.create_task(stop(process)))
         if process.returncode:
             raise RuntimeError(f"Sandbox exited {process.returncode}: {stderr[:2000]}")
         return {

@@ -14,11 +14,11 @@ def test_catalog_coverage_filter_and_order(project):
     assert result["count"] == 2 and result["records"][0]["id"] == "c" and result["truncated"]
 
 
-def test_invalid_paths_coordinates_and_bbox(project):
+async def test_invalid_paths_coordinates_and_bbox(project):
     with pytest.raises(ValueError):
         DatasetRegistry(project).resolve("usgs", "../../pyproject.toml")
     with pytest.raises(ValueError):
-        LocalArtifactStore(project / "artifacts").write_json("../escape", {}, "test")
+        await LocalArtifactStore(project / "artifacts").write_json("../escape", {}, "test")
     with pytest.raises(ValueError):
         Points(lat1=91, lon1=0, lat2=0, lon2=0)
     with pytest.raises(ValueError):

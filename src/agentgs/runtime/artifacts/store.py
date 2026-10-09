@@ -5,6 +5,7 @@ from pathlib import Path
 from uuid import uuid4
 
 from agentgs.config.paths import within
+from agentgs.contracts.async_utils import invoke
 from agentgs.contracts.models import ArtifactRef
 
 
@@ -13,7 +14,10 @@ class LocalArtifactStore:
         self.root = root.resolve()
         self.root.mkdir(parents=True, exist_ok=True)
 
-    def write_json(self, name, data, source):
+    async def write_json(self, name, data, source):
+        return await invoke(self._write_json, name, data, source)
+
+    def _write_json(self, name, data, source):
         target = within(self.root, name)
         if target.exists():
             raise ValueError("Artifact path already exists; producer call ids must be unique")
@@ -31,7 +35,10 @@ class LocalArtifactStore:
             source=source,
         )
 
-    def register(self, path, source):
+    async def register(self, path, source):
+        return await invoke(self._register, path, source)
+
+    def _register(self, path, source):
         path = Path(path).resolve()
         if not path.is_relative_to(self.root) or not path.is_file():
             raise ValueError("Only produced files in the task artifact directory can be registered")

@@ -1,7 +1,6 @@
 {
   "id": "geotooleval-101",
   "selection_date": "2026-10-08",
-  "policy": "用户指定只保留旧主项目GeoEval catalog的101工具及其关联Skill/Capability；算法源码基线不切换交付副本。",
   "source_catalog": {
     "path": "ToolsAgent/ToolsFuns/GeoEval/catalog.py",
     "sha256": "54ad221f1d34eb1c184fd29c9c3c7dc403985d9e926e5e105ede61f0aad01cd3"
@@ -109,65 +108,6 @@
     "NaturalHazardBuildStartDate",
     "NaturalHazardSelectLatest"
   ],
-  "skill_ids": [
-    "deep-earth-model-query",
-    "earthquake-catalog-analysis",
-    "earthquake-event-model-sampling",
-    "semantic-geospatial-query",
-    "mineral-deposit-search",
-    "mineral-resource-ranking",
-    "climate-scenario-analysis",
-    "energy-spatial-analysis",
-    "energy-capacity-transition",
-    "ocean-carbon-observation",
-    "ocean-profile-qc",
-    "ocean-spatial-analysis",
-    "deep-time-coordinate-spatial",
-    "deep-time-vector-workflow",
-    "deep-time-raster-zonal",
-    "ccs-coordinate-spatial",
-    "ccs-mrv-workflow",
-    "ccs-raster-zonal",
-    "remote-sensing-data-discovery",
-    "remote-sensing-preprocessing",
-    "remote-sensing-raster-statistics",
-    "remote-sensing-change-detection",
-    "remote-sensing-trend-distribution",
-    "natural-hazard-table-analytics"
-  ],
-  "capability_ids": [
-    "model-query",
-    "catalog-filter",
-    "event-sampling",
-    "semantic-query",
-    "deposit-query",
-    "resource-ranking",
-    "climate-query",
-    "comparison",
-    "spatial-analysis",
-    "temporal-aggregation",
-    "observation-query",
-    "profile-qc",
-    "ocean-spatial",
-    "coordinate-spatial",
-    "vector-preprocessing",
-    "vector-analysis",
-    "raster-analysis",
-    "zonal-summary",
-    "ccs-coordinate-spatial",
-    "mrv-preprocessing",
-    "mrv-analysis",
-    "asset-discovery",
-    "preprocess",
-    "derive-index",
-    "raster-aggregate",
-    "raster-algebra",
-    "change-metric",
-    "hotspot",
-    "time-series",
-    "table-preparation",
-    "event-aggregation"
-  ],
   "excluded_tool_ids": [
     "GeoCheckCRSConsistency",
     "GeoHaversineDistance",
@@ -178,21 +118,6 @@
     "地震事件地图可视化",
     "USGS 地震数据获取",
     "地震数据清洗与分级"
-  ],
-  "excluded_skill_ids": [
-    "geodesic-coordinate-analysis",
-    "earthquake-energy-estimation",
-    "extension-geoscience-result-cartography",
-    "extension-earthquake-catalog-preparation"
-  ],
-  "excluded_capability_ids": [
-    "coordinate-validation",
-    "geodesic-calculation",
-    "magnitude-validation",
-    "energy-estimation",
-    "extension-map-rendering",
-    "extension-earthquake-catalog-retrieval",
-    "extension-earthquake-catalog-cleaning"
   ],
   "internal_runtime_operations": [
     "ExecutePython"

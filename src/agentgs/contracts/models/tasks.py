@@ -29,6 +29,7 @@ class TaskInput(Model):
     question: str = ""
     messages: list[Message] = Field(default_factory=list)
     calls: list[ToolCall] = Field(default_factory=list)
+    parallel_tools: bool = False
     model: str | None = None
     effort: str | None = None
     skill_ids: list[str] = Field(default_factory=list)
@@ -37,7 +38,9 @@ class TaskInput(Model):
     file_path_list: list[str] = Field(default_factory=list)
     output_contract: dict[str, Any] | None = None
     planning_mode: Literal["tool_only", "skill_guided"] | None = None
-    require_llm: bool | None = None
+    allow_rule_planning: bool | None = None
+    plan_attempts: int | None = Field(default=None, ge=1)
+    tool_attempts: int | None = Field(default=None, ge=1)
     input_domain: str | None = None
 
     @model_validator(mode="after")

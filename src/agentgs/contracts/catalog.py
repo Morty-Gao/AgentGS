@@ -13,3 +13,8 @@ def load_catalog() -> dict[str, Any]:
 def get_tool_spec(name: str) -> dict[str, Any] | None:
     """Find one metadata record by its public tool name."""
     return next((row for row in load_catalog()["specs"] if row["Name"] == name), None)
+
+
+def load_tool_scope() -> dict[str, Any]:
+    """Load the public tool allowlist without any Skill/Capability declarations."""
+    return json.loads(files("agentgs.contracts").joinpath("tool_scope.json").read_text("utf-8"))

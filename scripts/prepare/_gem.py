@@ -98,3 +98,18 @@ def convert_workbook(source: Path, target: Path) -> Path:
     finally:
         temporary.unlink(missing_ok=True)
     return target
+
+
+def compress_jsonl(source: Path, target: Path) -> Path:
+    import gzip
+    import shutil
+
+    temporary = target.with_name(target.name + ".prepare")
+    try:
+        with source.open("rb") as incoming, temporary.open("wb") as output:
+            with gzip.GzipFile(filename="", mode="wb", fileobj=output, mtime=0) as compressed:
+                shutil.copyfileobj(incoming, compressed, 1024 * 1024)
+        temporary.replace(target)
+    finally:
+        temporary.unlink(missing_ok=True)
+    return target
