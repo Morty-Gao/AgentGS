@@ -10,6 +10,25 @@ from agentgs.contracts.models import AgentResult, TaskInput
 from agentgs.messages import Conversation, Message
 
 
+def test_native_call_index_is_accepted_but_not_sent_back():
+    message = Message.from_openai(
+        {
+            "role": "assistant",
+            "tool_calls": [
+                {
+                    "id": "call-1",
+                    "index": 0,
+                    "type": "function",
+                    "function": {"name": "Mean", "arguments": '{"x":[1,3]}'},
+                }
+            ],
+        }
+    )
+    assert message.tool_calls[0].index == 0
+    assert "index" not in message.to_openai()["tool_calls"][0]
+    assert Message.model_validate_json(message.model_dump_json()) == message
+
+
 def test_multiturn_parallel_functions_reasoning_and_serialization(tmp_path):
     original = [
         {"role": "system", "content": "Use tools."},

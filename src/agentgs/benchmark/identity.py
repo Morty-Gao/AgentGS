@@ -24,6 +24,14 @@ def planning_resource_hashes(root, planning_mode):
     for package in packages:
         source = root / "src" / "agentgs" / package
         walk(source if source.is_dir() else files("agentgs." + package), package)
+    if planning_mode != "data_only":
+        from agentgs.client.embedding import CACHE_FILES
+
+        for name in CACHE_FILES:
+            path = root / "embedding" / name
+            result["embedding/" + name] = (
+                hashlib.sha256(path.read_bytes()).hexdigest() if path.is_file() else None
+            )
     return result
 
 

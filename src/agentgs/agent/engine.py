@@ -23,7 +23,7 @@ from agentgs.config.algorithm import AlgorithmSettings, resolve_algorithm
 from agentgs.contracts.async_utils import drain, invoke
 from agentgs.contracts.catalog import load_catalog
 from agentgs.contracts.remote_sensing import contract_scope
-from agentgs.contracts.resources import RESOURCE_MARKER, resource_access
+from agentgs.contracts.resources import resource_access, retrieval_question
 
 
 class MutablePlan(SimpleNamespace):
@@ -112,11 +112,7 @@ class AgentEngine:
             return state.result()
         if not task.question.strip() or context.client is None:
             raise ValueError("Question mode requires a question and configured model client")
-        question = task.question
-        if task.input_resource is not None and RESOURCE_MARKER not in question:
-            question += (
-                "\n\n" + RESOURCE_MARKER + " " + json.dumps(task.input_resource, ensure_ascii=False)
-            )
+        question = retrieval_question(task.question, task.input_resource)
         stages = ModelStages(
             state,
             lambda q: task.output_contract,

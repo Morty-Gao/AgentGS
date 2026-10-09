@@ -1,75 +1,28 @@
 \section{GeoToolEval}
 \label{sec:benchmark}
-GeoToolEval is a dataset for evaluating scientific answers and the tool workflows used to obtain them. It covers ten geoscientific research themes and pairs each task with input resources, a reference answer, and a reference invocation chain. This supports separate analysis of outcome quality, tool coverage, and invocation order within the same evaluation record.
+We introduce GeoToolEval by integrating tasks from multiple geoscientific datasets and annotating their reference tool calls under a common set of interfaces. Each task pairs a scientific question with input resources, a reference answer, and a reference workflow, supporting evaluation of both the result and the tool use required to obtain it.
 
-\subsection{Evaluation Objectives and Task Design}
-\label{sec:benchmark-design}
-Scientific tool use involves more than selecting a function with a relevant description. An agent must identify the intended data, instantiate the analysis with appropriate parameters, and propagate results to later operations. GeoToolEval includes tasks that exercise these requirements at different orchestration lengths.
-
-Single-step tasks assess resource identification, parameter determination, and invocation under a registered interface. Multistep tasks additionally require composing operations and using intermediate results. For example, if a question requests the mean of a composite raster, independently computing means of the input rasters does not establish that the requested artifact was produced and analyzed. The answer and the tool trace expose different aspects of this distinction.
-
-Tasks span three-dimensional Earth structure, geoscientific big-data analysis, critical minerals, climate change, energy resources, the global ocean carbon cycle, the deep-time biosphere, carbon capture and storage, remote sensing, and natural-disaster event statistics. This breadth covers different data objects and analytical operations. The themes are not equally sized: their counts reflect resource availability and screening outcomes.
-
-\subsection{Task Sources and Construction}
+\subsection{Dataset Construction and Coverage}
 \label{sec:benchmark-construction}
-The construction combines two sources of tasks.
-
-\paragraph{Adapted question-answer tasks.}
-Questions selected from existing resources retain their source questions and reference answers, while the required operations are mapped to the registered tool interfaces. Geoscientific big-data analysis includes 40 selected GeoQuestions1089 tasks. Remote sensing includes 49 of Earth-Bench's 248 tasks~\cite{feng2026earthagent}, retaining questions, choices, and answers. Critical-mineral and climate-change tasks are selected from \nolinkurl{habitable_earth_dataset} by theme.
-
-\paragraph{Tasks derived from scientific data.}
-These tasks specify identifiable objects, variables, and computational relationships. Reference results are obtained through corresponding processing and calculations. Sources include Earth-structure models and earthquake catalogs, mineral and energy inventories, ocean-carbon observations, paleobiological data, synthetic carbon-storage monitoring data, and disaster-event records. Table~\ref{tab:benchmark} identifies the sources by theme; Appendix~\ref{app:dataset-details} gives further construction details.
-
-\paragraph{Reference workflows and record format.}
-Each evaluation record contains a natural-language question, resource locators, a reference answer, an answer type, and reference calls. A call identifies the registered tool, its parameters, and relevant input/output information. The reference chain expresses one implementation of the requested analysis under the exposed interfaces. Existing tasks retain source identifiers or locators, and data-derived tasks retain derivation records and computational scripts.
-
-Interface adaptation determines the reference-chain length. A tool wrapper can encapsulate several processing operations in one invocation; therefore, source-dataset labels such as single-tool or multitool cannot be transferred without examining the registered interfaces.
-
-\paragraph{Quality control.}
-Construction checks source traceability, required fields, tool-name and parameter consistency, and sample execution. For data-derived tasks, retained calculations support recalculation of reference quantities. For adapted tasks, source answers provide an independent record of the target output. These checks have different scopes: a parseable invocation is not proof of scientific correctness, and successful sample execution does not certify all records. Construction validation is kept separate from the complete benchmark evaluation.
-
-\subsection{Dataset Composition}
 \label{sec:benchmark-composition}
-GeoToolEval contains 603 evaluation records: 424 have one reference invocation, 119 have two or three, and 60 have at least four. Its 179 multistep records constitute 29.68\% of the dataset.
-\input{tables/benchmark}
+GeoToolEval combines existing question-answer tasks with tasks derived from scientific data. The former include selected questions from GeoQuestions1089, Earth-Bench~\cite{feng2026earthagent}, and \nolinkurl{habitable_earth_dataset}. We retain their questions and reference answers while mapping the required operations to the registered tool interfaces. For data-derived tasks, questions specify identifiable objects and computational relationships, and reference answers are obtained through the corresponding analysis.
 
-The critical-mineral and climate-change themes share nine cross-theme questions included in both themes. Thus, 603 denotes evaluation records rather than 603 distinct question texts. The main score weights records equally, so these repeated questions contribute through both theme assignments.
+The dataset contains 603 evaluation records across ten research themes, covering resources such as Earth-structure models, mineral inventories, climate observations, remote-sensing imagery, and disaster-event records (Table~\ref{tab:benchmark}; Figure~\ref{fig:geotooleval}a). Of these records, 424 require one reference call, 119 require two or three, and 60 require at least four. Single-step tasks assess basic data access and tool use, while multistep tasks additionally involve operation composition and intermediate results. Counts refer to calls under the registered interfaces; a tool may perform several operations internally. Source details, construction checks, and cross-theme overlap are described in Appendix~\ref{app:dataset-details}.
 
-A step denotes a reference tool invocation, not an elementary scientific operation or a direct measure of scientific difficulty. Energy-resource and ocean-carbon tools, for example, can perform multiple internal operations within one call. Chain-length strata characterize orchestration demands under the current interfaces. They should be interpreted jointly with domain and wrapper design.
+\subsection{Task Definition and Tool-Call Annotations}
+\label{sec:benchmark-design}
+\label{sec:task-record}
+We represent an evaluation record as
+\begin{equation}
+\mathcal{E}_i=(q_i,X_i,y_i^{\star},\tau_i^{\star}),
+\label{eq:task-record}
+\end{equation}
+where $q_i$ specifies the scientific question and requested outputs, $X_i$ identifies the input data and resource locators, $y_i^{\star}$ is the reference answer, and $\tau_i^{\star}$ is a reference tool-call sequence. Answer types and format requirements support consistent scoring across numerical, categorical, and structured outputs.
 
-Long chains are unevenly distributed across themes. Remote sensing accounts for 42 of the 60 records with at least four reference calls. Consequently, changes across chain-length groups can also reflect domain-specific inputs and tools. We preserve both domain and chain-length views rather than treating either as a controlled difficulty scale.
+The tool-call annotations identify the tool, arguments, and relevant input/output information for each reference step. They connect the question to a concrete analysis over the supplied resources. For example, a task requesting the number of events satisfying a condition can be annotated as loading an event table, filtering its records, and counting the filtered result. This records the intermediate object needed by the final operation, in addition to the expected count.
+
+The reference workflow provides one implementation under the registered interfaces. It supports comparison of tool coverage and order and helps locate differences in execution. Alternative workflows may also produce a valid answer, so agreement with the reference calls is assessed separately from answer correctness.
 
 \subsection{Evaluation Metrics}
 \label{sec:metrics}
-We score each record separately and average over the declared evaluation population, retaining failures. The three metrics below distinguish final-answer agreement, successful-tool coverage, and relative invocation order.
-
-\paragraph{Final Answer Score (FAS).}
-FAS lies in $[0,1]$ and preserves partial credit. Scoring depends on answer type: choice normalization for multiple-choice answers, matching rules for dates and identifiers, numerical tolerances for scalar quantities, item matching for multiple values or text items, and field-level comparison for structured answers. Empty answers receive zero. For $N$ records,
-\begin{equation}
-\overline{FAS}=\frac{1}{N}\sum_{i=1}^{N}FAS_i.
-\label{eq:fas}
-\end{equation}
-The main experiment uses $N=603$. Domain and chain-length groups average their own records. This record-weighted mean is distinct from a domain-balanced macro-average or the rate of fully correct answers.
-
-\paragraph{Tool Selection F1 (TSF1).}
-Let $G_i$ be the reference sequence and $A_i$ the actual successful-call sequence for record $i$. Calls are matched one to one by tool name, treating the two sequences as multisets and retaining multiplicity. If $m_i$ calls match,
-\begin{equation}
-\mathrm{TSF1}_i=\frac{2m_i}{|G_i|+|A_i|}.
-\label{eq:tsf1}
-\end{equation}
-This is the harmonic mean of successful-call precision and reference-call recall. Missing tools, irrelevant successful calls, and repeated successful invocations affect the score. Two required calls to the same tool remain two occurrences.
-
-\paragraph{Tool Order Score (TOS).}
-The longest common subsequence measures preservation of relative order:
-\begin{equation}
-\mathrm{TOS}_i=\frac{\mathrm{LCS}(G_i,A_i)}{|G_i|}.
-\label{eq:tos}
-\end{equation}
-For reference order read--filter--count and actual order read--count--filter, TSF1 is 1 while TOS is $2/3$. Extra calls do not necessarily lower TOS, which is why it is reported with TSF1.
-
-Both process metrics are zero when no invocation succeeds. Failed invocations do not enter the successful-call sequence, but failed tasks remain in the average. All three metrics are reported separately; we do not combine them into a single measure of scientific correctness.
-
-\subsection{Interpreting Answer and Process Scores}
-A reference chain records one solution under the available interfaces. An alternative valid implementation may have lower name-based process scores, while a chain with the expected names and order can still consume the wrong artifacts or use incorrect parameters. TSF1 and TOS therefore measure agreement with reference workflows rather than semantic equivalence of arbitrary analyses.
-
-The metrics support complementary questions. FAS measures whether the returned answer matches the reference. TSF1 identifies omissions and excess successful calls relative to the reference chain. TOS measures whether matched tools occur in a compatible relative order. Explaining why an answer is wrong, or whether a different workflow is valid, requires inputs, outputs, and dependency traces in addition to these aggregates.
+Each record is scored in $[0,1]$, and failed tasks remain in the average. Table~\ref{tab:main-results} reports six scores. FAS measures agreement with the reference answer and keeps partial credit. TSF1 measures whether the successful calls cover the reference tools. PAS measures whether the arguments of aligned calls match the reference. TOS measures whether those calls preserve the reference order. ECR measures the share of attempts that are matched successful calls. Quality is their weighted aggregate. Bash-only agents have no tool trace, so only FAS applies to them. Formulas and weights are in Appendix~\ref{app:metric-details}.

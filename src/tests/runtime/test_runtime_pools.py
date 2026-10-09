@@ -7,6 +7,30 @@ import pytest
 from agentgs.runtime.concurrency import RuntimeCoordinator
 
 
+async def test_model_deadline_is_transport_failure_and_releases_capacity(project):
+    from agentgs.client.errors import TransportFailure
+    from agentgs.config.settings import RuntimeSettings
+    from agentgs.runtime.models import ModelExecutor
+
+    class Client:
+        async def chat(self):
+            await asyncio.sleep(10)
+
+        async def aclose(self):
+            pass
+
+    coordinator = RuntimeCoordinator(project)
+    client = ModelExecutor(Client(), RuntimeSettings(model_timeout_seconds=0.01), coordinator)
+    try:
+        with pytest.raises(TransportFailure, match="deadline exceeded"):
+            await client.chat()
+        async with asyncio.timeout(1):
+            async with coordinator.slot("models", 1):
+                pass
+    finally:
+        await client.aclose()
+
+
 async def test_different_workers_can_execute_against_same_shared_project(project, monkeypatch):
     monkeypatch.setattr("agentgs.runtime.concurrency.worker_identity", lambda: "worker-a")
     first = RuntimeCoordinator(project)

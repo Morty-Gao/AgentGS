@@ -5,11 +5,12 @@
 .DEFAULT_GOAL := pdf
 
 LATEXMK ?= latexmk
+PYTHON ?= uv run --offline --no-sync python
 MAIN := main.tex
 OUTDIR := build
 LATEXFLAGS := -pdf -interaction=nonstopmode -halt-on-error -file-line-error -synctex=1 -outdir=$(OUTDIR)
 
-.PHONY: all pdf supplement figures compile watch clean distclean rebuild check-tools help
+.PHONY: all pdf supplement figures tables compile watch clean distclean rebuild check-tools help
 
 all: pdf supplement
 
@@ -25,13 +26,18 @@ FIGURE_SCRIPTS := $(wildcard scripts/fig_*.py)
 figures:
 	@for script in $(FIGURE_SCRIPTS); do python3 $$script || exit 1; done
 
-pdf: check-tools
+tables: tables/main_results.tex
+
+tables/main_results.tex: scripts/table_main.py
+	$(PYTHON) scripts/table_main.py
+
+pdf: check-tools tables
 	$(LATEXMK) $(LATEXFLAGS) $(MAIN)
 	cp "$(OUTDIR)/main.pdf" main.pdf
 	@printf 'PDF: main.pdf\n'
 
 # Continuously rebuild when source files change; Ctrl+C stops watching.
-watch: check-tools
+watch: check-tools tables
 	$(LATEXMK) $(LATEXFLAGS) -pvc -view=none $(MAIN)
 
 # Remove auxiliary files while keeping the compiled PDF.
@@ -63,4 +69,5 @@ help:
 	  'make distclean                 Remove generated files, including PDF' \
 	  'make rebuild                   Clean and compile from scratch' \
 	  'make figures                   Redraw figures from scripts/fig_*.py' \
+	  'make tables                    Generate the GeoToolEval main table' \
 	  'make help                      Show available commands'

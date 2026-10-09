@@ -39,7 +39,7 @@ class PipeEvents:
             )
 
 
-async def execute(root, work, spec, settings):
+async def execute(root, work, spec, settings, embedding_endpoint=None):
     settings = settings.model_copy(update={"default_rss_limit_mb": spec.rss_limit_mb})
     events = PipeEvents()
     coordinator = RuntimeCoordinator(root)
@@ -79,10 +79,14 @@ async def execute(root, work, spec, settings):
             and await invoke(relation_cache.is_file)
             and await invoke((index_folder / "graph_store.json").is_file)
         ):
+            from agentgs.runtime.embeddings import RemoteEmbedding
+
             retriever = LazyToolRetriever(
                 lambda: KGToolRetriever.from_directory(
                     index_folder,
-                    LocalEmbedding(
+                    RemoteEmbedding(embedding_endpoint)
+                    if embedding_endpoint
+                    else LocalEmbedding(
                         root / options.model_cache,
                         options.embedding_model,
                         options.embedding_threads,
@@ -109,9 +113,12 @@ async def execute(root, work, spec, settings):
 
             skills, planner = await asyncio.gather(
                 invoke(builtin_skills),
-                invoke(builtin_planner, rs_local_contracts=options.rs_local_contracts,
-                       predecessor_expansion=options.predecessor_expansion,
-                       capability_completion=options.capability_completion),
+                invoke(
+                    builtin_planner,
+                    rs_local_contracts=options.rs_local_contracts,
+                    predecessor_expansion=options.predecessor_expansion,
+                    capability_completion=options.capability_completion,
+                ),
             )
             skill_retriever = KeywordSkillRetriever(skills)
         context = AgentContext(
@@ -140,7 +147,13 @@ async def run_request(request_path):
     spec = TaskSpec.model_validate(request["spec"])
     work, root = request_path.parent, Path(request["root"])
     task = asyncio.create_task(
-        execute(root, work, spec, RuntimeSettings.model_validate(request["runtime"]))
+        execute(
+            root,
+            work,
+            spec,
+            RuntimeSettings.model_validate(request["runtime"]),
+            request.get("embedding_endpoint"),
+        )
     )
     loop = asyncio.get_running_loop()
     try:

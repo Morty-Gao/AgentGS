@@ -48,6 +48,7 @@ Explore the stored data with the bash tool and collect the measurements the ques
 {work} is writable and keeps files between calls. Each call starts a new shell there.
 {network} There is no registered scientific tool. Read filenames, headers and values yourself.
 The evaluation locator below is a hint, not a file listing and not a renamed path.
+If the question is a geographic lookup whose values come from a frozen query, match the question text in /data/geoquestions/questions.jsonl and read that record's result table.
 
 When the observations are sufficient, stop calling bash and reply with the values you found.
 Return the final answer directly in the task's required format. There is no later formatting step.

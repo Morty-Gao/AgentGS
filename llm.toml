@@ -6,7 +6,7 @@ schema_version = 1
 base_url = "http://10.102.211.12:30000/v1"
 api_key = "none"
 timeout_seconds = 600
-max_concurrent_requests = 48
+max_concurrent_requests = 128
 
 [models.qwen38-27b]
 provider = "qwen38-27b"
@@ -23,7 +23,7 @@ tool_calling = true
 base_url = "http://10.102.211.12:30001/v1"
 api_key = "none"
 timeout_seconds = 600
-max_concurrent_requests = 48
+max_concurrent_requests = 128
 
 [models.qwen35-35b-a3b]
 provider = "qwen35-35b-a3b"
@@ -40,7 +40,7 @@ tool_calling = true
 base_url = "http://10.102.211.12:30002/v1"
 api_key = "none"
 timeout_seconds = 600
-max_concurrent_requests = 48
+max_concurrent_requests = 128
 
 [models.qwen35-4b]
 provider = "qwen35-4b"
@@ -57,7 +57,7 @@ tool_calling = true
 base_url = "http://10.102.211.12:30003/v1"
 api_key = "none"
 timeout_seconds = 600
-max_concurrent_requests = 48
+max_concurrent_requests = 128
 
 [models.qwen35-9b]
 provider = "qwen35-9b"
@@ -68,4 +68,38 @@ supported_efforts = ["max", "xhigh", "high", "medium", "low"]
 default_effort = "max"
 
 [models.qwen35-9b.capabilities]
+tool_calling = true
+
+[providers.deepseek]
+base_url = "http://10.102.208.8:30010/v1"
+api_key = "local-no-key"
+timeout_seconds = 600
+max_concurrent_requests = 48
+
+[models.deepseek]
+provider = "deepseek"
+model = "deepseek-v4.1-flash"
+context_window = 262144
+max_output_tokens = 32768
+supported_efforts = ["max"]
+default_effort = "max"
+
+[models.deepseek.capabilities]
+tool_calling = true
+
+[providers.terra]
+base_url = "${LLM_BASE_URL}/v1"
+api_key = "${LLM_API_KEY}"
+timeout_seconds = 600
+max_concurrent_requests = 64
+
+[models."gpt-5.6-terra"]
+provider = "terra"
+model = "gpt-5.6-terra"
+context_window = 262144
+max_output_tokens = 32768
+supported_efforts = ["medium"]
+default_effort = "medium"
+
+[models."gpt-5.6-terra".capabilities]
 tool_calling = true

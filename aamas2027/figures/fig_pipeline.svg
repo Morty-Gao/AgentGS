@@ -1,0 +1,238 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" width="1430" height="1484" viewBox="0 0 1430 1484">
+<defs><symbol id="icon1" viewBox="0 0 95 124.72" preserveAspectRatio="none">
+<path d="M 0,114.69 L 1.42,96.22 C 2.84,85.67 18.43,79.08 34.03,75.12 L 59.55,75.12 C 79.41,79.08 92.17,86.99 95,98.86 L 95,116.01 C 93.59,119.96 87.91,121.28 79.41,121.28 L 8.51,121.28 C 2.84,121.28 0,119.96 0,114.69 Z" fill="#B8D9FC"/>
+<path d="M 34.03,63.68 L 34.03,78.19 C 41.12,90.06 53.88,90.06 62.39,78.19 L 59.55,62.36 Z" fill="#F4D096"/>
+<path d="M 28.36,76.53 L 46.79,88.4 L 68.06,76.53 L 58.14,118.74 L 38.29,118.74 Z" fill="#E9F5FF"/>
+<path d="M 41.12,89.29 L 52.46,89.29 L 55.3,97.2 L 46.79,118.31 L 41.12,98.52 Z" fill="#278BE0"/>
+<path d="M 26.94,77.95 L 41.12,89.82 L 35.45,100.37 L 43.95,120.16 L 4.25,118.84 L 5.67,96.42 Z" fill="#A5D0FA"/>
+<path d="M 69.48,77.95 L 56.71,89.82 L 60.97,100.37 L 52.46,120.16 L 89.33,118.84 L 87.91,96.42 Z" fill="#ACD4FD"/>
+<path d="M 22.69,25.45 C 21.27,10.95 68.06,5.67 72.32,28.09 L 69.48,51.83 C 63.81,67.66 53.88,74.25 46.79,72.94 C 35.45,71.62 22.69,58.43 22.69,47.88 Z" fill="#FCE4B6"/>
+<path d="M 24.11,40.89 C 17.02,35.61 14.18,17.15 22.69,13.19 C 28.36,9.23 31.2,13.19 34.03,10.55 C 41.12,0 53.88,5.28 59.56,7.91 C 75.15,7.91 80.82,19.78 75.15,38.25 L 66.64,46.16 L 62.39,26.38 C 43.96,30.34 36.87,21.1 32.61,22.42 L 28.36,42.21 Z" fill="#455867"/>
+</symbol></defs>
+<rect x="0" y="0" width="1430" height="1484" fill="#FFFFFF" stroke="none"/>
+<use xlink:href="#icon1" x="182" y="14" width="95" height="124.72"/>
+<path d="M354,18 H1386 A24,24 0 0 1 1410,42 V110 A24,24 0 0 1 1386,134 H396 L296,164 L360,134 H354 A24,24 0 0 1 330,110 V42 A24,24 0 0 1 354,18 Z" fill="#F5F7FA" stroke="#9AA5B1" stroke-width="2.5" stroke-linejoin="round" stroke-linecap="round"/>
+<text font-family="'Times New Roman', 'TeX Gyre Termes', 'Nimbus Roman', serif" font-size="40" fill="#1F2933" text-anchor="start"><tspan x="362" y="68">Is the mean of the cloud-free composite above</tspan></text>
+<text font-family="'Times New Roman', 'TeX Gyre Termes', 'Nimbus Roman', serif" font-size="40" fill="#1F2933" text-anchor="start"><tspan x="362" y="114">the supplied reference value?</tspan></text>
+<rect x="20" y="196" width="1390" height="500" rx="24" fill="#F5F7FA" stroke="#CBD2D9" stroke-width="2.5" stroke-linejoin="miter" stroke-linecap="butt"/>
+<text font-family="'Times New Roman', 'TeX Gyre Termes', 'Nimbus Roman', serif" font-size="38" fill="#52606D" text-anchor="middle"><tspan x="905" y="241.2">Skill-guided Plan Composition</tspan></text>
+<rect x="20" y="746" width="1390" height="500" rx="24" fill="#F5F7FA" stroke="#CBD2D9" stroke-width="2.5" stroke-linejoin="miter" stroke-linecap="butt"/>
+<text font-family="'Times New Roman', 'TeX Gyre Termes', 'Nimbus Roman', serif" font-size="38" fill="#52606D" text-anchor="middle"><tspan x="905" y="791.2">Automatic Plan Completion</tspan></text>
+<rect x="70" y="280" width="320" height="80" rx="40" fill="#EEF3F8" stroke="#1F2933" stroke-width="3" stroke-linejoin="miter" stroke-linecap="butt"/>
+<text font-family="'Comic Sans MS', 'Comic Neue', 'Chalkboard SE', cursive" font-size="40" fill="#1F2933" text-anchor="middle"><tspan x="230" y="335">Retrieve</tspan></text>
+<rect x="496" y="291" width="108" height="22" rx="11" fill="#DCE7F3" fill-opacity="0.75" stroke="#3B6EA8" stroke-width="3" stroke-linejoin="miter" stroke-linecap="butt"/>
+<rect x="496" y="291" width="108" height="22" rx="11" transform="rotate(45 550 302)" fill="#DCEFE4" fill-opacity="0.75" stroke="#3E8E64" stroke-width="3" stroke-linejoin="miter" stroke-linecap="butt"/>
+<rect x="496" y="291" width="108" height="22" rx="11" transform="rotate(-45 550 302)" fill="#FBE3D1" fill-opacity="0.75" stroke="#E07B39" stroke-width="3" stroke-linejoin="miter" stroke-linecap="butt"/>
+<ellipse cx="509" cy="302" rx="7.5" ry="7.5" fill="#3B6EA8" stroke="#1F2933" stroke-width="2" stroke-linejoin="miter" stroke-linecap="butt"/>
+<ellipse cx="591" cy="302" rx="7.5" ry="7.5" fill="#3B6EA8" stroke="#1F2933" stroke-width="2" stroke-linejoin="miter" stroke-linecap="butt"/>
+<ellipse cx="521" cy="273" rx="7.5" ry="7.5" fill="#E07B39" stroke="#1F2933" stroke-width="2" stroke-linejoin="miter" stroke-linecap="butt"/>
+<ellipse cx="579" cy="331" rx="7.5" ry="7.5" fill="#E07B39" stroke="#1F2933" stroke-width="2" stroke-linejoin="miter" stroke-linecap="butt"/>
+<ellipse cx="521" cy="331" rx="7.5" ry="7.5" fill="#3E8E64" stroke="#1F2933" stroke-width="2" stroke-linejoin="miter" stroke-linecap="butt"/>
+<ellipse cx="579" cy="273" rx="7.5" ry="7.5" fill="#3E8E64" stroke="#1F2933" stroke-width="2" stroke-linejoin="miter" stroke-linecap="butt"/>
+<ellipse cx="550" cy="302" rx="8.5" ry="8.5" fill="#1F2933" stroke="#1F2933" stroke-width="2" stroke-linejoin="miter" stroke-linecap="butt"/>
+<text font-family="'Comic Sans MS', 'Comic Neue', 'Chalkboard SE', cursive" font-size="32" fill="#1F2933" text-anchor="middle"><tspan x="550" y="387.8">GeoSkillKG</tspan></text>
+<path d="M626,302 L711.65,302" fill="none" stroke="#1F2933" stroke-width="3" stroke-linejoin="miter" stroke-linecap="butt"/>
+<polygon points="726.65,302 711.65,309.5 711.65,294.5" fill="#1F2933" stroke="#1F2933" stroke-width="3" stroke-linejoin="miter" stroke-linecap="butt"/>
+<rect x="785" y="274" width="190" height="56" rx="28" fill="#DCE7F3" stroke="#3B6EA8" stroke-width="3" stroke-linejoin="miter" stroke-linecap="butt"/>
+<path d="M828,302 L932,302" fill="none" stroke="#1F2933" stroke-width="2.5" stroke-linejoin="miter" stroke-linecap="butt"/>
+<ellipse cx="828" cy="302" rx="13" ry="13" fill="#3B6EA8" stroke="#1F2933" stroke-width="2" stroke-linejoin="miter" stroke-linecap="butt"/>
+<ellipse cx="880" cy="302" rx="13" ry="13" fill="#3B6EA8" stroke="#1F2933" stroke-width="2" stroke-linejoin="miter" stroke-linecap="butt"/>
+<ellipse cx="932" cy="302" rx="13" ry="13" fill="#3B6EA8" stroke="#1F2933" stroke-width="2" stroke-linejoin="miter" stroke-linecap="butt"/>
+<text font-family="'Times New Roman', 'TeX Gyre Termes', 'Nimbus Roman', serif" font-size="34" fill="#3B6EA8" text-anchor="middle"><tspan x="880" y="368.6">Skill A</tspan></text>
+<rect x="1010" y="274" width="190" height="56" rx="28" fill="#DCEFE4" stroke="#3E8E64" stroke-width="3" stroke-linejoin="miter" stroke-linecap="butt"/>
+<path d="M1053,302 L1157,302" fill="none" stroke="#1F2933" stroke-width="2.5" stroke-linejoin="miter" stroke-linecap="butt"/>
+<ellipse cx="1053" cy="302" rx="13" ry="13" fill="#3E8E64" stroke="#1F2933" stroke-width="2" stroke-linejoin="miter" stroke-linecap="butt"/>
+<ellipse cx="1105" cy="302" rx="13" ry="13" fill="#3E8E64" stroke="#1F2933" stroke-width="2" stroke-linejoin="miter" stroke-linecap="butt"/>
+<ellipse cx="1157" cy="302" rx="13" ry="13" fill="#3E8E64" stroke="#1F2933" stroke-width="2" stroke-linejoin="miter" stroke-linecap="butt"/>
+<text font-family="'Times New Roman', 'TeX Gyre Termes', 'Nimbus Roman', serif" font-size="34" fill="#3E8E64" text-anchor="middle"><tspan x="1105" y="368.6">Skill B</tspan></text>
+<rect x="1235" y="274" width="190" height="56" rx="28" fill="#F5F7FA" stroke="#9AA5B1" stroke-width="3" stroke-linejoin="miter" stroke-linecap="butt"/>
+<path d="M1278,302 L1382,302" fill="none" stroke="#9AA5B1" stroke-width="2.5" stroke-linejoin="miter" stroke-linecap="butt"/>
+<ellipse cx="1278" cy="302" rx="13" ry="13" fill="#CBD2D9" stroke="#9AA5B1" stroke-width="2" stroke-linejoin="miter" stroke-linecap="butt"/>
+<ellipse cx="1330" cy="302" rx="13" ry="13" fill="#CBD2D9" stroke="#9AA5B1" stroke-width="2" stroke-linejoin="miter" stroke-linecap="butt"/>
+<ellipse cx="1382" cy="302" rx="13" ry="13" fill="#CBD2D9" stroke="#9AA5B1" stroke-width="2" stroke-linejoin="miter" stroke-linecap="butt"/>
+<text font-family="'Times New Roman', 'TeX Gyre Termes', 'Nimbus Roman', serif" font-size="34" fill="#52606D" text-anchor="middle"><tspan x="1330" y="368.6">Skill D</tspan></text>
+<rect x="70" y="428" width="320" height="80" rx="40" fill="#EEF3F8" stroke="#1F2933" stroke-width="3" stroke-linejoin="miter" stroke-linecap="butt"/>
+<text font-family="'Comic Sans MS', 'Comic Neue', 'Chalkboard SE', cursive" font-size="40" fill="#1F2933" text-anchor="middle"><tspan x="230" y="483">Select Goals</tspan></text>
+<rect x="514" y="435" width="352" height="66" rx="33" fill="none" stroke="#3B6EA8" stroke-width="3" stroke-linejoin="miter" stroke-linecap="butt" stroke-dasharray="12 9"/>
+<rect x="1034" y="435" width="352" height="66" rx="33" fill="none" stroke="#3E8E64" stroke-width="3" stroke-linejoin="miter" stroke-linecap="butt" stroke-dasharray="12 9"/>
+<ellipse cx="560" cy="468" rx="9" ry="9" fill="#CBD2D9" stroke="none"/>
+<ellipse cx="690" cy="468" rx="9" ry="9" fill="#CBD2D9" stroke="none"/>
+<ellipse cx="1080" cy="468" rx="9" ry="9" fill="#CBD2D9" stroke="none"/>
+<ellipse cx="1210" cy="468" rx="9" ry="9" fill="#CBD2D9" stroke="none"/>
+<ellipse cx="820" cy="468" rx="19" ry="19" fill="#FFFFFF" stroke="#3B6EA8" stroke-width="4" stroke-linejoin="miter" stroke-linecap="butt"/>
+<ellipse cx="820" cy="468" rx="8" ry="8" fill="#3B6EA8" stroke="none"/>
+<ellipse cx="1340" cy="468" rx="19" ry="19" fill="#FFFFFF" stroke="#3E8E64" stroke-width="4" stroke-linejoin="miter" stroke-linecap="butt"/>
+<ellipse cx="1340" cy="468" rx="8" ry="8" fill="#3E8E64" stroke="none"/>
+<rect x="70" y="574" width="320" height="80" rx="40" fill="#EEF3F8" stroke="#1F2933" stroke-width="3" stroke-linejoin="miter" stroke-linecap="butt"/>
+<text font-family="'Comic Sans MS', 'Comic Neue', 'Chalkboard SE', cursive" font-size="40" fill="#1F2933" text-anchor="middle"><tspan x="230" y="629">Expand</tspan></text>
+<rect x="514" y="581" width="352" height="66" rx="33" fill="#DCE7F3" stroke="#3B6EA8" stroke-width="3" stroke-linejoin="miter" stroke-linecap="butt"/>
+<rect x="1034" y="581" width="352" height="66" rx="33" fill="#DCEFE4" stroke="#3E8E64" stroke-width="3" stroke-linejoin="miter" stroke-linecap="butt"/>
+<path d="M581,614 L652.65,614" fill="none" stroke="#1F2933" stroke-width="3" stroke-linejoin="miter" stroke-linecap="butt"/>
+<polygon points="665.65,614 652.65,620.5 652.65,607.5" fill="#1F2933" stroke="#1F2933" stroke-width="3" stroke-linejoin="miter" stroke-linecap="butt"/>
+<path d="M711,614 L782.65,614" fill="none" stroke="#1F2933" stroke-width="3" stroke-linejoin="miter" stroke-linecap="butt"/>
+<polygon points="795.65,614 782.65,620.5 782.65,607.5" fill="#1F2933" stroke="#1F2933" stroke-width="3" stroke-linejoin="miter" stroke-linecap="butt"/>
+<ellipse cx="560" cy="614" rx="19" ry="19" fill="#3B6EA8" stroke="#1F2933" stroke-width="2.5" stroke-linejoin="miter" stroke-linecap="butt"/>
+<ellipse cx="690" cy="614" rx="19" ry="19" fill="#3B6EA8" stroke="#1F2933" stroke-width="2.5" stroke-linejoin="miter" stroke-linecap="butt"/>
+<ellipse cx="820" cy="614" rx="19" ry="19" fill="#3B6EA8" stroke="#1F2933" stroke-width="2.5" stroke-linejoin="miter" stroke-linecap="butt"/>
+<path d="M1101,614 L1172.65,614" fill="none" stroke="#1F2933" stroke-width="3" stroke-linejoin="miter" stroke-linecap="butt"/>
+<polygon points="1185.65,614 1172.65,620.5 1172.65,607.5" fill="#1F2933" stroke="#1F2933" stroke-width="3" stroke-linejoin="miter" stroke-linecap="butt"/>
+<path d="M1231,614 L1302.65,614" fill="none" stroke="#1F2933" stroke-width="3" stroke-linejoin="miter" stroke-linecap="butt"/>
+<polygon points="1315.65,614 1302.65,620.5 1302.65,607.5" fill="#1F2933" stroke="#1F2933" stroke-width="3" stroke-linejoin="miter" stroke-linecap="butt"/>
+<ellipse cx="1080" cy="614" rx="19" ry="19" fill="#3E8E64" stroke="#1F2933" stroke-width="2.5" stroke-linejoin="miter" stroke-linecap="butt"/>
+<ellipse cx="1210" cy="614" rx="19" ry="19" fill="#3E8E64" stroke="#1F2933" stroke-width="2.5" stroke-linejoin="miter" stroke-linecap="butt"/>
+<ellipse cx="1340" cy="614" rx="19" ry="19" fill="#3E8E64" stroke="#1F2933" stroke-width="2.5" stroke-linejoin="miter" stroke-linecap="butt"/>
+<path d="M928,614 L1042.65,614" fill="none" stroke="#C8473D" stroke-width="3" stroke-linejoin="miter" stroke-linecap="butt" stroke-dasharray="9 6"/>
+<polygon points="1055.65,614 1042.65,620.5 1042.65,607.5" fill="#C8473D" stroke="#C8473D" stroke-width="3" stroke-linejoin="miter" stroke-linecap="butt"/>
+<text font-family="'Comic Sans MS', 'Comic Neue', 'Chalkboard SE', cursive" font-size="40" font-weight="bold" fill="#C8473D" text-anchor="middle"><tspan x="910" y="629">?</tspan></text>
+<rect x="70" y="828" width="320" height="80" rx="40" fill="#EEF3F8" stroke="#1F2933" stroke-width="3" stroke-linejoin="miter" stroke-linecap="butt"/>
+<text font-family="'Comic Sans MS', 'Comic Neue', 'Chalkboard SE', cursive" font-size="40" fill="#1F2933" text-anchor="middle"><tspan x="230" y="883">Review Support</tspan></text>
+<rect x="514" y="849" width="352" height="66" rx="33" fill="#DCE7F3" stroke="#3B6EA8" stroke-width="3" stroke-linejoin="miter" stroke-linecap="butt"/>
+<rect x="1034" y="849" width="352" height="66" rx="33" fill="#DCEFE4" stroke="#3E8E64" stroke-width="3" stroke-linejoin="miter" stroke-linecap="butt"/>
+<path d="M581,882 L652.65,882" fill="none" stroke="#1F2933" stroke-width="3" stroke-linejoin="miter" stroke-linecap="butt"/>
+<polygon points="665.65,882 652.65,888.5 652.65,875.5" fill="#1F2933" stroke="#1F2933" stroke-width="3" stroke-linejoin="miter" stroke-linecap="butt"/>
+<path d="M711,882 L782.65,882" fill="none" stroke="#1F2933" stroke-width="3" stroke-linejoin="miter" stroke-linecap="butt"/>
+<polygon points="795.65,882 782.65,888.5 782.65,875.5" fill="#1F2933" stroke="#1F2933" stroke-width="3" stroke-linejoin="miter" stroke-linecap="butt"/>
+<ellipse cx="560" cy="882" rx="19" ry="19" fill="#3B6EA8" stroke="#1F2933" stroke-width="2.5" stroke-linejoin="miter" stroke-linecap="butt"/>
+<ellipse cx="690" cy="882" rx="19" ry="19" fill="#3B6EA8" stroke="#1F2933" stroke-width="2.5" stroke-linejoin="miter" stroke-linecap="butt"/>
+<ellipse cx="820" cy="882" rx="19" ry="19" fill="#3B6EA8" stroke="#1F2933" stroke-width="2.5" stroke-linejoin="miter" stroke-linecap="butt"/>
+<path d="M1101,882 L1172.65,882" fill="none" stroke="#1F2933" stroke-width="3" stroke-linejoin="miter" stroke-linecap="butt"/>
+<polygon points="1185.65,882 1172.65,888.5 1172.65,875.5" fill="#1F2933" stroke="#1F2933" stroke-width="3" stroke-linejoin="miter" stroke-linecap="butt"/>
+<path d="M1231,882 L1302.65,882" fill="none" stroke="#1F2933" stroke-width="3" stroke-linejoin="miter" stroke-linecap="butt"/>
+<polygon points="1315.65,882 1302.65,888.5 1302.65,875.5" fill="#1F2933" stroke="#1F2933" stroke-width="3" stroke-linejoin="miter" stroke-linecap="butt"/>
+<ellipse cx="1080" cy="882" rx="19" ry="19" fill="#3E8E64" stroke="#1F2933" stroke-width="2.5" stroke-linejoin="miter" stroke-linecap="butt"/>
+<ellipse cx="1210" cy="882" rx="19" ry="19" fill="#3E8E64" stroke="#1F2933" stroke-width="2.5" stroke-linejoin="miter" stroke-linecap="butt"/>
+<ellipse cx="1340" cy="882" rx="19" ry="19" fill="#3E8E64" stroke="#1F2933" stroke-width="2.5" stroke-linejoin="miter" stroke-linecap="butt"/>
+<path d="M928,882 L1042.65,882" fill="none" stroke="#C8473D" stroke-width="3" stroke-linejoin="miter" stroke-linecap="butt" stroke-dasharray="9 6"/>
+<polygon points="1055.65,882 1042.65,888.5 1042.65,875.5" fill="#C8473D" stroke="#C8473D" stroke-width="3" stroke-linejoin="miter" stroke-linecap="butt"/>
+<text font-family="'Comic Sans MS', 'Comic Neue', 'Chalkboard SE', cursive" font-size="40" font-weight="bold" fill="#C8473D" text-anchor="middle"><tspan x="910" y="897">?</tspan></text>
+<ellipse cx="608" cy="814" rx="16" ry="16" fill="#4A5864" stroke="#1F2933" stroke-width="2.5" stroke-linejoin="miter" stroke-linecap="butt"/>
+<path d="M622,818 L662.02,853.22" fill="none" stroke="#1F2933" stroke-width="2.5" stroke-linejoin="miter" stroke-linecap="butt"/>
+<polygon points="669.9,860.15 658.55,857.16 665.49,849.28" fill="#1F2933" stroke="#1F2933" stroke-width="2.5" stroke-linejoin="miter" stroke-linecap="butt"/>
+<path d="M632,792 L640,802 L656,782" fill="none" stroke="#3E8E64" stroke-width="5" stroke-linejoin="round" stroke-linecap="round"/>
+<rect x="1234" y="798" width="32" height="32" rx="16" fill="#FFFFFF" stroke="#9AA5B1" stroke-width="2.5" stroke-linejoin="miter" stroke-linecap="butt" stroke-dasharray="4 3"/>
+<path d="M1278,804 L1294,820" fill="none" stroke="#C8473D" stroke-width="5" stroke-linejoin="miter" stroke-linecap="round"/>
+<path d="M1294,804 L1278,820" fill="none" stroke="#C8473D" stroke-width="5" stroke-linejoin="miter" stroke-linecap="round"/>
+<rect x="70" y="976" width="320" height="80" rx="40" fill="#EEF3F8" stroke="#1F2933" stroke-width="3" stroke-linejoin="miter" stroke-linecap="butt"/>
+<text font-family="'Comic Sans MS', 'Comic Neue', 'Chalkboard SE', cursive" font-size="40" fill="#1F2933" text-anchor="middle"><tspan x="230" y="1031">Search Bridges</tspan></text>
+<rect x="514" y="983" width="352" height="66" rx="33" fill="#DCE7F3" stroke="#3B6EA8" stroke-width="3" stroke-linejoin="miter" stroke-linecap="butt"/>
+<rect x="1034" y="983" width="352" height="66" rx="33" fill="#DCEFE4" stroke="#3E8E64" stroke-width="3" stroke-linejoin="miter" stroke-linecap="butt"/>
+<path d="M581,1016 L652.65,1016" fill="none" stroke="#1F2933" stroke-width="3" stroke-linejoin="miter" stroke-linecap="butt"/>
+<polygon points="665.65,1016 652.65,1022.5 652.65,1009.5" fill="#1F2933" stroke="#1F2933" stroke-width="3" stroke-linejoin="miter" stroke-linecap="butt"/>
+<path d="M711,1016 L782.65,1016" fill="none" stroke="#1F2933" stroke-width="3" stroke-linejoin="miter" stroke-linecap="butt"/>
+<polygon points="795.65,1016 782.65,1022.5 782.65,1009.5" fill="#1F2933" stroke="#1F2933" stroke-width="3" stroke-linejoin="miter" stroke-linecap="butt"/>
+<ellipse cx="560" cy="1016" rx="19" ry="19" fill="#3B6EA8" stroke="#1F2933" stroke-width="2.5" stroke-linejoin="miter" stroke-linecap="butt"/>
+<ellipse cx="690" cy="1016" rx="19" ry="19" fill="#3B6EA8" stroke="#1F2933" stroke-width="2.5" stroke-linejoin="miter" stroke-linecap="butt"/>
+<ellipse cx="820" cy="1016" rx="19" ry="19" fill="#3B6EA8" stroke="#1F2933" stroke-width="2.5" stroke-linejoin="miter" stroke-linecap="butt"/>
+<path d="M1101,1016 L1172.65,1016" fill="none" stroke="#1F2933" stroke-width="3" stroke-linejoin="miter" stroke-linecap="butt"/>
+<polygon points="1185.65,1016 1172.65,1022.5 1172.65,1009.5" fill="#1F2933" stroke="#1F2933" stroke-width="3" stroke-linejoin="miter" stroke-linecap="butt"/>
+<path d="M1231,1016 L1302.65,1016" fill="none" stroke="#1F2933" stroke-width="3" stroke-linejoin="miter" stroke-linecap="butt"/>
+<polygon points="1315.65,1016 1302.65,1022.5 1302.65,1009.5" fill="#1F2933" stroke="#1F2933" stroke-width="3" stroke-linejoin="miter" stroke-linecap="butt"/>
+<ellipse cx="1080" cy="1016" rx="19" ry="19" fill="#3E8E64" stroke="#1F2933" stroke-width="2.5" stroke-linejoin="miter" stroke-linecap="butt"/>
+<ellipse cx="1210" cy="1016" rx="19" ry="19" fill="#3E8E64" stroke="#1F2933" stroke-width="2.5" stroke-linejoin="miter" stroke-linecap="butt"/>
+<ellipse cx="1340" cy="1016" rx="19" ry="19" fill="#3E8E64" stroke="#1F2933" stroke-width="2.5" stroke-linejoin="miter" stroke-linecap="butt"/>
+<rect x="780" y="975" width="340" height="82" rx="41" fill="none" stroke="#E07B39" stroke-width="3.5" stroke-linejoin="miter" stroke-linecap="butt" stroke-dasharray="9 6"/>
+<path d="M841,1016 L912.65,1016" fill="none" stroke="#E07B39" stroke-width="3" stroke-linejoin="miter" stroke-linecap="butt" stroke-dasharray="9 6"/>
+<polygon points="925.65,1016 912.65,1022.5 912.65,1009.5" fill="#E07B39" stroke="#E07B39" stroke-width="3" stroke-linejoin="miter" stroke-linecap="butt"/>
+<path d="M971,1016 L1042.65,1016" fill="none" stroke="#E07B39" stroke-width="3" stroke-linejoin="miter" stroke-linecap="butt" stroke-dasharray="9 6"/>
+<polygon points="1055.65,1016 1042.65,1022.5 1042.65,1009.5" fill="#E07B39" stroke="#E07B39" stroke-width="3" stroke-linejoin="miter" stroke-linecap="butt"/>
+<ellipse cx="950" cy="1016" rx="19" ry="19" fill="#E07B39" stroke="#1F2933" stroke-width="2.5" stroke-linejoin="miter" stroke-linecap="butt"/>
+<text font-family="'Times New Roman', 'TeX Gyre Termes', 'Nimbus Roman', serif" font-size="34" fill="#E07B39" text-anchor="middle"><tspan x="950" y="964.6">Skill C</tspan></text>
+<rect x="70" y="1124" width="320" height="80" rx="40" fill="#EEF3F8" stroke="#1F2933" stroke-width="3" stroke-linejoin="miter" stroke-linecap="butt"/>
+<text font-family="'Comic Sans MS', 'Comic Neue', 'Chalkboard SE', cursive" font-size="40" fill="#1F2933" text-anchor="middle"><tspan x="230" y="1179">Insert Branch</tspan></text>
+<rect x="514" y="1117" width="352" height="66" rx="33" fill="#DCE7F3" stroke="#3B6EA8" stroke-width="3" stroke-linejoin="miter" stroke-linecap="butt"/>
+<rect x="1034" y="1117" width="352" height="66" rx="33" fill="#DCEFE4" stroke="#3E8E64" stroke-width="3" stroke-linejoin="miter" stroke-linecap="butt"/>
+<rect x="774" y="1117" width="352" height="66" rx="33" fill="#FBE3D1" stroke="#E07B39" stroke-width="3" stroke-linejoin="miter" stroke-linecap="butt"/>
+<path d="M581,1150 L652.65,1150" fill="none" stroke="#1F2933" stroke-width="3" stroke-linejoin="miter" stroke-linecap="butt"/>
+<polygon points="665.65,1150 652.65,1156.5 652.65,1143.5" fill="#1F2933" stroke="#1F2933" stroke-width="3" stroke-linejoin="miter" stroke-linecap="butt"/>
+<path d="M711,1150 L782.65,1150" fill="none" stroke="#1F2933" stroke-width="3" stroke-linejoin="miter" stroke-linecap="butt"/>
+<polygon points="795.65,1150 782.65,1156.5 782.65,1143.5" fill="#1F2933" stroke="#1F2933" stroke-width="3" stroke-linejoin="miter" stroke-linecap="butt"/>
+<path d="M841,1150 L912.65,1150" fill="none" stroke="#E07B39" stroke-width="3" stroke-linejoin="miter" stroke-linecap="butt"/>
+<polygon points="925.65,1150 912.65,1156.5 912.65,1143.5" fill="#E07B39" stroke="#E07B39" stroke-width="3" stroke-linejoin="miter" stroke-linecap="butt"/>
+<path d="M971,1150 L1042.65,1150" fill="none" stroke="#E07B39" stroke-width="3" stroke-linejoin="miter" stroke-linecap="butt"/>
+<polygon points="1055.65,1150 1042.65,1156.5 1042.65,1143.5" fill="#E07B39" stroke="#E07B39" stroke-width="3" stroke-linejoin="miter" stroke-linecap="butt"/>
+<path d="M1101,1150 L1172.65,1150" fill="none" stroke="#1F2933" stroke-width="3" stroke-linejoin="miter" stroke-linecap="butt"/>
+<polygon points="1185.65,1150 1172.65,1156.5 1172.65,1143.5" fill="#1F2933" stroke="#1F2933" stroke-width="3" stroke-linejoin="miter" stroke-linecap="butt"/>
+<path d="M1231,1150 L1302.65,1150" fill="none" stroke="#1F2933" stroke-width="3" stroke-linejoin="miter" stroke-linecap="butt"/>
+<polygon points="1315.65,1150 1302.65,1156.5 1302.65,1143.5" fill="#1F2933" stroke="#1F2933" stroke-width="3" stroke-linejoin="miter" stroke-linecap="butt"/>
+<ellipse cx="560" cy="1150" rx="19" ry="19" fill="#3B6EA8" stroke="#1F2933" stroke-width="2.5" stroke-linejoin="miter" stroke-linecap="butt"/>
+<ellipse cx="690" cy="1150" rx="19" ry="19" fill="#3B6EA8" stroke="#1F2933" stroke-width="2.5" stroke-linejoin="miter" stroke-linecap="butt"/>
+<ellipse cx="820" cy="1150" rx="19" ry="19" fill="#3B6EA8" stroke="#1F2933" stroke-width="2.5" stroke-linejoin="miter" stroke-linecap="butt"/>
+<ellipse cx="950" cy="1150" rx="19" ry="19" fill="#E07B39" stroke="#1F2933" stroke-width="2.5" stroke-linejoin="miter" stroke-linecap="butt"/>
+<ellipse cx="1080" cy="1150" rx="19" ry="19" fill="#3E8E64" stroke="#1F2933" stroke-width="2.5" stroke-linejoin="miter" stroke-linecap="butt"/>
+<ellipse cx="1210" cy="1150" rx="19" ry="19" fill="#3E8E64" stroke="#1F2933" stroke-width="2.5" stroke-linejoin="miter" stroke-linecap="butt"/>
+<ellipse cx="1340" cy="1150" rx="19" ry="19" fill="#3E8E64" stroke="#1F2933" stroke-width="2.5" stroke-linejoin="miter" stroke-linecap="butt"/>
+<text font-family="'Times New Roman', 'TeX Gyre Termes', 'Nimbus Roman', serif" font-size="34" fill="#3B6EA8" text-anchor="middle"><tspan x="690" y="1220.6">Skill A</tspan></text>
+<text font-family="'Times New Roman', 'TeX Gyre Termes', 'Nimbus Roman', serif" font-size="34" fill="#E07B39" text-anchor="middle"><tspan x="950" y="1220.6">Skill C</tspan></text>
+<text font-family="'Times New Roman', 'TeX Gyre Termes', 'Nimbus Roman', serif" font-size="34" fill="#3E8E64" text-anchor="middle"><tspan x="1210" y="1220.6">Skill B</tspan></text>
+<path d="M230,140 L230,260.59" fill="none" stroke="#1F2933" stroke-width="3.5" stroke-linejoin="miter" stroke-linecap="butt"/>
+<polygon points="230,276.09 222.25,260.59 237.75,260.59" fill="#1F2933" stroke="#1F2933" stroke-width="3.5" stroke-linejoin="miter" stroke-linecap="butt"/>
+<path d="M230,360 L230,408.59" fill="none" stroke="#1F2933" stroke-width="3.5" stroke-linejoin="miter" stroke-linecap="butt"/>
+<polygon points="230,424.09 222.25,408.59 237.75,408.59" fill="#1F2933" stroke="#1F2933" stroke-width="3.5" stroke-linejoin="miter" stroke-linecap="butt"/>
+<path d="M230,508 L230,554.59" fill="none" stroke="#1F2933" stroke-width="3.5" stroke-linejoin="miter" stroke-linecap="butt"/>
+<polygon points="230,570.09 222.25,554.59 237.75,554.59" fill="#1F2933" stroke="#1F2933" stroke-width="3.5" stroke-linejoin="miter" stroke-linecap="butt"/>
+<path d="M230,654 L230,808.59" fill="none" stroke="#1F2933" stroke-width="3.5" stroke-linejoin="miter" stroke-linecap="butt"/>
+<polygon points="230,824.09 222.25,808.59 237.75,808.59" fill="#1F2933" stroke="#1F2933" stroke-width="3.5" stroke-linejoin="miter" stroke-linecap="butt"/>
+<path d="M230,908 L230,956.59" fill="none" stroke="#1F2933" stroke-width="3.5" stroke-linejoin="miter" stroke-linecap="butt"/>
+<polygon points="230,972.09 222.25,956.59 237.75,956.59" fill="#1F2933" stroke="#1F2933" stroke-width="3.5" stroke-linejoin="miter" stroke-linecap="butt"/>
+<path d="M230,1056 L230,1104.59" fill="none" stroke="#1F2933" stroke-width="3.5" stroke-linejoin="miter" stroke-linecap="butt"/>
+<polygon points="230,1120.09 222.25,1104.59 237.75,1104.59" fill="#1F2933" stroke="#1F2933" stroke-width="3.5" stroke-linejoin="miter" stroke-linecap="butt"/>
+<text font-family="'Times New Roman', 'TeX Gyre Termes', 'Nimbus Roman', serif" font-size="36" fill="#1F2933" text-anchor="end"><tspan x="216" y="416.4">Yes</tspan></text>
+<text font-family="'Times New Roman', 'TeX Gyre Termes', 'Nimbus Roman', serif" font-size="36" fill="#1F2933" text-anchor="start"><tspan x="246" y="400.4">LLM</tspan></text>
+<text font-family="'Times New Roman', 'TeX Gyre Termes', 'Nimbus Roman', serif" font-size="36" fill="#1F2933" text-anchor="start"><tspan x="246" y="800.4">LLM</tspan></text>
+<text font-family="'Times New Roman', 'TeX Gyre Termes', 'Nimbus Roman', serif" font-size="36" font-style="italic" fill="#52606D" text-anchor="start"><tspan x="246" y="734.4">initial plan</tspan></text>
+<path d="M230,1204 L230,1276.59" fill="none" stroke="#1F2933" stroke-width="3.5" stroke-linejoin="miter" stroke-linecap="butt"/>
+<polygon points="230,1292.09 222.25,1276.59 237.75,1276.59" fill="#1F2933" stroke="#1F2933" stroke-width="3.5" stroke-linejoin="miter" stroke-linecap="butt"/>
+<text font-family="'Times New Roman', 'TeX Gyre Termes', 'Nimbus Roman', serif" font-size="36" fill="#1F2933" text-anchor="start"><tspan x="246" y="1286.4">Tool Grounding (LLM)</tspan></text>
+<path d="M230,1317.84 L191.56,1346.36" fill="none" stroke="#52606D" stroke-width="2.5" stroke-linejoin="miter" stroke-linecap="butt"/>
+<path d="M230,1317.84 L236.2,1368.68" fill="none" stroke="#52606D" stroke-width="2.5" stroke-linejoin="miter" stroke-linecap="butt"/>
+<path d="M230,1317.84 L272.16,1337.68" fill="none" stroke="#52606D" stroke-width="2.5" stroke-linejoin="miter" stroke-linecap="butt"/>
+<path d="M191.56,1346.36 L236.2,1368.68" fill="none" stroke="#52606D" stroke-width="2.5" stroke-linejoin="miter" stroke-linecap="butt"/>
+<path d="M191.56,1346.36 L199,1400.92" fill="none" stroke="#52606D" stroke-width="2.5" stroke-linejoin="miter" stroke-linecap="butt"/>
+<path d="M236.2,1368.68 L272.16,1337.68" fill="none" stroke="#52606D" stroke-width="2.5" stroke-linejoin="miter" stroke-linecap="butt"/>
+<path d="M236.2,1368.68 L280.84,1378.6" fill="none" stroke="#52606D" stroke-width="2.5" stroke-linejoin="miter" stroke-linecap="butt"/>
+<path d="M236.2,1368.68 L254.8,1408.36" fill="none" stroke="#52606D" stroke-width="2.5" stroke-linejoin="miter" stroke-linecap="butt"/>
+<path d="M236.2,1368.68 L199,1400.92" fill="none" stroke="#52606D" stroke-width="2.5" stroke-linejoin="miter" stroke-linecap="butt"/>
+<path d="M272.16,1337.68 L280.84,1378.6" fill="none" stroke="#52606D" stroke-width="2.5" stroke-linejoin="miter" stroke-linecap="butt"/>
+<path d="M280.84,1378.6 L254.8,1408.36" fill="none" stroke="#52606D" stroke-width="2.5" stroke-linejoin="miter" stroke-linecap="butt"/>
+<path d="M254.8,1408.36 L199,1400.92" fill="none" stroke="#52606D" stroke-width="2.5" stroke-linejoin="miter" stroke-linecap="butt"/>
+<ellipse cx="230" cy="1317.84" rx="11.78" ry="11.78" fill="#DCE7F3" stroke="#1F2933" stroke-width="2.5" stroke-linejoin="miter" stroke-linecap="butt"/>
+<ellipse cx="191.56" cy="1346.36" rx="11.78" ry="11.78" fill="#F4CF62" stroke="#1F2933" stroke-width="2.5" stroke-linejoin="miter" stroke-linecap="butt"/>
+<ellipse cx="236.2" cy="1368.68" rx="11.78" ry="11.78" fill="#DCEFE4" stroke="#1F2933" stroke-width="2.5" stroke-linejoin="miter" stroke-linecap="butt"/>
+<ellipse cx="272.16" cy="1337.68" rx="11.78" ry="11.78" fill="#DCEFE4" stroke="#1F2933" stroke-width="2.5" stroke-linejoin="miter" stroke-linecap="butt"/>
+<ellipse cx="280.84" cy="1378.6" rx="11.78" ry="11.78" fill="#E5DCF0" stroke="#1F2933" stroke-width="2.5" stroke-linejoin="miter" stroke-linecap="butt"/>
+<ellipse cx="254.8" cy="1408.36" rx="11.78" ry="11.78" fill="#DCE7F3" stroke="#1F2933" stroke-width="2.5" stroke-linejoin="miter" stroke-linecap="butt"/>
+<ellipse cx="199" cy="1400.92" rx="11.78" ry="11.78" fill="#E5DCF0" stroke="#1F2933" stroke-width="2.5" stroke-linejoin="miter" stroke-linecap="butt"/>
+<text font-family="'Comic Sans MS', 'Comic Neue', 'Chalkboard SE', cursive" font-size="38" fill="#1F2933" text-anchor="middle"><tspan x="230" y="1453.2">GeoToolKG</tspan></text>
+<path d="M300,1360 L460.59,1360" fill="none" stroke="#1F2933" stroke-width="3.5" stroke-linejoin="miter" stroke-linecap="butt"/>
+<polygon points="476.09,1360 460.59,1367.75 460.59,1352.25" fill="#1F2933" stroke="#1F2933" stroke-width="3.5" stroke-linejoin="miter" stroke-linecap="butt"/>
+<text font-family="'Times New Roman', 'TeX Gyre Termes', 'Nimbus Roman', serif" font-size="36" fill="#1F2933" text-anchor="middle"><tspan x="390" y="1402.4">Executor</tspan></text>
+<path d="M 508.8,1369.65 L 508.8,1361.25 C 506.6,1356 500,1352.85 500,1342.35 C 500,1314 545.1,1314 545.1,1342.35 C 545.1,1352.85 537.4,1358.1 535.2,1362.3 L 535.2,1369.65 Z" fill="#F4CF62" stroke="#1F2933" stroke-width="3.5" stroke-linejoin="miter" stroke-linecap="butt"/>
+<path d="M 509.9,1379.41 L 534.1,1379.41" fill="none" stroke="#1F2933" stroke-width="4.2" stroke-linejoin="miter" stroke-linecap="round"/>
+<path d="M 516.5,1385.09 C 517.6,1390.34 527.5,1390.34 529.7,1385.09" fill="none" stroke="#1F2933" stroke-width="4" stroke-linejoin="miter" stroke-linecap="round"/>
+<path d="M 522,1304.55 L 522,1312.95" fill="none" stroke="#1F2933" stroke-width="3.5" stroke-linejoin="miter" stroke-linecap="round"/>
+<path d="M 492.3,1315.05 L 498.9,1321.35" fill="none" stroke="#1F2933" stroke-width="3.5" stroke-linejoin="miter" stroke-linecap="round"/>
+<path d="M 545.1,1321.35 L 551.7,1315.05" fill="none" stroke="#1F2933" stroke-width="3.5" stroke-linejoin="miter" stroke-linecap="round"/>
+<path d="M 481.3,1343.4 L 491.2,1343.4" fill="none" stroke="#1F2933" stroke-width="3.5" stroke-linejoin="miter" stroke-linecap="round"/>
+<path d="M 553.9,1343.4 L 563.8,1343.4" fill="none" stroke="#1F2933" stroke-width="3.5" stroke-linejoin="miter" stroke-linecap="round"/>
+<text font-family="'Comic Sans MS', 'Comic Neue', 'Chalkboard SE', cursive" font-size="38" fill="#1F2933" text-anchor="middle"><tspan x="525" y="1453.2">Answer</tspan></text>
+<path d="M70,320 L54,320 Q44,320 44,330 L44,1350 Q44,1360 54,1360 L128.59,1360" fill="none" stroke="#52606D" stroke-width="3.5" stroke-linejoin="round" stroke-linecap="butt" stroke-dasharray="14 10.5"/>
+<polygon points="144.09,1360 128.59,1367.75 128.59,1352.25" fill="#52606D" stroke="#52606D" stroke-width="3.5" stroke-linejoin="miter" stroke-linecap="butt"/>
+<text font-family="'Times New Roman', 'TeX Gyre Termes', 'Nimbus Roman', serif" font-size="36" fill="#52606D" text-anchor="start"><tspan x="54" y="400.4">No</tspan></text>
+<rect x="760" y="1276" width="650" height="194" rx="14" fill="#FFFFFF" stroke="#CBD2D9" stroke-width="2" stroke-linejoin="miter" stroke-linecap="butt"/>
+<rect x="776" y="1304" width="60" height="30" rx="15" fill="#DCE7F3" stroke="#3B6EA8" stroke-width="3" stroke-linejoin="miter" stroke-linecap="butt"/>
+<text font-family="'Times New Roman', 'TeX Gyre Termes', 'Nimbus Roman', serif" font-size="32" fill="#1F2933" text-anchor="start"><tspan x="846" y="1330.8">Skill fragment</tspan></text>
+<ellipse cx="806" cy="1373" rx="19" ry="19" fill="#FFFFFF" stroke="#1F2933" stroke-width="4" stroke-linejoin="miter" stroke-linecap="butt"/>
+<ellipse cx="806" cy="1373" rx="8" ry="8" fill="#1F2933" stroke="none"/>
+<text font-family="'Times New Roman', 'TeX Gyre Termes', 'Nimbus Roman', serif" font-size="32" fill="#1F2933" text-anchor="start"><tspan x="846" y="1384.8">Goal operation</tspan></text>
+<ellipse cx="806" cy="1427" rx="17" ry="17" fill="#4A5864" stroke="#1F2933" stroke-width="2.5" stroke-linejoin="miter" stroke-linecap="butt"/>
+<text font-family="'Times New Roman', 'TeX Gyre Termes', 'Nimbus Roman', serif" font-size="32" fill="#1F2933" text-anchor="start"><tspan x="846" y="1438.8">Capability</tspan></text>
+<ellipse cx="1102" cy="1319" rx="13" ry="13" fill="#4A5864" stroke="#1F2933" stroke-width="2.5" stroke-linejoin="miter" stroke-linecap="butt"/>
+<path d="M1121,1319 L1128,1327 L1142,1310" fill="none" stroke="#3E8E64" stroke-width="5" stroke-linejoin="round" stroke-linecap="round"/>
+<text font-family="'Times New Roman', 'TeX Gyre Termes', 'Nimbus Roman', serif" font-size="32" fill="#1F2933" text-anchor="start"><tspan x="1155" y="1330.8">Support candidate</tspan></text>
+<path d="M1085,1373 L1124.65,1373" fill="none" stroke="#C8473D" stroke-width="3" stroke-linejoin="miter" stroke-linecap="butt" stroke-dasharray="9 6"/>
+<polygon points="1137.65,1373 1124.65,1379.5 1124.65,1366.5" fill="#C8473D" stroke="#C8473D" stroke-width="3" stroke-linejoin="miter" stroke-linecap="butt"/>
+<text font-family="'Times New Roman', 'TeX Gyre Termes', 'Nimbus Roman', serif" font-size="32" fill="#1F2933" text-anchor="start"><tspan x="1155" y="1384.8">Unresolved input</tspan></text>
+<rect x="1085" y="1412" width="60" height="30" rx="15" fill="none" stroke="#E07B39" stroke-width="3.5" stroke-linejoin="miter" stroke-linecap="butt" stroke-dasharray="7 5"/>
+<text font-family="'Times New Roman', 'TeX Gyre Termes', 'Nimbus Roman', serif" font-size="32" fill="#1F2933" text-anchor="start"><tspan x="1155" y="1438.8">Bridging Skill</tspan></text>
+</svg>

@@ -3,6 +3,7 @@
 import asyncio
 from contextlib import asynccontextmanager
 
+from agentgs.client.errors import TransportFailure
 from agentgs.contracts.async_utils import drain
 
 
@@ -51,6 +52,8 @@ class ModelExecutor:
                     "models", self.settings.max_concurrent_model_calls
                 ):
                     return await self.client.chat(*args, **kwargs)
+        except TimeoutError as exc:
+            raise TransportFailure("LLM request deadline exceeded") from exc
         finally:
             self._tasks.discard(task)
 

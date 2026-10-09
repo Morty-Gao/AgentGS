@@ -1,24 +1,9 @@
-\subsection{Plan Completion over the Skill Hypergraph}
+\subsection{Automatic Plan Completion}
 \label{sec:completion}
-Completion examines whether the composed plan contains the required operations, whether their inputs are supplied, and whether admissible implementations are available. These are different failure modes: an omitted statistic requires another operation, an unresolved artifact reference requires a valid producer, and a missing implementation cannot be repaired merely by ordering the existing steps.
+AgentGS examines the initial plan for omitted operations and disconnected fragments. It proposes supporting operations from compatible Skills for task-relevance review, then searches other Skills for declared branches connecting active fragments. The search fixes the active boundaries and uses shared operations and typed interfaces to identify candidate connections within individual provider Skills.
 
-\paragraph{Supporting-capability completion.}
-The system searches registered knowledge for operations supporting an identified gap. Activated and directly compatible Skills can supply missing task operations, while explicit compatibility relations guide the search for unsatisfied dependencies. Insertions are followed by prerequisite expansion and conflict checks. Retrieval cues help identify candidates, but keyword overlap alone is not evidence that an operation is scientifically necessary.
+A candidate must add a missing operation, satisfy its prerequisites, and have available tools within the declared scope. Insertion must preserve acyclic dependencies. A unique valid branch is added automatically; ambiguous alternatives are reported. This procedure is designed to repair omissions without requiring the model to generate every intermediate step.
 
-\paragraph{Directed bridging.}
-Bridging connects active fragments using a directed branch from an inactive Skill. Let $u$ be an output-boundary capability of active Skill $A$ and $v$ an input-boundary capability of active Skill $B$: $u$ has no successor in $A$'s active local dependencies, and $v$ has no predecessor in $B$'s active local dependencies. An inactive provider Skill can declare
-\begin{equation}
-\pi=(u,m_1,\ldots,m_k,v),\qquad k\geq1,
-\label{eq:bridge}
-\end{equation}
-where at least one intermediate capability is inactive. The provider supplies both the intermediate operations and their declared connection to the endpoints. Figure~\ref{fig:overview}(c) illustrates this reuse of a local branch.
+Insertion preserves the entry operation's constraints and updates the receiving operation's dependencies and bindings. Recomposition verifies mandatory prerequisites; a branch requiring additional operations outside the accepted connection is rejected.
 
-Search fixes the active capability set at its start. Hypergraph membership identifies inactive Skills containing the two endpoints; explicit dependencies and applicable conditional order determine directed simple paths within each provider. Co-occurrence and list position do not establish direction. Candidates for an endpoint pair are skipped when an indirect data path already connects that pair. Newly inserted operations do not recursively extend this search.
-
-\paragraph{Branch validity.}
-A candidate branch must satisfy five conditions. Its direction must be declared; all mandatory predecessors must belong to the active set or the candidate branch; adjacent operations must share compatible concrete input/output types; every required operation must have an available tool within its permitted scope; and both individual and joint insertions must preserve acyclicity. Generic types alone do not establish compatibility. External active predecessors retain their original constraints rather than inheriting the provider's scope.
-
-\paragraph{Acceptance and recomposition.}
-For an ordered endpoint pair, only a unique valid branch is inserted automatically. Multiple valid candidates produce an ambiguity report. Insertion preserves the entry instance's dependencies and implementation constraints, adds the intermediate operations, and updates the exit's dependencies, tool scope, and bindings according to the accepted provider. Recomposition then checks for unmet prerequisites or additional operations outside the accepted branch. A candidate that fails these checks is rejected.
-
-This procedure makes bridge insertion explicit and inspectable. It establishes compatibility with declared workflow knowledge, rather than a guarantee that every inserted operation is required by the task's scientific meaning. Appendix~\ref{app:method-details} provides the detailed algorithm and acceptance conditions; Appendix~\ref{sec:case-study} works through a complete example.
+Figure~\ref{fig:pipeline} illustrates a connection between raster compositing and scalar comparison. Completion inserts a valid-pixel mean operation and binds the comparison to its output. Grounding selects concrete tools and preserves these producer--consumer bindings; an inconsistent grounding is rejected. The resulting plan uses the existing execution and answer-generation services. Search rules, execution details, and the complete example are provided in Appendices~\ref{app:method-details}, \ref{sec:system}, and~\ref{sec:case-study}.

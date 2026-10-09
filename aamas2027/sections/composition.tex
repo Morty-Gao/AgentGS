@@ -1,0 +1,11 @@
+\subsection{Skill-guided Plan Composition}
+\label{sec:composition}
+\label{sec:initial-selection}
+\input{figures/fig_pipeline}
+Given a question and input resources, AgentGS retrieves Skills using the requested operations, domain, and available data types. The model selects goal operations from the retrieved candidates. The framework expands their mandatory predecessors and combines the selected fragments into an initial plan, preserving dependencies and permitted tools. Multiple required inputs can produce a branching plan.
+
+This procedure heuristically prunes the planning space. Task relevance narrows the candidate strategies, and goal selection excludes unrelated optional operations while retaining required predecessors. Typed inputs and outputs guide connections between fragments. A raster-producing operation, for example, cannot directly supply a comparison that expects a scalar; the unresolved input identifies a gap for completion.
+
+Each operation retains its source Skill, required inputs, and permitted implementations. These records constrain tool selection and preserve the operation's role in the workflow.
+
+The model thus receives a structured starting plan and scoped tool candidates. It can reuse part of a Skill without regenerating its declared prerequisites or adopting the whole workflow. When no Skill applies, the agent falls back to the existing tool-only planning path.

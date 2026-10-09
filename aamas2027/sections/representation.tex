@@ -1,54 +1,7 @@
-\subsection{Skill--Capability--Tool Representation}
+\subsection{Hierarchical Organization of Skills and Tools}
 \label{sec:representation}
-The representation distinguishes strategies, shared operations, and executable interfaces (Figure~\ref{fig:overview}(b)).
+Individual tools provide little guidance about their joint use, while complete Skills may contain operations that a new task does not need. AgentGS exposes the internal operations of reusable Skills, combining strategy-level guidance with the flexibility to compose local operations across strategies.
 
-\paragraph{Skills as reusable strategies.}
-A Skill describes a class of workflows through an objective, applicable inputs, expected artifacts, capability steps, and usage constraints. Each step specifies its operation, mandatory predecessors, required or optional status, and permitted implementations. Validation requirements and recovery policies describe how the strategy's results and failures should be handled. Reuse selects task-relevant local steps; an agent need not execute every operation in the original strategy.
+Each Skill specifies an objective, typed inputs and outputs, and dependencies between operations. A shared operation, termed a \emph{Capability}, maps to one or more implementing tools. We represent this organization as a hypergraph with operations as nodes and Skills as hyperedges. Shared operations connect strategies, while declared dependencies govern their composition.
 
-\paragraph{Capabilities as shared operations.}
-A Capability specifies an operation through its function, input/output types, preconditions, postconditions, and candidate tools. The same capability can occur in several Skills. Its occurrence retains the source strategy's constraints: two Skills may both use raster analysis but permit different tools or require different preceding transformations. Sharing a capability therefore provides a point of connection between strategies without making all its occurrences interchangeable.
-
-\paragraph{Tools as implementations.}
-A Tool is a callable interface with an identifier, parameter schema, input/output definitions, and runtime information. Capability--Tool mappings record which tools implement an operation and any operation-specific parameter constraints. The mapping is many-to-many: a capability can admit several implementations, and a tool can support several capabilities. Concrete files, values, and upstream artifacts are bound at execution time.
-
-\paragraph{Skill hypergraph.}
-Let $S$ and $C$ denote the registered Skills and Capabilities. Their membership defines
-\begin{equation}
-H=(C,E),\qquad E=\{e_s:s\in S\},\qquad e_s\subseteq C.
-\label{eq:hypergraph}
-\end{equation}
-Capabilities are nodes and each Skill is a hyperedge. Skills containing $\{a,b\}$ and $\{b,c\}$ intersect at capability $b$, providing a candidate connection for composition. Hyperedge membership records which operations belong to a strategy. It does not, by itself, specify the order or data flow between them.
-
-Execution prerequisites are represented separately by a scoped relation $d=(s,U,c)$: within Skill $s$, capability $c$ requires every predecessor in $U$. This is a conjunctive requirement. When an operation requires both a prepared raster and a reference value, supplying either input alone does not satisfy the declaration. Conditional order is used only when its stated condition applies. The strategy identity remains part of each relation, preventing a dependency from one Skill from being silently substituted for another's.
-
-\paragraph{Capability instances and artifact bindings.}
-A task-specific plan is
-\begin{equation}
-P=(V,D_d,D_c,\beta),\qquad v_i=(c_i,s_i,r_i),
-\label{eq:plan}
-\end{equation}
-where $c_i$ is the operation, $s_i$ its source Skill, and $r_i$ its step/input role. $D_d$ and $D_c$ represent data and control dependencies, respectively; $\beta$ binds inputs to task resources or outputs of preceding instances. A capability is a reusable definition, whereas an instance is one occurrence on particular inputs. Two operations on different rasters remain distinct even if they select the same tool. This distinction is essential for preserving multiplicity, provenance, and the identity of the artifact consumed downstream.
-
-\subsection{Plan Composition}
-\label{sec:composition}
-\label{sec:initial-selection}
-Composition turns retrieved strategies into a task-specific set of operations. Skill retrieval uses the question, domain, and input types to supply candidate strategies. Selection then identifies applicable Skills and the operations needed for the requested outputs. The LLM makes these decisions within the retrieved declarations, retaining the relevant source Skills and their constraints.
-
-\paragraph{Mandatory-predecessor expansion.}
-Selected operations can depend on outputs not yet included in the plan. For a selected Skill $s$, let $R_s^{(0)}$ contain its initially required capabilities. Its dependency closure can be written as
-\begin{equation}
-R_s^{(k+1)}
-=
-R_s^{(k)}
-\cup
-\bigcup_{\substack{(s,U,c)\in\mathcal{D}\\c\in R_s^{(k)}}} U,
-\label{eq:closure}
-\end{equation}
-where $\mathcal{D}$ is the set of declared mandatory dependencies. Expansion continues until no required predecessor is missing. This expression describes closure within a strategy; instantiation still preserves separate occurrences and input roles. Missing declarations and dependency cycles are diagnosed rather than accepted as executable plans.
-
-\paragraph{Combining local fragments.}
-Composition assembles the selected operations and their required predecessors into $P$. Composition retains the provenance and admissible tool scope of every occurrence, together with its data and control dependencies. Shared capability identity makes reuse discoverable, but does not justify merging operations on different inputs or changing a strategy's prerequisites.
-
-Predecessor expansion only supplies dependencies already declared for the selected operations. It can leave a gap between fragments from different strategies. For instance, a compositing fragment may produce a raster while a comparison fragment expects a scalar statistic. Both fragments can be internally complete and still fail to form an executable analysis. Completion addresses these remaining gaps.
-
-When no Skill is applicable, AgentGS retrieves tool candidates from GeoToolKG for direct tool-call planning. Both routes use the same execution and answer-generation interfaces. This fallback provides access to registered tools, but it does not supply the strategy knowledge absent from retrieval.
+Reuse preserves the prerequisites and tool constraints of the source Skill. Two strategies can therefore share an operation while requiring different preprocessing steps. Operations on different input objects remain separate, retaining the identity of the result consumed downstream. Appendix~\ref{app:method-details} gives the formal representation.

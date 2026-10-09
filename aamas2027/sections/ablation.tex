@@ -1,55 +1,35 @@
 \section{Ablation and Analysis}
 \label{sec:ablations}
-We examine representation, dependency expansion, completion, tool selection, and recovery. The study reports answer scores alongside tool coverage and order. We distinguish the intended intervention from the intervention actually established by the reported run.
+We examine the contribution of structured strategy knowledge, the mechanisms that construct and complete plans, and their computational cost.
 
-\subsection{Study Design and Intervention Scope}
-The fixed subset covers all ten domains and contains 57 records: 22 single-step, 20 two- to three-step, and 15 with at least four reference calls. Its 35 multistep records account for 61.40\%, compared with 29.68\% in the complete dataset. The subset therefore emphasizes orchestration more heavily and should not be treated as a replacement for the 603-record evaluation.
+\emph{Draft note:} The component scores below retain the previous 57-record study. Matched system comparisons, plan-refinement statistics, and cost measurements remain to be populated from reruns.
 
-Full is the reference configuration within this study. Its overall and multistep FAS are 0.6387 and 0.5333, respectively. These values belong to the subset experiment; neither its composition nor its run provenance supports directly equating them with the main evaluation.
+\subsection{From Data to Skills}
+\label{sec:knowledge-ablation}
+We separate three levels of agent support. \emph{Data-only} provides the input data and Bash for exploration and computation. \emph{Tool-only} adds the registered scientific tools and their existing planning and execution workflow. \emph{AgentGS} further introduces Skill organization, plan composition, and automatic completion. Data-only versus Tool-only examines the contribution of packaged scientific operations; Tool-only versus AgentGS examines the additional contribution of strategy knowledge and structured planning.
 
-\paragraph{A1: representation.}
-The control asks the model to plan directly in tool instances while retaining strategies, dependencies, and candidate tools. It targets the organization of planning decisions rather than removing all strategy knowledge. The reported run implements only a partial control. Its score difference therefore cannot isolate the value of hierarchical representation.
+The planned comparison uses the same backbone, questions, accessible data, and model budgets. Tasks depending on data services unavailable to Bash are excluded from all three configurations. FAS provides a common outcome measure; Quality and its process components additionally compare Tool-only with AgentGS. Table~\ref{tab:system-ablation} reserves these matched results. Earlier direct-answer baselines do not substitute for the Data-only condition.
+\input{tables/system_ablation}
 
-\paragraph{A2: mandatory-predecessor expansion.}
-The intended intervention retains selected requirements and dependency declarations but disables automatic predecessor closure. Completion remains available and may restore omitted prerequisites. The supplied result record states that the intended A2 intervention was not activated. Its numbers are retained for provenance but are not evidence for an expansion effect.
+\subsection{Design Contributions}
+\label{sec:design-contributions}
+Within AgentGS, we consider four interventions. \emph{Flat planning} retains strategy declarations and candidate tools but asks the model to plan directly in tool instances. \emph{Without predecessor expansion} retains goal selection and dependency declarations while disabling automatic predecessor closure. \emph{Without automatic completion} disables supporting-operation insertion and bridging. \emph{Without directed bridging} removes only the search for connecting branches, retaining other completion mechanisms. These controls isolate narrower changes than removing the entire Skill layer.
 
-\paragraph{A3 and A4: completion.}
-A3 keeps gap diagnosis but disables supporting-capability insertion, including bridging. A4 disables only directed bridging while retaining the other completion mechanisms. Their scopes distinguish general support insertion from the additional connection supplied by an inactive provider Skill.
-
-\paragraph{A5: implementation selection.}
-The intended control chooses the first eligible tool in a fixed order while preserving operation requirements, candidate scope, and argument validation. The reported run changes only part of ranking, so it does not establish the effect of removing all selection optimization.
-
-\paragraph{A6: execution recovery.}
-A6 disables recovery after a scientific execution failure. Initial planning, grounding, and binding remain enabled. The relevant contrast is whether failure feedback can repair an execution or trigger replanning, rather than whether initial inputs are validated.
+Table~\ref{tab:ablation} retains the earlier results on 57 records, including 35 multistep records. Full obtains overall/multistep FAS of 0.6387/\allowbreak 0.5333. Disabling completion gives 0.4624/\allowbreak 0.3802, while disabling bridging alone gives 0.6160/\allowbreak 0.4913. The corresponding multistep decreases are 15.31 and 4.20 percentage points. These comparisons motivate examining which missing operations completion supplies and when a connecting branch changes the outcome.
 \input{tables/ablation}
-\input{tables/ablation_process}
 
-The present runtime exposes explicit controls for these interventions, but control availability does not retroactively establish that a reported experiment used them. Appendix~\ref{app:experimental-details} distinguishes current intervention semantics from the provenance of these scores.
+Flat planning and the predecessor configuration score below Full, but their earlier runs implemented only a partial control and an inactive intervention, respectively. Their differences cannot yet establish those designs' effects. The reruns must verify effective interventions and changes in the resulting plans. Full process scores, provenance, and supplementary tool-selection and recovery comparisons are retained in Appendix~\ref{app:component-details}.
 
-\subsection{Planning Representation and Dependency Expansion}
-Relative to Full, A1 lowers overall FAS by 16.39 percentage points and multistep FAS by 12.38 points. Its multistep TSF1/TOS are 0.8147/\allowbreak 0.8295, compared with Full's 0.8862/\allowbreak 0.8952. Thus, the reported configuration differs in both answers and successful-call sequences. Because A1 is only a partial control, these changes cannot be assigned solely to planning at the capability level.
+\subsection{Plan Refinement}
+\label{sec:plan-refinement}
+The analysis follows the plan from retrieved candidates to selected goals, expanded predecessors, and completed connections. For composition, we will report the number of candidate and retained operations, required-operation coverage, and unresolved inputs. Reference-workflow mappings and inspected traces will check whether pruning preserves necessary operations. A smaller candidate set is useful only when it retains an appropriate route to the requested outputs.
 
-A2 has overall and multistep FAS decreases of 16.27 and 12.38 points. Its multistep TSF1/TOS are 0.8302/\allowbreak 0.8588. The inactive intervention prevents interpreting these differences as the effect of predecessor expansion, regardless of their magnitude.
+For completion, we will record how often a gap is detected, a supporting operation or branch is inserted, and grounding succeeds. Paired executions will start from the same saved initial plan with completion enabled or disabled, using matched downstream settings and budgets. We will report changes in per-task FAS, corrected and degraded outcomes, and the reasons connections are rejected. Both the full population and the subset with gaps identified before the intervention will be reported.
 
-There is also a structural interaction between expansion and completion. If completion inserts a prerequisite omitted by the expansion control, the final plan may remain unchanged even when the control is active. Conversely, a model can explicitly include necessary operations without automatic closure. Isolating expansion requires inspecting initial requirements, predecessor additions, support additions, and unresolved gaps, rather than inferring the intervention from the final score alone.
+This comparison tests whether completion repairs an initially incomplete plan rather than benefiting from a different initial model proposal. Appendix~\ref{sec:case-study} illustrates the mechanism: a raster-producing fragment and a scalar-comparison fragment are connected through a statistics operation, whose output is explicitly bound to the comparison. The illustration explains the expected repair; its frequency and outcome effects remain to be measured.
 
-\subsection{Supporting-Capability Completion and Bridging}
-A3 obtains overall FAS of 0.4624 and multistep FAS of 0.3802, decreases of 17.63 and 15.31 points from Full. Both scopes show lower answer agreement. The multistep decrease is smaller than the overall decrease, so this result does not support a claim that completion has a larger effect on multistep tasks in this subset.
+\subsection{Quality and Cost}
+\label{sec:quality-cost}
+We will compare Tool-only, AgentGS, and AgentGS without completion using answer quality, model requests, token consumption, tool attempts, and elapsed time. Measurements will include failed tasks under matched budgets and execution conditions. ECR describes successful reference-call matches per attempt; actual time and token usage are needed to assess computational cost.
 
-A4 obtains overall and multistep FAS of 0.6160 and 0.4913, decreases of 2.27 and 4.20 points. It retains more of the Full configuration's answer performance than A3. The two configurations remove different sets of mechanisms, however, so their difference is not an independently measured additive contribution of bridging.
-
-Process scores further separate their behavior. On multistep records, A3 obtains TSF1/TOS of 0.8364/\allowbreak 0.8438, whereas A4 obtains 0.8249/\allowbreak 0.8652. A4 has lower coverage agreement but higher order agreement than A3. This divergence shows why a single process score would obscure changes in successful-call sequences.
-
-A bridge-specific explanation requires evidence that the task exposes a disconnected pair of active fragments, an admissible provider branch was available, and the inserted operation consumed and produced the expected artifacts. The case in Appendix~\ref{sec:case-study} explains these conditions for a composite-raster workflow. It is a mechanism illustration rather than a measured frequency of bridge use across the dataset.
-
-\subsection{Tool Selection and Execution Recovery}
-A5 increases overall FAS from 0.6387 to 0.6415 but decreases multistep FAS from 0.5333 to 0.5184. Its multistep TSF1/TOS are 0.8133/\allowbreak 0.8414, decreases of 7.29/\allowbreak 5.38 percentage points. Answer and process changes therefore do not have a uniform direction across the reported scopes. In view of the partial ranking intervention, these results describe the available configuration rather than establish a general selection benefit.
-
-A6 obtains overall and multistep FAS of 0.5972 and 0.4613, decreases of 4.15 and 7.20 points. Its multistep TSF1/TOS are 0.7652/\allowbreak 0.7985, decreases of 12.10/\allowbreak 9.67 points. The coverage decline is the largest among the six reported multistep configurations. This is consistent with recovery affecting how much of a successful-call sequence is completed, but the aggregate does not identify which failed calls were recoverable.
-
-Trace-level attribution should distinguish argument corrections, alternative implementations, replanned operations, and exhaustion of execution budgets. A resumed scalar computation and a rerun of a file-producing step also have different costs. The reported scores contain no matched latency or token-cost analysis, so they do not establish the efficiency of recovery.
-
-\subsection{Joint Interpretation of Answer and Workflow Evidence}
-Full has the highest reported overall and multistep process scores: 0.9249/\allowbreak 0.9392 and 0.8862/\allowbreak 0.8952, respectively. Its process scores come from the supplementary 57-record experiment, while A1--A6 use records from the formal worksheet. The intervention and provenance limitations remain relevant even when all process differences favor Full.
-
-The combined results identify three questions for mechanistic analysis. Which declared operations are missing before execution? Which consumers receive the intended upstream artifacts? Which failures can be repaired without changing the scientific objective? These questions connect the model's decisions to scientific outputs more directly than tool-name agreement alone. The current aggregates establish configuration differences; a causal account of individual components additionally requires matched runs and aligned execution traces.
+Comparing weaker and stronger backbones will test whether structured planning and automatic repair reduce dependence on model capability. The analysis will relate score gains to additional planning calls, inserted operations, and avoided execution failures. No efficiency advantage is inferred from the available accuracy scores alone; these measurements will determine whether improved task completion offsets the extra planning work.

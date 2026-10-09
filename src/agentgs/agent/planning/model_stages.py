@@ -56,6 +56,47 @@ class ModelStages:
             scopes = {sid: ids for sid, ids in scopes.items() if ids}
         if not scopes:
             return {}
+        # Scope selection needs operation meanings; execution contracts are
+        # supplied after adoption so prerequisites are not mistaken for goals.
+        selection_context = {
+            "strategies": [
+                {
+                    "skill_id": skill["id"],
+                    "description": skill.get("description", ""),
+                    "operations": [
+                        {
+                            "capability_id": capability_id(
+                                row.get("capability_id")
+                                or row.get("capability")
+                                or row.get("operation")
+                            ),
+                            "operation": row.get("operation", row.get("capability", "")),
+                        }
+                        for row in workflow_steps(skill)
+                        if capability_id(
+                            row.get("capability_id")
+                            or row.get("capability")
+                            or row.get("operation")
+                        )
+                        in scopes.get(skill["id"], set())
+                    ]
+                    or [
+                        {
+                            "capability_id": cid,
+                            "operation": (skill.get("goal") or {}).get("description", cid),
+                        }
+                        for cid in sorted(scopes.get(skill["id"], set()))
+                    ],
+                }
+                for skill in retrieval["declarations"]
+                if skill["id"] in scopes
+            ],
+            **{
+                key: retrieval[key]
+                for key in ("support_candidates", "adopted_requirements")
+                if key in retrieval
+            },
+        }
         definition = {
             "type": "function",
             "function": {
@@ -92,7 +133,14 @@ class ModelStages:
             "Do not adopt unrelated operations merely because they share a domain or input type. "
             "A requested intermediate operation can be a goal; do not import its downstream steps. "
             "Select goal operations before prerequisite expansion; the next stage handles declared "
-            "dependencies. The selection is an unordered set, not an execution plan. "
+            "dependencies. Select one applicable strategy per requested result, not multiple "
+            "alternative strategies for the same result. Do not separately select loading, "
+            "filtering or normalization just to supply another operation's inputs. Select such "
+            "an operation only when its own output is explicitly requested by the question. "
+            "A declaration's required input or step flags govern execution after adoption; "
+            "they do not require adopting extra goal operations here. For a request to count "
+            "a subset, select the subset-count operation alone; prepare its inputs in the "
+            "execution plan. The selection is an unordered set, not an execution plan. "
             "Return an empty requirements array when none of the candidates applies; direct tool "
             "planning remains available. Do not generate measurements or tool arguments here."
         )
@@ -107,7 +155,7 @@ class ModelStages:
                 "adopted goals or restore prerequisites disabled by the predecessor intervention."
             )
         stage = "capability_completion" if completion else "capability_selection"
-        prompt = StagePrompt(instruction, retrieval)
+        prompt = StagePrompt(instruction, selection_context)
         self.state.begin_protocol_stage()
         for attempt in range(self.state.context.options.argument_attempts):
             message = await self.call(
@@ -169,7 +217,7 @@ class ModelStages:
             await self.state.emit(
                 "planning_protocol_error", {"attempt": attempt + 1, "error": error}
             )
-            prompt = StagePrompt(instruction, {**retrieval, "validation_error": error})
+            prompt = StagePrompt(instruction, {**selection_context, "validation_error": error})
         raise ModelProtocolError("Capability selection protocol attempts exhausted")
 
     async def generate_tools_plan(

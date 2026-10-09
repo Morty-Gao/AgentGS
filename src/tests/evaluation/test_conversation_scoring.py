@@ -80,7 +80,7 @@ def test_native_scoring_uses_call_links_bound_arguments_and_retries(form):
     assert scored["physical_tool_call_attempts"] == 2
     assert scored["ecr"] == scored["tce"] == 0.5
     assert scored["model_total_tokens"] == 30
-    assert scored["accuracy_score"] == 95
+    assert scored["quality_score"] == 95
     assert scored["cost_score"] == 80
     assert scored["final_score"] == 92.75
     assert conversation.model_dump_json() == before

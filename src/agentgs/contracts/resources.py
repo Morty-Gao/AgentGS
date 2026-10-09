@@ -14,6 +14,19 @@ RESOURCE_MARKER = (
 )
 
 
+def retrieval_question(question, input_resource=None):
+    """Construct the public retrieval input identically offline and at runtime."""
+    if input_resource is not None and RESOURCE_MARKER not in question:
+        return (
+            question
+            + "\n\n"
+            + RESOURCE_MARKER
+            + " "
+            + json.dumps(input_resource, ensure_ascii=False)
+        )
+    return question
+
+
 def split_question_resource(question: str) -> tuple[str, Any]:
     """Separate caller-supplied public resources from the question text."""
     if RESOURCE_MARKER not in question:

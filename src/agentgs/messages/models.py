@@ -25,6 +25,7 @@ class FunctionCall(BaseModel):
     id: str = Field(min_length=1)
     type: Literal["function"] = "function"
     function: Function
+    index: int | None = Field(default=None, ge=0)
 
 
 class Message(BaseModel):
@@ -93,7 +94,7 @@ class Message(BaseModel):
         if self.name is not None:
             result["name"] = self.name
         if self.tool_calls:
-            result["tool_calls"] = [call.model_dump() for call in self.tool_calls]
+            result["tool_calls"] = [call.model_dump(exclude={"index"}) for call in self.tool_calls]
         if self.tool_call_id is not None:
             result["tool_call_id"] = self.tool_call_id
         for key in ("refusal", "audio"):

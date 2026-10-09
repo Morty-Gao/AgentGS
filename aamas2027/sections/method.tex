@@ -1,15 +1,7 @@
 \section{AgentGS}
 \label{sec:method}
-AgentGS organizes scientific tool use around reusable operations and their dependencies. Given a scientific question and available resources, the agent retrieves relevant strategies, composes their local operations into a task-specific plan, completes missing connections, and grounds the result in concrete tool calls. Figure~\ref{fig:overview} summarizes this workflow. Its central design choice is to preserve the strategy-specific conditions under which an operation can be reused while allowing that operation to participate in a new composition.
-
-\subsection{Task Formulation and Design}
-\label{sec:task-formulation}
-Let $q$ be a natural-language task, $X$ its available input resources, and $\mathcal{T}$ the registered tool collection. A task can request both computed quantities and output artifacts: for example, a composite raster, a statistic calculated from that raster, and a comparison with a supplied reference. Solving the task requires determining the necessary operations, their data dependencies, admissible implementations, and concrete arguments.
-
-A useful plan must meet three conditions. First, it must cover the requested operations and their prerequisites. Second, each operation must have an available implementation whose inputs can be supplied by $X$ or by successful preceding operations. Third, the produced quantities and artifacts must support the requested answer. The first two conditions constrain workflow construction; the third requires checking the meaning of the actual results. A structurally valid plan alone does not establish scientific correctness.
-
-AgentGS separates this problem into capability planning and tool execution. Capability planning determines what operations are needed and how they connect. Tool grounding chooses implementations under the resulting constraints, and execution resolves their arguments from observed data. This allows alternative implementations of an operation without discarding its role in the workflow. It also makes a missing intermediate operation distinguishable from a failed invocation of an already selected operation.
+AgentGS extends a tool-only agent with hierarchical strategy knowledge, Skill-guided plan composition, and automatic completion (Figures~\ref{fig:overview} and~\ref{fig:pipeline}). Composition provides a task-specific starting plan; completion recovers missing connections before the plan is mapped to executable tools.
 
 \input{sections/representation}
+\input{sections/composition}
 \input{sections/completion}
-\input{sections/execution}

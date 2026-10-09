@@ -50,7 +50,7 @@ def finish_for(mode: str | None):
             "primary_metric": "final_score",
             "micro_fas": report.get("micro_fas"),
             "macro_fas": report.get("macro_fas"),
-            "accuracy_score": composite.get("accuracy_score"),
+            "quality_score": composite.get("quality_score"),
             "final_score": composite.get("final_score"),
             "tsf1": composite.get("tsf1"),
             "tos": composite.get("tos"),

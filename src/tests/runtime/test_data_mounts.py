@@ -27,9 +27,15 @@ def test_mount_manifest_keeps_stored_names_and_omits_answer_keys(tmp_path):
             path.mkdir()
             (path / "secret.txt").write_text("secret")
     guests = mount_manifest(data)
-    assert guests == ["/data/climate", "/data/earthbench", "/data/mineral.csv"]
+    assert guests == [
+        "/data/climate",
+        "/data/earthbench",
+        "/data/geoquestions",
+        "/data/mineral.csv",
+    ]
     assert "geotooleval.jsonl" not in DATA_FILES
-    assert {"metadata", "geoquestions", "raw", "geotoolkg"}.isdisjoint(DATA_DIRECTORIES)
+    assert "/data/geotooleval.jsonl" not in guests
+    assert {"metadata", "raw", "geotoolkg"}.isdisjoint(DATA_DIRECTORIES)
     assert all("secret" not in guest for guest in guests)
     assert data_mounts(data / "missing") == []
 

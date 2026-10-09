@@ -12,6 +12,7 @@ from types import SimpleNamespace
 from typing import Any, Dict, List, Set
 
 from agentgs.agent.retrieval.graph import GraphStore, get_top_k_embeddings
+from agentgs.agent.retrieval.texts import anchor_text, relation_text
 from agentgs.contracts.async_utils import invoke
 
 logger = logging.getLogger(__name__)
@@ -133,7 +134,7 @@ class KGToolRetriever:
     def list2string(self, triplets_list):
         tri_list = []
         for triplets in triplets_list:
-            tri_list.append("('" + triplets[0] + "', '" + triplets[1] + "', '" + triplets[2] + "')")
+            tri_list.append(relation_text(triplets))
         return tri_list
 
     def batch_get_text_embeddings(
@@ -162,6 +163,7 @@ class KGToolRetriever:
                     embeddings[index] = future.result()
                 except Exception as exc:
                     logger.debug("Embedding item failed: %s", type(exc).__name__)
+                    raise
         return embeddings
 
     async def retrieve(self, query_bundle: Any):
@@ -352,9 +354,7 @@ class KGToolRetriever:
                 fun_rel_texts = list(dict.fromkeys(fun_rel_texts))
                 if not fun_rel_texts:
                     continue
-                tool_existed = "There is an existing tool:" + str(fun_rel_texts[0]).replace(
-                    "'", ""
-                ).replace("(", "").replace(")", "")
+                tool_existed = anchor_text(fun_rel_texts[0])
                 fun_rel_texts = fun_rel_texts[1:]
                 if fun_rel_texts == []:
                     continue

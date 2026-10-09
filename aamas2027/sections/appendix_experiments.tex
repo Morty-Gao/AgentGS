@@ -1,7 +1,8 @@
 \section{Experimental Provenance and Control Details}
 \label{app:experimental-details}
 \subsection{Sources of the Reported Aggregates}
-The main FAS table retains the answer scores supplied by the source experiment, with AgentGS identified as its first complete 603-record run. AgentGS's main TSF1/TOS are supplied by the recorded end-to-end evaluation on that population. Combining these aggregates in one table does not establish paired answer/process outcomes for every task.
+\input{tables/prior_results}
+Table~\ref{tab:prior-results} retains the answer scores supplied by the earlier experiment, with AgentGS identified as its first complete 603-record run. AgentGS's TSF1/TOS are supplied by the recorded end-to-end evaluation on that population. Combining these aggregates in one table does not establish paired answer/process outcomes for every task.
 
 The 57-record configuration study has a separate Full reference. Full's process scores are taken from the supplementary experiment, while A1--A6 use per-task records in the formal worksheet. A1's partial control, A2's inactive intervention, and A5's partial ranking change apply to those reported runs. Current implementation of a corresponding switch does not validate the identity or behavior of a past run.
 
@@ -12,7 +13,7 @@ The available manuscript evidence does not provide a complete set of immutable m
 \subsection{Interventions in the Current Runtime}
 Module interventions operate within Skill-guided planning. A1 preserves access to strategy declarations and admitted capabilities while requesting tool-instance planning without an ordered capability plan. This differs from a tool-only baseline that removes the Skill/Capability layer altogether.
 
-A2 suppresses automatic mandatory-predecessor closure. A3 suppresses supporting-capability insertion and bridging, while retaining gap diagnosis. With A2 alone, completion can restore a predecessor; with A2 and A3 together, neither automatic insertion phase supplies it. The model may still explicitly include declared requirements. Effective intervention therefore needs to be evaluated through changes in preparation and planning, not assumed from a configuration flag.
+A2 disables automatic predecessor closure during preparation and support completion. Support insertion does not restore omitted predecessors. A3 suppresses supporting-capability insertion and bridging, while retaining gap diagnosis. With A2 and A3 together, neither automatic insertion phase supplies missing dependencies. The model may still explicitly include declared requirements. Effective intervention therefore needs to be evaluated through changes in preparation and planning, not assumed from a configuration flag.
 
 A4 suppresses only directed bridging. A5 selects the first eligible implementation in a fixed tool-identifier order, preserving instance identities, constraints, and argument checks. A6 suppresses execution-driven repair and replanning after a scientific failure. These definitions specify intended controlled comparisons; the reported A1, A2, and A5 measurements retain the limitations stated above.
 
@@ -29,3 +30,15 @@ Budgets should distinguish model requests, transport attempts, plan attempts, sc
 To relate composition to outcomes, a trace must show the selected requirements, inserted predecessors, supporting operations, and remaining gaps. To relate bridging to outcomes, it must show the provider, endpoints, accepted path, and resolved data bindings. To relate recovery to outcomes, it must distinguish failed attempts, repaired arguments, changed plans, and verified reuse.
 
 The illustrative case provides a concrete explanation of these relationships. It is not a sampled failure distribution or a measured estimate of component utilization. Repeated matched runs and per-task alignment are needed before reporting uncertainty, significance, or causal component effects.
+
+\subsection{Complete Component Results}
+\label{app:component-details}
+Tables~\ref{tab:ablation-full} and~\ref{tab:ablation-process} retain the complete earlier configuration comparisons. The subset covers all ten domains, with 22 single-step, 20 two- to three-step, and 15 longer records. Its multistep fraction is 61.40\%, so it differs from the main evaluation population. The recorded A1, A2, and A5 intervention limitations remain applicable to these numbers.
+\input{tables/ablation_full}
+\input{tables/ablation_process}
+
+Full's overall TSF1/TOS are 0.9249/\allowbreak 0.9392, and its multistep scores are 0.8862/\allowbreak 0.8952. A3 obtains multistep TSF1/TOS of 0.8364/\allowbreak 0.8438, while A4 obtains 0.8249/\allowbreak 0.8652. The higher order score but lower coverage score of A4 illustrates why the two measures should be interpreted separately. These are configuration-level differences rather than an additive decomposition of component effects.
+
+A5 changes only part of tool ranking in the reported run. Its overall FAS rises from Full's 0.6387 to 0.6415, while multistep FAS falls from 0.5333 to 0.5184. Its multistep TSF1/TOS are 0.8133/\allowbreak 0.8414. The directions therefore differ across the answer-score populations.
+
+A6 disables execution recovery and obtains overall/multistep FAS of 0.5972/\allowbreak 0.4613. Its multistep TSF1/TOS are 0.7652/\allowbreak 0.7985, decreases of 12.10/\allowbreak 9.67 percentage points from Full. Attributing these differences to recovered failures requires matched execution traces. Recovery is part of the shared execution framework, so this comparison is supplementary to the main planning interventions.

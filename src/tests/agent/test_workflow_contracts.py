@@ -292,9 +292,15 @@ def test_common_data_selection_is_identical_across_modes():
     for mode in ["skill_guided", "tool_only", "data_only"]:
         selected, policy = select_scope(rows, "common_data", planning_mode=mode)
         assert [e.question_id for e in selected] == [2]
-        assert policy["excluded"][0]["question_id"] == 1
-    with pytest.raises(ValueError, match="Bash cannot access"):
-        select_scope(rows, "full", planning_mode="data_only")
+        assert policy["excluded"] == [
+            {
+                "question_id": 1,
+                "reason": "materialized_query_lookup_unavailable_to_bash",
+            }
+        ]
+    selected, policy = select_scope(rows, "full", planning_mode="data_only")
+    assert [e.question_id for e in selected] == [1, 2]
+    assert policy["excluded"] == []
 
 
 def test_common_data_offline_completeness_uses_selected_population(tmp_path):

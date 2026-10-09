@@ -11,10 +11,6 @@ def select_scope(examples, scope, *, planning_mode):
     if scope not in {"full", "common_data"}:
         raise ValueError("benchmark_scope must be full or common_data")
     excluded = [e for e in examples if access_class(e) == "materialized_query_lookup"]
-    if scope == "full" and planning_mode == "data_only" and excluded:
-        raise ValueError(
-            "Bash cannot access materialized query results. Use benchmark_scope=common_data for every compared mode."
-        )
     selected = examples if scope == "full" else [e for e in examples if e not in excluded]
     return selected, {
         "scope": scope,

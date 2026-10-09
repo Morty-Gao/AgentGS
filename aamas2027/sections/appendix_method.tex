@@ -1,6 +1,39 @@
-\section{Detailed Completion Procedure}
+\section{Representation and Completion Details}
 \label{app:method-details}
-This appendix specifies the branch search and acceptance conditions supporting Section~\ref{sec:completion}.
+This appendix provides the formal representation, dependency closure, and branch acceptance rules supporting Section~\ref{sec:method}.
+
+\subsection{Representation and Plan Notation}
+\paragraph{Skill hypergraph.}
+Let $S$ and $C$ denote the registered Skills and Capabilities. Their membership defines
+\begin{equation}
+H=(C,E),\qquad E=\{e_s:s\in S\},\qquad e_s\subseteq C.
+\label{eq:hypergraph}
+\end{equation}
+Capabilities are nodes and each Skill is a hyperedge. Skills containing $\{a,b\}$ and $\{b,c\}$ intersect at capability $b$, providing a candidate connection for composition. Hyperedge membership records which operations belong to a strategy. It does not, by itself, specify the order or data flow between them.
+
+Execution prerequisites are represented separately by a scoped relation $d=(s,U,c)$: within Skill $s$, capability $c$ requires every predecessor in $U$. This is a conjunctive requirement. When an operation requires both a prepared raster and a reference value, supplying either input alone does not satisfy the declaration. Conditional order is used only when its stated condition applies. The strategy identity remains part of each relation, preventing a dependency from one Skill from being silently substituted for another's.
+
+\paragraph{Capability instances and artifact bindings.}
+A task-specific plan is
+\begin{equation}
+P=(V,D_d,D_c,\beta),\qquad v_i=(c_i,s_i,r_i),
+\label{eq:plan}
+\end{equation}
+where $c_i$ is the operation, $s_i$ its source Skill, and $r_i$ its step/input role. $D_d$ and $D_c$ represent data and control dependencies, respectively; $\beta$ binds inputs to task resources or outputs of preceding instances. A capability is a reusable definition, whereas an instance is one occurrence on particular inputs. Two operations on different rasters remain distinct even if they select the same tool. This distinction is essential for preserving multiplicity, provenance, and the identity of the artifact consumed downstream.
+
+\subsection{Mandatory-Predecessor Expansion}
+Selected operations can depend on outputs not yet included in the plan. For a selected Skill $s$, let $R_s^{(0)}$ contain its initially required capabilities. Its dependency closure can be written as
+\begin{equation}
+R_s^{(k+1)}
+=
+R_s^{(k)}
+\cup
+\bigcup_{\substack{(s,U,c)\in\mathcal{D}\\c\in R_s^{(k)}}} U,
+\label{eq:closure}
+\end{equation}
+where $\mathcal{D}$ is the set of declared mandatory dependencies. Expansion continues until no required predecessor is missing. This expression describes closure within a strategy; instantiation still preserves separate occurrences and input roles. Missing declarations and dependency cycles are diagnosed rather than accepted as executable plans.
+
+
 
 \subsection{Directed Bridging with a Fixed Active Boundary}
 Suppose activated Skills $A$ and $B$ supply disconnected fragments. Let $u$ be an output-boundary capability of $A$, with no successor among its active dependencies, and $v$ an input-boundary capability of $B$, with no predecessor among its active dependencies. If inactive Skill $C$ declares $u\to m\to v$, this branch can supply intermediate capability $m$ without importing the entire Skill.

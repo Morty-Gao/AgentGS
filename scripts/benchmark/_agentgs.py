@@ -235,7 +235,12 @@ def build_identity(
 
 
 def select_tasks(
-    root: Path, dataset: Path | None, dataset_name: str | None, ids: str, planning_mode: str
+    root: Path,
+    dataset: Path | None,
+    dataset_name: str | None,
+    ids: str,
+    planning_mode: str,
+    benchmark_scope: str | None = None,
 ):
     from agentgs.benchmark.scope import select_scope
     from agentgs.benchmark.selection import resolve_dataset
@@ -250,7 +255,7 @@ def select_tasks(
         if missing:
             raise ValueError(f"Unknown benchmark question IDs: {sorted(missing, key=str)}")
         tasks = [task for task in tasks if task.question_id in chosen]
-    scope = load_algorithm(root).benchmark_scope
+    scope = benchmark_scope or load_algorithm(root).benchmark_scope
     selected, _policy = select_scope(tasks, scope, planning_mode=planning_mode)
     if not selected:
         raise ValueError("The declared benchmark scope contains no selected tasks")

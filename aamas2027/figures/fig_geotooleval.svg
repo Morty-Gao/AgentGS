@@ -1,0 +1,241 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" width="3000" height="1050" viewBox="0 0 3000 1050">
+<defs></defs>
+<rect x="0" y="0" width="3000" height="1050" fill="#FFFFFF" stroke="none"/>
+<rect x="24" y="24" width="1180" height="1002" rx="18" fill="#FFFFFF" stroke="#CBD2D9" stroke-width="2" stroke-linejoin="miter" stroke-linecap="butt"/>
+<text font-family="'Times New Roman', 'TeX Gyre Termes', 'Nimbus Roman', serif" font-size="48" font-weight="bold" fill="#1F2933" text-anchor="start"><tspan x="44" y="82.2">a</tspan></text>
+<path d="M404,294 A230,230 0 0 1 602.58,407.96 L516.24,458.41 A130,130 0 0 0 404,394 Z" fill="#8C6D46" stroke="#FFFFFF" stroke-width="3" stroke-linejoin="miter" stroke-linecap="butt"/>
+<path d="M404,254 A270,270 0 0 1 613.07,353.16 L586.75,374.67 A236,236 0 0 0 404,288 Z" fill="#DCE3EA" stroke="#FFFFFF" stroke-width="2.5" stroke-linejoin="miter" stroke-linecap="butt"/>
+<path d="M639.4,331.64 A304,304 0 0 1 666.48,370.63 L607.76,404.94 A236,236 0 0 0 586.75,374.67 Z" fill="#93A8BD" stroke="#FFFFFF" stroke-width="2.5" stroke-linejoin="miter" stroke-linecap="butt"/>
+<text font-family="'Comic Sans MS', 'Comic Neue', 'Chalkboard SE', cursive" font-size="34" font-weight="bold" fill="#FFFFFF" text-anchor="middle"><tspan x="493.59" y="380.48">1</tspan></text>
+<path d="M602.58,407.96 A230,230 0 0 1 632.56,498.29 L533.19,509.47 A130,130 0 0 0 516.24,458.41 Z" fill="#5B7DB1" stroke="#FFFFFF" stroke-width="3" stroke-linejoin="miter" stroke-linecap="butt"/>
+<path d="M637.12,387.78 A270,270 0 0 1 672.31,493.82 L638.52,497.62 A236,236 0 0 0 607.76,404.94 Z" fill="#DCE3EA" stroke="#FFFFFF" stroke-width="2.5" stroke-linejoin="miter" stroke-linecap="butt"/>
+<text font-family="'Comic Sans MS', 'Comic Neue', 'Chalkboard SE', cursive" font-size="34" font-weight="bold" fill="#FFFFFF" text-anchor="middle"><tspan x="574.84" y="479.91">2</tspan></text>
+<path d="M632.56,498.29 A230,230 0 0 1 606.68,632.72 L518.56,585.45 A130,130 0 0 0 533.19,509.47 Z" fill="#B0707E" stroke="#FFFFFF" stroke-width="3" stroke-linejoin="miter" stroke-linecap="butt"/>
+<path d="M672.31,493.82 A270,270 0 0 1 657.96,615.68 L625.98,604.14 A236,236 0 0 0 638.52,497.62 Z" fill="#DCE3EA" stroke="#FFFFFF" stroke-width="2.5" stroke-linejoin="miter" stroke-linecap="butt"/>
+<path d="M689.94,627.23 A304,304 0 0 1 671.89,667.7 L611.97,635.55 A236,236 0 0 0 625.98,604.14 Z" fill="#93A8BD" stroke="#FFFFFF" stroke-width="2.5" stroke-linejoin="miter" stroke-linecap="butt"/>
+<text font-family="'Comic Sans MS', 'Comic Neue', 'Chalkboard SE', cursive" font-size="34" font-weight="bold" fill="#FFFFFF" text-anchor="middle"><tspan x="580.76" y="570.62">3</tspan></text>
+<path d="M606.68,632.72 A230,230 0 0 1 529.72,716.6 L475.06,632.86 A130,130 0 0 0 518.56,585.45 Z" fill="#D08C3E" stroke="#FFFFFF" stroke-width="3" stroke-linejoin="miter" stroke-linecap="butt"/>
+<path d="M641.93,651.63 A270,270 0 0 1 589.11,720.55 L565.8,695.8 A236,236 0 0 0 611.97,635.55 Z" fill="#DCE3EA" stroke="#FFFFFF" stroke-width="2.5" stroke-linejoin="miter" stroke-linecap="butt"/>
+<path d="M612.43,745.3 A304,304 0 0 1 572.81,776.82 L535.05,720.27 A236,236 0 0 0 565.8,695.8 Z" fill="#93A8BD" stroke="#FFFFFF" stroke-width="2.5" stroke-linejoin="miter" stroke-linecap="butt"/>
+<path d="M597.54,801.1 A338,338 0 0 1 582.78,810.85 L528.83,724.29 A236,236 0 0 0 539.14,717.48 Z" fill="#3E5C76" stroke="#FFFFFF" stroke-width="2.5" stroke-linejoin="miter" stroke-linecap="butt"/>
+<text font-family="'Comic Sans MS', 'Comic Neue', 'Chalkboard SE', cursive" font-size="34" font-weight="bold" fill="#FFFFFF" text-anchor="middle"><tspan x="536.63" y="658.29">4</tspan></text>
+<path d="M529.72,716.6 A230,230 0 0 1 301.13,729.71 L345.86,640.27 A130,130 0 0 0 475.06,632.86 Z" fill="#D9B23F" stroke="#FFFFFF" stroke-width="3" stroke-linejoin="miter" stroke-linecap="butt"/>
+<path d="M551.58,750.1 A270,270 0 0 1 283.24,765.49 L298.45,735.08 A236,236 0 0 0 533,721.62 Z" fill="#DCE3EA" stroke="#FFFFFF" stroke-width="2.5" stroke-linejoin="miter" stroke-linecap="butt"/>
+<text font-family="'Comic Sans MS', 'Comic Neue', 'Chalkboard SE', cursive" font-size="34" font-weight="bold" fill="#FFFFFF" text-anchor="middle"><tspan x="414.31" y="716.3">5</tspan></text>
+<path d="M301.13,729.71 A230,230 0 0 1 174.49,538.97 L274.28,532.46 A130,130 0 0 0 345.86,640.27 Z" fill="#3C8DA0" stroke="#FFFFFF" stroke-width="3" stroke-linejoin="miter" stroke-linecap="butt"/>
+<path d="M283.24,765.49 A270,270 0 0 1 134.57,541.57 L168.5,539.36 A236,236 0 0 0 298.45,735.08 Z" fill="#DCE3EA" stroke="#FFFFFF" stroke-width="2.5" stroke-linejoin="miter" stroke-linecap="butt"/>
+<text font-family="'Comic Sans MS', 'Comic Neue', 'Chalkboard SE', cursive" font-size="34" font-weight="bold" fill="#FFFFFF" text-anchor="middle"><tspan x="254.04" y="636.16">6</tspan></text>
+<path d="M174.49,538.97 A230,230 0 0 1 177.92,481.7 L276.22,500.09 A130,130 0 0 0 274.28,532.46 Z" fill="#6E9F4E" stroke="#FFFFFF" stroke-width="3" stroke-linejoin="miter" stroke-linecap="butt"/>
+<path d="M134.57,541.57 A270,270 0 0 1 134.48,507.83 L168.42,509.87 A236,236 0 0 0 168.5,539.36 Z" fill="#DCE3EA" stroke="#FFFFFF" stroke-width="2.5" stroke-linejoin="miter" stroke-linecap="butt"/>
+<path d="M100.55,505.8 A304,304 0 0 1 102.68,483.73 L170.08,492.74 A236,236 0 0 0 168.42,509.87 Z" fill="#93A8BD" stroke="#FFFFFF" stroke-width="2.5" stroke-linejoin="miter" stroke-linecap="butt"/>
+<path d="M68.97,479.27 A338,338 0 0 1 71.77,461.8 L172.03,480.57 A236,236 0 0 0 170.08,492.77 Z" fill="#3E5C76" stroke="#FFFFFF" stroke-width="2.5" stroke-linejoin="miter" stroke-linecap="butt"/>
+<text font-family="'Comic Sans MS', 'Comic Neue', 'Chalkboard SE', cursive" font-size="34" font-weight="bold" fill="#FFFFFF" text-anchor="middle"><tspan x="224.32" y="525.82">7</tspan></text>
+<path d="M177.92,481.7 A230,230 0 0 1 195.42,427.07 L286.11,469.21 A130,130 0 0 0 276.22,500.09 Z" fill="#7E7BB5" stroke="#FFFFFF" stroke-width="3" stroke-linejoin="miter" stroke-linecap="butt"/>
+<path d="M138.6,474.35 A270,270 0 0 1 146.87,441.64 L179.25,452.01 A236,236 0 0 0 172.02,480.6 Z" fill="#DCE3EA" stroke="#FFFFFF" stroke-width="2.5" stroke-linejoin="miter" stroke-linecap="butt"/>
+<path d="M114.48,431.3 A304,304 0 0 1 119.73,416.28 L183.31,440.37 A236,236 0 0 0 179.24,452.04 Z" fill="#93A8BD" stroke="#FFFFFF" stroke-width="2.5" stroke-linejoin="miter" stroke-linecap="butt"/>
+<path d="M87.92,404.27 A338,338 0 0 1 97.48,381.55 L189.98,424.54 A236,236 0 0 0 183.3,440.4 Z" fill="#3E5C76" stroke="#FFFFFF" stroke-width="2.5" stroke-linejoin="miter" stroke-linecap="butt"/>
+<text font-family="'Comic Sans MS', 'Comic Neue', 'Chalkboard SE', cursive" font-size="34" font-weight="bold" fill="#FFFFFF" text-anchor="middle"><tspan x="232.58" y="481.69">8</tspan></text>
+<path d="M195.42,427.07 A230,230 0 0 1 269.39,337.5 L327.92,418.59 A130,130 0 0 0 286.11,469.21 Z" fill="#4C6A8A" stroke="#FFFFFF" stroke-width="3" stroke-linejoin="miter" stroke-linecap="butt"/>
+<path d="M128.32,395.88 A304,304 0 0 1 138.38,376.13 L197.8,409.21 A236,236 0 0 0 189.98,424.54 Z" fill="#93A8BD" stroke="#FFFFFF" stroke-width="2.5" stroke-linejoin="miter" stroke-linecap="butt"/>
+<path d="M108.68,359.6 A338,338 0 0 1 206.18,249.93 L265.88,332.64 A236,236 0 0 0 197.8,409.21 Z" fill="#3E5C76" stroke="#FFFFFF" stroke-width="2.5" stroke-linejoin="miter" stroke-linecap="butt"/>
+<text font-family="'Comic Sans MS', 'Comic Neue', 'Chalkboard SE', cursive" font-size="34" font-weight="bold" fill="#FFFFFF" text-anchor="middle"><tspan x="265.21" y="421.98">9</tspan></text>
+<path d="M269.39,337.5 A230,230 0 0 1 404,294 L404,394 A130,130 0 0 0 327.92,418.59 Z" fill="#C0504D" stroke="#FFFFFF" stroke-width="3" stroke-linejoin="miter" stroke-linecap="butt"/>
+<path d="M226.08,277.5 A304,304 0 0 1 388.17,220.41 L391.71,288.32 A236,236 0 0 0 265.88,332.64 Z" fill="#93A8BD" stroke="#FFFFFF" stroke-width="2.5" stroke-linejoin="miter" stroke-linecap="butt"/>
+<path d="M386.35,186.46 A338,338 0 0 1 404.04,186 L404.03,288 A236,236 0 0 0 391.68,288.32 Z" fill="#3E5C76" stroke="#FFFFFF" stroke-width="2.5" stroke-linejoin="miter" stroke-linecap="butt"/>
+<text font-family="'Comic Sans MS', 'Comic Neue', 'Chalkboard SE', cursive" font-size="34" font-weight="bold" fill="#FFFFFF" text-anchor="middle"><tspan x="348.64" y="365.32">10</tspan></text>
+<text font-family="'Times New Roman', 'TeX Gyre Termes', 'Nimbus Roman', serif" font-size="72" font-weight="bold" fill="#1F2933" text-anchor="middle"><tspan x="404" y="527.8">603</tspan></text>
+<text font-family="'Times New Roman', 'TeX Gyre Termes', 'Nimbus Roman', serif" font-size="36" fill="#52606D" text-anchor="middle"><tspan x="404" y="570.4">records</tspan></text>
+<text font-family="'Times New Roman', 'TeX Gyre Termes', 'Nimbus Roman', serif" font-size="34" font-weight="bold" fill="#1F2933" text-anchor="start"><tspan x="772" y="197.6">Research theme</tspan></text>
+<ellipse cx="794" cy="236" rx="20" ry="20" fill="#8C6D46" stroke="none"/>
+<text font-family="'Comic Sans MS', 'Comic Neue', 'Chalkboard SE', cursive" font-size="24" font-weight="bold" fill="#FFFFFF" text-anchor="middle"><tspan x="794" y="244.6">1</tspan></text>
+<text font-family="'Times New Roman', 'TeX Gyre Termes', 'Nimbus Roman', serif" font-size="31" fill="#1F2933" text-anchor="start"><tspan x="828" y="247.4">Deep Earth</tspan></text>
+<text font-family="'Times New Roman', 'TeX Gyre Termes', 'Nimbus Roman', serif" font-size="31" fill="#52606D" text-anchor="end"><tspan x="1154" y="247.4">100</tspan></text>
+<ellipse cx="794" cy="300" rx="20" ry="20" fill="#5B7DB1" stroke="none"/>
+<text font-family="'Comic Sans MS', 'Comic Neue', 'Chalkboard SE', cursive" font-size="24" font-weight="bold" fill="#FFFFFF" text-anchor="middle"><tspan x="794" y="308.6">2</tspan></text>
+<text font-family="'Times New Roman', 'TeX Gyre Termes', 'Nimbus Roman', serif" font-size="31" fill="#1F2933" text-anchor="start"><tspan x="828" y="311.4">GeoQuestions</tspan></text>
+<text font-family="'Times New Roman', 'TeX Gyre Termes', 'Nimbus Roman', serif" font-size="31" fill="#52606D" text-anchor="end"><tspan x="1154" y="311.4">40</tspan></text>
+<ellipse cx="794" cy="364" rx="20" ry="20" fill="#B0707E" stroke="none"/>
+<text font-family="'Comic Sans MS', 'Comic Neue', 'Chalkboard SE', cursive" font-size="24" font-weight="bold" fill="#FFFFFF" text-anchor="middle"><tspan x="794" y="372.6">3</tspan></text>
+<text font-family="'Times New Roman', 'TeX Gyre Termes', 'Nimbus Roman', serif" font-size="31" fill="#1F2933" text-anchor="start"><tspan x="828" y="375.4">Critical Minerals</tspan></text>
+<text font-family="'Times New Roman', 'TeX Gyre Termes', 'Nimbus Roman', serif" font-size="31" fill="#52606D" text-anchor="end"><tspan x="1154" y="375.4">58</tspan></text>
+<ellipse cx="794" cy="428" rx="20" ry="20" fill="#D08C3E" stroke="none"/>
+<text font-family="'Comic Sans MS', 'Comic Neue', 'Chalkboard SE', cursive" font-size="24" font-weight="bold" fill="#FFFFFF" text-anchor="middle"><tspan x="794" y="436.6">4</tspan></text>
+<text font-family="'Times New Roman', 'TeX Gyre Termes', 'Nimbus Roman', serif" font-size="31" fill="#1F2933" text-anchor="start"><tspan x="828" y="439.4">Climate Change</tspan></text>
+<text font-family="'Times New Roman', 'TeX Gyre Termes', 'Nimbus Roman', serif" font-size="31" fill="#52606D" text-anchor="end"><tspan x="1154" y="439.4">48</tspan></text>
+<ellipse cx="794" cy="492" rx="20" ry="20" fill="#D9B23F" stroke="none"/>
+<text font-family="'Comic Sans MS', 'Comic Neue', 'Chalkboard SE', cursive" font-size="24" font-weight="bold" fill="#FFFFFF" text-anchor="middle"><tspan x="794" y="500.6">5</tspan></text>
+<text font-family="'Times New Roman', 'TeX Gyre Termes', 'Nimbus Roman', serif" font-size="31" fill="#1F2933" text-anchor="start"><tspan x="828" y="503.4">Energy Resources</tspan></text>
+<text font-family="'Times New Roman', 'TeX Gyre Termes', 'Nimbus Roman', serif" font-size="31" fill="#52606D" text-anchor="end"><tspan x="1154" y="503.4">100</tspan></text>
+<ellipse cx="794" cy="556" rx="20" ry="20" fill="#3C8DA0" stroke="none"/>
+<text font-family="'Comic Sans MS', 'Comic Neue', 'Chalkboard SE', cursive" font-size="24" font-weight="bold" fill="#FFFFFF" text-anchor="middle"><tspan x="794" y="564.6">6</tspan></text>
+<text font-family="'Times New Roman', 'TeX Gyre Termes', 'Nimbus Roman', serif" font-size="31" fill="#1F2933" text-anchor="start"><tspan x="828" y="567.4">Ocean Carbon</tspan></text>
+<text font-family="'Times New Roman', 'TeX Gyre Termes', 'Nimbus Roman', serif" font-size="31" fill="#52606D" text-anchor="end"><tspan x="1154" y="567.4">100</tspan></text>
+<ellipse cx="794" cy="620" rx="20" ry="20" fill="#6E9F4E" stroke="none"/>
+<text font-family="'Comic Sans MS', 'Comic Neue', 'Chalkboard SE', cursive" font-size="24" font-weight="bold" fill="#FFFFFF" text-anchor="middle"><tspan x="794" y="628.6">7</tspan></text>
+<text font-family="'Times New Roman', 'TeX Gyre Termes', 'Nimbus Roman', serif" font-size="31" fill="#1F2933" text-anchor="start"><tspan x="828" y="631.4">Deep-Time Biosphere</tspan></text>
+<text font-family="'Times New Roman', 'TeX Gyre Termes', 'Nimbus Roman', serif" font-size="31" fill="#52606D" text-anchor="end"><tspan x="1154" y="631.4">24</tspan></text>
+<ellipse cx="794" cy="684" rx="20" ry="20" fill="#7E7BB5" stroke="none"/>
+<text font-family="'Comic Sans MS', 'Comic Neue', 'Chalkboard SE', cursive" font-size="24" font-weight="bold" fill="#FFFFFF" text-anchor="middle"><tspan x="794" y="692.6">8</tspan></text>
+<text font-family="'Times New Roman', 'TeX Gyre Termes', 'Nimbus Roman', serif" font-size="31" fill="#1F2933" text-anchor="start"><tspan x="828" y="695.4">CCS</tspan></text>
+<text font-family="'Times New Roman', 'TeX Gyre Termes', 'Nimbus Roman', serif" font-size="31" fill="#52606D" text-anchor="end"><tspan x="1154" y="695.4">24</tspan></text>
+<ellipse cx="794" cy="748" rx="20" ry="20" fill="#4C6A8A" stroke="none"/>
+<text font-family="'Comic Sans MS', 'Comic Neue', 'Chalkboard SE', cursive" font-size="24" font-weight="bold" fill="#FFFFFF" text-anchor="middle"><tspan x="794" y="756.6">9</tspan></text>
+<text font-family="'Times New Roman', 'TeX Gyre Termes', 'Nimbus Roman', serif" font-size="31" fill="#1F2933" text-anchor="start"><tspan x="828" y="759.4">Remote Sensing</tspan></text>
+<text font-family="'Times New Roman', 'TeX Gyre Termes', 'Nimbus Roman', serif" font-size="31" fill="#52606D" text-anchor="end"><tspan x="1154" y="759.4">49</tspan></text>
+<ellipse cx="794" cy="812" rx="20" ry="20" fill="#C0504D" stroke="none"/>
+<text font-family="'Comic Sans MS', 'Comic Neue', 'Chalkboard SE', cursive" font-size="24" font-weight="bold" fill="#FFFFFF" text-anchor="middle"><tspan x="794" y="820.6">10</tspan></text>
+<text font-family="'Times New Roman', 'TeX Gyre Termes', 'Nimbus Roman', serif" font-size="31" fill="#1F2933" text-anchor="start"><tspan x="828" y="823.4">Natural Hazards</tspan></text>
+<text font-family="'Times New Roman', 'TeX Gyre Termes', 'Nimbus Roman', serif" font-size="31" fill="#52606D" text-anchor="end"><tspan x="1154" y="823.4">60</tspan></text>
+<text font-family="'Times New Roman', 'TeX Gyre Termes', 'Nimbus Roman', serif" font-size="34" font-weight="bold" fill="#1F2933" text-anchor="start"><tspan x="64" y="968.6">Reference chain</tspan></text>
+<rect x="354" y="949.8" width="34" height="22.2" fill="#DCE3EA" stroke="none"/>
+<text font-family="'Times New Roman', 'TeX Gyre Termes', 'Nimbus Roman', serif" font-size="32" fill="#1F2933" text-anchor="start"><tspan x="402" y="967.8">1 call (424)</tspan></text>
+<rect x="634" y="939.6" width="34" height="32.4" fill="#93A8BD" stroke="none"/>
+<text font-family="'Times New Roman', 'TeX Gyre Termes', 'Nimbus Roman', serif" font-size="32" fill="#1F2933" text-anchor="start"><tspan x="682" y="967.8">2–3 calls (119)</tspan></text>
+<rect x="914" y="929.4" width="34" height="42.6" fill="#3E5C76" stroke="none"/>
+<text font-family="'Times New Roman', 'TeX Gyre Termes', 'Nimbus Roman', serif" font-size="32" fill="#1F2933" text-anchor="start"><tspan x="962" y="967.8">≥4 calls (60)</tspan></text>
+<rect x="1228" y="24" width="1748" height="1002" rx="18" fill="#FFFFFF" stroke="#CBD2D9" stroke-width="2" stroke-linejoin="miter" stroke-linecap="butt"/>
+<text font-family="'Times New Roman', 'TeX Gyre Termes', 'Nimbus Roman', serif" font-size="48" font-weight="bold" fill="#1F2933" text-anchor="start"><tspan x="1248" y="82.2">b</tspan></text>
+<path d="M1888,456 L1927.97,468.99 L1952.67,502.99 L1952.67,545.01 L1927.97,579.01 L1888,592 L1848.03,579.01 L1823.33,545.01 L1823.33,502.99 L1848.03,468.99 Z" fill="none" stroke="#CBD2D9" stroke-width="2" stroke-linejoin="miter" stroke-linecap="butt"/>
+<path d="M1888,388 L1967.94,413.97 L2017.34,481.97 L2017.34,566.03 L1967.94,634.03 L1888,660 L1808.06,634.03 L1758.66,566.03 L1758.66,481.97 L1808.06,413.97 Z" fill="none" stroke="#CBD2D9" stroke-width="2" stroke-linejoin="miter" stroke-linecap="butt"/>
+<path d="M1888,320 L2007.91,358.96 L2082.02,460.96 L2082.02,587.04 L2007.91,689.04 L1888,728 L1768.09,689.04 L1693.98,587.04 L1693.98,460.96 L1768.09,358.96 Z" fill="none" stroke="#CBD2D9" stroke-width="2" stroke-linejoin="miter" stroke-linecap="butt"/>
+<path d="M1888,252 L2047.88,303.95 L2146.69,439.95 L2146.69,608.05 L2047.88,744.05 L1888,796 L1728.12,744.05 L1629.31,608.05 L1629.31,439.95 L1728.12,303.95 Z" fill="none" stroke="#CBD2D9" stroke-width="2" stroke-linejoin="miter" stroke-linecap="butt"/>
+<path d="M1888,184 L2087.85,248.93 L2211.36,418.93 L2211.36,629.07 L2087.85,799.07 L1888,864 L1688.15,799.07 L1564.64,629.07 L1564.64,418.93 L1688.15,248.93 Z" fill="none" stroke="#9AA5B1" stroke-width="2.5" stroke-linejoin="miter" stroke-linecap="butt"/>
+<path d="M1888,524 L1888,184" fill="none" stroke="#CBD2D9" stroke-width="2" stroke-linejoin="miter" stroke-linecap="butt"/>
+<path d="M1888,524 L2087.85,248.93" fill="none" stroke="#CBD2D9" stroke-width="2" stroke-linejoin="miter" stroke-linecap="butt"/>
+<path d="M1888,524 L2211.36,418.93" fill="none" stroke="#CBD2D9" stroke-width="2" stroke-linejoin="miter" stroke-linecap="butt"/>
+<path d="M1888,524 L2211.36,629.07" fill="none" stroke="#CBD2D9" stroke-width="2" stroke-linejoin="miter" stroke-linecap="butt"/>
+<path d="M1888,524 L2087.85,799.07" fill="none" stroke="#CBD2D9" stroke-width="2" stroke-linejoin="miter" stroke-linecap="butt"/>
+<path d="M1888,524 L1888,864" fill="none" stroke="#CBD2D9" stroke-width="2" stroke-linejoin="miter" stroke-linecap="butt"/>
+<path d="M1888,524 L1688.15,799.07" fill="none" stroke="#CBD2D9" stroke-width="2" stroke-linejoin="miter" stroke-linecap="butt"/>
+<path d="M1888,524 L1564.64,629.07" fill="none" stroke="#CBD2D9" stroke-width="2" stroke-linejoin="miter" stroke-linecap="butt"/>
+<path d="M1888,524 L1564.64,418.93" fill="none" stroke="#CBD2D9" stroke-width="2" stroke-linejoin="miter" stroke-linecap="butt"/>
+<path d="M1888,524 L1688.15,248.93" fill="none" stroke="#CBD2D9" stroke-width="2" stroke-linejoin="miter" stroke-linecap="butt"/>
+<path d="M1888,507 L1907.98,496.49 L1920.34,513.49 L2001.18,560.77 L1917.98,565.26 L1888,626 L1878.01,537.75 L1855.66,534.51 L1774.82,487.23 L1778.08,372.71 Z" fill="none" stroke="#C99A2E" stroke-width="3.2" stroke-linejoin="round" stroke-linecap="butt" stroke-dasharray="10 7"/>
+<ellipse cx="1888" cy="507" rx="5.5" ry="5.5" fill="#C99A2E" stroke="none"/>
+<ellipse cx="1907.98" cy="496.49" rx="5.5" ry="5.5" fill="#C99A2E" stroke="none"/>
+<ellipse cx="1920.34" cy="513.49" rx="5.5" ry="5.5" fill="#C99A2E" stroke="none"/>
+<ellipse cx="2001.18" cy="560.77" rx="5.5" ry="5.5" fill="#C99A2E" stroke="none"/>
+<ellipse cx="1917.98" cy="565.26" rx="5.5" ry="5.5" fill="#C99A2E" stroke="none"/>
+<ellipse cx="1888" cy="626" rx="5.5" ry="5.5" fill="#C99A2E" stroke="none"/>
+<ellipse cx="1878.01" cy="537.75" rx="5.5" ry="5.5" fill="#C99A2E" stroke="none"/>
+<ellipse cx="1855.66" cy="534.51" rx="5.5" ry="5.5" fill="#C99A2E" stroke="none"/>
+<ellipse cx="1774.82" cy="487.23" rx="5.5" ry="5.5" fill="#C99A2E" stroke="none"/>
+<ellipse cx="1778.08" cy="372.71" rx="5.5" ry="5.5" fill="#C99A2E" stroke="none"/>
+<path d="M1888,286 L1907.98,496.49 L1985.01,492.48 L1952.67,545.01 L1967.94,634.03 L1888,768.8 L1878.01,537.75 L1871.83,529.25 L1677.82,455.71 L1744.11,325.95 Z" fill="none" stroke="#7A5BA6" stroke-width="3.2" stroke-linejoin="round" stroke-linecap="butt" stroke-dasharray="10 7"/>
+<ellipse cx="1888" cy="286" rx="5.5" ry="5.5" fill="#7A5BA6" stroke="none"/>
+<ellipse cx="1907.98" cy="496.49" rx="5.5" ry="5.5" fill="#7A5BA6" stroke="none"/>
+<ellipse cx="1985.01" cy="492.48" rx="5.5" ry="5.5" fill="#7A5BA6" stroke="none"/>
+<ellipse cx="1952.67" cy="545.01" rx="5.5" ry="5.5" fill="#7A5BA6" stroke="none"/>
+<ellipse cx="1967.94" cy="634.03" rx="5.5" ry="5.5" fill="#7A5BA6" stroke="none"/>
+<ellipse cx="1888" cy="768.8" rx="5.5" ry="5.5" fill="#7A5BA6" stroke="none"/>
+<ellipse cx="1878.01" cy="537.75" rx="5.5" ry="5.5" fill="#7A5BA6" stroke="none"/>
+<ellipse cx="1871.83" cy="529.25" rx="5.5" ry="5.5" fill="#7A5BA6" stroke="none"/>
+<ellipse cx="1677.82" cy="455.71" rx="5.5" ry="5.5" fill="#7A5BA6" stroke="none"/>
+<ellipse cx="1744.11" cy="325.95" rx="5.5" ry="5.5" fill="#7A5BA6" stroke="none"/>
+<path d="M1888,507 L1894,515.75 L1897.7,520.85 L1904.17,529.25 L1894,532.25 L1888,534.2 L1878.01,537.75 L1839.5,539.76 L1613.14,434.69 L1878.01,510.25 Z" fill="none" stroke="#1F2933" stroke-width="3.2" stroke-linejoin="round" stroke-linecap="butt"/>
+<ellipse cx="1888" cy="507" rx="5.5" ry="5.5" fill="#1F2933" stroke="none"/>
+<ellipse cx="1894" cy="515.75" rx="5.5" ry="5.5" fill="#1F2933" stroke="none"/>
+<ellipse cx="1897.7" cy="520.85" rx="5.5" ry="5.5" fill="#1F2933" stroke="none"/>
+<ellipse cx="1904.17" cy="529.25" rx="5.5" ry="5.5" fill="#1F2933" stroke="none"/>
+<ellipse cx="1894" cy="532.25" rx="5.5" ry="5.5" fill="#1F2933" stroke="none"/>
+<ellipse cx="1888" cy="534.2" rx="5.5" ry="5.5" fill="#1F2933" stroke="none"/>
+<ellipse cx="1878.01" cy="537.75" rx="5.5" ry="5.5" fill="#1F2933" stroke="none"/>
+<ellipse cx="1839.5" cy="539.76" rx="5.5" ry="5.5" fill="#1F2933" stroke="none"/>
+<ellipse cx="1613.14" cy="434.69" rx="5.5" ry="5.5" fill="#1F2933" stroke="none"/>
+<ellipse cx="1878.01" cy="510.25" rx="5.5" ry="5.5" fill="#1F2933" stroke="none"/>
+<path d="M1888,224.8 L2011.91,353.46 L2114.35,450.45 L2065.85,581.79 L2077.85,785.31 L1888,853.8 L1868.02,551.51 L1790.99,555.52 L1677.82,455.71 L1704.14,270.94 Z" fill="none" stroke="#3E8E64" stroke-width="3.2" stroke-linejoin="round" stroke-linecap="butt"/>
+<ellipse cx="1888" cy="224.8" rx="5.5" ry="5.5" fill="#3E8E64" stroke="none"/>
+<ellipse cx="2011.91" cy="353.46" rx="5.5" ry="5.5" fill="#3E8E64" stroke="none"/>
+<ellipse cx="2114.35" cy="450.45" rx="5.5" ry="5.5" fill="#3E8E64" stroke="none"/>
+<ellipse cx="2065.85" cy="581.79" rx="5.5" ry="5.5" fill="#3E8E64" stroke="none"/>
+<ellipse cx="2077.85" cy="785.31" rx="5.5" ry="5.5" fill="#3E8E64" stroke="none"/>
+<ellipse cx="1888" cy="853.8" rx="5.5" ry="5.5" fill="#3E8E64" stroke="none"/>
+<ellipse cx="1868.02" cy="551.51" rx="5.5" ry="5.5" fill="#3E8E64" stroke="none"/>
+<ellipse cx="1790.99" cy="555.52" rx="5.5" ry="5.5" fill="#3E8E64" stroke="none"/>
+<ellipse cx="1677.82" cy="455.71" rx="5.5" ry="5.5" fill="#3E8E64" stroke="none"/>
+<ellipse cx="1704.14" cy="270.94" rx="5.5" ry="5.5" fill="#3E8E64" stroke="none"/>
+<path d="M1888,211.2 L2003.91,364.46 L2017.34,481.97 L2049.68,576.53 L2079.85,788.06 L1888,850.4 L1808.06,634.03 L1823.33,545.01 L1829.8,505.09 L1718.13,290.19 Z" fill="none" stroke="#3B6EA8" stroke-width="3.2" stroke-linejoin="round" stroke-linecap="butt"/>
+<ellipse cx="1888" cy="211.2" rx="5.5" ry="5.5" fill="#3B6EA8" stroke="none"/>
+<ellipse cx="2003.91" cy="364.46" rx="5.5" ry="5.5" fill="#3B6EA8" stroke="none"/>
+<ellipse cx="2017.34" cy="481.97" rx="5.5" ry="5.5" fill="#3B6EA8" stroke="none"/>
+<ellipse cx="2049.68" cy="576.53" rx="5.5" ry="5.5" fill="#3B6EA8" stroke="none"/>
+<ellipse cx="2079.85" cy="788.06" rx="5.5" ry="5.5" fill="#3B6EA8" stroke="none"/>
+<ellipse cx="1888" cy="850.4" rx="5.5" ry="5.5" fill="#3B6EA8" stroke="none"/>
+<ellipse cx="1808.06" cy="634.03" rx="5.5" ry="5.5" fill="#3B6EA8" stroke="none"/>
+<ellipse cx="1823.33" cy="545.01" rx="5.5" ry="5.5" fill="#3B6EA8" stroke="none"/>
+<ellipse cx="1829.8" cy="505.09" rx="5.5" ry="5.5" fill="#3B6EA8" stroke="none"/>
+<ellipse cx="1718.13" cy="290.19" rx="5.5" ry="5.5" fill="#3B6EA8" stroke="none"/>
+<path d="M1888,201 L2037.89,317.7 L2140.22,442.05 L2088.48,589.14 L2083.85,793.56 L1888,860.6 L1748.11,716.55 L1677.82,592.29 L1629.31,439.95 L1692.15,254.44 Z" fill="none" stroke="#C8473D" stroke-width="5.5" stroke-linejoin="round" stroke-linecap="butt"/>
+<ellipse cx="1888" cy="201" rx="7.5" ry="7.5" fill="#C8473D" stroke="none"/>
+<ellipse cx="2037.89" cy="317.7" rx="7.5" ry="7.5" fill="#C8473D" stroke="none"/>
+<ellipse cx="2140.22" cy="442.05" rx="7.5" ry="7.5" fill="#C8473D" stroke="none"/>
+<ellipse cx="2088.48" cy="589.14" rx="7.5" ry="7.5" fill="#C8473D" stroke="none"/>
+<ellipse cx="2083.85" cy="793.56" rx="7.5" ry="7.5" fill="#C8473D" stroke="none"/>
+<ellipse cx="1888" cy="860.6" rx="7.5" ry="7.5" fill="#C8473D" stroke="none"/>
+<ellipse cx="1748.11" cy="716.55" rx="7.5" ry="7.5" fill="#C8473D" stroke="none"/>
+<ellipse cx="1677.82" cy="592.29" rx="7.5" ry="7.5" fill="#C8473D" stroke="none"/>
+<ellipse cx="1629.31" cy="439.95" rx="7.5" ry="7.5" fill="#C8473D" stroke="none"/>
+<ellipse cx="1692.15" cy="254.44" rx="7.5" ry="7.5" fill="#C8473D" stroke="none"/>
+<rect x="1907.01" y="425.33" width="52" height="34" rx="6" fill="#FFFFFF" stroke="none"/>
+<text font-family="'Times New Roman', 'TeX Gyre Termes', 'Nimbus Roman', serif" font-size="28" fill="#52606D" text-anchor="middle"><tspan x="1933.01" y="452.53">20</tspan></text>
+<rect x="1928.03" y="360.66" width="52" height="34" rx="6" fill="#FFFFFF" stroke="none"/>
+<text font-family="'Times New Roman', 'TeX Gyre Termes', 'Nimbus Roman', serif" font-size="28" fill="#52606D" text-anchor="middle"><tspan x="1954.03" y="387.86">40</tspan></text>
+<rect x="1949.04" y="295.98" width="52" height="34" rx="6" fill="#FFFFFF" stroke="none"/>
+<text font-family="'Times New Roman', 'TeX Gyre Termes', 'Nimbus Roman', serif" font-size="28" fill="#52606D" text-anchor="middle"><tspan x="1975.04" y="323.18">60</tspan></text>
+<rect x="1970.05" y="231.31" width="52" height="34" rx="6" fill="#FFFFFF" stroke="none"/>
+<text font-family="'Times New Roman', 'TeX Gyre Termes', 'Nimbus Roman', serif" font-size="28" fill="#52606D" text-anchor="middle"><tspan x="1996.05" y="258.51">80</tspan></text>
+<rect x="1991.07" y="166.64" width="52" height="34" rx="6" fill="#FFFFFF" stroke="none"/>
+<text font-family="'Times New Roman', 'TeX Gyre Termes', 'Nimbus Roman', serif" font-size="28" fill="#52606D" text-anchor="middle"><tspan x="2017.07" y="193.84">100</tspan></text>
+<ellipse cx="1888" cy="142" rx="20" ry="20" fill="#8C6D46" stroke="none"/>
+<text font-family="'Comic Sans MS', 'Comic Neue', 'Chalkboard SE', cursive" font-size="24" font-weight="bold" fill="#FFFFFF" text-anchor="middle"><tspan x="1888" y="150.6">1</tspan></text>
+<text font-family="'Times New Roman', 'TeX Gyre Termes', 'Nimbus Roman', serif" font-size="32" fill="#1F2933" text-anchor="middle"><tspan x="1888" y="111.8">Deep Earth</tspan></text>
+<ellipse cx="2112.53" cy="214.96" rx="20" ry="20" fill="#5B7DB1" stroke="none"/>
+<text font-family="'Comic Sans MS', 'Comic Neue', 'Chalkboard SE', cursive" font-size="24" font-weight="bold" fill="#FFFFFF" text-anchor="middle"><tspan x="2112.53" y="223.56">2</tspan></text>
+<text font-family="'Times New Roman', 'TeX Gyre Termes', 'Nimbus Roman', serif" font-size="32" fill="#1F2933" text-anchor="start"><tspan x="2140.53" y="226.76">GeoQuestions</tspan></text>
+<ellipse cx="2251.3" cy="405.96" rx="20" ry="20" fill="#B0707E" stroke="none"/>
+<text font-family="'Comic Sans MS', 'Comic Neue', 'Chalkboard SE', cursive" font-size="24" font-weight="bold" fill="#FFFFFF" text-anchor="middle"><tspan x="2251.3" y="414.56">3</tspan></text>
+<text font-family="'Times New Roman', 'TeX Gyre Termes', 'Nimbus Roman', serif" font-size="32" fill="#1F2933" text-anchor="start"><tspan x="2279.3" y="417.76">Critical Minerals</tspan></text>
+<ellipse cx="2251.3" cy="642.04" rx="20" ry="20" fill="#D08C3E" stroke="none"/>
+<text font-family="'Comic Sans MS', 'Comic Neue', 'Chalkboard SE', cursive" font-size="24" font-weight="bold" fill="#FFFFFF" text-anchor="middle"><tspan x="2251.3" y="650.64">4</tspan></text>
+<text font-family="'Times New Roman', 'TeX Gyre Termes', 'Nimbus Roman', serif" font-size="32" fill="#1F2933" text-anchor="start"><tspan x="2279.3" y="653.84">Climate Change</tspan></text>
+<ellipse cx="2112.53" cy="833.04" rx="20" ry="20" fill="#D9B23F" stroke="none"/>
+<text font-family="'Comic Sans MS', 'Comic Neue', 'Chalkboard SE', cursive" font-size="24" font-weight="bold" fill="#FFFFFF" text-anchor="middle"><tspan x="2112.53" y="841.64">5</tspan></text>
+<text font-family="'Times New Roman', 'TeX Gyre Termes', 'Nimbus Roman', serif" font-size="32" fill="#1F2933" text-anchor="start"><tspan x="2140.53" y="844.84">Energy Resources</tspan></text>
+<ellipse cx="1888" cy="906" rx="20" ry="20" fill="#3C8DA0" stroke="none"/>
+<text font-family="'Comic Sans MS', 'Comic Neue', 'Chalkboard SE', cursive" font-size="24" font-weight="bold" fill="#FFFFFF" text-anchor="middle"><tspan x="1888" y="914.6">6</tspan></text>
+<text font-family="'Times New Roman', 'TeX Gyre Termes', 'Nimbus Roman', serif" font-size="32" fill="#1F2933" text-anchor="middle"><tspan x="1888" y="961.8">Ocean Carbon</tspan></text>
+<ellipse cx="1663.47" cy="833.04" rx="20" ry="20" fill="#6E9F4E" stroke="none"/>
+<text font-family="'Comic Sans MS', 'Comic Neue', 'Chalkboard SE', cursive" font-size="24" font-weight="bold" fill="#FFFFFF" text-anchor="middle"><tspan x="1663.47" y="841.64">7</tspan></text>
+<text font-family="'Times New Roman', 'TeX Gyre Termes', 'Nimbus Roman', serif" font-size="32" fill="#1F2933" text-anchor="end"><tspan x="1635.47" y="844.84">Deep-Time Biosphere</tspan></text>
+<ellipse cx="1524.7" cy="642.04" rx="20" ry="20" fill="#7E7BB5" stroke="none"/>
+<text font-family="'Comic Sans MS', 'Comic Neue', 'Chalkboard SE', cursive" font-size="24" font-weight="bold" fill="#FFFFFF" text-anchor="middle"><tspan x="1524.7" y="650.64">8</tspan></text>
+<text font-family="'Times New Roman', 'TeX Gyre Termes', 'Nimbus Roman', serif" font-size="32" fill="#1F2933" text-anchor="end"><tspan x="1496.7" y="653.84">CCS</tspan></text>
+<ellipse cx="1524.7" cy="405.96" rx="20" ry="20" fill="#4C6A8A" stroke="none"/>
+<text font-family="'Comic Sans MS', 'Comic Neue', 'Chalkboard SE', cursive" font-size="24" font-weight="bold" fill="#FFFFFF" text-anchor="middle"><tspan x="1524.7" y="414.56">9</tspan></text>
+<text font-family="'Times New Roman', 'TeX Gyre Termes', 'Nimbus Roman', serif" font-size="32" fill="#1F2933" text-anchor="end"><tspan x="1496.7" y="417.76">Remote Sensing</tspan></text>
+<ellipse cx="1663.47" cy="214.96" rx="20" ry="20" fill="#C0504D" stroke="none"/>
+<text font-family="'Comic Sans MS', 'Comic Neue', 'Chalkboard SE', cursive" font-size="24" font-weight="bold" fill="#FFFFFF" text-anchor="middle"><tspan x="1663.47" y="223.56">10</tspan></text>
+<text font-family="'Times New Roman', 'TeX Gyre Termes', 'Nimbus Roman', serif" font-size="32" fill="#1F2933" text-anchor="end"><tspan x="1635.47" y="226.76">Natural Hazards</tspan></text>
+<text font-family="'Times New Roman', 'TeX Gyre Termes', 'Nimbus Roman', serif" font-size="34" font-weight="bold" fill="#1F2933" text-anchor="start"><tspan x="2558" y="246.6">Mean FAS (×100)</tspan></text>
+<text font-family="'Times New Roman', 'TeX Gyre Termes', 'Nimbus Roman', serif" font-size="30" font-style="italic" fill="#52606D" text-anchor="start"><tspan x="2558" y="321">Agents (DeepSeek V4.1 Flash)</tspan></text>
+<path d="M2558,370 L2628,370" fill="none" stroke="#C8473D" stroke-width="5.5" stroke-linejoin="miter" stroke-linecap="butt"/>
+<ellipse cx="2593" cy="370" rx="7" ry="7" fill="#C8473D" stroke="none"/>
+<text font-family="'Times New Roman', 'TeX Gyre Termes', 'Nimbus Roman', serif" font-size="32" font-weight="bold" fill="#1F2933" text-anchor="start"><tspan x="2646" y="381.8">AgentGS</tspan></text>
+<path d="M2558,434 L2628,434" fill="none" stroke="#3B6EA8" stroke-width="3.2" stroke-linejoin="miter" stroke-linecap="butt"/>
+<ellipse cx="2593" cy="434" rx="7" ry="7" fill="#3B6EA8" stroke="none"/>
+<text font-family="'Times New Roman', 'TeX Gyre Termes', 'Nimbus Roman', serif" font-size="32" fill="#1F2933" text-anchor="start"><tspan x="2646" y="445.8">AgentGS (Tool Only)</tspan></text>
+<path d="M2558,498 L2628,498" fill="none" stroke="#3E8E64" stroke-width="3.2" stroke-linejoin="miter" stroke-linecap="butt"/>
+<ellipse cx="2593" cy="498" rx="7" ry="7" fill="#3E8E64" stroke="none"/>
+<text font-family="'Times New Roman', 'TeX Gyre Termes', 'Nimbus Roman', serif" font-size="32" fill="#1F2933" text-anchor="start"><tspan x="2646" y="509.8">GeoAgent</tspan></text>
+<path d="M2558,562 L2628,562" fill="none" stroke="#1F2933" stroke-width="3.2" stroke-linejoin="miter" stroke-linecap="butt"/>
+<ellipse cx="2593" cy="562" rx="7" ry="7" fill="#1F2933" stroke="none"/>
+<text font-family="'Times New Roman', 'TeX Gyre Termes', 'Nimbus Roman', serif" font-size="32" fill="#1F2933" text-anchor="start"><tspan x="2646" y="573.8">EarthAgent</tspan></text>
+<text font-family="'Times New Roman', 'TeX Gyre Termes', 'Nimbus Roman', serif" font-size="30" font-style="italic" fill="#52606D" text-anchor="start"><tspan x="2558" y="661">Bash-only</tspan></text>
+<path d="M2558,710 L2628,710" fill="none" stroke="#7A5BA6" stroke-width="3.2" stroke-linejoin="miter" stroke-linecap="butt" stroke-dasharray="10 7"/>
+<ellipse cx="2593" cy="710" rx="7" ry="7" fill="#7A5BA6" stroke="none"/>
+<text font-family="'Times New Roman', 'TeX Gyre Termes', 'Nimbus Roman', serif" font-size="32" fill="#1F2933" text-anchor="start"><tspan x="2646" y="721.8">DeepSeek V4.1 Flash</tspan></text>
+<path d="M2558,774 L2628,774" fill="none" stroke="#C99A2E" stroke-width="3.2" stroke-linejoin="miter" stroke-linecap="butt" stroke-dasharray="10 7"/>
+<ellipse cx="2593" cy="774" rx="7" ry="7" fill="#C99A2E" stroke="none"/>
+<text font-family="'Times New Roman', 'TeX Gyre Termes', 'Nimbus Roman', serif" font-size="32" fill="#1F2933" text-anchor="start"><tspan x="2646" y="785.8">GeoGPT</tspan></text>
+</svg>

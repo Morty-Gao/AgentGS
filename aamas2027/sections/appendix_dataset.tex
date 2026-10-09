@@ -1,5 +1,6 @@
 \section{Dataset Sources and Construction Records}
 \label{app:dataset-details}
+\input{tables/benchmark}
 \subsection{Source-Specific Task Construction}
 Geoscientific big-data analysis includes 40 GeoQuestions1089 questions concerning physical geographic objects and spatial operations. The remote-sensing theme retains 49 tasks from Earth-Bench's 248-task collection, including source questions, choices, and answers, with calls adapted to the registered interfaces. Critical-mineral and climate-change questions are selected by theme from \nolinkurl{habitable_earth_dataset}; the underlying resources include MRDS, paleoclimate reconstructions, GISTEMP, and SSP warming summaries.
 
@@ -18,3 +19,53 @@ The reference sequence is defined under the tool packaging available to the eval
 Record-weighted averaging gives each of the 603 entries equal weight. A domain-balanced mean would instead give the ten themes equal weight, and a deduplicated question mean would change the treatment of repeated cross-theme questions. Those quantities answer different questions and are not interchangeable with the reported main FAS.
 
 Numerical tolerances and answer normalization belong to the answer-type-specific scorer. Process metrics do not validate those numerical decisions. Conversely, matching a reference answer does not establish that the agent produced every requested artifact or followed the intended data dependencies.
+
+The critical-mineral and climate-change themes share nine questions, represented in both themes. The 603 records therefore do not denote 603 distinct question texts. Remote sensing accounts for 42 of the 60 records with at least four reference calls, so domain and chain-length effects overlap in this dataset.
+
+\subsection{Metric Definitions and Aggregation}
+\label{app:metric-details}
+Let $G_i$ be the reference sequence of tool names and $A_i$ the sequence of successful calls in the current user turn. Calls match one to one by tool name, retaining multiplicity, and $m_i$ is the number of matched occurrences. Failed calls stay out of $A_i$. Planning calls are excluded from both successful calls and attempts. A score whose denominator is zero is defined to be zero. For any per-record score $M$ and $N$ records,
+\begin{equation}
+\overline{M}=\frac{1}{N}\sum_{i=1}^{N}M_i.
+\label{eq:metric-mean}
+\end{equation}
+The main experiment uses $N=603$. Domain and chain-length groups average their own records. This record-weighted mean is distinct from a domain-balanced macro-average and from the rate of fully correct answers.
+
+FAS follows the answer type: choice letters, calendar dates, identifiers, numerical tolerances, item matching, or field comparison. An empty answer scores zero.
+
+Tool selection is the F1 of successful-call precision and reference-call recall:
+\begin{equation}
+\mathrm{TSF1}_i=\frac{2m_i}{|G_i|+|A_i|}.
+\label{eq:tsf1}
+\end{equation}
+Missing tools, extra successful calls, and repeated successful calls change the score.
+
+Let $\pi_i$ be a longest-common-subsequence alignment from reference steps to calls in $A_i$. For reference step $k$, the argument similarity $s_{i,k}$ is zero when $k$ is not aligned. Otherwise $s_{i,k}=\mathrm{Sim}(e_{i,k},a_{i,\pi_i(k)})$, where $e_{i,k}$ is the reference argument and $a_{i,\pi_i(k)}$ is the argument of the aligned call. Equal normalized values score 1, as do scalars within a numeric tolerance. Mappings and sequences score the F1 of their recursively matched fields or items. A reference argument that is an intermediate result is compared with the value produced by the preceding successful call that supplies it. Parameter alignment is
+\begin{equation}
+\mathrm{PAS}_i=\frac{1}{|G_i|}\sum_{k=1}^{|G_i|}s_{i,k}.
+\label{eq:pas}
+\end{equation}
+
+Tool order is the normalized longest common subsequence:
+\begin{equation}
+\mathrm{TOS}_i=\frac{\mathrm{LCS}(G_i,A_i)}{|G_i|}.
+\label{eq:tos}
+\end{equation}
+For the reference order read--filter--count and the executed order read--count--filter, TSF1 is 1 and TOS is $2/3$. Extra calls do not necessarily lower TOS.
+
+Let $U_i$ be the attempt sequence, including failed calls and excluding planning calls. Execution efficiency is the fraction of those attempts that are matched successful calls:
+\begin{equation}
+\mathrm{ECR}_i=\frac{m_i}{|U_i|}.
+\label{eq:ecr}
+\end{equation}
+
+Quality applies fixed weights, with the largest weight on the answer and the smallest on order and attempt efficiency:
+\begin{equation}
+\begin{aligned}
+\mathrm{Quality}_i={}&0.4\,\mathrm{FAS}_i+0.2\,\mathrm{TSF1}_i+0.2\,\mathrm{PAS}_i\\
+&+0.1\,\mathrm{TOS}_i+0.1\,\mathrm{ECR}_i.
+\end{aligned}
+\label{eq:quality}
+\end{equation}
+
+A reference chain records one solution under the available interfaces. An alternative valid implementation can receive lower tool-name scores. PAS compares arguments only on steps aligned by tool name, so an unaligned call contributes no argument credit. These scores measure agreement with the reference workflow rather than semantic equivalence of arbitrary analyses. Explaining an answer or judging an alternative workflow still requires the inputs, outputs, and dependency trace.

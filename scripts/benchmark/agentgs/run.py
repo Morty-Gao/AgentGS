@@ -52,6 +52,11 @@ def main(
         help="Parallel questions. Omit to use the runtime default",
     ),
     planning_mode: str = typer.Option("skill_guided", "--planning-mode"),
+    benchmark_scope: str | None = typer.Option(
+        None,
+        "--benchmark-scope",
+        help="full or common_data. Omit to use config.toml. data_only requires common_data",
+    ),
     modules: str | None = typer.Option(None, "--modules", help="Module overrides as JSON or @file"),
     ablation: list[str] | None = typer.Option(
         None, "--ablation", help="Repeatable A1–A6 or BIPARTITE preset"
@@ -106,7 +111,9 @@ def main(
     mode = check_planning_mode(planning_mode)
     try:
         parsed_modules = parse_object(modules, "--modules") if modules else None
-        source, rows, scope = select_tasks(root, dataset, dataset_name, ids, mode)
+        source, rows, scope = select_tasks(
+            root, dataset, dataset_name, ids, mode, benchmark_scope
+        )
         loaded = load_llm(root)
         model_key, selected = loaded.configured_model(model)
         provider = loaded.providers[selected.provider]

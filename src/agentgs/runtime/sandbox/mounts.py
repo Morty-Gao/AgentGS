@@ -15,6 +15,7 @@ DATA_DIRECTORIES = (
     "ocean",
     "reference",
     "earthbench",
+    "geoquestions",
 )
 DATA_FILES = ("mineral.csv", "hazard.jsonl", "gem.jsonl", "gem.jsonl.gz")
 OUTPUT_LIMIT = 16 * 1024

@@ -31,8 +31,10 @@ def resolve_store(root: Path) -> Path:
 
 
 def functionality_keys(graph: dict) -> list[str]:
+    from agentgs.agent.retrieval.texts import relation_text
+
     keys = [
-        repr((subject, relation, target))
+        relation_text((subject, relation, target))
         for subject, edges in graph.items()
         for relation, target in edges
         if relation == RELATION
@@ -52,13 +54,16 @@ def load_graph(index_dir: Path) -> dict:
 
 
 def question_texts(root: Path) -> list[str]:
+    from agentgs.benchmark.inputs import public_input
+    from agentgs.contracts.resources import retrieval_question
     from agentgs.datasets.geotooleval import benchmark_dataset
     from agentgs.evaluation.datasets.geotooleval import load_tasks
 
     texts = []
     seen = set()
     for task in load_tasks(benchmark_dataset(root)):
-        text = task.question
+        request = public_input(task)
+        text = retrieval_question(request.question, request.input_resource)
         if text and text not in seen:
             seen.add(text)
             texts.append(text)
@@ -70,8 +75,10 @@ def question_texts(root: Path) -> list[str]:
 def encode(embedder, texts: list[str], label: str) -> list[list[float]]:
     vectors = []
     total = len(texts)
-    for done, text in enumerate(texts, start=1):
-        vectors.append(embedder.get_text_embedding(text))
+    for done, vector in enumerate(
+        embedder._model().embed(texts, batch_size=embedder.batch_size), start=1
+    ):
+        vectors.append(vector.tolist())
         if done == total or done % 20 == 0:
             print(f"embedded {label} {done}/{total}", file=sys.stderr, flush=True)
     dimension = len(vectors[0])
@@ -93,8 +100,12 @@ def main() -> None:
     try:
         locate_model_directory(model_cache, settings.embedding_model)
         require_fastembed()
-        relations = functionality_keys(load_graph(index_dir))
+        from agentgs.agent.retrieval.texts import context_texts
+
+        graph = load_graph(index_dir)
+        relations = functionality_keys(graph)
         questions = question_texts(output_root)
+        contexts = context_texts(graph)
         from agentgs.client.embedding import LocalEmbedding, save_embeddings
 
         embedder = LocalEmbedding(
@@ -105,8 +116,13 @@ def main() -> None:
         )
         relation_vectors = encode(embedder, relations, "tools")
         question_vectors = encode(embedder, questions, "questions")
+        context_vectors = encode(embedder, contexts, "contexts") if contexts else []
         save_embeddings(store / "tools.npz", relations, relation_vectors)
         save_embeddings(store / "questions.npz", questions, question_vectors)
+        if contexts:
+            save_embeddings(store / "contexts.npz", contexts, context_vectors)
+        else:
+            (store / "contexts.npz").unlink(missing_ok=True)
     except (FileNotFoundError, RuntimeError, ValueError) as exc:
         write_json(
             manifest_path,
@@ -123,6 +139,8 @@ def main() -> None:
         report("embedding", "partial", [str(exc)], 0)
         raise SystemExit(2) from exc
     files = [store / "tools.npz", store / "questions.npz"]
+    if contexts:
+        files.append(store / "contexts.npz")
     write_json(
         manifest_path,
         {
@@ -133,6 +151,15 @@ def main() -> None:
             "store": relative_to(store, output_root),
             "relations": len(relations),
             "questions": len(questions),
+            "contexts": len(contexts),
+            "graph_sha256": sha256(index_dir / "graph_store.json"),
+            "model_files": {
+                relative_to(path, model_cache): sha256(path)
+                for path in sorted(
+                    locate_model_directory(model_cache, settings.embedding_model).iterdir()
+                )
+                if path.is_file() and path.suffix in {".onnx", ".json"}
+            },
             "dimension": len(relation_vectors[0]),
             "missing": [],
             "files": {relative_to(path, output_root): sha256(path) for path in files},

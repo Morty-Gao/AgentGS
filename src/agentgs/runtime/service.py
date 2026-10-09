@@ -35,6 +35,9 @@ class TaskService:
         self._submission_lock = asyncio.Lock()
         self._rss_lock = asyncio.Lock()
         self._rss_snapshot, self._rss_snapshot_at = {}, 0.0
+        from agentgs.runtime.embeddings import EmbeddingRuntime
+
+        self.embeddings = EmbeddingRuntime(self.root)
 
     async def __aenter__(self):
         await self.store.initialize()
@@ -148,6 +151,7 @@ class TaskService:
         jobs = list(self.jobs.values())
         await asyncio.gather(*(self.cancel(key) for key in list(self.jobs)), return_exceptions=True)
         await asyncio.gather(*jobs, return_exceptions=True)
+        await self.embeddings.close()
 
     async def _run(self, spec):
         record = await self.get(spec.id)
@@ -180,6 +184,20 @@ class TaskService:
                 await self.store.save(record)
                 work = self.root / "outputs/tasks" / spec.id
                 request = work / "request.json"
+                embedding_endpoint = None
+                if not spec.input.calls:
+                    from agentgs.config.algorithm import load_algorithm, resolve_algorithm
+
+                    options = resolve_algorithm(await invoke(load_algorithm, self.root), spec.input)
+                    if (
+                        options.planning_mode != "data_only"
+                        and options.candidate_pool == "retrieved"
+                        and await invoke((self.root / "embedding/tools.npz").is_file)
+                        and await invoke(
+                            (self.root / options.index_path / "graph_store.json").is_file
+                        )
+                    ):
+                        embedding_endpoint = await self.embeddings.endpoint(options)
 
                 def prepare():
                     work.mkdir(parents=True, exist_ok=False)
@@ -189,6 +207,7 @@ class TaskService:
                                 "root": str(self.root),
                                 "spec": spec.model_dump(mode="json"),
                                 "runtime": self.settings.model_dump(),
+                                "embedding_endpoint": embedding_endpoint,
                             }
                         ),
                         encoding="utf-8",

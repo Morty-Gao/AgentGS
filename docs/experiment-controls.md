@@ -60,6 +60,14 @@ domain seed injection for that request, without mutating a shared retriever.
 `allow_rule_planning=false` alone does not mean that all deterministic assistance
 is disabled. Keep these controls identical across the relevant comparisons.
 
+Prepared embeddings cover the public question plus resource locator, tool
+functionality relations, and graph-expansion contexts. Every mode shares the same
+input construction and encoder. Runtime sessions warm the CPU encoder once and
+serve isolated task workers through loopback; dynamic misses are memoized.
+Vector-file hashes are part of resume identity, so rebuilding the cache requires
+a new experimental output directory. Scientific source-data gaps remain recorded
+task failures and are not filled with inferred values.
+
 Bridge direct-path comparisons are opt-in via `bridge_diagnostics=true` and are
 off in normal experiments. Diagnostic executor requests have a separate counter.
 

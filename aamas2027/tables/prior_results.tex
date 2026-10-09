@@ -1,0 +1,19 @@
+\begin{table}[t]
+\caption{Earlier GeoToolEval baseline comparison. AgentGS process metrics are per-record averages from the present 603-record end-to-end experiment; FAS values are retained from the source manuscript. Direct-answer language models have no tool traces; their process metrics are not applicable (---).}
+\label{tab:prior-results}
+\centering
+\begin{tabularx}{\columnwidth}{@{}Xrrr@{}}
+\toprule
+Method & FAS & TSF1 & TOS \\
+\midrule
+AgentGS (GPT-5.6 Terra) & \textbf{0.8731} & 0.9170 & 0.9166 \\
+GeoAgent (GPT-5.6 Terra) & 0.7804 & 0.8663 & 0.7911 \\
+EarthAgent (GPT-5.6 Terra) & 0.0862 & 0.1182 & 0.1390 \\
+DeepSeek V4 Pro & 0.5162 & --- & --- \\
+GPT-5.6 Terra & 0.3137 & --- & --- \\
+GPT-5.4 & 0.3069 & --- & --- \\
+Qwen-Plus & 0.2918 & --- & --- \\
+GeoGPT & 0.2500 & --- & --- \\
+\bottomrule
+\end{tabularx}
+\end{table}

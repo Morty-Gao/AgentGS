@@ -1,4 +1,4 @@
-"""Deterministic GeoToolEval accuracy and token-cost scoring."""
+"""Deterministic GeoToolEval quality and token-cost scoring."""
 
 from __future__ import annotations
 
@@ -191,7 +191,7 @@ def score_task(
     token_usage: dict[str, Any] | list[dict[str, Any]] | None = None,
     token_budget_per_gold_step: int = DEFAULT_TOKEN_BUDGET_PER_GOLD_STEP,
 ) -> dict[str, Any]:
-    """Score one task on the 0-100 accuracy, token-cost and final scales."""
+    """Score one task on the 0-100 quality, token-cost and final scales."""
     gold_steps = list(gold_steps or [])
     gold_tools = [str(step.get("tool_name") or "") for step in gold_steps]
     conversation = as_conversation(messages)
@@ -211,7 +211,7 @@ def score_task(
     pas = sum(parameter_scores) / len(gold_steps) if gold_steps else 0.0
     ecr = matched_success / len(attempts) if attempts else 0.0
     fas = min(1.0, max(0.0, float(answer_score)))
-    accuracy_score = 100.0 * (0.4 * fas + 0.2 * tsf1 + 0.1 * tos + 0.2 * pas + 0.1 * ecr)
+    quality_score = 100.0 * (0.4 * fas + 0.2 * tsf1 + 0.1 * tos + 0.2 * pas + 0.1 * ecr)
     task_success = (
         math.isclose(fas, 1.0)
         and math.isclose(tsf1, 1.0)
@@ -237,7 +237,7 @@ def score_task(
             0.0 if not task_success else min(1.0, len(gold_steps) / max(len(attempts), 1))
         )
         cost_score = 100.0 * (0.6 * mte + 0.4 * tce_for_cost)
-        final_score = 0.85 * accuracy_score + 0.15 * cost_score
+        final_score = 0.85 * quality_score + 0.15 * cost_score
     tce = 0.0 if not task_success else min(1.0, len(gold_steps) / max(len(attempts), 1))
     return {
         "protocol": SCORING_PROTOCOL,
@@ -253,7 +253,7 @@ def score_task(
         "physical_tool_call_attempts": len(attempts),
         "pending_function_calls": len(conversation.pending_tool_calls()),
         "ecr": round(ecr, 6),
-        "accuracy_score": round(accuracy_score, 4),
+        "quality_score": round(quality_score, 4),
         "task_success_gate": task_success,
         "model_total_tokens": total_tokens,
         "token_budget": token_budget,
@@ -288,7 +288,7 @@ def aggregate_scores(samples: list[dict[str, Any]]) -> dict[str, Any]:
         "tos",
         "pas",
         "ecr",
-        "accuracy_score",
+        "quality_score",
         "mte",
         "tce",
         "cost_score",

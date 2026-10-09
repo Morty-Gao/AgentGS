@@ -89,6 +89,8 @@ async def test_worker_resolves_mode_before_loading_declarations(project, monkeyp
     (project / "config.toml").write_text(f'[agent]\nplanning_mode="{configured}"\n')
     (project / "embedding").mkdir(parents=True)
     (project / "embedding" / "tools.npz").write_bytes(b"")
+    (project / "data/geotoolkg").mkdir(parents=True)
+    (project / "data/geotoolkg/graph_store.json").write_text('{"graph_dict": {}}')
     loads = []
     if mode == "tool_only":
 
