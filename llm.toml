@@ -91,7 +91,7 @@ tool_calling = true
 base_url = "http://10.102.209.46:30010/v1"
 api_key = "local-no-key"
 timeout_seconds = 600
-max_concurrent_requests = 48
+max_concurrent_requests = 64
 
 [models.ds2]
 provider = "ds2"

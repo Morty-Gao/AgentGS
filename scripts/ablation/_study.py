@@ -85,12 +85,15 @@ def request_for(row, study, cell, contracts):
         output_contract=contracts.find(row.question),
         dataset_instructions=contracts.system_prompt,
     )
+    recorded = study["model"]
     return TaskInput.model_validate(
         {
             **base.model_dump(),
             **study["design"]["common_task"],
             "modules": cell_modules(cell),
             "ablations": cell["ablations"],
+            "model": recorded["key"],
+            "effort": recorded["effort"],
         }
     )
 

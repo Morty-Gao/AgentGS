@@ -174,6 +174,15 @@ def main():
         help="Optional manually curated JSON list of exactly 60 IDs, six per domain",
     )
     parser.add_argument("--model", help="llm.toml model key; required when several models are configured")
+    parser.add_argument("--effort", help="Reasoning effort frozen into every task; default is the model default")
+    parser.add_argument("--repetitions", type=int, help="Override design.json repetitions for this study only")
+    parser.add_argument("--schedule-seed", type=int, help="Override the cell and question order seed")
+    parser.add_argument("--bootstrap-seed", type=int, help="Override the paired-bootstrap seed")
+    parser.add_argument(
+        "--concurrency",
+        type=int,
+        help="Task, model, tool and sandbox concurrency for this study only",
+    )
     args = parser.parse_args()
     directory = args.study.resolve()
     if directory.exists() and any(directory.iterdir()):
@@ -181,6 +190,27 @@ def main():
             "Study directory is not empty. Use a fresh directory; frozen designs are not overwritten."
         )
     design = load_design()
+    if args.repetitions is not None:
+        if args.repetitions < 1:
+            raise SystemExit("--repetitions must be at least 1")
+        design["repetitions"] = args.repetitions
+    if args.schedule_seed is not None:
+        design["schedule_seed"] = args.schedule_seed
+    if args.bootstrap_seed is not None:
+        design["bootstrap_seed"] = args.bootstrap_seed
+    if args.concurrency is not None:
+        if not 1 <= args.concurrency <= 128:
+            raise SystemExit("--concurrency must be from 1 to 128")
+        runtime = design["runtime"]
+        runtime["max_concurrent_tasks"] = args.concurrency
+        runtime["max_concurrent_model_calls"] = args.concurrency
+        runtime["max_concurrent_tool_calls"] = args.concurrency
+        runtime["max_concurrent_sandbox_calls"] = args.concurrency
+        # The RSS watchdog stops a cell when the sum of worker RSS crosses this cap.
+        per_task = int(runtime.get("default_rss_limit_mb", 1024))
+        runtime["max_total_rss_mb"] = max(
+            int(runtime.get("max_total_rss_mb", 0)), args.concurrency * per_task
+        )
     before = source_snapshot(ROOT)
     tasks = GeoToolEvalDataset(args.source).load()
     if len({row.category_id for row in tasks}) != 10:
@@ -217,6 +247,18 @@ def main():
     config = load_llm(ROOT)
     key, model = config.configured_model(args.model)
     provider = config.providers[model.provider]
+    effort = args.effort or model.default_effort
+    if effort and effort not in model.supported_efforts:
+        raise SystemExit(f"Model {key} does not support effort {effort}")
+    if (
+        args.concurrency is not None
+        and provider.max_concurrent_requests is not None
+        and provider.max_concurrent_requests < args.concurrency
+    ):
+        raise SystemExit(
+            f"Provider {model.provider} allows {provider.max_concurrent_requests} "
+            f"concurrent requests, below --concurrency {args.concurrency}"
+        )
     library = list(planner.skills.values())
     eligibility = {
         "A4": {
@@ -313,6 +355,7 @@ def main():
         "model": {
             "key": key,
             **model.model_dump(mode="json"),
+            "effort": effort,
             "base_url_sha256": digest(provider.base_url),
         },
         "source_snapshot": before,
@@ -337,10 +380,15 @@ def main():
                 "study_id": study["study_id"],
                 "questions": len(selected),
                 "chain_groups": dict(Counter(row["chain_group"] for row in chosen)),
+                "repetitions": design["repetitions"],
+                "concurrency": design["runtime"]["max_concurrent_tasks"],
+                "effort": effort,
                 "pilot_episodes": len(pilot) * sum(cell["suite"] == "primary" for cell in cells),
-                "primary_episodes": 60 * 3 * sum(cell["suite"] == "primary" for cell in cells),
+                "primary_episodes": 60
+                * design["repetitions"]
+                * sum(cell["suite"] == "primary" for cell in cells),
                 "interaction_episodes": 60
-                * 3
+                * design["repetitions"]
                 * sum(cell["suite"] == "interaction" for cell in cells),
                 "eligibility": eligibility,
             },
