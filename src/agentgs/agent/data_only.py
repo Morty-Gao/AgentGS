@@ -102,9 +102,10 @@ async def explore(question, state, stages, answering):
     }
     limit = state.context.options.command_attempts
     transcript = []
-    used = 0
+    used = _finished_bash_calls(state.conversation)
     completed = False
-    first = True
+    first = used == 0
+    seen_completed = set()
     while used < limit:
         message = await state.model(
             _instruction(question, first=first, described=described)
@@ -122,6 +123,14 @@ async def explore(question, state, stages, answering):
                 completed=completed,
                 answer_text=message.content,
             )
+        if message.tool_calls and all(
+            _recorded_tool_output(state.conversation, call.id) is not None
+            for call in message.tool_calls
+        ):
+            if message.id in seen_completed:
+                break
+            seen_completed.add(message.id)
+            continue
         for call in message.tool_calls:
             if used >= limit:
                 payload = {"status": "error", "error": "bash command budget exhausted"}
@@ -140,6 +149,25 @@ async def explore(question, state, stages, answering):
         evidence,
         completed=any(result.succeeded for result in state.results),
     )
+
+
+def _finished_bash_calls(conversation) -> int:
+    calls = conversation.function_calls()
+    count = 0
+    for message in conversation.messages:
+        if message.role != "tool" or message.metadata.get("status") != "success":
+            continue
+        call = calls.get(message.tool_call_id)
+        if call is not None and call.function.name == "bash":
+            count += 1
+    return count
+
+
+def _recorded_tool_output(conversation, call_id):
+    for message in conversation.messages:
+        if message.role == "tool" and message.tool_call_id == call_id:
+            return message.metadata.get("raw_tool_output", message.content)
+    return None
 
 
 async def _run_bash(state, call):

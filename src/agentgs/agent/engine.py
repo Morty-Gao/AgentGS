@@ -17,6 +17,7 @@ from agentgs.agent.planning.geosparql import _heuristic_geosparql_query
 from agentgs.agent.planning.instances import ExecutionPlan, PlanStep, resolve_inputs, reuse_key
 from agentgs.agent.planning.model_stages import ModelStages
 from agentgs.agent.planning.routing.entry import infer_tools, normalize_plan
+from agentgs.agent.resume import prepare_resume, resumable_failure
 from agentgs.agent.state import AgentExecutionError, ModelProtocolError, RunState
 from agentgs.client.errors import BudgetExceeded, ProviderError, TransportFailure
 from agentgs.config.algorithm import AlgorithmSettings, resolve_algorithm
@@ -24,6 +25,7 @@ from agentgs.contracts.async_utils import drain, invoke
 from agentgs.contracts.catalog import load_catalog
 from agentgs.contracts.remote_sensing import contract_scope
 from agentgs.contracts.resources import resource_access, retrieval_question
+from agentgs.messages.conversation import reuse_finished_tools
 
 
 class MutablePlan(SimpleNamespace):
@@ -75,12 +77,37 @@ class AgentEngine:
     async def run(self, task, context):
         context = copy(context)
         context.options = resolve_algorithm(context.options or AlgorithmSettings(), task)
-        state = RunState(context, task)
+        retries = getattr(task, "resume_attempts", 0) or 0
+        snapshot = getattr(task, "resume", None)
+        attempt = 0
+        last_error = None
+        replay = reuse_finished_tools.set(False)
         try:
-            return await self._run_task(task, context, state)
-        except asyncio.CancelledError:
-            await drain(asyncio.create_task(state.cancel()))
-            raise
+            while True:
+                current = task if snapshot is None else task.model_copy(update={"resume": snapshot})
+                try:
+                    state = RunState(context, current)
+                except ValueError:
+                    if last_error is None:
+                        raise
+                    raise last_error
+                try:
+                    return await self._run_task(current, context, state)
+                except asyncio.CancelledError:
+                    await drain(asyncio.create_task(state.cancel()))
+                    raise
+                except AgentExecutionError as exc:
+                    if attempt >= retries or not resumable_failure(exc) or exc.result is None:
+                        raise
+                    try:
+                        prepare_resume(exc.result)
+                    except ValueError:
+                        raise exc
+                    snapshot = exc.result
+                    last_error = exc
+                    attempt += 1
+        finally:
+            reuse_finished_tools.reset(replay)
 
     async def _run_task(self, task, context, state):
         # Explicit structured requests use the same tool schemas without a model.
@@ -131,6 +158,15 @@ class AgentEngine:
                 resource_access(context.resource_resolver),
                 scope.request_scope(task.input_domain),
             ):
+                cursor = state.resume_cursor
+                if cursor is not None and cursor.answer_only:
+                    return await answering.generate(
+                        question,
+                        cursor.evidence or "No tool result was recorded.",
+                        completed=cursor.tool_chain_completed,
+                    )
+                if cursor is not None and cursor.continue_plan:
+                    return await self._continue_plan(question, state, execution, answering)
                 if context.options.planning_mode == "data_only":
                     return await explore(question, state, stages, answering)
                 return await self._staged(question, state, stages, execution, answering)
@@ -145,6 +181,82 @@ class AgentEngine:
             scope._permitted.reset(permission)
             if bridge_token is not None:
                 _bridge_enabled.reset(bridge_token)
+
+    async def _continue_plan(self, question, state, execution, answering):
+        """Continue a created plan without calling the planning model again."""
+        cursor = state.resume_cursor
+        registry = await invoke(ArtifactRegistry, question)
+        scope.set_registry(registry)
+        options = state.context.options
+        chain = list(cursor.chain)
+        instances = cursor.instances
+        outputs = {}
+        total_output = ""
+        current = ""
+        occurrences = {}
+        failed = False
+        for index, name in enumerate(chain, 1):
+            occurrence = occurrences.get(name, 0)
+            occurrences[name] = occurrence + 1
+            instance = instances.steps[index - 1]
+            if index <= len(cursor.restored_outputs):
+                raw = cursor.restored_outputs[index - 1]
+                try:
+                    decoded = json.loads(raw)
+                except ValueError:
+                    decoded = {"text": raw}
+                outputs[instance.id] = decoded
+                total_output += (
+                    f"\n\nNow we have run the **{name}** with input `{{}}` "
+                    f"and obtained result\n {raw}."
+                )
+                current = raw
+                await invoke(registry.ingest_tool_output, name, f"tool_step_{index:02d}", raw)
+                continue
+            explicit_inputs = resolve_inputs(instance, outputs)
+            step = {
+                "execution_index": index,
+                "occurrence_index": occurrence,
+                "occurrence_count": chain.count(name),
+                "tool_chain": chain,
+                "instance": instance.model_dump(mode="json"),
+                "resolved_inputs": explicit_inputs,
+            }
+            result = await execution.run(
+                name,
+                question,
+                registry,
+                total_output,
+                current,
+                step,
+                initial_arguments=explicit_inputs,
+            )
+            if result.succeeded:
+                try:
+                    decoded = json.loads(result.output)
+                except ValueError:
+                    decoded = {"text": result.output}
+                outputs[instance.id] = decoded
+            total_output += result.render_for_agent()
+            current = result.output
+            await invoke(registry.ingest_tool_output, name, f"tool_step_{index:02d}", result.output)
+            if not result.succeeded:
+                failed = True
+                await state.emit(
+                    "execution_feedback",
+                    {
+                        "status": "recovery_disabled"
+                        if not options.execution_recovery
+                        else "replanning",
+                        "tool_name": name,
+                    },
+                )
+                break
+        if failed:
+            return await answering.generate(
+                question, total_output, completed=False, tool_attempts_exhausted=True
+            )
+        return await answering.generate(question, total_output)
 
     async def _staged(self, question, state, stages, execution, answering):
         context, task, options = state.context, state.task, state.context.options
@@ -183,6 +295,16 @@ class AgentEngine:
         )
         plan = None
         bridge_report = None
+        cursor = state.resume_cursor
+        if (
+            skill_guided
+            and cursor is not None
+            and cursor.skip_skill_layer
+            and cursor.restored_plan is not None
+        ):
+            # Requirements were already adopted; the next call is tool planning.
+            plan = cursor.restored_plan
+            bridge_report = cursor.bridge_report
         # Authorized offline GeoQuestions route retains the original early-route position.
         if "GeoBigDataExecuteGeoSPARQL" in inferred and options.allow_rule_planning:
             if skill_guided:

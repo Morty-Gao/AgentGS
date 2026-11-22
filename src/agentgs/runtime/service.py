@@ -3,6 +3,7 @@
 import asyncio
 import json
 import os
+import sqlite3
 import sys
 import time
 from datetime import datetime, timezone
@@ -18,10 +19,23 @@ from agentgs.contracts.models import (
     TaskStatus,
     ToolError,
 )
-from agentgs.runtime.concurrency import RuntimeCoordinator
+from agentgs.runtime.concurrency import RuntimeCoordinator, sqlite_busy
 from agentgs.runtime.resources import tree_rss
-from agentgs.runtime.storage.store import TaskStore
+from agentgs.runtime.storage.store import QueueFull, TaskStore
 from agentgs.runtime.subprocesses import spawn, stop
+
+
+def _error_text(exc) -> str:
+    text = str(exc).strip()
+    name = type(exc).__name__
+    return f"{name}: {text}" if text else name
+
+
+def _stream_error(exc) -> ToolError:
+    """Keep a sqlite lock visible. Other broken streams stay protocol failures."""
+    if sqlite_busy(exc):
+        return ToolError(code="runtime_error", message=_error_text(exc))
+    return ToolError(code="worker_protocol", message="Invalid worker event stream")
 
 
 class TaskService:
@@ -72,7 +86,7 @@ class TaskService:
             )
             record = TaskRecord(spec=spec)
             try:
-                await self.store.reserve(record, self.settings.max_pending_tasks)
+                await self._reserve(record)
             except asyncio.CancelledError:
 
                 async def rollback():
@@ -91,6 +105,21 @@ class TaskService:
                 raise
             self.jobs[spec.id] = asyncio.create_task(self._run(spec))
             return record
+
+    async def _reserve(self, record):
+        # A full queue is often a dead supervisor. Recover, then retry briefly.
+        delay = 0.02
+        deadline = time.monotonic() + 0.2
+        while True:
+            try:
+                await self.store.reserve(record, self.settings.max_pending_tasks)
+                return
+            except QueueFull:
+                if time.monotonic() >= deadline:
+                    raise
+                await self.store.recover()
+                await asyncio.sleep(min(delay, max(0.0, deadline - time.monotonic())))
+                delay = min(0.08, delay * 1.5)
 
     async def get(self, task_id):
         return await self.store.get(task_id)
@@ -166,7 +195,7 @@ class TaskService:
                 if control and control["cancelled"]:
                     target.cancel()
                     return
-                await asyncio.sleep(0.02)
+                await asyncio.sleep(0.5)
 
         watcher = asyncio.create_task(cancellation())
         try:
@@ -268,14 +297,25 @@ class TaskService:
                         await self.store.emit(spec.id, event["type"], event["payload"])
 
                 reader = asyncio.create_task(consume())
+                last_sample = 0.0
+                sampled_total = 0
                 while process.returncode is None:
                     async with self._rss_lock:
                         rss, _ = await invoke(self._memory_usage, process.pid)
-                    total = await self.store.worker(spec.id, process.pid, rss)
-                    record.peak_rss_bytes = max(record.peak_rss_bytes, rss)
+                    now = time.monotonic()
+                    # A locked RSS write used to abort the task. Sample once a
+                    # second and keep the worker when sqlite is busy.
+                    if now - last_sample >= 1:
+                        total = await self.store.worker(
+                            spec.id, process.pid, rss, best_effort=True
+                        )
+                        last_sample = now
+                        if total is not None:
+                            sampled_total = total
+                            record.peak_rss_bytes = max(record.peak_rss_bytes, rss)
                     if (
                         rss > spec.rss_limit_mb * 1024 * 1024
-                        or total > self.settings.max_total_rss_mb * 1024 * 1024
+                        or sampled_total > self.settings.max_total_rss_mb * 1024 * 1024
                     ):
                         record.error = ToolError(
                             code="resource_limit", message="RSS watchdog limit exceeded"
@@ -283,17 +323,13 @@ class TaskService:
                         await stop(process)
                         break
                     if reader.done() and reader.exception():
-                        record.error = ToolError(
-                            code="worker_protocol", message="Invalid worker event stream"
-                        )
+                        record.error = _stream_error(reader.exception())
                         await stop(process)
                         break
-                    await asyncio.sleep(0.05)
+                    await asyncio.sleep(0.2)
                 await process.wait()
                 if reader.done() and reader.exception():
-                    record.error = record.error or ToolError(
-                        code="worker_protocol", message="Invalid worker event stream"
-                    )
+                    record.error = record.error or _stream_error(reader.exception())
                 else:
                     await reader
                 await self._read_result(record, work, process.returncode)
@@ -307,12 +343,9 @@ class TaskService:
             )
         except Exception as exc:
             record.status = TaskStatus.FAILED
-            record.error = ToolError(
-                code="runtime_error",
-                message=f"{type(exc).__name__}: {exc}"
-                if isinstance(exc, (ValueError, FileNotFoundError))
-                else type(exc).__name__,
-            )
+            # Keep the exception text. "database is locked" is infrastructure;
+            # the type name alone is classified as an ordinary failure.
+            record.error = ToolError(code="runtime_error", message=_error_text(exc))
         finally:
             await drain(
                 asyncio.create_task(
@@ -364,7 +397,11 @@ class TaskService:
             reader.cancel()
             await asyncio.gather(reader, return_exceptions=True)
         self.processes.pop(record.spec.id, None)
-        await self.store.worker(record.spec.id, None)
+        try:
+            await self.store.worker(record.spec.id, None)
+        except sqlite3.OperationalError as exc:
+            if not sqlite_busy(exc):
+                raise
         partial = self.root / "outputs/tasks" / record.spec.id / "result.json"
         if record.result is None and await invoke(partial.is_file):
             try:
@@ -374,11 +411,15 @@ class TaskService:
             except (ValueError, OSError):
                 pass
         await self.store.save(record)
-        await self.store.emit(
-            record.spec.id,
-            "task." + record.status.value,
-            {
-                "error": record.error.model_dump() if record.error else None,
-                "peak_rss_bytes": record.peak_rss_bytes,
-            },
-        )
+        try:
+            await self.store.emit(
+                record.spec.id,
+                "task." + record.status.value,
+                {
+                    "error": record.error.model_dump() if record.error else None,
+                    "peak_rss_bytes": record.peak_rss_bytes,
+                },
+            )
+        except sqlite3.OperationalError as exc:
+            if not sqlite_busy(exc):
+                raise

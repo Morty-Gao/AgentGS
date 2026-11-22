@@ -7,9 +7,9 @@ import hashlib
 import json
 import math
 import os
+import queue
 import threading
 import time
-from concurrent.futures import ThreadPoolExecutor, as_completed
 from contextlib import contextmanager
 from copy import deepcopy
 from functools import lru_cache
@@ -443,6 +443,68 @@ def conversation(prompt, events, dialogue=None, calls=()):
     return result.model_dump(mode="json")
 
 
+_MODEL_TIMEOUT = (
+    "ReadTimeout",
+    "WriteTimeout",
+    "ConnectTimeout",
+    "PoolTimeout",
+    "LLM request deadline exceeded",
+    "LLM transport/retry budget exhausted",
+)
+_MODEL_TRANSPORT = (
+    "RemoteProtocolError",
+    "ReadError",
+    "ConnectError",
+    "TransportFailure",
+)
+_OTHER_TIMEOUT = (
+    "Tool invocation exceeded its time budget",
+    "Task admission/execution time budget exceeded",
+    "Tool-call budget exhausted",
+    "Execution of the code snippet has timed out",
+    "TimeoutExpired",
+    "probe timed out",
+)
+_INFRASTRUCTURE = (
+    "QueueFull",
+    "Runtime task queue is full",
+    "database is locked",
+    "database is busy",
+)
+
+
+def failure_class(error) -> str:
+    """Classify one failed attempt. Model timeouts keep the full retry budget."""
+    text = "" if error is None else str(error)
+    if "HTTP 401" in text or "HTTP 403" in text:
+        return "authentication"
+    if any(token in text for token in _MODEL_TIMEOUT):
+        return "model_timeout"
+    if any(token in text for token in _MODEL_TRANSPORT):
+        return "model_transport"
+    if any(token in text for token in _OTHER_TIMEOUT):
+        return "other_timeout"
+    if any(token in text for token in _INFRASTRUCTURE):
+        return "infrastructure"
+    return "other"
+
+
+def failure_disposition(error, status, index, retries):
+    """Return class, attempts used, and whether the question may run again.
+
+    Infrastructure stays at ``index`` so a locked database is not a consumed try.
+    """
+    if status == "succeeded":
+        return None, index + 1, False
+    klass = failure_class(error)
+    if klass == "infrastructure":
+        return klass, index, True
+    if klass == "authentication":
+        return klass, index + 1, False
+    limit = retries if klass in {"model_timeout", "model_transport"} else min(3, retries)
+    return klass, index + 1, index < limit
+
+
 def add_arguments(parser):
     parser.add_argument("--questions", type=Path)
     parser.add_argument("--output", type=Path)
@@ -463,10 +525,66 @@ def add_arguments(parser):
     parser.add_argument("--retries", type=int, default=3)
 
 
+def prediction_identity(args, agent, source):
+    """Identity stored beside predictions. A later run must build the same value."""
+    env = environment(args)
+    source_paths = [
+        Path(source),
+        ROOT / "scripts/benchmark/_runtime.py",
+        Path(source).with_name("geotool_bridge.py"),
+    ]
+    for directory in (
+        "config",
+        "contracts",
+        "datasets",
+        "messages",
+        "runtime/tools",
+        "evaluation",
+        "benchmark",
+    ):
+        for suffix in ("*.py", "*.json"):
+            source_paths.extend(sorted((ROOT / "src/agentgs" / directory).rglob(suffix)))
+    source_paths.extend(
+        p
+        for p in [
+            ROOT / "src/agentgs/cli/parsing.py",
+            ROOT / "src/agentgs/client/config.py",
+            ROOT / "src/agentgs/client/models.py",
+            ROOT / "pyproject.toml",
+            ROOT / "uv.lock",
+        ]
+        if p.exists()
+    )
+    source_paths.extend(sorted((ROOT / "scripts/benchmark").rglob("*.py")))
+    dataset = Path(args.questions or ROOT / "data/geotooleval.jsonl")
+    settings = {
+        k: str(v) if isinstance(v, Path) else v
+        for k, v in vars(args).items()
+        if k not in {"api_key", "output", "retry_failed", "ids"}
+    }
+    settings.update(model=env["LLM_MODEL"], base_url=env["LLM_BASE_URL"])
+    identity = {
+        "agent": agent,
+        "protocol": "fork-geotooleval-v2",
+        "dataset_sha256": hashlib.sha256(dataset.read_bytes()).hexdigest(),
+        "source_sha256": {
+            str(p.relative_to(ROOT)): hashlib.sha256(p.read_bytes()).hexdigest()
+            for p in source_paths
+        },
+        "settings": settings,
+    }
+    identity["prepared_inputs"] = {
+        str(p.relative_to(ROOT)): [p.stat().st_size, p.stat().st_mtime_ns]
+        for p in sorted((ROOT / "data").rglob("*"))
+        if p.is_file() and "raw" not in p.relative_to(ROOT / "data").parts
+    }
+    return identity
+
+
 def batch(args, agent, source, run_one):
     retries = getattr(args, "retries", 3)
-    if not 0 <= retries <= 10:
-        raise ValueError("--retries must be between 0 and 10")
+    if not 0 <= retries <= 100:
+        raise ValueError("--retries must be between 0 and 100")
     if not 1 <= args.concurrency <= 128 or args.request_timeout <= 0 or args.max_output_tokens < 1:
         raise ValueError("Invalid concurrency, timeout or output token budget")
     rows = load_questions(args.questions)
@@ -500,56 +618,7 @@ def batch(args, agent, source, run_one):
     os.close(fd)
     try:
         env = environment(args)
-        source_paths = [
-            Path(source),
-            ROOT / "scripts/benchmark/_runtime.py",
-            Path(source).with_name("geotool_bridge.py"),
-        ]
-        for directory in (
-            "config",
-            "contracts",
-            "datasets",
-            "messages",
-            "runtime/tools",
-            "evaluation",
-            "benchmark",
-        ):
-            for suffix in ("*.py", "*.json"):
-                source_paths.extend(sorted((ROOT / "src/agentgs" / directory).rglob(suffix)))
-        source_paths.extend(
-            p
-            for p in [
-                ROOT / "src/agentgs/cli/parsing.py",
-                ROOT / "src/agentgs/client/config.py",
-                ROOT / "src/agentgs/client/models.py",
-                ROOT / "pyproject.toml",
-                ROOT / "uv.lock",
-            ]
-            if p.exists()
-        )
-        source_paths.extend(sorted((ROOT / "scripts/benchmark").rglob("*.py")))
-        dataset = Path(args.questions or ROOT / "data/geotooleval.jsonl")
-        settings = {
-            k: str(v) if isinstance(v, Path) else v
-            for k, v in vars(args).items()
-            if k not in {"api_key", "output", "retry_failed", "ids"}
-        }
-        settings.update(model=env["LLM_MODEL"], base_url=env["LLM_BASE_URL"])
-        identity = {
-            "agent": agent,
-            "protocol": "fork-geotooleval-v2",
-            "dataset_sha256": hashlib.sha256(dataset.read_bytes()).hexdigest(),
-            "source_sha256": {
-                str(p.relative_to(ROOT)): hashlib.sha256(p.read_bytes()).hexdigest()
-                for p in source_paths
-            },
-            "settings": settings,
-        }
-        identity["prepared_inputs"] = {
-            str(p.relative_to(ROOT)): [p.stat().st_size, p.stat().st_mtime_ns]
-            for p in sorted((ROOT / "data").rglob("*"))
-            if p.is_file() and "raw" not in p.relative_to(ROOT / "data").parts
-        }
+        identity = prediction_identity(args, agent, source)
         manifest = run_root / "manifest.json"
         if manifest.exists():
             if json.loads(manifest.read_text()) != identity:
@@ -633,10 +702,16 @@ def batch(args, agent, source, run_one):
             return record
 
         write_lock = threading.Lock()
+        progress_lock = threading.Lock()
+        work_queue = queue.Queue()
+        stop = threading.Event()
+        errors = []
+        finished = {"n": 0}
+        outstanding = {"n": len(pending)}
+        auth_stopped = {"hit": False}
+        states = {}
 
-        def run_one_tracked(row):
-            from agentgs.messages import Conversation
-
+        def resume_state(row):
             previous = latest.get(row["question_id"], {})
             prior_paths = list(
                 previous.get("attempt_directories")
@@ -647,97 +722,201 @@ def batch(args, agent, source, run_one):
                 if previous.get("retry_pending") and not args.retry_failed
                 else 0
             )
+            if offset > retries:
+                raise RuntimeError("Automatic retry state exceeded its configured budget")
             model_events = []
             for path in prior_paths:
                 prior = json.loads((Path(path) / "result.json").read_text())
                 model_events.extend(
-                    e for e in prior.get("trace", {}).get("events", []) if e.get("phase") == "model"
+                    event
+                    for event in prior.get("trace", {}).get("events", [])
+                    if event.get("phase") == "model"
                 )
-            for index in range(offset, retries + 1):
-                record = run_attempt(row)
-                prior_paths.append(record["attempt_directory"])
-                record.update(
-                    attempt_directories=list(prior_paths),
-                    automatic_attempts_used=index + 1,
-                    retry_pending=record["status"] != "succeeded" and index < retries,
-                )
-                model_events.extend(
-                    e
-                    for e in record.get("trace", {}).get("events", [])
-                    if e.get("phase") == "model"
-                )
-                # Domain scoring uses the current execution. Cost includes every
-                # failed/successful attempt, with unknown usage left unknown.
-                combined = Conversation.model_validate(record["conversation"])
-                combined.messages = [
-                    m
-                    for m in combined.messages
-                    if not (
-                        m.role == "event" and str(m.metadata.get("type", "")).startswith("model.")
-                    )
-                ]
-                for event in model_events:
-                    combined.record_event(
-                        "model.started",
-                        {
-                            "request_id": event["request_id"],
-                            "stage": event["stage"],
-                            "request_payload": event["request"],
-                        },
-                    )
-                    combined.record_event(
-                        "model.completed" if event["status"] == "completed" else "model.failed",
-                        {
-                            "request_id": event["request_id"],
-                            "usage": event.get("raw_response", {}).get("usage"),
-                            "attempts": 1,
-                            "error": event.get("error"),
-                        },
-                    )
-                record["conversation"] = combined.model_dump(mode="json")
-                attempt = Path(record["attempt_directory"])
-                atomic_json(attempt / "result.json", record)
-                atomic_json(attempt / "conversation.json", record["conversation"])
-                # Publish each failed attempt before retrying so interruption
-                # recovery preserves both the evidence and the remaining budget.
-                with write_lock:
-                    stream.write(json.dumps(record, ensure_ascii=False, default=str) + "\n")
-                    stream.flush()
-                    os.fsync(stream.fileno())
-                    latest[record["question_id"]] = record
-                    atomic_jsonl(output, [latest[qid] for qid in sorted(latest)])
-                if not record["retry_pending"]:
-                    return record
-                print(
-                    f"Q{row['question_id']} retry {index + 1}/{retries}: {record.get('error', 'failed')}",
-                    flush=True,
-                )
-                time.sleep(min(2**index, 8))
-            raise RuntimeError("Automatic retry state exceeded its configured budget")
+            return {
+                "prior_paths": prior_paths,
+                "model_events": model_events,
+                "index": offset,
+                "deferrals": 0,
+            }
 
-        # Give instrumentation and callers a stable question boundary.
-        run_one_tracked.__name__ = "run_one"
-        with (
-            client,
-            history.open("a", encoding="utf-8") as stream,
-            ThreadPoolExecutor(max_workers=args.concurrency) as pool,
-        ):
-            futures = [pool.submit(run_one_tracked, row) for row in pending]
-            for index, future in enumerate(as_completed(futures), 1):
-                record = future.result()
+        def wake():
+            # Stop before enqueueing sentinels so a worker cannot miss the exit.
+            stop.set()
+            for _ in range(args.concurrency):
+                work_queue.put(None)
+
+        def fail(exc):
+            with progress_lock:
+                errors.append(exc)
+                first = len(errors) == 1
+            if first:
+                wake()
+
+        def track(row):
+            from agentgs.messages import Conversation
+
+            state = states[row["question_id"]]
+            index = state["index"]
+            if index > retries:
+                raise RuntimeError("Automatic retry state exceeded its configured budget")
+            record = run_attempt(row)
+            state["prior_paths"].append(record["attempt_directory"])
+            klass, used, pending_retry = failure_disposition(
+                record.get("error"), record["status"], index, retries
+            )
+            if klass != "infrastructure":
+                state["index"] = used
+            record.update(
+                attempt_directories=list(state["prior_paths"]),
+                automatic_attempts_used=used,
+                retry_pending=pending_retry,
+            )
+            if klass:
+                record["failure_class"] = klass
+            state["model_events"].extend(
+                event
+                for event in record.get("trace", {}).get("events", [])
+                if event.get("phase") == "model"
+            )
+            # Domain scoring uses the current execution. Cost includes every
+            # failed/successful attempt, with unknown usage left unknown.
+            combined = Conversation.model_validate(record["conversation"])
+            combined.messages = [
+                message
+                for message in combined.messages
+                if not (
+                    message.role == "event"
+                    and str(message.metadata.get("type", "")).startswith("model.")
+                )
+            ]
+            for event in state["model_events"]:
+                combined.record_event(
+                    "model.started",
+                    {
+                        "request_id": event["request_id"],
+                        "stage": event["stage"],
+                        "request_payload": event["request"],
+                    },
+                )
+                combined.record_event(
+                    "model.completed" if event["status"] == "completed" else "model.failed",
+                    {
+                        "request_id": event["request_id"],
+                        "usage": event.get("raw_response", {}).get("usage"),
+                        "attempts": 1,
+                        "error": event.get("error"),
+                    },
+                )
+            record["conversation"] = combined.model_dump(mode="json")
+            attempt = Path(record["attempt_directory"])
+            atomic_json(attempt / "result.json", record)
+            atomic_json(attempt / "conversation.json", record["conversation"])
+            # Publish before releasing the worker so interruption keeps the budget.
+            with write_lock:
+                stream.write(json.dumps(record, ensure_ascii=False, default=str) + "\n")
+                stream.flush()
+                os.fsync(stream.fileno())
+                latest[record["question_id"]] = record
+                atomic_jsonl(output, [latest[qid] for qid in sorted(latest)])
+            return record, klass, index
+
+        def finish_question(record):
+            with progress_lock:
+                if record is not None and not record["retry_pending"]:
+                    finished["n"] += 1
+                    done_index = finished["n"]
+                    status = record["status"]
+                    question_id = record["question_id"]
+                else:
+                    done_index = None
+                outstanding["n"] -= 1
+                done = outstanding["n"] == 0 or stop.is_set()
+            if done_index is not None:
                 print(
-                    f"[{index}/{len(pending)}] Q{record['question_id']} {record['status']}",
+                    f"[{done_index}/{len(pending)}] Q{question_id} {status}",
                     flush=True,
                 )
+            if done:
+                wake()
+
+        def worker():
+            while not stop.is_set():
+                try:
+                    row = work_queue.get(timeout=0.05)
+                except queue.Empty:
+                    continue
+                if row is None or stop.is_set():
+                    if isinstance(row, dict):
+                        finish_question(None)
+                    return
+                try:
+                    record, klass, index = track(row)
+                except Exception as exc:
+                    fail(exc)
+                    return
+                retry = record["retry_pending"] and not stop.is_set()
+                if klass == "authentication":
+                    # Same stop as the async runner: later questions stay queued.
+                    auth_stopped["hit"] = True
+                    stop.set()
+                    retry = False
+                if retry:
+                    state = states[row["question_id"]]
+                    delay = min(2 ** state["deferrals"], 8)
+                    state["deferrals"] += 1
+                    print(
+                        f"Q{row['question_id']} retry {index + 1}/{retries} {klass}: "
+                        f"{record.get('error', 'failed')}",
+                        flush=True,
+                    )
+
+                    def later(row=row, delay=delay):
+                        try:
+                            time.sleep(delay)
+                        except Exception as exc:
+                            fail(exc)
+                            return
+                        if not stop.is_set():
+                            work_queue.put(row)
+                        else:
+                            finish_question(None)
+
+                    threading.Thread(target=later, daemon=True).start()
+                    continue
+                finish_question(record)
+
+        # One thread per slot. Sleep and requeue happen off the thread so the
+        # next question can run before this one reaches its next attempt.
+        threads = [
+            threading.Thread(target=worker, name="benchmark-attempt")
+            for _ in range(args.concurrency)
+        ]
+        with client, history.open("a", encoding="utf-8") as stream:
+            for row in pending:
+                states[row["question_id"]] = resume_state(row)
+                work_queue.put(row)
+            # An empty queue never calls wake(); joining idle workers would block.
+            if pending:
+                for thread in threads:
+                    thread.start()
+                for thread in threads:
+                    thread.join()
+            if errors:
+                raise errors[0]
         report = {
             "selected": len(rows),
-            "succeeded": sum(latest[r["question_id"]].get("status") == "succeeded" for r in rows),
-            "failed": sum(latest[r["question_id"]].get("status") != "succeeded" for r in rows),
+            "succeeded": sum(
+                latest.get(r["question_id"], {}).get("status") == "succeeded" for r in rows
+            ),
+            "failed": sum(
+                latest.get(r["question_id"], {}).get("status") != "succeeded" for r in rows
+            ),
             "output": str(output),
             "retries": retries,
             "attempts": sum(
-                len(latest[r["question_id"]].get("attempt_directories", [])) for r in rows
+                len(latest.get(r["question_id"], {}).get("attempt_directories", [])) for r in rows
             ),
+            "stopped_for_auth": auth_stopped["hit"],
         }
         atomic_json(run_root / "summary.json", report)
         print(json.dumps(report), flush=True)

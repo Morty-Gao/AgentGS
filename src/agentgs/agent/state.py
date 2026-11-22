@@ -8,11 +8,13 @@ from dataclasses import dataclass, field
 from uuid import uuid4
 
 from agentgs.agent.prompts import system_prompt, task_context, tool_feedback
+from agentgs.agent.resume import prepare_resume
 from agentgs.client import audit
 from agentgs.config.algorithm import AlgorithmSettings
 from agentgs.contracts.async_utils import invoke
 from agentgs.contracts.models import AgentResult
 from agentgs.messages import Conversation, Message
+from agentgs.messages.conversation import reuse_finished_tools
 
 logger = logging.getLogger(__name__)
 
@@ -45,9 +47,6 @@ class RunState:
     def __post_init__(self):
         self._model_lock = asyncio.Lock()
         self._save_lock = asyncio.Lock()
-        self.conversation = Conversation(
-            messages=[m.model_copy(deep=True) for m in self.task.messages]
-        )
         self._finished = False
         self._stage_request = None
         self._protocol_remaining = None
@@ -55,16 +54,20 @@ class RunState:
         self._http_attempts = 0
         self.physical_tool_calls = 0
         self.diagnostic_tool_calls = 0
+        self._resume_resend = False
+        self._resume_replay = False
+        self._replayed_ids = set()
+        self._replay_token = None
+        self.resume_cursor = None
         options = getattr(self.context, "options", None) or AlgorithmSettings()
         self.context.options = options
-        expected_system = system_prompt(options.planning_mode, self.task.dataset_instructions)
-        systems = [m for m in self.conversation.messages if m.role == "system"]
-        if any(m.content != expected_system for m in systems):
-            raise ValueError("Imported system prompt differs from the framework system prompt")
-        self.conversation.messages = [m for m in self.conversation.messages if m.role != "system"]
-        self.conversation.messages.insert(
-            0, systems[0] if systems else Message(role="system", content=expected_system)
+        if getattr(self.task, "resume", None) is not None:
+            self._load_resume()
+            return
+        self.conversation = Conversation(
+            messages=[m.model_copy(deep=True) for m in self.task.messages]
         )
+        self._install_system_prompt()
         if self.conversation.pending_tool_calls():
             raise ValueError("Cannot start a user task with unresolved historical tool calls")
         dialogue = [m for m in self.conversation.messages if m.role not in {"system", "event"}]
@@ -91,6 +94,65 @@ class RunState:
         self._current_user = next(
             (m for m in reversed(self.conversation.messages) if m.role == "user"), None
         )
+
+    def _install_system_prompt(self):
+        options = self.context.options
+        expected_system = system_prompt(options.planning_mode, self.task.dataset_instructions)
+        systems = [m for m in self.conversation.messages if m.role == "system"]
+        if any(m.content != expected_system for m in systems):
+            raise ValueError("Imported system prompt differs from the framework system prompt")
+        self.conversation.messages = [m for m in self.conversation.messages if m.role != "system"]
+        self.conversation.messages.insert(
+            0, systems[0] if systems else Message(role="system", content=expected_system)
+        )
+
+    def _load_resume(self):
+        # A sent tool turn is the prepared request for the next model call, not a new question.
+        cursor = prepare_resume(self.task.resume)
+        self.resume_cursor = cursor
+        self.conversation = Conversation(
+            messages=[message.model_copy(deep=True) for message in cursor.messages]
+        )
+        self._install_system_prompt()
+        if self.conversation.pending_tool_calls():
+            raise ValueError("Cannot resume a task with unresolved historical tool calls")
+        self.usage = deepcopy(cursor.usage)
+        self.model_calls = cursor.model_calls
+        self._token_charge = cursor.token_charge
+        self._http_attempts = cursor.http_attempts
+        self.physical_tool_calls = cursor.physical_tool_calls
+        self.diagnostic_tool_calls = cursor.diagnostic_tool_calls
+        self.results = [item.model_copy(deep=True) for item in cursor.tool_results]
+        self.tool_chain_completed = cursor.tool_chain_completed
+        self.action_budget_exhausted = cursor.action_budget_exhausted
+        dialogue = [m for m in self.conversation.messages if m.role not in {"system", "event"}]
+        if any(message.metadata.get("sent_to_model") for message in dialogue):
+            self._stage_request = ("__resume__", None)
+        self._resume_resend = cursor.resend
+        self._resume_replay = cursor.replay
+        if cursor.replay:
+            self._replay_token = reuse_finished_tools.set(True)
+        self._current_user = next(
+            (m for m in reversed(self.conversation.messages) if m.role == "user"), None
+        )
+
+    def _cached_stage_reply(self, stage):
+        if not self._resume_replay:
+            return None
+        for message in self.conversation.messages:
+            if message.role != "assistant" or message.metadata.get("stage") != stage:
+                continue
+            if message.id in self._replayed_ids:
+                continue
+            self._replayed_ids.add(message.id)
+            return message
+        return None
+
+    def _stop_replay(self):
+        self._resume_replay = False
+        if self._replay_token is not None:
+            reuse_finished_tools.reset(self._replay_token)
+            self._replay_token = None
 
     def execution_events(self):
         return self.conversation.execution_events()
@@ -273,7 +335,23 @@ class RunState:
         if pending:
             raise ValueError("Cannot request a model response before all tool calls are answered")
         inputs = [m for m in self.conversation.messages if m.role != "event"]
-        if self._stage_request is None:
+        cached = self._cached_stage_reply(stage)
+        if cached is not None:
+            return cached
+        if self._resume_replay:
+            self._stop_replay()
+        prepared = (
+            self._resume_resend
+            and self.resume_cursor is not None
+            and self.resume_cursor.stage == stage
+            and inputs
+            and inputs[-1].metadata.get("sent_to_model")
+            and inputs[-1].metadata.get("stage") == stage
+        )
+        if prepared:
+            # The checkpoint already wrote this stage's feedback; send that request again.
+            self._resume_resend = False
+        elif self._stage_request is None:
             if self._current_user is None:
                 raise ModelProtocolError("A model task requires a user message")
             user = self._current_user

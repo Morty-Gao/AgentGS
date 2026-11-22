@@ -26,6 +26,17 @@ _sandbox_admission = ContextVar("sandbox_admission", default=None)
 _loop_pools = WeakKeyDictionary()
 
 
+def sqlite_busy(exc):
+    """True when sqlite could not get a lock, including errors without a code."""
+    if not isinstance(exc, sqlite3.OperationalError):
+        return False
+    code = getattr(exc, "sqlite_errorcode", 0) or 0
+    if code & 255 in {sqlite3.SQLITE_BUSY, sqlite3.SQLITE_LOCKED}:
+        return True
+    text = str(exc).lower()
+    return "database is locked" in text or "database is busy" in text
+
+
 class _Pool:
     def __init__(self):
         self.gate = asyncio.Lock()
@@ -124,6 +135,15 @@ class RuntimeCoordinator:
             return True
 
     def _admit(self, lease, capacities, rate_scope, tokens, rpm, tpm):
+        try:
+            return self._admit_once(lease, capacities, rate_scope, tokens, rpm, tpm)
+        except sqlite3.OperationalError as exc:
+            # A missing sqlite_errorcode still means the slot was not taken.
+            if sqlite_busy(exc):
+                return False
+            raise
+
+    def _admit_once(self, lease, capacities, rate_scope, tokens, rpm, tpm):
         now = time.time()
         with sqlite3.connect(self.path, timeout=0.05) as db:
             db.execute("BEGIN IMMEDIATE")
@@ -200,8 +220,7 @@ class RuntimeCoordinator:
                         self._admit, lease, capacities, rate_scope, tokens, rpm, tpm
                     )
                 except sqlite3.OperationalError as exc:
-                    code = getattr(exc, "sqlite_errorcode", 0)
-                    if code & 255 in {sqlite3.SQLITE_BUSY, sqlite3.SQLITE_LOCKED}:
+                    if sqlite_busy(exc):
                         return False
                     raise
 

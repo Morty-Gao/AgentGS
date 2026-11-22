@@ -4,7 +4,9 @@ Generation records the answer and the conversation. It does not calculate FAS.
 Tool messages used for domain scores come from the final attempt. Model-usage
 events from earlier attempts stay on the scoring conversation so cost includes
 every try. A finished Not Completed result that still returned an answer is a
-produced answer; timeouts and worker crashes are retried.
+produced answer. Model transport keeps the full retry budget. Other
+failures stop after a few tries. Infrastructure contention is requeued and
+does not consume an attempt.
 """
 
 from __future__ import annotations
@@ -17,7 +19,7 @@ import time
 from pathlib import Path
 from uuid import uuid4
 
-from _runtime import atomic_json, atomic_jsonl
+from _runtime import atomic_json, atomic_jsonl, failure_class, failure_disposition
 
 from agentgs.benchmark.identity import model_request_controls, planning_resource_hashes
 from agentgs.benchmark.inputs import public_input
@@ -91,8 +93,7 @@ def classify_result(result) -> dict:
 
 
 def authentication_failure(error) -> bool:
-    text = error or ""
-    return "HTTP 401" in text or "HTTP 403" in text
+    return failure_class(error) == "authentication"
 
 
 def _model_event(message) -> bool:
@@ -343,8 +344,8 @@ def run_batch(
     label: str = "agentgs",
 ) -> int:
     """Run unfinished questions. ``opener`` yields the async per-attempt callable."""
-    if not 0 <= retries <= 10:
-        raise ValueError("--retries must be between 0 and 10")
+    if not 0 <= retries <= 100:
+        raise ValueError("--retries must be between 0 and 100")
     if not 1 <= concurrency <= 128:
         raise ValueError("Invalid concurrency")
     output = output.resolve()
@@ -382,9 +383,15 @@ def run_batch(
 
         async def execute_pending():
             stop = asyncio.Event()
-            semaphore = asyncio.Semaphore(concurrency)
             write_lock = asyncio.Lock()
             finished = 0
+            errors = []
+            stopped_for_auth = False
+            by_id = {row.question_id: row for row in pending}
+            states = {}
+            work = asyncio.Queue()
+            outstanding = len(pending)
+            retry_tasks = set()
 
             def publish(record, snapshot):
                 attempt = Path(record["attempt_directory"])
@@ -396,93 +403,159 @@ def run_batch(
                     os.fsync(stream.fileno())
                 atomic_jsonl(output, snapshot)
 
-            async def one(row):
-                nonlocal finished
-                async with semaphore:
-                    if stop.is_set():
+            def resume_state(row):
+                previous = latest.get(row.question_id, {})
+                prior_paths = list(
+                    previous.get("attempt_directories")
+                    or (
+                        [previous["attempt_directory"]]
+                        if previous.get("attempt_directory")
+                        else []
+                    )
+                )
+                offset = (
+                    previous.get("automatic_attempts_used", 0)
+                    if previous.get("retry_pending") and not retry_failed
+                    else 0
+                )
+                if offset > retries:
+                    raise RuntimeError("Automatic retry state exceeded its configured budget")
+                return {
+                    "prior_paths": prior_paths,
+                    "local": [_attempt_conversation(path) for path in prior_paths],
+                    "index": offset,
+                    "deferrals": 0,
+                }
+
+            def wake():
+                for _ in range(concurrency):
+                    work.put_nowait(None)
+
+            def watch(task):
+                retry_tasks.discard(task)
+                if task.cancelled():
+                    return
+                exc = task.exception()
+                if exc is not None:
+                    errors.append(exc)
+                    stop.set()
+                    wake()
+
+            for row in pending:
+                states[row.question_id] = resume_state(row)
+                work.put_nowait(row.question_id)
+
+            async def one_attempt(row):
+                state = states[row.question_id]
+                index = state["index"]
+                if index > retries:
+                    raise RuntimeError("Automatic retry state exceeded its configured budget")
+                attempt = (
+                    run_root / "questions" / str(row.question_id) / ("attempt_" + uuid4().hex)
+                )
+                await invoke(attempt.mkdir, parents=True, exist_ok=False)
+                started = time.time()
+                try:
+                    payload = await execute(row, attempt)
+                except Exception as exc:
+                    payload = {
+                        "answer": "",
+                        "final_answer": "",
+                        "status": "failed",
+                        "error": f"{type(exc).__name__}: {exc}",
+                        "conversation": Conversation(),
+                    }
+                payload = _normalize(dict(payload))
+                conversation = as_conversation(payload.pop("conversation", None))
+                state["local"].append(conversation)
+                state["prior_paths"].append(str(attempt))
+                klass, used, pending_retry = failure_disposition(
+                    payload.get("error"), payload["status"], index, retries
+                )
+                if klass != "infrastructure":
+                    state["index"] = used
+                record = {
+                    **payload,
+                    "question_id": row.question_id,
+                    "category_id": row.category_id,
+                    "attempt_directory": str(attempt),
+                    "attempt_directories": list(state["prior_paths"]),
+                    "automatic_attempts_used": used,
+                    "retry_pending": pending_retry,
+                    "attempt_conversation": conversation.model_dump(mode="json"),
+                    "conversation": scoring_conversation(state["local"]).model_dump(mode="json"),
+                    "started_at": started,
+                    "ended_at": time.time(),
+                }
+                if klass:
+                    record["failure_class"] = klass
+                public = _public_record(record)
+                async with write_lock:
+                    latest[row.question_id] = public
+                    snapshot = [latest[key] for key in sorted(latest)]
+                    await invoke(publish, record, snapshot)
+                return record, klass, index
+
+            async def requeue(question_id, delay):
+                await asyncio.sleep(delay)
+                if not stop.is_set():
+                    await work.put(question_id)
+
+            async def worker():
+                nonlocal finished, outstanding, stopped_for_auth
+                while True:
+                    question_id = await work.get()
+                    if question_id is None or stop.is_set():
                         return
-                    previous = latest.get(row.question_id, {})
-                    prior_paths = list(
-                        previous.get("attempt_directories")
-                        or (
-                            [previous["attempt_directory"]]
-                            if previous.get("attempt_directory")
-                            else []
-                        )
-                    )
-                    offset = (
-                        previous.get("automatic_attempts_used", 0)
-                        if previous.get("retry_pending") and not retry_failed
-                        else 0
-                    )
-                    if offset > retries:
-                        raise RuntimeError("Automatic retry state exceeded its configured budget")
-                    local = [_attempt_conversation(path) for path in prior_paths]
-                    for index in range(offset, retries + 1):
-                        if stop.is_set():
-                            return
-                        attempt = (
-                            run_root
-                            / "questions"
-                            / str(row.question_id)
-                            / ("attempt_" + uuid4().hex)
-                        )
-                        await invoke(attempt.mkdir, parents=True, exist_ok=False)
-                        started = time.time()
-                        try:
-                            payload = await execute(row, attempt)
-                        except Exception as exc:
-                            payload = {
-                                "answer": "",
-                                "final_answer": "",
-                                "status": "failed",
-                                "error": f"{type(exc).__name__}: {exc}",
-                                "conversation": Conversation(),
-                            }
-                        payload = _normalize(dict(payload))
-                        conversation = as_conversation(payload.pop("conversation", None))
-                        local.append(conversation)
-                        aggregated = scoring_conversation(local)
-                        prior_paths.append(str(attempt))
-                        record = {
-                            **payload,
-                            "question_id": row.question_id,
-                            "category_id": row.category_id,
-                            "attempt_directory": str(attempt),
-                            "attempt_directories": list(prior_paths),
-                            "automatic_attempts_used": index + 1,
-                            "retry_pending": payload["status"] != "succeeded"
-                            and index < retries
-                            and not authentication_failure(payload.get("error")),
-                            "attempt_conversation": conversation.model_dump(mode="json"),
-                            "conversation": aggregated.model_dump(mode="json"),
-                            "started_at": started,
-                            "ended_at": time.time(),
-                        }
-                        public = _public_record(record)
-                        async with write_lock:
-                            latest[row.question_id] = public
-                            snapshot = [latest[key] for key in sorted(latest)]
-                            await invoke(publish, record, snapshot)
-                        if authentication_failure(payload.get("error")):
-                            stop.set()
-                        if not record["retry_pending"]:
-                            finished += 1
-                            print(
-                                f"[{finished}/{len(pending)}] Q{row.question_id} {record['status']}",
-                                flush=True,
-                            )
-                            return
+                    row = by_id[question_id]
+                    try:
+                        record, klass, index = await one_attempt(row)
+                    except Exception as exc:
+                        errors.append(exc)
+                        stop.set()
+                        wake()
+                        return
+                    retry = record["retry_pending"] and not stop.is_set()
+                    if authentication_failure(record.get("error")):
+                        stopped_for_auth = True
+                        stop.set()
+                        retry = False
+                    if retry:
+                        state = states[question_id]
+                        delay = min(2 ** state["deferrals"], 8)
+                        state["deferrals"] += 1
                         print(
-                            f"Q{row.question_id} retry {index + 1}/{retries}: {payload.get('error', 'failed')}",
+                            f"Q{row.question_id} retry {index + 1}/{retries} {klass}: "
+                            f"{record.get('error', 'failed')}",
                             flush=True,
                         )
-                        await asyncio.sleep(min(2**index, 8))
-                    raise RuntimeError("Automatic retry state exceeded its configured budget")
+                        task = asyncio.create_task(requeue(question_id, delay))
+                        retry_tasks.add(task)
+                        task.add_done_callback(watch)
+                        continue
+                    if not record["retry_pending"]:
+                        finished += 1
+                        print(
+                            f"[{finished}/{len(pending)}] Q{row.question_id} {record['status']}",
+                            flush=True,
+                        )
+                    outstanding -= 1
+                    if outstanding == 0 or stop.is_set():
+                        stop.set()
+                        wake()
 
             async with opener() as execute:
-                await asyncio.gather(*(one(row) for row in pending))
-            return stop.is_set()
+                workers = [asyncio.create_task(worker()) for _ in range(concurrency)]
+                try:
+                    await asyncio.gather(*workers)
+                finally:
+                    for task in list(retry_tasks):
+                        task.cancel()
+                    if retry_tasks:
+                        await asyncio.gather(*retry_tasks, return_exceptions=True)
+                if errors:
+                    raise errors[0]
+            return stopped_for_auth
 
         stopped = asyncio.run(execute_pending()) if pending else False
         report, code = _summary(rows, latest, output, retries, stopped)

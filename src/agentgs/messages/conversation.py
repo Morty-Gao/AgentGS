@@ -1,6 +1,7 @@
 """One durable message log for dialogue, model requests, tools and annotations."""
 
 import json
+from contextvars import ContextVar
 from copy import deepcopy
 from pathlib import Path
 from typing import Any, Iterable, Literal
@@ -16,6 +17,9 @@ from agentgs.messages.models import (
     RuntimeEvent,
     parse_entry,
 )
+
+# Replaying a saved stage must not append a second result for a call that already finished.
+reuse_finished_tools: ContextVar[bool] = ContextVar("agentgs_reuse_finished_tools", default=False)
 
 
 class Conversation(BaseModel):
@@ -129,6 +133,17 @@ class Conversation(BaseModel):
         return call_id
 
     def finish_tool(self, call_id: str, output: str, **metadata: Any) -> Message:
+        if reuse_finished_tools.get():
+            existing = next(
+                (
+                    message
+                    for message in self.messages
+                    if message.role == "tool" and message.tool_call_id == call_id
+                ),
+                None,
+            )
+            if existing is not None:
+                return existing
         return self.append(
             Message(role="tool", tool_call_id=call_id, content=output, metadata=metadata)
         )

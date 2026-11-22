@@ -47,8 +47,8 @@ def main(
         3,
         "--retries",
         min=0,
-        max=10,
-        help="Automatic retries per failed question; 3 means at most 4 attempts",
+        max=100,
+        help="Automatic retries per failed question; 100 means at most 101 attempts",
     ),
 ) -> None:
     """Run Earth-Agent over GeoToolEval and keep one JSONL record per question."""

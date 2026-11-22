@@ -161,7 +161,7 @@ class AnsweringService:
                 },
             )
             status_code = getattr(exc, "status_code", None)
-            message = f"LLM final-answer generation failed: {type(exc).__name__}"
+            message = f"LLM final-answer generation failed: {type(exc).__name__}: {exc}"
             if status_code is not None:
                 message += f" (HTTP {status_code})"
             failure = FinalAnswerGenerationError(message)

@@ -4,18 +4,70 @@ import asyncio
 import json
 import os
 import sqlite3
+import threading
+import time
 from pathlib import Path
 
 import psutil
 
 from agentgs.contracts.async_utils import invoke
 from agentgs.contracts.models import TERMINAL, Event, TaskRecord, TaskStatus, ToolError
-from agentgs.runtime.concurrency import RuntimeCoordinator, worker_identity
+from agentgs.runtime.concurrency import RuntimeCoordinator, sqlite_busy, worker_identity
 from agentgs.runtime.resources import kill_tree
 
 
 class QueueFull(RuntimeError):
     pass
+
+
+class _ClosingConnection:
+    """One sqlite connection that commits and closes, and shares a process lock.
+
+    ``with sqlite3.connect() as db`` commits but leaves the connection open.
+    Concurrent ``BEGIN IMMEDIATE`` from the supervisor's thread pool then
+    raises ``database is locked`` even though only one process is writing.
+    """
+
+    def __init__(self, path: Path, lock: threading.Lock, timeout: float = 30):
+        self._path = path
+        self._lock = lock
+        self._timeout = timeout
+        self._db = None
+        self._locked = False
+
+    def execute(self, *args, **kwargs):
+        return self._db.execute(*args, **kwargs)
+
+    def executemany(self, *args, **kwargs):
+        return self._db.executemany(*args, **kwargs)
+
+    def __enter__(self):
+        self._lock.acquire()
+        self._locked = True
+        try:
+            self._db = sqlite3.connect(self._path, timeout=self._timeout)
+            self._db.execute(f"PRAGMA busy_timeout={int(self._timeout * 1000)}")
+            self._db.__enter__()
+            return self
+        except Exception:
+            self._release()
+            raise
+
+    def __exit__(self, exc_type, exc, traceback):
+        try:
+            if self._db is not None:
+                try:
+                    return self._db.__exit__(exc_type, exc, traceback)
+                finally:
+                    self._db.close()
+                    self._db = None
+        finally:
+            self._release()
+
+    def _release(self):
+        if self._locked:
+            self._lock.release()
+            self._locked = False
 
 
 class TaskStore:
@@ -24,6 +76,7 @@ class TaskStore:
         self.pool = worker_identity()
         self._initialized = False
         self._init_lock = asyncio.Lock()
+        self._db_lock = threading.Lock()
         if initialize:
             self._initialize()
 
@@ -69,29 +122,47 @@ class TaskStore:
             if not self._initialized:
                 await invoke(self._initialize)
 
-    def connection(self):
-        return sqlite3.connect(self.path, timeout=10)
+    def connection(self, timeout: float = 30):
+        return _ClosingConnection(self.path, self._db_lock, timeout)
+
+    def _retry_locked(self, operation):
+        delay = 0.02
+        for attempt in range(8):
+            try:
+                return operation()
+            except sqlite3.OperationalError as exc:
+                if not sqlite_busy(exc) or attempt == 7:
+                    raise
+                time.sleep(delay)
+                delay = min(0.5, delay * 2)
 
     def save_sync(self, record):
-        with self.connection() as db:
-            db.execute(
-                "INSERT INTO tasks VALUES (?,?) ON CONFLICT(id) DO UPDATE SET record=excluded.record",
-                (record.spec.id, record.model_dump_json()),
-            )
-            db.execute(
-                "UPDATE controls SET state=? WHERE task_id=?", (record.status.value, record.spec.id)
-            )
+        def once():
+            with self.connection() as db:
+                db.execute(
+                    "INSERT INTO tasks VALUES (?,?) ON CONFLICT(id) DO UPDATE SET record=excluded.record",
+                    (record.spec.id, record.model_dump_json()),
+                )
+                db.execute(
+                    "UPDATE controls SET state=? WHERE task_id=?",
+                    (record.status.value, record.spec.id),
+                )
+
+        self._retry_locked(once)
 
     async def save(self, record):
         await self.initialize()
         await invoke(self.save_sync, record.model_copy(deep=True))
 
     def get_sync(self, task_id):
-        with self.connection() as db:
-            row = db.execute("SELECT record FROM tasks WHERE id=?", (task_id,)).fetchone()
-        if not row:
-            raise KeyError(task_id)
-        return self._decode_record(row[0])
+        def once():
+            with self.connection() as db:
+                row = db.execute("SELECT record FROM tasks WHERE id=?", (task_id,)).fetchone()
+            if not row:
+                raise KeyError(task_id)
+            return self._decode_record(row[0])
+
+        return self._retry_locked(once)
 
     @staticmethod
     def _decode_record(encoded):
@@ -141,21 +212,27 @@ class TaskStore:
         return event
 
     def emit_sync(self, task_id, kind, payload):
-        with self.connection() as db:
-            db.execute("BEGIN IMMEDIATE")
-            return self._emit(db, task_id, kind, payload)
+        def once():
+            with self.connection() as db:
+                db.execute("BEGIN IMMEDIATE")
+                return self._emit(db, task_id, kind, payload)
+
+        return self._retry_locked(once)
 
     async def emit(self, task_id, kind, payload):
         await self.initialize()
         return await invoke(self.emit_sync, task_id, kind, payload)
 
     def events_sync(self, task_id, after=0):
-        with self.connection() as db:
-            rows = db.execute(
-                "SELECT record FROM events WHERE task_id=? AND sequence>? ORDER BY sequence",
-                (task_id, after),
-            ).fetchall()
-        return [Event.model_validate_json(row[0]) for row in rows]
+        def once():
+            with self.connection() as db:
+                rows = db.execute(
+                    "SELECT record FROM events WHERE task_id=? AND sequence>? ORDER BY sequence",
+                    (task_id, after),
+                ).fetchall()
+            return [Event.model_validate_json(row[0]) for row in rows]
+
+        return self._retry_locked(once)
 
     async def events(self, task_id, after=0):
         await self.initialize()
@@ -184,7 +261,7 @@ class TaskStore:
                 )
                 self._emit(db, record.spec.id, "task.queued", {})
 
-        await invoke(insert)
+        await invoke(self._retry_locked, insert)
 
     async def control(self, task_id):
         await self.initialize()
@@ -201,7 +278,7 @@ class TaskStore:
                 else None
             )
 
-        return await invoke(read)
+        return await invoke(self._retry_locked, read)
 
     async def request_cancel(self, task_id):
         await self.initialize()
@@ -210,13 +287,19 @@ class TaskStore:
             with self.connection() as db:
                 db.execute("UPDATE controls SET cancelled=1 WHERE task_id=?", (task_id,))
 
-        await invoke(update)
+        await invoke(self._retry_locked, update)
 
-    async def worker(self, task_id, pid, rss=0):
+    async def worker(self, task_id, pid, rss=0, *, best_effort=False):
+        """Record the worker pid and RSS. Polling skips a locked database.
+
+        The RSS sample runs for every live task. On the shared GPFS database a
+        locked write is not a task failure; dropping one sample keeps the worker
+        alive. Registration and clearing the pid still wait and retry.
+        """
         await self.initialize()
 
         def update():
-            with self.connection() as db:
+            with self.connection(0.2 if best_effort else 30) as db:
                 identity = None
                 if pid is not None:
                     try:
@@ -236,7 +319,14 @@ class TaskStore:
                     (self.pool,),
                 ).fetchone()[0]
 
-        return await invoke(update)
+        if best_effort:
+            try:
+                return await invoke(update)
+            except sqlite3.OperationalError as exc:
+                if sqlite_busy(exc):
+                    return None
+                raise
+        return await invoke(self._retry_locked, update)
 
     async def recover(self):
         """Reclaim queue entries and orphan workers left by dead supervisors."""
@@ -283,4 +373,4 @@ class TaskStore:
                     )
                     self._emit(db, key, "task.failed", {"error": record.error.model_dump()})
 
-        await invoke(reap)
+        await invoke(self._retry_locked, reap)

@@ -57,10 +57,15 @@ class TaskInput(Model):
     bridge_diagnostics: bool | None = None
     max_total_tokens: int | None = Field(default=None, ge=1)
     input_domain: str | None = None
+    # Explicit continuation. Messages alone still start a new user turn.
+    resume: Any = None
+    resume_attempts: int = Field(default=0, ge=0)
 
     @model_validator(mode="after")
     def question_from_messages(self):
         Conversation(messages=self.messages)
+        if self.resume is not None and not isinstance(self.resume, AgentResult):
+            self.resume = AgentResult.model_validate(self.resume)
         if not self.question.strip():
             for message in reversed(self.messages):
                 if message.role == "user" and isinstance(message.content, str):
